@@ -1,0 +1,606 @@
+<style>
+  :root{
+    --bg:#eceef3; --surface:#ffffff; --surface-2:#f5f6fa; --border:#d9dee7;
+    --ink:#1a2030; --muted:#586074; --faint:#8891a2;
+    --engine:#2f4bce; --engine-soft:#e6eafb;
+    --oracle:#a5640a; --oracle-soft:#f6ecda;
+    --pass:#1c7c4a; --pass-bg:#e4f3ea;
+    --fail:#c2384a; --fail-bg:#fbe5e9;
+    --warn:#a9760a; --warn-bg:#f7edd7;
+    --code-bg:#f3f4f8; --code-ink:#2a3040;
+    --radius:14px; --radius-s:9px;
+    --maxw:960px;
+    --sans:system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,"Cascadia Mono",Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f121b; --surface:#161b28; --surface-2:#1d2432; --border:#2a3242;
+      --ink:#e7eaf1; --muted:#9aa3b5; --faint:#6b7488;
+      --engine:#8298f2; --engine-soft:#1c2440;
+      --oracle:#e3a94e; --oracle-soft:#2e2413;
+      --pass:#54c68b; --pass-bg:#123222;
+      --fail:#f0798a; --fail-bg:#3a1620;
+      --warn:#e3ad4d; --warn-bg:#2f2611;
+      --code-bg:#10141e; --code-ink:#d7dce8;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f121b; --surface:#161b28; --surface-2:#1d2432; --border:#2a3242;
+    --ink:#e7eaf1; --muted:#9aa3b5; --faint:#6b7488;
+    --engine:#8298f2; --engine-soft:#1c2440;
+    --oracle:#e3a94e; --oracle-soft:#2e2413;
+    --pass:#54c68b; --pass-bg:#123222;
+    --fail:#f0798a; --fail-bg:#3a1620;
+    --warn:#e3ad4d; --warn-bg:#2f2611;
+    --code-bg:#10141e; --code-ink:#d7dce8;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.7;margin:0;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px 96px;}
+  .sans-tight{font-family:var(--sans)}
+  code,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 34px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--engine);font-weight:600;margin-bottom:18px;}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.12;letter-spacing:-.02em;font-weight:800;
+    margin:0 0 18px;text-wrap:balance;}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--muted);max-width:70ch;margin:0;}
+  .lede b{color:var(--ink);font-weight:700;}
+  .badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+  .stat{display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-s);padding:12px 16px;min-width:120px;}
+  .stat .n{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.02em;}
+  .stat .l{font-size:12px;color:var(--faint);letter-spacing:.02em;}
+  .stat.good .n{color:var(--pass);}
+
+  /* ---------- sections ---------- */
+  section{padding:40px 0;border-bottom:1px solid var(--border);}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--faint);font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .kicker .num{color:var(--engine);}
+  h2{font-size:clamp(22px,3.4vw,30px);letter-spacing:-.015em;font-weight:750;margin:0 0 14px;text-wrap:balance;}
+  h3{font-size:18px;font-weight:700;margin:26px 0 10px;letter-spacing:-.01em;}
+  p{margin:0 0 14px;} p:last-child{margin-bottom:0;}
+  .muted{color:var(--muted);}
+  strong{font-weight:700;}
+  a{color:var(--engine);}
+
+  /* ---------- cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:20px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+  .card h4{margin:0 0 8px;font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px;}
+  .card p{font-size:14.5px;color:var(--muted);margin:0;}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+
+  .callout{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--engine);
+    border-radius:var(--radius-s);padding:16px 20px;margin:20px 0;}
+  .callout.warn{border-left-color:var(--warn);background:var(--warn-bg);}
+  .callout.q{border-left-color:var(--oracle);}
+  .callout .t{font-weight:700;margin-bottom:6px;}
+  .callout p{font-size:14.5px;margin:0;}
+
+  /* ---------- tables ---------- */
+  .tscroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);margin-top:16px;background:var(--surface);}
+  table{border-collapse:collapse;width:100%;font-size:13.7px;min-width:520px;}
+  caption{caption-side:top;text-align:left;padding:14px 16px 4px;font-weight:700;font-size:15px;}
+  caption .cnt{font-family:var(--mono);color:var(--faint);font-weight:500;font-size:13px;margin-left:6px;}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  thead th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600;
+    background:var(--surface-2);position:sticky;top:0;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.id{font-family:var(--mono);font-size:12.5px;color:var(--engine);white-space:nowrap;font-weight:600;}
+  td.ltv{font-family:var(--mono);font-weight:700;text-align:right;white-space:nowrap;}
+  .kv{font-family:var(--mono);font-size:12.5px;color:var(--muted);}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:20px;letter-spacing:.03em;white-space:nowrap;}
+  .pill.pass{color:var(--pass);background:var(--pass-bg);}
+  .pill.fail{color:var(--fail);background:var(--fail-bg);}
+  .pill.warn{color:var(--warn);background:var(--warn-bg);}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--muted);}
+  .tag.eng{color:var(--engine);border-color:color-mix(in srgb,var(--engine) 35%,var(--border));background:var(--engine-soft);}
+  .tag.ora{color:var(--oracle);border-color:color-mix(in srgb,var(--oracle) 35%,var(--border));background:var(--oracle-soft);}
+
+  /* ---------- code ---------- */
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius-s);
+    padding:16px 18px;overflow-x:auto;margin:0;font-size:13px;line-height:1.6;}
+  pre code{color:var(--code-ink);font-size:13px;}
+  .cm{color:var(--faint);font-style:italic;}
+  .kw{color:var(--engine);font-weight:600;}
+  .ko{color:var(--oracle);font-weight:600;}
+  .st{color:var(--pass);}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  @media(max-width:720px){.split{grid-template-columns:1fr;}}
+  .col-head{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:8px;
+    display:flex;align-items:center;gap:8px;text-transform:uppercase;}
+
+  /* ---------- differential diagram ---------- */
+  .diag{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px 22px;margin-top:20px;}
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto auto;align-items:center;gap:14px;}
+  @media(max-width:760px){.flow{grid-template-columns:1fr;gap:12px;}.flow .arrow{transform:rotate(90deg);justify-self:center;}}
+  .node{border-radius:var(--radius-s);padding:14px 16px;border:1.5px solid var(--border);background:var(--surface-2);}
+  .node .lab{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);margin-bottom:4px;}
+  .node .nm{font-weight:700;font-size:15px;}
+  .node .sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .node.engine{border-color:var(--engine);background:var(--engine-soft);}
+  .node.oracle{border-color:var(--oracle);background:var(--oracle-soft);}
+  .node.judge{border-color:var(--pass);background:var(--pass-bg);text-align:center;}
+  .arrow{font-family:var(--mono);color:var(--faint);font-size:20px;text-align:center;}
+  .input-chip{justify-self:center;font-family:var(--mono);font-size:12px;padding:8px 12px;border:1px dashed var(--border);
+    border-radius:20px;color:var(--muted);background:var(--surface);}
+
+  /* ---------- ladder ---------- */
+  .ladder{display:flex;flex-direction:column;gap:0;margin-top:18px;counter-reset:none;}
+  .rung{display:grid;grid-template-columns:66px 1fr auto;gap:14px;align-items:center;
+    padding:11px 16px;border:1px solid var(--border);background:var(--surface);}
+  .rung:first-child{border-radius:var(--radius) var(--radius) 0 0;}
+  .rung:last-child{border-radius:0 0 var(--radius) var(--radius);}
+  .rung+.rung{border-top:none;}
+  .rung .p{font-family:var(--mono);font-weight:700;color:var(--engine);font-size:13.5px;}
+  .rung .desc{font-size:14px;}
+  .rung .desc b{font-weight:700;}
+  .rung .out{font-family:var(--mono);font-size:12.5px;font-weight:700;white-space:nowrap;}
+  .rung.stop .out{color:var(--muted);}
+
+  /* ---------- mutation ---------- */
+  .mut{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  @media(max-width:720px){.mut{grid-template-columns:1fr;}}
+  .mcard{border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface);}
+  .mcard .h{font-weight:700;margin-bottom:10px;display:flex;gap:8px;align-items:center;font-size:15px;}
+  .step{display:flex;gap:10px;font-size:13.5px;margin:8px 0;align-items:flex-start;}
+  .step .ic{font-family:var(--mono);flex:none;font-weight:700;}
+
+  /* ---------- metrics bars ---------- */
+  .bars{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
+  .bar{display:grid;grid-template-columns:150px 1fr 66px;gap:14px;align-items:center;}
+  @media(max-width:560px){.bar{grid-template-columns:110px 1fr 54px;gap:10px;}}
+  .bar .name{font-family:var(--mono);font-size:12.5px;color:var(--muted);}
+  .track{height:12px;border-radius:20px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border);}
+  .fill{height:100%;background:var(--pass);border-radius:20px;}
+  .bar .pct{font-family:var(--mono);font-size:13px;font-weight:700;text-align:right;color:var(--pass);}
+
+  ul.clean{margin:12px 0;padding-left:20px;} ul.clean li{margin:6px 0;font-size:14.5px;}
+  .foot{padding-top:34px;color:var(--faint);font-size:13px;}
+  .foot code{background:var(--code-bg);padding:2px 7px;border-radius:5px;border:1px solid var(--border);}
+  .filemap{font-family:var(--mono);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-s);padding:14px 16px;margin-top:12px;white-space:pre;overflow-x:auto;line-height:1.9;}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">RegImpact AI · Assurance Dimension ④</div>
+    <h1>룰엔진을 "독립 채점기"로 검증하기</h1>
+    <p class="lede">규제 LTV를 계산하는 <b>룰엔진</b>이 사람이 확정한 명세대로 정확히 계산하는지를,
+      그 명세를 <b>완전히 따로 구현한 채점기(오라클)</b>와 30개 시나리오에서 맞대어 검증했습니다.
+      결과는 <b>30개 전부 일치(100%)</b>, 그리고 일부러 심은 버그는 채점기가 잡아냈습니다.</p>
+    <div class="badges">
+      <div class="stat good"><span class="n">30/30</span><span class="l">Rule-regression Pass Rate</span></div>
+      <div class="stat good"><span class="n">100%</span><span class="l">엔진 = 오라클 일치</span></div>
+      <div class="stat"><span class="n">6</span><span class="l">위험 카테고리</span></div>
+      <div class="stat good"><span class="n">39</span><span class="l">전체 테스트 통과</span></div>
+      <div class="stat"><span class="n">2</span><span class="l">Mutation 방어력 증명</span></div>
+    </div>
+  </header>
+
+  <!-- 0. 큰 그림 -->
+  <section>
+    <div class="kicker"><span class="num">00</span> 한눈에 보기</div>
+    <h2>무엇을, 왜 만들었나</h2>
+    <p class="muted">이전 세션에서 "규제 대출 신청 → LTV 몇 %"를 자동 계산하는 <strong>룰엔진</strong>은 이미 만들어져 있었습니다.
+      이번 작업은 그 엔진을 <strong>믿을 수 있는지 검증하는 장치</strong>를 만든 것입니다. 세 부품으로 구성됩니다.</p>
+    <div class="cards">
+      <div class="card">
+        <h4><span class="dot" style="background:var(--oracle)"></span>오라클 (채점기)</h4>
+        <p>규제 명세를 보고 <strong>엔진과 무관하게 처음부터 다시</strong> 구현한 "정답 계산기". 엔진 코드를 한 줄도 참조하지 않습니다.</p>
+      </div>
+      <div class="card">
+        <h4><span class="dot" style="background:var(--engine)"></span>생성기 (문제 출제)</h4>
+        <p>경계·예외·충돌 등 <strong>버그가 잘 나는 지점</strong>을 노려 30개 시나리오를 체계적으로 만듭니다. 정답은 오라클이 채웁니다.</p>
+      </div>
+      <div class="card">
+        <h4><span class="dot" style="background:var(--pass)"></span>회귀 하네스 (채점)</h4>
+        <p>각 시나리오를 <strong>엔진과 오라클 둘 다</strong>에 넣고 답이 같은지 비교해, 카테고리별 통과율을 냅니다.</p>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="t">이 방식의 이름: 차등 검증 (Differential Testing) · 챌린저 모델</div>
+      <p>금융권 Model Risk / 모델검증 직무의 표준 기법입니다. "실무 모델(엔진)"을 "독립적으로 만든 도전자(오라클)"와
+        맞대어, 둘의 <strong>불일치</strong>를 곧 버그 신호로 삼습니다.</p>
+    </div>
+  </section>
+
+  <!-- 1. 데이터 -->
+  <section>
+    <div class="kicker"><span class="num">01</span> 데이터</div>
+    <h2>무엇을 계산하는가 — 2026 6·30 규제</h2>
+    <p>정부의 <strong>2026년 6월 30일 주택담보대출 규제</strong>가 대상입니다. 구리·용인기흥·화성동탄 3개 지역이
+      <strong>2026-07-01부터 규제지역</strong>으로 지정되었고, 그 전날(6-30)까지는 비규제였습니다.
+      규제지역에서 집을 살 때 적용되는 <strong>LTV(집값 대비 대출 한도)</strong>는 차주 조건에 따라 달라집니다.</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>규제지역 LTV 표<span class="cnt">docs/05_RULE_SPEC.md §C</span></caption>
+        <thead><tr><th>차주 조건</th><th style="text-align:right">LTV</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>무주택 일반</td><td class="ltv">40%</td><td class="kv">기본</td></tr>
+          <tr><td>생애최초 구입</td><td class="ltv">70%</td><td class="kv">예외(상향)</td></tr>
+          <tr><td>서민·실수요자</td><td class="ltv">60%</td><td class="kv">예외(상향)</td></tr>
+          <tr><td>유주택 (비처분 1주택 이상)</td><td class="ltv">0%</td><td class="kv">규제(불가)</td></tr>
+          <tr><td>다주택</td><td class="ltv">0%</td><td class="kv">규제(불가)</td></tr>
+          <tr><td>비규제지역 무주택</td><td class="ltv">70%</td><td class="kv">기준선</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>경과규정 (Grandfathering)</h3>
+    <p>6-30 <strong>이전에 이미 접수·계약을 끝낸 사람</strong>은 옛 규정(종전 70%)을 그대로 적용받습니다.
+      이게 날짜 경계를 만들어 버그가 잘 나는 지점이 됩니다.</p>
+
+    <h3>룰엔진의 입력과 출력</h3>
+    <div class="split">
+      <div>
+        <div class="col-head"><span class="tag eng">INPUT</span> MortgageApplication (대출신청 1건)</div>
+<pre><code>지역코드, 평가일자, 보유주택수,
+처분조건부여부, 생애최초여부,
+서민실수요여부, 정책대출여부, 대출목적,
+<span class="cm"># 경과규정용 날짜들</span>
+접수일, 계약일, 계약금납부일,
+토지거래허가 대상·신청일</code></pre>
+      </div>
+      <div>
+        <div class="col-head"><span class="tag ora">OUTPUT</span> LtvDecision (판정 결과)</div>
+<pre><code>status          <span class="cm"># 판정 종류</span>
+max_ltv         <span class="cm"># 적용 LTV %</span>
+applicable_rule_id
+grandfathering_applied
+reason_codes    <span class="cm"># 판정 근거 라벨</span></code></pre>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:14px;font-size:13.5px;">
+      ※ 여기서 다루는 "데이터"는 실제 고객 데이터가 아니라, 검증을 위해 <strong>체계적으로 생성한 가상 시나리오</strong>입니다.
+      정답의 기준(ground truth)은 사람이 확정한 규제 명세(§H)입니다.</p>
+  </section>
+
+  <!-- 2. 핵심 문제 -->
+  <section>
+    <div class="kicker"><span class="num">02</span> 왜 오라클이 필요한가</div>
+    <h2>"동어반복(tautology)" 함정</h2>
+    <p>검증할 때 흔한 실수는 <strong>엔진에게 문제를 풀게 하고, 그 답을 정답지로 삼아, 다시 엔진으로 채점</strong>하는 것입니다.
+      당연히 항상 100% 맞지만 — 아무것도 검증하지 못합니다.</p>
+    <div class="split">
+      <div class="mcard" style="border-color:color-mix(in srgb,var(--fail) 40%,var(--border))">
+        <div class="h"><span class="pill fail">✗ 잘못된 방식</span></div>
+        <div class="step"><span class="ic" style="color:var(--fail)">1</span><span>엔진이 문제를 푼다</span></div>
+        <div class="step"><span class="ic" style="color:var(--fail)">2</span><span>그 답을 "정답지"에 적는다</span></div>
+        <div class="step"><span class="ic" style="color:var(--fail)">3</span><span>엔진으로 다시 채점한다 → 항상 100%</span></div>
+        <p class="muted" style="font-size:13px;margin-top:10px;">엔진의 버그가 정답지에도 그대로 복사되어 <strong>영원히 안 잡힘.</strong></p>
+      </div>
+      <div class="mcard" style="border-color:color-mix(in srgb,var(--pass) 40%,var(--border))">
+        <div class="h"><span class="pill pass">✓ 채택한 방식</span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">1</span><span>명세를 보고 <b>오라클</b>을 따로 만든다</span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">2</span><span>엔진과 오라클이 <b>각자</b> 문제를 푼다</span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">3</span><span>두 답을 비교한다 → 다르면 버그</span></div>
+        <p class="muted" style="font-size:13px;margin-top:10px;">두 구현이 <strong>서로의 감시자</strong>가 된다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 구조 -->
+  <section>
+    <div class="kicker"><span class="num">03</span> 검증 구조</div>
+    <h2>엔진과 오라클을 맞대는 흐름</h2>
+    <div class="diag">
+      <div class="flow">
+        <div class="input-chip" style="grid-column:1 / -1;margin-bottom:6px;">대출신청 1건 (MortgageApplication)</div>
+        <div class="node engine">
+          <div class="lab">검증 대상</div><div class="nm">엔진 evaluate()</div>
+          <div class="sub">rule_engine · regions · grandfathering</div>
+        </div>
+        <div class="arrow">▶</div>
+        <div class="node oracle">
+          <div class="lab">독립 채점기</div><div class="nm">오라클 expected()</div>
+          <div class="sub">명세를 따로 구현 · 엔진 미참조</div>
+        </div>
+        <div class="arrow">▶</div>
+        <div class="node judge">
+          <div class="lab">채점</div><div class="nm">비교</div>
+          <div class="sub">일치? → Pass</div>
+        </div>
+      </div>
+    </div>
+    <h3>"일치"의 정확한 기준 — 5개 항목이 모두 맞아야 통과</h3>
+    <ul class="clean">
+      <li><code>status</code> — 판정 종류 (DECIDED / OUT_OF_SCOPE / DISCOVERY / NEEDS_HUMAN_REVIEW)</li>
+      <li><code>max_ltv</code> — 적용 LTV 수치</li>
+      <li><code>applicable_rule_id</code> — 적용 규칙 ID</li>
+      <li><code>grandfathering_applied</code> — 경과규정 적용 여부</li>
+      <li><code>reason_codes</code> — 판정 근거 라벨을 모두 포함하는가</li>
+    </ul>
+  </section>
+
+  <!-- 4. 우선순위 사다리 -->
+  <section>
+    <div class="kicker"><span class="num">04</span> 판정 로직</div>
+    <h2>우선순위 사다리 (P0 → P7)</h2>
+    <p>여러 조건이 동시에 맞을 때, <strong>위에서부터 먼저 걸리는 규칙이 이깁니다</strong>(short-circuit).
+      엔진과 오라클 둘 다 이 순서를 따릅니다. 충돌 케이스가 왜 그렇게 판정되는지의 근거입니다.</p>
+    <div class="ladder">
+      <div class="rung stop"><span class="p">P0</span><span class="desc">대출목적이 <b>주택구입이 아님</b></span><span class="out">→ OUT_OF_SCOPE</span></div>
+      <div class="rung stop"><span class="p">P0b</span><span class="desc"><b>정책대출</b> (디딤돌·보금자리)</span><span class="out">→ DISCOVERY</span></div>
+      <div class="rung stop"><span class="p">P1</span><span class="desc"><b>경과규정</b> 해당 (G1·G2·G3)</span><span class="out">→ 종전 70% / 유주택은 검토</span></div>
+      <div class="rung stop"><span class="p">P2</span><span class="desc">지역이 <b>비규제</b></span><span class="out">→ 기준선 70%</span></div>
+      <div class="rung stop"><span class="p">P3</span><span class="desc"><b>다주택</b> (주택수 ≥ 2)</span><span class="out">→ 0%</span></div>
+      <div class="rung stop"><span class="p">P4</span><span class="desc"><b>유주택</b> (비처분 1주택 이상)</span><span class="out">→ 0%</span></div>
+      <div class="rung stop"><span class="p">P5</span><span class="desc"><b>생애최초</b></span><span class="out">→ 70%</span></div>
+      <div class="rung stop"><span class="p">P6</span><span class="desc"><b>서민·실수요자</b></span><span class="out">→ 60%</span></div>
+      <div class="rung stop"><span class="p">P7</span><span class="desc">그 외 (무주택 일반 / 처분조건부 1주택)</span><span class="out">→ 40%</span></div>
+    </div>
+  </section>
+
+  <!-- 5. 30 케이스 -->
+  <section>
+    <div class="kicker"><span class="num">05</span> 생성된 시나리오</div>
+    <h2>30개 케이스 전체 목록</h2>
+    <p>아무렇게나 만든 게 아니라 <strong>6개 카테고리로 위험 지점을 노려</strong> 생성했습니다.
+      아래 모든 케이스는 <span class="pill pass">PASS</span> (엔진 = 오라클). <span class="tag eng">GF✓</span>는 경과규정 적용을 뜻합니다.</p>
+
+    <div class="tscroll">
+      <table>
+        <caption>① SCOPE — 스코프 분기<span class="cnt">3건</span></caption>
+        <thead><tr><th>ID</th><th>입력</th><th>기대 판정</th><th>근거</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="id">SCOPE-01</td><td>대출목적 ≠ 주택구입</td><td class="kv">OUT_OF_SCOPE</td><td>코어 판정 대상 아님</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">SCOPE-02</td><td>정책대출=Y, 생애최초=Y</td><td class="kv">DISCOVERY</td><td>정책대출은 다른 조건 무시</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">SCOPE-03</td><td>정책대출=Y, 주택수=3</td><td class="kv">DISCOVERY</td><td>다주택이어도 정책대출 우선</td><td><span class="pill pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>② BASELINE — 기준선<span class="cnt">3건</span></caption>
+        <thead><tr><th>ID</th><th>입력</th><th style="text-align:right">LTV</th><th>판정</th><th>근거</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="id">BASE-01</td><td>구리, 평가일 6-15, 무주택</td><td class="ltv">70%</td><td class="kv">DECIDED</td><td>시행 전 → 아직 비규제</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BASE-02</td><td>미등록지역, 무주택</td><td class="ltv">70%</td><td class="kv">DECIDED</td><td>등록 안 된 지역 = 비규제</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BASE-03</td><td>미등록지역, 유주택 1</td><td class="ltv">—</td><td class="kv">NEEDS_HUMAN_REVIEW</td><td>비규제 유주택 값이 명세에 없음</td><td><span class="pill pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>③ EXCEPTION — 무주택 예외 계층<span class="cnt">5건</span></caption>
+        <thead><tr><th>ID</th><th>입력</th><th style="text-align:right">LTV</th><th>rule_id</th><th>근거</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="id">EXC-01</td><td>규제지역, 무주택</td><td class="ltv">40%</td><td class="kv">REG_STD</td><td>무주택 일반</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">EXC-02</td><td>규제지역, 생애최초</td><td class="ltv">70%</td><td class="kv">REG_FIRSTHOME</td><td>생애최초 예외</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">EXC-03</td><td>규제지역, 서민실수요</td><td class="ltv">60%</td><td class="kv">REG_REALDEMAND</td><td>서민실수요 예외</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">EXC-04</td><td>처분조건부 1주택</td><td class="ltv">40%</td><td class="kv">REG_STD</td><td>처분조건부 = 무주택 취급</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">EXC-05</td><td>처분조건부 1주택 + 생애최초</td><td class="ltv">70%</td><td class="kv">REG_FIRSTHOME</td><td>처분조건부 통과 후 생애최초</td><td><span class="pill pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>④ BOUNDARY — 경계값 ★ 버그가 가장 잘 나는 지점<span class="cnt">8건</span></caption>
+        <thead><tr><th>ID</th><th>입력 (노리는 경계)</th><th style="text-align:right">LTV</th><th>GF</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="id">BND-EFF-01</td><td>평가일 <b>6-30</b> (효력일 하루 전 → 비규제)</td><td class="ltv">70%</td><td class="kv">—</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-EFF-02</td><td>평가일 <b>7-01</b> (효력일 당일 → 규제)</td><td class="ltv">40%</td><td class="kv">—</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-G1-cutoff</td><td>접수일 <b>6-30</b> (경과규정 마감 당일)</td><td class="ltv">70%</td><td class="kv">GF✓</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-G1-cutoff-1</td><td>접수일 <b>6-29</b> (경계 하루 전)</td><td class="ltv">70%</td><td class="kv">GF✓</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-G1-cutoff+1</td><td>접수일 <b>7-01</b> (경계 하루 후)</td><td class="ltv">40%</td><td class="kv">—</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-HC-0</td><td>주택수 <b>0</b> (무주택 경계)</td><td class="ltv">40%</td><td class="kv">—</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-HC-1</td><td>주택수 <b>1</b> (유주택 경계)</td><td class="ltv">0%</td><td class="kv">—</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">BND-HC-2</td><td>주택수 <b>2</b> (다주택 경계)</td><td class="ltv">0%</td><td class="kv">—</td><td><span class="pill pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>⑤ GRANDFATHERING — 경과규정 G1·G2·G3<span class="cnt">6건</span></caption>
+        <thead><tr><th>ID</th><th>입력</th><th style="text-align:right">LTV</th><th>GF</th><th>근거</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="id">GF-G1-01</td><td>전산접수 6-30</td><td class="ltv">70%</td><td class="kv">GF✓</td><td>G1 마감일 이내</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">GF-G1-02</td><td>전산접수 7-01</td><td class="ltv">40%</td><td class="kv">—</td><td>G1 하루 초과</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">GF-G2-01</td><td>계약 6-29 + 계약금, 접수 7-01</td><td class="ltv">70%</td><td class="kv">GF✓</td><td>계약+계약금이면 접수 늦어도 인정</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">GF-G2-02</td><td>계약 6-29만, 계약금 미납</td><td class="ltv">40%</td><td class="kv">—</td><td>계약금 증빙 없으면 불인정</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">GF-G3-01</td><td>토허제신청 6-30, 계약 7-10</td><td class="ltv">70%</td><td class="kv">GF✓</td><td>토허제 신청 시 이후 계약해도 종전</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">GF-G3-02</td><td>토허제 대상 아님, 신청일 6-30</td><td class="ltv">40%</td><td class="kv">—</td><td>대상 물건 아니면 신청일 무의미</td><td><span class="pill pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tscroll">
+      <table>
+        <caption>⑥ CONFLICT — 조건 충돌·우선순위 ★<span class="cnt">5건</span></caption>
+        <thead><tr><th>ID</th><th>입력 (동시 충족)</th><th style="text-align:right">LTV</th><th>우선순위 판단</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="id">CFL-01</td><td>생애최초 + 서민실수요</td><td class="ltv">70%</td><td class="kv">생애최초(P5) &gt; 서민실수요(P6)</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">CFL-02</td><td>경과규정 + 생애최초</td><td class="ltv">70%</td><td class="kv">경과규정(P1) 최우선</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">CFL-03</td><td>경과규정 + 다주택</td><td class="ltv">—</td><td class="kv">종전 유주택 값 부재 → 검토</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">CFL-04</td><td>유주택 1 + 생애최초</td><td class="ltv">0%</td><td class="kv">§H P4 short-circuit (모순 Q8)</td><td><span class="pill pass">PASS</span></td></tr>
+          <tr><td class="id">CFL-05</td><td>다주택 + 서민실수요</td><td class="ltv">0%</td><td class="kv">다주택(P3) &gt; 서민실수요(P6)</td><td><span class="pill pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6. 오라클 독립 구현 -->
+  <section>
+    <div class="kicker"><span class="num">06</span> 핵심</div>
+    <h2>오라클은 실제로 어떻게 "독립"인가</h2>
+    <p>핵심은 오라클이 엔진의 부품을 <strong>하나도 import하지 않고, 같은 계산을 처음부터 다시 짠다</strong>는 것입니다.
+      세 지점을 실제 코드로 나란히 비교합니다.</p>
+
+    <h3>독립성 ① — import 자체가 다르다</h3>
+    <div class="split">
+      <div>
+        <div class="col-head"><span class="tag eng">엔진 rule_engine.py</span></div>
+<pre><code><span class="cm"># 부품을 가져다 씀</span>
+<span class="kw">from</span> .grandfathering <span class="kw">import</span> is_grandfathered, is_owner
+<span class="kw">from</span> .regions <span class="kw">import</span> resolve_region_status</code></pre>
+      </div>
+      <div>
+        <div class="col-head"><span class="tag ora">오라클 oracle.py</span></div>
+<pre><code><span class="cm"># 그 부품들을 안 가져옴 — 스키마만 공유</span>
+<span class="ko">from</span> ..models <span class="ko">import</span> (EvaluationStatus,
+    LoanPurpose, MortgageApplication)
+<span class="cm"># rule_engine / regions / grandfathering → 없음</span></code></pre>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="t">이 독립성을 기계가 강제한다</div>
+      <p>테스트 <code>test_oracle_does_not_import_rule_engine</code>가 오라클의 import문을 <strong>AST로 파싱</strong>해서
+        금지 모듈이 들어오면 실패시킵니다. "독립성"이 사람 약속이 아니라 <strong>자동 검사 규칙</strong>입니다.</p>
+    </div>
+
+    <h3>독립성 ② — 지역 판정을 따로 구현</h3>
+    <div class="split">
+      <div>
+        <div class="col-head"><span class="tag eng">엔진 regions.py</span></div>
+<pre><code><span class="cm"># 버전 테이블을 순회하며 날짜 구간 매칭</span>
+<span class="kw">for</span> v <span class="kw">in</span> REGION_VERSIONS.get(code, []):
+    after  = v.effective_from <span class="kw">is</span> None <span class="kw">or</span> d &gt;= v.effective_from
+    before = v.effective_to   <span class="kw">is</span> None <span class="kw">or</span> d &lt;= v.effective_to
+    <span class="kw">if</span> after <span class="kw">and</span> before:
+        <span class="kw">return</span> v.status, v.regulated_type</code></pre>
+      </div>
+      <div>
+        <div class="col-head"><span class="tag ora">오라클 oracle.py</span></div>
+<pre><code><span class="cm"># 테이블 없이, 사실을 직접 조건식으로</span>
+<span class="ko">def</span> _region_is_regulated(code, as_of):
+    <span class="ko">if</span> code <span class="ko">in</span> _SIX_THIRTY_REGIONS \
+       <span class="ko">and</span> as_of &gt;= _REG_EFFECTIVE:
+        <span class="ko">return</span> True
+    <span class="ko">return</span> False</code></pre>
+      </div>
+    </div>
+    <p class="muted" style="font-size:13.5px;">같은 규제 사실, 완전히 다른 코드. 만약 <code>regions.py</code>가 <code>&gt;=</code>를 <code>&gt;</code>로 잘못 쓰면
+      (효력일 당일 판정이 어긋남) 오라클은 여전히 <code>&gt;=</code>로 계산하므로 <strong>BND-EFF-02에서 두 답이 갈라지고 = 버그가 잡힙니다.</strong></p>
+
+    <h3>독립성 ③ — 경과규정도 따로 구현</h3>
+    <div class="split">
+      <div>
+        <div class="col-head"><span class="tag eng">엔진</span></div>
+<pre><code><span class="cm"># grandfathering.py의 함수를 호출</span>
+grandfathered, reason = is_grandfathered(app)</code></pre>
+      </div>
+      <div>
+        <div class="col-head"><span class="tag ora">오라클</span></div>
+<pre><code><span class="cm"># G1/G2/G3를 자기 안에서 다시 판정</span>
+<span class="ko">def</span> _is_grandfathered(app):
+    <span class="ko">if</span> app.application_accepted_at &lt;= _GF_CUTOFF:
+        <span class="ko">return</span> <span class="st">"GRANDFATHERED_ACCEPTED_OR_CONTRACT"</span>
+    <span class="cm"># ... G2(계약+계약금), G3(토허제) 동일하게</span>
+    <span class="ko">return</span> None</code></pre>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="t">왜 결과는 같아야 하나?</div>
+      <p>독립적으로 짰지만 <strong>둘 다 같은 명세(§H)의 올바른 구현</strong>이라면 답은 항상 같아야 합니다.
+        평소엔 30개 전부 일치(100%). 한쪽에 버그가 생기면 답이 갈라져 반드시 드러납니다 —
+        구현 방식을 일부러 다르게 했기에 <strong>같은 오타가 양쪽에 복제될 확률이 낮습니다.</strong></p>
+    </div>
+  </section>
+
+  <!-- 7. mutation -->
+  <section>
+    <div class="kicker"><span class="num">07</span> 검증 장치를 다시 검증</div>
+    <h2>Mutation Test — 이 fixture에 이빨이 있는가?</h2>
+    <p>30개 다 통과했다고 검증 장치가 제대로 작동한다는 보장은 없습니다. 혹시 무조건 통과시키는 껍데기라면?
+      그래서 <strong>일부러 엔진에 버그를 심고</strong>, 회귀가 그 버그를 잡는지 확인했습니다.</p>
+    <div class="mut">
+      <div class="mcard">
+        <div class="h"><span class="tag">돌연변이 1</span> LTV 상수 조작</div>
+        <div class="step"><span class="ic" style="color:var(--warn)">△</span><span>규제 표준 LTV를 <b>40% → 50%</b>로 몰래 변조</span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">✓</span><span>회귀 통과율이 100% 밑으로 <b>떨어짐</b></span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">✓</span><span><code>EXC-01</code>·<code>BND-HC-*</code> 케이스가 <b>실패로 잡힘</b></span></div>
+      </div>
+      <div class="mcard">
+        <div class="h"><span class="tag">돌연변이 2</span> 경과규정 무력화</div>
+        <div class="step"><span class="ic" style="color:var(--warn)">△</span><span>경과규정 판정을 <b>항상 "미해당"</b>으로 변조</span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">✓</span><span>회귀 통과율 <b>하락</b></span></div>
+        <div class="step"><span class="ic" style="color:var(--pass)">✓</span><span><b>GRANDFATHERING 카테고리</b>가 실패로 잡힘</span></div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="t">이게 있어야 "100% 통과"가 의미를 가진다</div>
+      <p>돌연변이를 심으면 반드시 실패한다는 걸 보였기 때문에, 평소의 100%는 "장치가 무력해서"가 아니라
+        <strong>"엔진이 실제로 맞아서"</strong>임을 증명할 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- 8. 결과 -->
+  <section>
+    <div class="kicker"><span class="num">08</span> 측정 결과</div>
+    <h2>카테고리별 통과율</h2>
+    <div class="bars">
+      <div class="bar"><span class="name">SCOPE</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">3/3</span></div>
+      <div class="bar"><span class="name">BASELINE</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">3/3</span></div>
+      <div class="bar"><span class="name">EXCEPTION</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">5/5</span></div>
+      <div class="bar"><span class="name">BOUNDARY</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">8/8</span></div>
+      <div class="bar"><span class="name">GRANDFATHERING</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">6/6</span></div>
+      <div class="bar"><span class="name">CONFLICT</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">5/5</span></div>
+    </div>
+    <div class="cards" style="margin-top:26px;">
+      <div class="card"><h4>Rule-regression Pass Rate</h4><p style="font-family:var(--mono);font-size:20px;color:var(--pass);font-weight:700;">30 / 30 = 100%</p><p>엔진이 확정 명세와 완전히 일치</p></div>
+      <div class="card"><h4>전체 테스트</h4><p style="font-family:var(--mono);font-size:20px;font-weight:700;">39 passed</p><p>기존 28 + 이번 신규 11</p></div>
+      <div class="card"><h4>Mutation 방어력</h4><p style="font-family:var(--mono);font-size:20px;font-weight:700;">2 / 2</p><p>심은 버그를 모두 잡아냄</p></div>
+    </div>
+    <div class="callout warn">
+      <div class="t">이 100%가 뜻하는 것과 뜻하지 않는 것</div>
+      <p>이 수치는 <strong>6·30 시나리오 소규모 seed 30건</strong> 기준입니다. "엔진이 명세와 맞고, 검증 장치가 올바르게
+        작동한다"는 확인이지, "모든 경우에 완벽"이라는 뜻은 아닙니다. 다음 단계(Phase 2)에서 합성 포트폴리오
+        2,000~5,000건으로 규모를 키웁니다.</p>
+    </div>
+  </section>
+
+  <!-- 9. Q8 -->
+  <section>
+    <div class="kicker"><span class="num">09</span> 덤으로 발견</div>
+    <h2>명세 자체의 모순 (Open Question Q8)</h2>
+    <p>케이스를 만들다가 <strong>규제 명세 문서 안에서 서로 모순되는 서술</strong>을 발견했습니다.
+      "유주택 + 생애최초"라는 (논리상 모순인) 입력이 들어올 때:</p>
+    <div class="split">
+      <div class="mcard"><div class="h">명세 §E 주석</div>
+        <p class="muted" style="font-size:14px;">"데이터 충돌 → <strong>사람 검토(NEEDS_HUMAN_REVIEW)</strong>로 넘겨라"</p></div>
+      <div class="mcard"><div class="h">명세 §H 알고리즘</div>
+        <p class="muted" style="font-size:14px;">"유주택이면 P4에서 그냥 <strong>0%</strong>로 처리(short-circuit)"</p></div>
+    </div>
+    <p style="margin-top:16px;">§H가 "엔진 구현의 기준"이라 명시돼 있어 일단 <strong>0%(§H)를 채택</strong>하고 엔진·오라클을 일치시켰지만,
+      이건 <strong>사람(도메인 전문가)이 결정해야 할 사안</strong>이라 케이스 <code>CFL-04</code>에 주석(<code>spec_note</code>)으로
+      표면화하고 <code>docs/03_OPEN_QUESTIONS.md</code>에 <strong>Q8</strong>로 기록했습니다.</p>
+    <div class="callout q">
+      <div class="t">왜 이게 가치 있는 발견인가</div>
+      <p>검증 작업이 단순히 "통과/실패"를 넘어 <strong>명세 자체의 결함을 드러냈습니다.</strong>
+        실무에서 "모순 입력을 자동 처리할지, 사람에게 넘길지"는 리스크 관리상 중요한 결정 지점입니다.</p>
+    </div>
+  </section>
+
+  <!-- footer -->
+  <div class="foot">
+    <p><strong>재현:</strong> <code>python -m pytest</code> (39 passed) · <code>python examples/demo_tc_regression.py</code> (회귀 리포트)</p>
+    <p style="margin-top:14px;"><strong>파일 구성</strong></p>
+    <div class="filemap">src/regimpact/tc_generator/
+├── oracle.py       독립 명세 오라클 (challenger) — 엔진 미참조
+├── generator.py    6 카테고리 30 케이스 체계 생성
+├── regression.py   엔진 ⟷ 오라클 비교 · 카테고리별 Pass Rate
+└── README.md       설계 근거
+tests/test_tc_generator.py   계약·독립성·회귀·mutation (11개)
+examples/demo_tc_regression.py</div>
+    <p style="margin-top:18px;">RegImpact AI · 규제 변경 영향분석·검증 시스템 · Assurance Dimension ④ (Rule Regression &amp; Conflict)</p>
+  </div>
+
+</div>
