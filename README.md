@@ -50,13 +50,20 @@
 | `docs/05_RULE_SPEC.md` | 룰엔진 규칙 명세 (LOCKED §4 — ✍️ 사용자 작성 / 🔧 스캐폴드 / 🤖 AI초안) |
 | `docs/sources/` | 공문 원본 스냅샷 + 추출 텍스트 + 해시 (SOURCES.md 레지스트리) |
 | `docs/ui/stitch_prompts.md` | UI 목업용 Google Stitch 프롬프트 모음(5개 화면) |
+| `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |
+| `tests/` | 룰엔진 테스트 하네스 (pytest, 23개) |
+| `examples/demo_6_30.py` | 6·30 시나리오 데모 실행 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |
 
 ## 현재 상태
 
-🟡 **기획/문서화 단계** — 코드 착수 전. 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1 착수** — 룰엔진 v1 구현 완료(테스트 23개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+
+```bash
+python -m pytest && python examples/demo_6_30.py
+```
 
 ## 개발 브랜치
 

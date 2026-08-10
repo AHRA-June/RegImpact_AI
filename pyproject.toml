@@ -1,0 +1,16 @@
+[project]
+name = "regimpact"
+version = "0.1.0"
+description = "RegImpact AI — 규제 변경 영향분석·검증 시스템 (deterministic LTV 룰엔진)"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
