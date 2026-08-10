@@ -26,9 +26,10 @@
 1. **`docs/01_PROJECT_STATE.md`** ← 지금 어디까지 왔는지, 다음 액션이 무엇인지 (가장 먼저!)
 2. `docs/00_BRIEF.md` ← 프로젝트 철학·범위·LOCKED 원칙 (정체성 문서, 원본 보존)
 3. `docs/02_DECISION_LOG.md` ← 지금까지의 결정과 그 이유
-4. `docs/03_OPEN_QUESTIONS.md` ← 사용자 확인이 필요한 대기 항목
-5. `docs/regulatory_facts.md` ← 6·30 규제 사실의 단일 기준점
-6. `docs/metrics_spec.md` ← 평가지표 정의
+4. `docs/04_PLAN.md` ← 현재 유효한 실행 계획(수직 슬라이스 우선, 9~10주)
+5. `docs/03_OPEN_QUESTIONS.md` ← 사용자 확인이 필요한 대기 항목
+6. `docs/regulatory_facts.md` ← 6·30 규제 사실의 단일 기준점
+7. `docs/metrics_spec.md` ← 평가지표 정의
 
 > ⚠️ 이 프로젝트는 개발 도중 Claude 계정이 교체됩니다.
 > **모든 상태는 이 저장소 안에만** 존재합니다. 대화 메모리에 의존하지 마세요.
@@ -45,6 +46,7 @@
 | `docs/01_PROJECT_STATE.md` | **살아있는 상태판** — 현재 위치, 다음 3개 액션, 블로커 |
 | `docs/02_DECISION_LOG.md` | 의사결정 이력 (날짜·결정·이유·이전값) |
 | `docs/03_OPEN_QUESTIONS.md` | 사용자 확인 대기 항목 |
+| `docs/04_PLAN.md` | **현재 유효 실행 계획** — 수직 슬라이스 우선, 총 9~10주 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |

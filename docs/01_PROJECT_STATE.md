@@ -21,14 +21,17 @@
 
 ---
 
-## 다음 3개 액션 (NEXT — 우선순위 순)
+## 다음 액션 (NEXT — Phase 0 = `04_PLAN.md` 기준선)
 
-> 아래는 기획 세션에서 도출한 권장 순서. 사용자 확정 전이면 `03_OPEN_QUESTIONS.md` 확인.
+> 실행 계획은 `docs/04_PLAN.md`(수직 슬라이스 우선, 총 9~10주). Phase 0 항목:
 
-1. **`regulatory_facts.md` 확정** — 6·30 규제 사실을 claim 단위로 원문 인용·URL·hash와 함께 고정.
-   골드셋·룰엔진·Rule Proposal의 공통 기준점이므로 코드보다 먼저. (사용자 도메인 검수 필요)
-2. **`metrics_spec.md` 확정** — §13 지표별 정의/분모/분자/pass-fail 임계/high-risk 정의를 한 줄씩.
-3. **수직 슬라이스(Walking Skeleton) 설계** — 6·30 1건이 볼품없어도 E2E로 관통되는 최소 경로를 PRD/설계에 반영.
+1. **`regulatory_facts.md` 확정** — 6·30 사실 claim(C01~C13) 원문 인용·URL·hash 검수. (사용자 도메인 검수 필요)
+2. **`metrics_spec.md` 확정** — 깊은 4 dimension 지표 공식/분모/임계/high-risk 정의.
+3. **룰엔진 규칙 명세 v0** — 사용자 본인 작성 (LOCKED §4). Claude는 인터페이스·하네스만.
+4. **6·30 수기 Impact 정답(앵커)** — 사용자 확인 (§24-4). Walking Skeleton의 E2E 테스트 케이스.
+- 이후 Phase 1(Walking Skeleton) 착수 → `04_PLAN.md` 참고.
+
+> ⚠️ **선행 조건: 원격 push 권한.** 아래 블로커 해결 전까지 새 계정 인계 불가.
 
 ---
 
@@ -37,9 +40,9 @@
 `docs/03_OPEN_QUESTIONS.md`에 상세. 요약:
 - ~~골드셋 규모~~ — **✅ 해결(2026-08-10): 100~120 확정, split DEV40/LOCKED40/CHALLENGE35**
 - ~~Assurance 깊게 갈 4개 선택~~ — **✅ 해결(2026-08-10): 수를 줄임, 깊은 4 dimension + 로드맵**
-- §18 주차 계획을 수직 슬라이스 우선으로 재배열할지 — **미확정**
-- 룰엔진 규칙 명세(사용자 본인 작성 — LOCKED §4) — **미착수**
-- 6·30 수기 Impact 정답(사용자 확인 필요 — 브리프 §24-4) — **미착수**
+- ~~주차 계획 재배열 + 총 기간~~ — **✅ 해결(2026-08-10): 수직 슬라이스 우선, 총 9~10주 (`04_PLAN.md`)**
+- 룰엔진 규칙 명세(사용자 본인 작성 — LOCKED §4) — **미착수 (Phase 0)**
+- 6·30 수기 Impact 정답(사용자 확인 필요 — 브리프 §24-4) — **미착수 (Phase 0)**
 
 ---
 
@@ -65,6 +68,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-10** — Q3 해결: 주차 계획 수직 슬라이스 우선 재배열 + 총 9~10주 확정. `04_PLAN.md` 신규, DECISION_LOG·OPEN_QUESTIONS·README·STATE 반영, 로컬 커밋.
 - **2026-08-10** — Q1 해결: 골드셋 100~120 확정(split DEV40/LOCKED40/CHALLENGE35, CHALLENGE 가중). DECISION_LOG·OPEN_QUESTIONS·metrics_spec·STATE 반영, 로컬 커밋.
 - **2026-08-10** — Q2 해결: Assurance 체크 "수를 줄임" 결정(깊은 4 dimension + 로드맵/인프라). DECISION_LOG·OPEN_QUESTIONS·metrics_spec 반영, 로컬 커밋. (원격 push는 권한 대기)
 - **2026-08-10** — 브리프 v2 검토, 분석 피드백 제공, handoff 문서 구조 생성·커밋. (기획 단계)
