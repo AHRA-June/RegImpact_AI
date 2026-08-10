@@ -8,6 +8,18 @@
 
 ---
 
+## 0-A. 평가셋 규모·split (2026-08-10 확정)
+
+- **총 규모: 100~120** (원안 150~200에서 축소, ADJUSTABLE). 질 우선, CHALLENGE 강화.
+- **확정 split (권장, 총 ~115):**
+  | Split | 규모 | 용도 |
+  |---|---:|---|
+  | DEV | 40 | 프롬프트·retrieval·extractor 튜닝 |
+  | LOCKED TEST | 40 | 최종 성능평가 (개발 중 튜닝 금지) |
+  | CHALLENGE | 35 | 예외·경계·충돌·모호 중심 적대적 평가 |
+- CHALLENGE는 EXCEPTION / GRANDFATHERING / EFFECTIVE_DATE / CONFLICT 가중.
+- 성공 기준: 건수 채우기가 아니라 **실패모드 카테고리 커버리지**.
+
 ## 0. 공통 원칙
 
 - 모든 지표는 **골드셋(DEV/LOCKED/CHALLENGE)** 또는 **룰엔진 회귀 fixture** 위에서 계산.

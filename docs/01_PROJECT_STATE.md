@@ -35,7 +35,7 @@
 ## 대기 중 결정 (BLOCKED ON USER)
 
 `docs/03_OPEN_QUESTIONS.md`에 상세. 요약:
-- 골드셋 규모: 100~120(질 우선, Claude 권장) vs 원안 150~200 — **미확정**
+- ~~골드셋 규모~~ — **✅ 해결(2026-08-10): 100~120 확정, split DEV40/LOCKED40/CHALLENGE35**
 - ~~Assurance 깊게 갈 4개 선택~~ — **✅ 해결(2026-08-10): 수를 줄임, 깊은 4 dimension + 로드맵**
 - §18 주차 계획을 수직 슬라이스 우선으로 재배열할지 — **미확정**
 - 룰엔진 규칙 명세(사용자 본인 작성 — LOCKED §4) — **미착수**
@@ -65,5 +65,6 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-10** — Q1 해결: 골드셋 100~120 확정(split DEV40/LOCKED40/CHALLENGE35, CHALLENGE 가중). DECISION_LOG·OPEN_QUESTIONS·metrics_spec·STATE 반영, 로컬 커밋.
 - **2026-08-10** — Q2 해결: Assurance 체크 "수를 줄임" 결정(깊은 4 dimension + 로드맵/인프라). DECISION_LOG·OPEN_QUESTIONS·metrics_spec 반영, 로컬 커밋. (원격 push는 권한 대기)
 - **2026-08-10** — 브리프 v2 검토, 분석 피드백 제공, handoff 문서 구조 생성·커밋. (기획 단계)
