@@ -9,10 +9,11 @@
 - 100~120 (질 우선, CHALLENGE 강화 / Claude 권장) vs 원안 150~200.
 - ADJUSTABLE 범위이나 프로젝트 시간 배분에 큰 영향.
 
-## Q2. Assurance 11개 체크 중 "깊게 구현할 4개" — `[대기]`
-- Claude 후보: ①Citation/Source grounding ②Exception+Grandfathering recall ③Temporal/policy-version consistency ④Rule-regression pass rate.
-- 나머지 7개는 "정의 + 소규모 예시 + 로드맵"으로 둘지, 아니면 다른 조합을 원하는지.
-- 주의: 브리프 §0-6 "Assurance Layer는 자르지 않는다" — 레이어는 유지, 개별 체크의 구현 깊이만 차등한다는 해석이 맞는지 확인 필요.
+## Q2. Assurance 11개 체크 중 "깊게 구현할 4개" — `[✅ 해결 2026-08-10]`
+- **결정: 수를 줄임.** 깊게 정량 측정하는 4개 dimension + 나머지 로드맵/인프라. 상세는 `02_DECISION_LOG.md` 2026-08-10 항목.
+- 깊게: ①Source Grounding & Citation ②Change & Exception Completeness ③Temporal/Policy-Version Consistency ④Rule Regression & Conflict.
+- 레이어는 유지(LOCKED §0-6 정합), 구현 깊이만 차등.
+- **잔여 여백:** escalation을 4번 대신 승격할지 여부만 열려 있음(현재는 위 4개 확정).
 
 ## Q3. 주차 계획 재배열(수직 슬라이스 우선) 수용 여부 — `[대기]`
 - §18을 "레이어별 완성"에서 "6·30 1건 E2E 관통 우선"으로 재배열할지.

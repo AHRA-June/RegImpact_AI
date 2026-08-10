@@ -14,9 +14,23 @@
 - LOCKED TEST / CHALLENGE는 개발 중 튜닝 루프에 쓰지 않음 (브리프 §12).
 - 최종 KPI 관점: 단순 정확도가 아니라 **AI Error → Decision/Operational Risk 전파**를 본다 (브리프 §13.5).
 
+### 구현 깊이 정책 (2026-08-10 결정, `02_DECISION_LOG.md`)
+
+Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
+
+- **[DEEP]** — 정량 측정하는 4개 dimension. 골드셋/회귀로 숫자가 나오고 보고서의 핵심.
+  1. Source Grounding & Citation → §2 + Citation Correctness
+  2. Change & Exception Completeness → Change Completeness, Exception Recall, Grandfathering Recall
+  3. Temporal / Policy-Version Consistency → Policy-version Consistency, Effective-date Accuracy
+  4. Rule Regression & Conflict → §3 전체
+- **[ROADMAP]** — 정의+루브릭+소규모 예시만. Human Escalation 계열(§4).
+- **[INFRA]** — metric이 아니라 항상 켜지는 인프라. Audit trail, Approval status field. (§13 밖, `docs/00_BRIEF.md` §16~17)
+
+각 지표 표의 맨 앞에 깊이 태그를 붙인다.
+
 ---
 
-## 1. RegChange / RAG 계열 (브리프 §13.1)
+## 1. RegChange / RAG 계열 (브리프 §13.1) — [DEEP] dimension ②③
 
 | 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk |
 |---|---|---|---|---|---|
@@ -27,7 +41,7 @@
 | Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 |
 | Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 |
 
-## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2)
+## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2) — [DEEP] dimension ①
 
 > `hallucination rate` 단일 지표로 뭉뚱그리지 않는다.
 
@@ -36,7 +50,7 @@
 | Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD |
 | Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD |
 
-## 3. Rule / Test 계열 (브리프 §13.3)
+## 3. Rule / Test 계열 (브리프 §13.3) — [DEEP] dimension ④
 
 | 지표 | 정의(초안) | 분모 | 분자 | 임계 |
 |---|---|---|---|---|
@@ -45,8 +59,11 @@
 | Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD |
 | Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD |
 
-## 4. Human Escalation 계열 (브리프 §13.4)
+## 4. Human Escalation 계열 (브리프 §13.4) — [ROADMAP]
 
+> 2026-08-10 결정에 따라 이 계열은 MVP에서 "정의+루브릭+소규모 예시"로 둔다(정량 딥다이브 아님).
+> escalation을 [DEEP] 4번으로 승격하려면 `03_OPEN_QUESTIONS.md` Q2 여백 참고.
+>
 > `human override rate` 자체를 품질지표로 쓰지 않는다.
 
 | 지표 | 정의(초안) | 분모 | 분자 | high-risk |
