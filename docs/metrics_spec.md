@@ -1,0 +1,77 @@
+# metrics_spec — 평가지표 정의
+
+> **이 파일은 브리프 §13 지표에 공식·분모·임계값을 부여한다.** 코드보다 먼저 채운다.
+> Model Risk 직무에서 실력이 드러나는 지점이므로 각 지표의 분모/분자를 모호하지 않게 정의한다.
+>
+> ⚠️ **상태: 스켈레톤.** 아래 정의는 초안이며 사용자 도메인 검수·확정 필요.
+> 각 지표: `정의 / 분모 / 분자 / pass-fail 임계 / high-risk 여부 / 산출 데이터원`.
+
+---
+
+## 0. 공통 원칙
+
+- 모든 지표는 **골드셋(DEV/LOCKED/CHALLENGE)** 또는 **룰엔진 회귀 fixture** 위에서 계산.
+- LOCKED TEST / CHALLENGE는 개발 중 튜닝 루프에 쓰지 않음 (브리프 §12).
+- 최종 KPI 관점: 단순 정확도가 아니라 **AI Error → Decision/Operational Risk 전파**를 본다 (브리프 §13.5).
+
+---
+
+## 1. RegChange / RAG 계열 (브리프 §13.1)
+
+| 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk |
+|---|---|---|---|---|---|
+| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | TBD | 놓침=위험 |
+| Exception Recall | 예외조건(생애최초·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | TBD | ★ 높음 |
+| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | TBD | ★ 높음 |
+| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | TBD | ★ 높음 |
+| Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 |
+| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 |
+
+## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2)
+
+> `hallucination rate` 단일 지표로 뭉뚱그리지 않는다.
+
+| 지표 | 정의(초안) | 분모 | 분자 | 임계 |
+|---|---|---|---|---|
+| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD |
+| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD |
+
+## 3. Rule / Test 계열 (브리프 §13.3)
+
+| 지표 | 정의(초안) | 분모 | 분자 | 임계 |
+|---|---|---|---|---|
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD |
+| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD |
+| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD |
+
+## 4. Human Escalation 계열 (브리프 §13.4)
+
+> `human override rate` 자체를 품질지표로 쓰지 않는다.
+
+| 지표 | 정의(초안) | 분모 | 분자 | high-risk |
+|---|---|---|---|---|
+| Escalation Recall | 반드시 사람 검토 필요한 건 중 escalate한 비율 | 검토 필수 건 | escalate된 건 | ★ 최고 |
+| Escalation Precision | 사람에게 넘긴 건 중 실제 검토 필요 비율 | escalate된 건 | 실제 필요 건 | 중 |
+| High-risk Miss Rate | 반드시 escalate해야 할 고위험 건을 자동처리한 비율 | 고위험 건 | 자동처리된 고위험 건 | ★ 최고 (0 목표) |
+| Unnecessary Escalation Rate | 자동처리 가능 건을 불필요하게 넘긴 비율 | 자동처리 가능 건 | 넘긴 건 | 낮음 |
+
+---
+
+## high-risk failure 정의 (초안 — 확정 필요)
+
+> "High-risk Miss Rate" 등을 측정하려면 **어떤 케이스가 high-risk인지**를 먼저 정의해야 한다.
+
+high-risk 후보 (사용자 검수 필요):
+- 경과규정 오판으로 종전/신규 규정을 뒤바꾸는 케이스
+- 시행일을 잘못 적용해 규제 전/후를 뒤바꾸는 케이스
+- 예외(생애최초·정책대출)를 놓쳐 LTV를 과소/과대 적용하는 케이스
+- 서로 다른 정책 간 rule conflict를 자동처리로 덮는 케이스
+
+---
+
+## 보고서의 한계 명시 (브리프 §12)
+
+> "The locked test set was frozen before system tuning, but was authored within the project and is not an independent third-party benchmark."
+
+n 규모는 통계적 검정력이 아니라 **실패모드 층화 커버리지**를 목표로 함을 명시.
