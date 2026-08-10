@@ -27,7 +27,7 @@
 
 1. **`regulatory_facts.md` 확정** — 6·30 사실 claim(C01~C13) 원문 인용·URL·hash 검수. (사용자 도메인 검수 필요)
 2. **`metrics_spec.md` 확정** — 깊은 4 dimension 지표 공식/분모/임계/high-risk 정의.
-3. **룰엔진 규칙 명세 v0** — 사용자 본인 작성 (LOCKED §4). Claude는 인터페이스·하네스만.
+3. **룰엔진 규칙 명세 v0** 🟡진행중 — `05_RULE_SPEC.md` 스캐폴드 완료. **✍️ 사용자 도메인 값 입력 대기**(생애최초/정책대출 LTV, 예외 우선순위, 경과규정 날짜경계 — 05_RULE_SPEC.md §G).
 4. **6·30 수기 Impact 정답(앵커)** — 사용자 확인 (§24-4). Walking Skeleton의 E2E 테스트 케이스.
 - 이후 Phase 1(Walking Skeleton) 착수 → `04_PLAN.md` 참고.
 
@@ -68,6 +68,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-10** — 룰엔진 규칙 명세 착수: `05_RULE_SPEC.md` 스캐폴드(스키마·의사결정표 구조·경과규정 뼈대) 생성·커밋. LOCKED §4에 따라 ✍️ 도메인 값은 사용자 입력 대기.
 - **2026-08-10** — Q3 해결: 주차 계획 수직 슬라이스 우선 재배열 + 총 9~10주 확정. `04_PLAN.md` 신규, DECISION_LOG·OPEN_QUESTIONS·README·STATE 반영, 로컬 커밋.
 - **2026-08-10** — Q1 해결: 골드셋 100~120 확정(split DEV40/LOCKED40/CHALLENGE35, CHALLENGE 가중). DECISION_LOG·OPEN_QUESTIONS·metrics_spec·STATE 반영, 로컬 커밋.
 - **2026-08-10** — Q2 해결: Assurance 체크 "수를 줄임" 결정(깊은 4 dimension + 로드맵/인프라). DECISION_LOG·OPEN_QUESTIONS·metrics_spec 반영, 로컬 커밋. (원격 push는 권한 대기)
