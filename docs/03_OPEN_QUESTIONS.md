@@ -21,7 +21,10 @@
 - Phase 0(W1)/1(W2~3 Walking Skeleton)/2(W4~6)/3(W7~8 코어완성)/스트레치(W9~10).
 - LOCKED §0-5 정합성 확인 완료(골드셋 freeze는 실제 튜닝 전, skeleton은 앵커 1건 스모크 테스트).
 
-## Q4. 룰엔진 규칙 명세 — `[🟡 진행 중 2026-08-10: 스캐폴드 완료, ✍️ 도메인 값 대기]`
+## Q4. 룰엔진 규칙 명세 — `[✅ v1 확정 2026-08-10]`
+- **확정:** `05_RULE_SPEC.md` v1 — LTV 값(FAQ Q2), precedence(E, P0~P7), 경과규정(F), 알고리즘(H). 정책대출→Discovery. 코어=LTV만.
+- **다음:** deterministic 엔진 코드 + 테스트 하네스 구현(Phase 1). 상세 이력은 `02_DECISION_LOG.md`.
+- (구) 진행 이력 아래 보존:
 - LOCKED §4: 규칙 로직은 LLM이 생성하지 않음. 사용자 본인이 규칙 명세를 작성해야 함.
 - **스캐폴드 완료:** `docs/05_RULE_SPEC.md` (입력/출력 스키마, 의사결정표 구조, reason_codes 라벨, 경과규정 뼈대).
 - **사용자 입력 대기(✍️):** 05_RULE_SPEC.md의 미결 질문 G섹션 —

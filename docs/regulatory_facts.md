@@ -100,7 +100,8 @@
 C02, C03, C04, C05, C06, C11 → 지역 × 주택수 × 생애최초 × 정책대출 × 이벤트 시점 × 경과규정 → 적용 LTV.
 
 ### Discovery Scope claim (Impact Matrix 표시만, 자동판정 안 함)
-C07(전세), C08(신용대출), C09(중도금·이주비), C10(사업자). → "Potentially impacted — manual policy review required".
+C07(전세), C08(신용대출), C09(중도금·이주비), C10(사업자), **정책대출(디딤돌·보금자리)**. → "Potentially impacted — manual policy review required".
+> 정책대출은 2026-08-10 코어에서 Discovery로 분리. 참고 LTV(디딤돌70/보금자리 아파트60·비55, 생초·실수요 좌동)는 위 확정 LTV 표에 기록됨.
 
 ---
 
