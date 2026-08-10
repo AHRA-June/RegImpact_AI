@@ -27,6 +27,12 @@
 
 ## 결정 로그
 
+### 2026-08-10 · RegChange Extractor 구현 + LLM 선택 · ✅ 완료
+- **LLM:** Anthropic Claude, 기본 `claude-opus-5` (ADJUSTABLE §0 — 비용/성능 따라 교체 가능). structured output(`output_config.format`).
+- **아키텍처:** LLM 호출 주입 가능(injectable) → API 키·비용 없이 오프라인 테스트. `src/regimpact/extractor/`.
+- **첫 Assurance 지표(A):** ①Citation grounding(인용의 원문 verbatim 존재를 deterministic 검증 → Citation Correctness/Unsupported Claim Rate, **LLM이 LLM 채점 회피**) ②Gold 대조(`docs/eval/regchange_gold_6_30.json` → Change Completeness/Exception Recall).
+- **테스트 28개 통과**(룰엔진 23 + extractor 5, 환각 탐지 포함). LOCKED 정합: 추출=초안(§9), 룰엔진=독립 기준(§4), 골드=사람 authoring(§0-5).
+
 ### 2026-08-10 · LOCKED §4 운영방식: "AI 초안 → 사람 확정" + 검증 독립성 · ✅ 승인됨(사용자 채택)
 - **배경:** 사용자가 "공문 업로드 → AI가 룰 명세 1차 초안" 플로우를 원함(제품 dogfooding).
 - **결정:** 룰 명세를 AI가 공문에서 **1차 추출(초안)** → **사용자가 원문 대조로 최종 확정(authority)**. 확정 전 초안은 authority 없음. (2026-08-10 사용자 "채택".)

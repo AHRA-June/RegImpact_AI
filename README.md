@@ -51,8 +51,10 @@
 | `docs/sources/` | 공문 원본 스냅샷 + 추출 텍스트 + 해시 (SOURCES.md 레지스트리) |
 | `docs/ui/stitch_prompts.md` | UI 목업용 Google Stitch 프롬프트 모음(5개 화면) |
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |
-| `tests/` | 룰엔진 테스트 하네스 (pytest, 23개) |
-| `examples/demo_6_30.py` | 6·30 시나리오 데모 실행 |
+| `src/regimpact/extractor/` | **RegChange Extractor(E) + Citation Assurance(A)** — 공문→추출→검증 |
+| `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
+| `tests/` | 테스트 하네스 (pytest, 28개) |
+| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |

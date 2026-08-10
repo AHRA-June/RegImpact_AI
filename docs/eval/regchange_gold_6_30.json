@@ -1,0 +1,16 @@
+{
+  "_note": "6·30 RegChange 골드 정답지 — 사람이 regulatory_facts.md에서 확정(LOCKED §4, AI초안→사람확정). extractor 출력 채점 기준.",
+  "policy_id": "FSC_20260630",
+  "effective_from": "2026-07-01",
+  "target_regions": ["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"],
+  "required_changes": [
+    {"id": "LTV_70_to_40", "categories": ["LTV"], "keywords": ["70%", "40%"]},
+    {"id": "effective_7_1", "categories": ["EFFECTIVE_DATE"], "keywords": ["7.1", "7월 1일", "2026-07-01"]},
+    {"id": "grandfathering", "categories": ["GRANDFATHERING"], "keywords": ["경과", "종전규정", "계약금"]},
+    {"id": "region_designation", "categories": ["REGION"], "keywords": ["규제지역", "투기과열", "조정대상"]}
+  ],
+  "exceptions": [
+    {"name": "first_home_buyer", "keywords": ["생애최초"]},
+    {"name": "real_demand", "keywords": ["서민", "실수요"]}
+  ]
+}

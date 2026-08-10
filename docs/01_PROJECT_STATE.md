@@ -22,13 +22,15 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-10)
-- **룰엔진 v1 구현** — `src/regimpact/` (models·regions·grandfathering·rule_engine), 알고리즘 H 그대로. 테스트 23개 통과, `examples/demo_6_30.py` 정상.
-- 판정 검증: 무주택40/생애최초70/서민60/유주택0/다주택0/경과규정70/정책대출Discovery — 확정 스펙과 일치.
+- **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
+- **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과.
+- 실행: `python -m pytest`(28), `python examples/demo_6_30.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **Walking Skeleton 나머지 노드** — 룰엔진은 완성. 다음은 6·30 앵커용 (a) RegChange Extractor(공문→Before/After, LLM) → 룰엔진 대조, (b) TC Generator(경계·예외·충돌) → 룰엔진 회귀, (c) 최소 Impact Matrix 산출.
-- **UI 연동 시 Stitch 데이터 오류 교정** (사용자 지시): 엔진 실제 출력으로 화면 하드코딩값 교체.
-- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수.
+- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- **TC Generator** — 경계·예외·충돌 케이스 생성 → 룰엔진 회귀 (Rule-regression Pass Rate).
+- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
+- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
 
@@ -77,6 +79,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.
 - **2026-08-10** — Stitch 1차 산출물(5화면) 수령·리뷰. 디자인 훌륭(Assurance·Rule변경안·임팩트매트릭스 서사 성공)하나 **도메인 데이터 환각**(지역을 세종/부산/강남으로, LTV 60→50 등). 정정 프롬프트 작성(`docs/ui/stitch_review.md`), export 보존(`docs/ui/stitch_export/`). → 재생성 또는 HTML 직접수정 필요.
 - **2026-08-10** — UI 목업용 Google Stitch 프롬프트 작성(`docs/ui/stitch_prompts.md`, 5개 화면: 분석 워크스페이스/임팩트매트릭스/Rule변경안+검토/Assurance/고객영향). 구현은 Streamlit 수준 유지, Stitch는 포트폴리오·참고 디자인용.
