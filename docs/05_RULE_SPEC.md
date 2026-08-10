@@ -16,9 +16,9 @@
 |---|---|---|---|
 | `region_code` | enum | GURI, YONGIN_GIHEUNG, HWASEONG_DONGTAN, OTHER | 지역 코드 |
 | `evaluation_date` | date | | 판정 기준일 (이 시점의 지역상태·정책버전 결정) |
-| `region_status_as_of` | enum(derived) | REGULATED, NON_REGULATED | ✍️Q: 조정대상지역/투기과열지구/토허제 구분이 LTV에 영향? 아니면 REGULATED 단일? |
+| `region_status_as_of` | enum(derived) | REGULATED, NON_REGULATED | ✅확정(2026-08-10): 2값. 조정/투기과열/토허제 세부유형은 LTV 판정 밖 메타데이터로 보관. |
 | `house_count` | int | 0, 1, 2+ | ✍️Q: 경계 정의 (0=무주택, 2+=다주택?) |
-| `disposal_condition_flag` | bool | | 🔧제안 신규: 처분조건부 1주택 구분용 (§8 원본엔 없음). ✍️Q: 이 방식 OK? |
+| `disposal_condition_flag` | bool | | ✅확정(2026-08-10): 별도 boolean 채택. house_count=1 + flag=true → 처분조건부 1주택. |
 | `first_home_buyer` | bool | | 생애최초 여부 |
 | `policy_mortgage_flag` | bool | | 정책대출 여부 |
 | `loan_purpose` | enum | HOME_PURCHASE, OTHER | Core는 HOME_PURCHASE만 |
@@ -27,7 +27,7 @@
 | `contract_signed_at` | datetime? | | 매매계약 체결 |
 | `downpayment_paid_at` | datetime? | | 계약금 납부 |
 
-> ✍️ **Q-스키마:** 위 필드로 충분한가요? 빠진 입력(예: 처분조건부 처분기한, 담보물건 종류, 소득요건 등)이 규칙에 필요하면 알려주세요.
+> ✅ **Q-스키마(처분조건부/지역상태) 확정 2026-08-10.** 남은 확인: 위 필드로 충분한지, 빠진 입력(처분기한, 담보물건 종류, 소득요건 등)이 규칙에 필요한지.
 
 ## B. 출력 스키마 🔧
 
@@ -116,8 +116,8 @@
 
 ## G. 미결 질문 요약 (✍️ 사용자 입력 대기)
 
-- Q-스키마: 입력 필드 충분성 / 처분조건부 표현 방식(`disposal_condition_flag`)
-- Q-지역: region_status를 REGULATED 단일로 볼지, 조정/투기과열/토허제 구분할지
+- ~~Q-스키마: 처분조건부 표현~~ ✅ 별도 boolean flag (2026-08-10) / 남은: 추가 필드 필요성
+- ~~Q-지역: region_status 세분화~~ ✅ REGULATED/NON_REGULATED 2값 (2026-08-10)
 - Q-값1: 생애최초·정책대출 정확 LTV
 - Q-값2: 비처분 1주택 처리
 - Q-우선순위: 복합 조건 precedence
