@@ -59,7 +59,7 @@
 | `src/regimpact/report/` | **Validation Report** — E2E 산출물→검증보고서(Markdown) + 승인상태 + audit trail |
 | `src/regimpact/e2e.py` | **E2E 오케스트레이터** — 6·30 코어 완성 파이프라인 관통(`run_six_thirty_e2e`) |
 | `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
-| `tests/` | 테스트 하네스 (pytest, 103개) |
+| `tests/` | 테스트 하네스 (pytest, 111개) |
 | `examples/` | 6·30 룰엔진 / Extractor / TC 회귀 / Impact Matrix / Rule Proposal / Proposal→TC / **E2E** 데모 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |

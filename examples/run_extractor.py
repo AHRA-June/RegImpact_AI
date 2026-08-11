@@ -25,21 +25,60 @@ from regimpact.extractor import (  # noqa: E402
     check_citation_grounding,
     extract_regchange,
     load_sources,
+    ollama_completion,
+    openai_compatible_completion,
     score_against_gold,
 )
 
 REPO = Path(__file__).resolve().parent.parent
 GOLD = json.loads((REPO / "docs" / "eval" / "regchange_gold_6_30.json").read_text(encoding="utf-8"))
-MODEL = os.environ.get("REGIMPACT_EXTRACTOR_MODEL", "claude-opus-5")
+
+# 백엔드 선택: anthropic(기본, 유료) | ollama(로컬·무료) | openai(무료 티어 호환)
+BACKEND = os.environ.get("REGIMPACT_EXTRACTOR_BACKEND", "anthropic").lower()
+MODEL = os.environ.get("REGIMPACT_EXTRACTOR_MODEL", "")
 
 _AUTH_HELP = """\
-[안내] 실제 LLM 호출에 사용할 자격증명을 찾지 못했습니다.
-다음 중 하나로 인증하세요:
-  1) export ANTHROPIC_API_KEY=sk-ant-...        (가장 단순)
-  2) `ant auth login`  후 재실행                 (OAuth 프로필; SDK가 자동 사용)
-그런 다음 다시 실행: python examples/run_extractor.py [--e2e]
-배선만 먼저 확인하려면: python examples/run_extractor.py --e2e --offline
+[안내] 실제 LLM 호출에 사용할 백엔드를 찾지 못했습니다. 무료 옵션이 있습니다:
+
+  # 1) Ollama — 로컬·완전 무료·키 불필요
+  #    ollama pull qwen2.5   (또는 llama3 등) 후:
+  REGIMPACT_EXTRACTOR_BACKEND=ollama REGIMPACT_EXTRACTOR_MODEL=qwen2.5 \\
+    python examples/run_extractor.py --e2e
+
+  # 2) OpenAI 호환 무료 티어 (Groq/OpenRouter/Gemini-호환 등, 무료 키 발급)
+  REGIMPACT_EXTRACTOR_BACKEND=openai \\
+  REGIMPACT_OPENAI_BASE_URL=https://api.groq.com/openai/v1 \\
+  REGIMPACT_OPENAI_API_KEY=... REGIMPACT_EXTRACTOR_MODEL=llama-3.3-70b-versatile \\
+    python examples/run_extractor.py --e2e
+
+  # 3) Anthropic (유료)
+  ANTHROPIC_API_KEY=sk-ant-... REGIMPACT_EXTRACTOR_MODEL=claude-opus-5 \\
+    python examples/run_extractor.py --e2e
+
+배선만 먼저 확인: python examples/run_extractor.py --e2e --offline
 """
+
+
+def _make_complete():
+    """선택된 백엔드의 complete 함수를 만든다. 미설정/실패 시 None + 안내."""
+    if BACKEND == "ollama":
+        model = MODEL or "qwen2.5"
+        host = os.environ.get("REGIMPACT_OLLAMA_HOST", "http://localhost:11434")
+        print(f"백엔드: ollama  model={model}  host={host}")
+        return ollama_completion(model=model, host=host)
+    if BACKEND == "openai":
+        base = os.environ.get("REGIMPACT_OPENAI_BASE_URL")
+        if not base or not MODEL:
+            print("[안내] openai 백엔드는 REGIMPACT_OPENAI_BASE_URL 과 REGIMPACT_EXTRACTOR_MODEL 이 필요합니다.")
+            return None
+        print(f"백엔드: openai-compatible  model={MODEL}  base={base}")
+        return openai_compatible_completion(
+            base_url=base, model=MODEL, api_key=os.environ.get("REGIMPACT_OPENAI_API_KEY"),
+        )
+    # 기본: anthropic
+    model = MODEL or "claude-opus-5"
+    print(f"백엔드: anthropic  model={model}")
+    return anthropic_completion(model=model)
 
 
 def _get_extraction(offline: bool):
@@ -56,15 +95,19 @@ def _get_extraction(offline: bool):
         return six_thirty_extraction(), sources
 
     try:
-        complete = anthropic_completion(model=MODEL)
-        print(f"LLM 추출 호출: model={MODEL} …")
+        complete = _make_complete()
+        if complete is None:
+            print(_AUTH_HELP)
+            return None, sources
+        print("LLM 추출 호출 …")
         extraction = extract_regchange(sources, complete=complete)
         return extraction, sources
-    except ImportError:
-        print("\n[안내] anthropic SDK 미설치. 실제 실행하려면: pip install anthropic")
+    except ImportError as e:
+        print(f"\n[안내] SDK/모듈 미설치: {e}")
+        print(_AUTH_HELP)
         return None, sources
-    except Exception as e:  # 인증/네트워크 등
-        print(f"\n[안내] LLM 호출 실패: {type(e).__name__}: {e}\n")
+    except Exception as e:  # 인증/네트워크/서버 등
+        print(f"\n[안내] LLM 호출 실패/미설정: {type(e).__name__}: {e}\n")
         print(_AUTH_HELP)
         return None, sources
 
