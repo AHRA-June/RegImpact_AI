@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-11
+- **갱신자:** Claude (Impact Matrix E2E 구현 세션)
+- **개발 브랜치:** `claude/continue-session-o2geks`
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **Impact Matrix(Before/After)** 구현(테스트 57 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -21,7 +21,15 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-10)
+## ✅ 방금 완료 (2026-08-11)
+- **Impact Matrix (Before/After) E2E** — `src/regimpact/impact/`. 같은 프로필을 **두 정책 시점**
+  (before=6.15 / after=7.2)에 동일 룰엔진으로 평가하고 '차이'만 산출 → 포트폴리오 세그먼트 매트릭스.
+  LOCKED §4 준수(새 규칙값 생성 안 함). **경과규정 = 임팩트 없음(UNCHANGED)** 이 정직하게 드러남.
+  방향(TIGHTENED/LOOSENED/UNCHANGED/STATUS_ONLY) + 고임팩트(30%p↓·신규거절0%·자동판정→검토전환).
+  **핵심 판정:** LTV 0%는 완화가 아니라 '대출 거절' → before 불명이어도 TIGHTENED. Stitch 하드코딩
+  임팩트값을 대체할 실제 엔진 출력. `examples/demo_impact_matrix.py`, 테스트 18개(총 57) 통과.
+
+## ✅ 이전 완료 (2026-08-10)
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
   **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
   명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
@@ -29,14 +37,14 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
+- 실행: `python -m pytest`(57), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/demo_impact_matrix.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
+- **Report stub + E2E 관통 데모** — Impact Matrix까지 왔으니 Source→…→Impact→(Rule Change Proposal)→Regression→Assurance→**Report** 를 6·30 1건으로 끝까지 잇는 최소 리포트 산출(Walking Skeleton 완결). Impact Matrix가 리포트 본문의 핵심 표가 됨.
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-11). `src/regimpact/impact/`. 이후 UI 연동 시 Stitch 하드코딩 임팩트값을 이 엔진 출력으로 교체.
+  - **후속(선택):** 층화 합성 포트폴리오(2,000~5,000)로 세그먼트 매트릭스 규모 확대 → 실제 임팩트 분포 산출.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
-  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
-    ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -86,6 +94,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-11** — ✅ **Impact Matrix (Before/After) E2E 구현.** `src/regimpact/impact/`(analyzer·README). 같은 고객 프로필을 두 정책 시점(before=6.15/after=7.2)에 **동일 룰엔진**으로 평가해 '차이'만 산출 → `ImpactRow`(방향·delta·고임팩트) + `ImpactMatrix`(세그먼트 집계·정렬·`format_matrix`). 설계 핵심: LOCKED §4 준수(새 규칙값 생성 안 함), before 뷰는 경과규정 이벤트 제거(순수 종전 기준선)해 **경과규정=임팩트 없음(UNCHANGED)** 이 정직하게 드러나게 함. 방향 판정에서 **LTV 0%=대출거절**로 해석(before 불명이어도 TIGHTENED+고임팩트) — 초안의 순진한 "after=DECIDED면 LOOSENED" 버그를 수정. `examples/demo_impact_matrix.py`(15건 대표 포트폴리오, 층화). 테스트 18개(총 57) 통과. → UI 연동 시 Stitch 하드코딩 임팩트값을 이 출력으로 교체.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.

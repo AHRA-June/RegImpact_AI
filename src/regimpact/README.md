@@ -8,6 +8,9 @@
 - `regions.py` — 지역 규제상태의 시점 버전 해석 (6·30 3개 지역: 7.1부터 REGULATED)
 - `grandfathering.py` — 경과규정 G1/G2/G3 판정 (컷오프 2026-06-30)
 - `rule_engine.py` — 통합 판정 알고리즘 H (P0~P7 우선순위)
+- `impact/` — Before/After Impact Matrix (규제 변경의 포트폴리오 임팩트 실측) → `impact/README.md`
+- `extractor/` — RegChange Extractor + Citation Assurance (LLM) → `extractor/README.md`
+- `tc_generator/` — TC Generator + Rule-Regression (독립 명세 오라클 차등검증) → `tc_generator/README.md`
 
 ## 사용
 ```python
@@ -22,8 +25,9 @@ print(d.max_ltv, d.applicable_rule_id, d.reason_codes)   # 0.7 REG_FIRSTHOME ['E
 ## 실행
 ```bash
 pip install -e ".[dev]"     # 또는: pip install pytest
-python -m pytest            # 테스트 23개
+python -m pytest            # 전체 57개 (엔진 23 · extractor 5 · tc_generator 11 · impact 18)
 python examples/demo_6_30.py
+python examples/demo_impact_matrix.py
 ```
 
 ## 판정 요약 (규제지역, 시행 후)
