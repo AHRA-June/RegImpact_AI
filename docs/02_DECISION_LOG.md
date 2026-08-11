@@ -27,6 +27,19 @@
 
 ## 결정 로그
 
+### 2026-08-11 · metrics_spec 임계값 확정 (tier 체계) · ✅ 승인됨(사용자 채택)
+- **gate 철학:** **차등(tiered)** — 안전핵심 0-tolerance + 고위험 recall 95% + **개별 miss 자동 escalate**.
+  (대안: 일괄 0-tolerance / 일괄 95% → 기각. 전자는 소형 LLM 현실에서 항상 fail이라 escalation과 중복,
+  후자는 안전핵심에 5% 허용이라 과함.)
+- **tier:** T0 안전핵심(하드 0/100%: regression·conflict·boundary=100%, High-risk Miss=0, Source Contradiction=0,
+  fidelity all-passed) / T1 고위험 recall(Gate 95%: exception·grandfathering·effective-date·policy-version·escalation
+  recall) / T2 완전성·grounding(Change Completeness 90%, Citation 95%, Unsupported ≤5%) / T3 모니터링(precision·불필요
+  escalation, gate 없음).
+- **핵심 정합:** 개별 miss는 항상 escalation으로 쌓여 gate를 REVIEW_REQUIRED로 만듦 → 집계 Gate 수치와 무관하게
+  **silent error 불가**(안전=escalation 보장, 지표=배포 판단선). `assurance.AssuranceThresholds`가 이 tier의 per-case 구현.
+- **high-risk 케이스 정의 확정:** 경과규정 오판·시행일 오판·예외 누락·conflict 자동처리·유주택 기준부재 임의채움(5종, 모두 T0).
+- 반영: `docs/metrics_spec.md`(전 표 임계값+tier 범례), `src/regimpact/assurance/`(Thresholds 값·docstring·README). 테스트 111 통과.
+
 ### 2026-08-10 · RegChange Extractor 구현 + LLM 선택 · ✅ 완료
 - **LLM:** Anthropic Claude, 기본 `claude-opus-5` (ADJUSTABLE §0 — 비용/성능 따라 교체 가능). structured output(`output_config.format`).
 - **아키텍처:** LLM 호출 주입 가능(injectable) → API 키·비용 없이 오프라인 테스트. `src/regimpact/extractor/`.

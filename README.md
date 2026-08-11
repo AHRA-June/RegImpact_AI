@@ -62,7 +62,7 @@
 | `tests/` | 테스트 하네스 (pytest, 111개) |
 | `examples/` | 6·30 룰엔진 / Extractor / TC 회귀 / Impact Matrix / Rule Proposal / Proposal→TC / **E2E** 데모 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
-| `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
+| `docs/metrics_spec.md` | 평가지표 정의·분모·**임계값(확정, tier 체계)**·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |
 
 ## 현재 상태

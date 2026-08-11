@@ -5,10 +5,15 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-11
-- **갱신자:** Claude (E2E 완결 세션 — Assurance + Validation Report)
-- **개발 브랜치:** `claude/work-start-sp37fd` (PR #2)
-- **전체 단계:** 🟢 **Phase 3 코어 완성선 도달** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Change Proposal + Proposal→TC + **Assurance(4 dim)** + **Validation Report**. **6·30 E2E 관통 완료**(Source→추출→Impact→Proposal→TC→Regression→Assurance→Report, gate PASS). 테스트 103 통과.
+- **갱신자:** Claude (metrics 임계값 확정 세션)
+- **개발 브랜치:** `claude/work-start-sp37fd` (PR #2, 커밋 7개)
+- **전체 단계:** 🟢 **Phase 3 코어 완성선 도달** — 룰엔진 + Extractor(+무료 백엔드) + TC Generator + Impact Matrix + Rule Change Proposal + Proposal→TC + **Assurance(4 dim)** + **Validation Report**. **6·30 E2E 관통 완료**(gate PASS). **metrics_spec 임계값 확정(tier 체계).** 테스트 111 통과.
 - (해결됨) 원격 푸시 권한 부여됨.
+
+> 🔖 **새 세션 인계 요약(1분):** 6·30 코어 E2E가 오프라인·무료로 관통돼 있고(`python examples/demo_e2e.py` → gate PASS),
+> metrics 임계값도 tier 체계로 확정됨. **다음 3개:** ①Extractor 실제 LLM 실측(로컬 Ollama/무료티어, `run_extractor.py --e2e`)
+> ②UI 연동(`report.to_dict()`·Impact Matrix → Streamlit/HTML) ③골드셋 100~120 확대(Phase 2).
+> **블로커:** 이 원격 환경엔 LLM 키 없음(무료 백엔드는 사용자 로컬 실행 필요). PR #2는 열려 있음(머지 대기).
 
 ---
 
@@ -79,7 +84,10 @@
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
+- ~~**metrics_spec 임계값 확정**~~ — ✅ 완료(2026-08-11). tier 체계(T0 하드 / T1 recall 95% / T2 완전성 / T3 모니터링),
+  개별 miss escalation으로 silent error 방지. `AssuranceThresholds` 정렬. high-risk 케이스 5종 확정.
+  **후속:** 골드셋 100~120 확대 시 이 gate로 LOCKED 집계 측정, `AssuranceThresholds` 인자화로 튜닝 노출.
+- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수(Phase 2).
 
 ### (이전) Phase 0 기준선 항목
 
@@ -128,6 +136,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-11** — ✅ **metrics_spec 임계값 확정(tier 체계).** gate 철학=차등(안전핵심 0-tolerance + recall 95% + 개별 miss 자동 escalate). T0 하드(regression·conflict·boundary=100%, High-risk Miss=0, Source Contradiction=0, fidelity all-passed) / T1 recall 95%(exception·grandfathering·effective-date·policy-version·escalation) / T2 완전성(Change 90%, Citation 95%, Unsupported ≤5%) / T3 모니터링(precision·불필요 escalation, gate 없음). 핵심: 개별 miss는 escalation으로 쌓여 gate를 REVIEW_REQUIRED로 만듦 → 집계 Gate 무관 silent error 불가. high-risk 케이스 5종 확정(경과규정·시행일·예외·conflict·유주택 기준부재). `docs/metrics_spec.md` 전 표 갱신 + tier 범례, `assurance.AssuranceThresholds` 값·docstring·README 정렬, `02_DECISION_LOG` 기록. 테스트 111 통과.
 - **2026-08-11** — ✅ **무료 LLM 백엔드 어댑터 + Extractor→E2E 배선.** `extractor/backends.py`(`ollama_completion` 로컬·무료·키불필요, `openai_compatible_completion` 무료 티어; stdlib urllib만, 구조화 출력 강제, 코드펜스 방어 파싱). `run_extractor.py`에 백엔드 선택(`REGIMPACT_EXTRACTOR_BACKEND`=ollama|openai|anthropic) + `--e2e`(추출→전체 파이프라인 관통) + `--offline`(배선 검증). 사용자가 Anthropic 키 없이·무료로 실제 추출 가능. fake transport 주입 테스트 8개(총 111). **배경:** 이 세션은 API 키 없음(OAuth 전용) → 유료 실측 불가, 세션 OAuth 토큰 재사용은 자격증명 경계 위반이라 배제. 대신 모델 무관 주입 설계를 살려 무료 경로를 열었다.
 - **2026-08-11** — ✅ **E2E 완결(Assurance + Validation Report).** `src/regimpact/assurance/`(evaluate·README: 깊은 4 dimension 집계 D1 grounding/D2 completeness/D3 consistency/D4 regression·fidelity, gate PASS/REVIEW_REQUIRED, escalations vs notes 분리), `src/regimpact/report/`(validation_report·README: 검증보고서 Markdown 7섹션 + 결정상태 + audit trail §17), `src/regimpact/e2e.py`(run_six_thirty_e2e 오케스트레이터 + E2EResult 번들). 6·30 Source→추출→Impact→Proposal→TC→Regression→Assurance→Report 관통, gate PASS·decision DRAFT. 실패 경로(환각 인용·골드 누락)를 실제로 잡아 REVIEW_REQUIRED 승격(테스트 증명). 유주택 기준부재는 gate 무관 note로 분리. canonical 추출 인용을 실제 원문 verbatim으로 교정 → citation grounding 6/6, gold 완전성 100%. audit source_hash=원문 sha256. `examples/demo_e2e.py`(Markdown/--json/--save). 테스트 11개(총 103). **브리프 §18 "코어 완성" 정의 충족.**
 - **2026-08-11** — ✅ **Proposal → Test Cases 연결 구현.** `src/regimpact/tc_generator/from_proposal.py`. 변경안(RuleChangeProposal)의 주장(claim)별로 겨냥 회귀 케이스 생성 + 케이스↔주장 추적성(traceability). 시점·경계를 proposal 값(effective_from·cutoff)에서 유도(하드코딩 방지). 3검증: Coverage(주장 7/7 커버) + Regression(engine⟷oracle 하네스 재사용, 9/9=100%) + Fidelity(engine⟷proposal, 9/9). fidelity(실행 기반)와 consistency(엔진 상수 대조)의 역할 분담을 테스트로 문서화(시행일 오류는 consistency가, 값 오류는 fidelity가 잡음). mutation으로 잘못된 LTV/기준선을 fidelity가 잡음 증명. `examples/demo_proposal_to_tc.py`. 테스트 14개(총 92). **수직 슬라이스 관통: 추출→변경안→TC→회귀.**

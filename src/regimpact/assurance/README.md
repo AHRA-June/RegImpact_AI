@@ -34,7 +34,15 @@ report.to_dict()
 `escalations`(게이트 차단). 유주택 '기존 LTV' 명세 부재 같은 *설계상 정직한 gap*은
 `notes`(게이트 무관, 보고서에 노출) — AI가 틀린 게 아니라 사람 확정 대기 항목이다.
 
-## 임계값 (DRAFT)
+## 임계값 (확정 2026-08-11)
 
-`AssuranceThresholds`는 metrics_spec 상태=스켈레톤에 맞춰 **DRAFT**다(사용자 확정 대기).
-high-risk dimension(예외·경과·시행일)은 엄격(1.0)하게 둔다. 확정 시 이 값만 교체.
+`AssuranceThresholds`는 `docs/metrics_spec.md`의 **tier 체계**를 구현한다(차등):
+
+| tier | 지표 | 값 |
+|---|---|---|
+| T0 안전핵심 | regression / fidelity / consistency | 하드(100% / all-passed) |
+| T1 고위험 recall | exception_recall / effective_date / regions | Gate 95% |
+| T2 완전성·grounding | change_completeness / citation_correctness | Gate 90% / 95% |
+
+**핵심:** 개별 miss는 항상 `escalations`에 쌓여 gate를 `REVIEW_REQUIRED`로 만든다 →
+Gate 수치와 무관하게 silent error가 불가능하다(안전은 escalation이 보장, 지표는 배포 판단선).

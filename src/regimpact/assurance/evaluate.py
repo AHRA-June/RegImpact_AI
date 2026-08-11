@@ -10,8 +10,9 @@ rule regression, proposal fidelity, coverage)를 metrics_spec.md의 **깊은 4 d
   ③ Temporal / Policy-Version Consistency
   ④ Rule Regression & Conflict
 
-⚠️ 임계값은 metrics_spec 상태=스켈레톤에 맞춰 **DRAFT**다(사용자 확정 대기).
-   high-risk dimension(①②③의 예외·경과·시행일)은 엄격(1.0)하게 둔다.
+임계값은 docs/metrics_spec.md(2026-08-11 확정)의 tier 체계를 따른다: 안전핵심(T0)은
+하드(0/100%), 고위험 recall(T1)·완전성(T2)은 Gate 90~95%. 개별 miss는 항상 escalation으로
+쌓여 gate를 REVIEW_REQUIRED로 만든다 → Gate 수치와 무관하게 silent error 불가.
 """
 from __future__ import annotations
 
@@ -27,16 +28,21 @@ class AssuranceGate(str, Enum):
 
 @dataclass(frozen=True)
 class AssuranceThresholds:
-    """DRAFT 임계값 (metrics_spec 확정 시 교체)."""
-    citation_correctness_min: float = 1.0
-    change_completeness_min: float = 1.0
-    exception_recall_min: float = 1.0
-    regression_pass_rate_min: float = 1.0
-    require_regions_correct: bool = True
-    require_effective_date_correct: bool = True
-    require_consistency: bool = True
-    require_fidelity: bool = True
-    require_coverage: bool = True
+    """확정 임계값 (docs/metrics_spec.md 2026-08-11, tier 체계).
+
+    차등 철학: 안전핵심(T0)은 하드(0/100%), 고위험 recall(T1)·완전성(T2)은 Gate + Target.
+    개별 miss는 항상 escalation으로 쌓이므로 Gate 수치와 무관하게 silent error가 불가능하다
+    (per-case gate). 아래는 그 tier의 구현값.
+    """
+    citation_correctness_min: float = 0.95   # T2 (Unsupported Claim Rate ≤ 5%와 동치)
+    change_completeness_min: float = 0.90     # T2
+    exception_recall_min: float = 0.95        # T1
+    regression_pass_rate_min: float = 1.0     # T0 (deterministic 하드)
+    require_regions_correct: bool = True      # T1 (대상지역 완전)
+    require_effective_date_correct: bool = True   # T1 시행일
+    require_consistency: bool = True          # T0/T1 policy-version consistency
+    require_fidelity: bool = True             # T0 engine⟷proposal 하드
+    require_coverage: bool = True             # 제안 주장 전수 테스트
 
 
 DEFAULT_THRESHOLDS = AssuranceThresholds()
