@@ -50,6 +50,42 @@ print(report.pass_rate_by_category())           # {카테고리: (통과, 전체
 
 데모: `python examples/demo_tc_regression.py`
 
+## Rule Change Proposal 연결 (`from_proposal.py`)
+
+변경안(`regimpact.proposal.RuleChangeProposal`)의 각 **주장(claim)** 을 겨냥해 회귀
+케이스를 생성하고, 케이스↔주장 **추적성**을 남긴다. 시점·경계는 proposal 값
+(effective_from, grandfathering.cutoff_date)에서 유도한다(하드코딩 아님).
+
+```python
+from regimpact.proposal import build_proposal_from_extraction, six_thirty_extraction
+from regimpact.tc_generator import (
+    generate_cases_for_proposal, check_proposal_fidelity,
+    run_regression, format_suite_report,
+)
+
+proposal = build_proposal_from_extraction(six_thirty_extraction())
+suite = generate_cases_for_proposal(proposal)        # 주장별 케이스 + 추적성
+
+fidelity = check_proposal_fidelity(suite, proposal)  # engine ⟷ proposal
+regression = run_regression(suite.generated_cases()) # engine ⟷ spec oracle (재사용)
+print(format_suite_report(suite, fidelity))
+print(suite.coverage())                              # 모든 주장이 커버되는가
+```
+
+세 가지 검증이 함께 나온다:
+
+| 검증 | 비교 | 의미 |
+|---|---|---|
+| **Coverage** | 주장 → 케이스 | 제안된 모든 변경이 테스트로 뒷받침되는가 |
+| **Regression** | engine ⟷ oracle | 엔진이 명세를 올바로 구현하는가(비-tautology) |
+| **Fidelity** | engine ⟷ proposal | 엔진 실제 동작이 제안 주장과 일치하는가 |
+
+**역할 분담:** fidelity는 엔진 *실행* 결과를 제안값과 대조하므로, 엔진의 지역 효력일
+(`REG_EFFECTIVE`)처럼 실행이 proposal과 독립인 부분은 직접 못 잡는다 → 그것은
+`proposal.check_proposal_consistency`(엔진 상수 대조)의 몫이다. 둘은 상보적이다.
+
+데모: `python examples/demo_proposal_to_tc.py`
+
 ## fixture에 이빨이 있는가? (mutation test)
 
 `tests/test_tc_generator.py` 는 엔진에 의도적 버그를 심어(LTV 상수 변조, 경과규정 무력화)

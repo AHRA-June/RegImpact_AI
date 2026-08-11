@@ -17,6 +17,16 @@ from .regression import (
     run_case,
     run_regression,
 )
+from .from_proposal import (
+    FidelityReport,
+    FidelityResult,
+    ProposalClaim,
+    ProposalTestSuite,
+    TracedCase,
+    check_proposal_fidelity,
+    format_suite_report,
+    generate_cases_for_proposal,
+)
 
 __all__ = [
     "Category",
@@ -29,4 +39,13 @@ __all__ = [
     "run_case",
     "run_regression",
     "format_report",
+    # proposal → TC 연결
+    "generate_cases_for_proposal",
+    "check_proposal_fidelity",
+    "format_suite_report",
+    "ProposalTestSuite",
+    "ProposalClaim",
+    "TracedCase",
+    "FidelityReport",
+    "FidelityResult",
 ]

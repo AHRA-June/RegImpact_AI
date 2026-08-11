@@ -4,11 +4,16 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-11
+- **갱신자:** Claude (metrics 임계값 확정 세션)
+- **개발 브랜치:** `claude/work-start-sp37fd` (PR #2, 커밋 7개)
+- **전체 단계:** 🟢 **Phase 3 코어 완성선 도달** — 룰엔진 + Extractor(+무료 백엔드) + TC Generator + Impact Matrix + Rule Change Proposal + Proposal→TC + **Assurance(4 dim)** + **Validation Report**. **6·30 E2E 관통 완료**(gate PASS). **metrics_spec 임계값 확정(tier 체계).** 테스트 111 통과.
 - (해결됨) 원격 푸시 권한 부여됨.
+
+> 🔖 **새 세션 인계 요약(1분):** 6·30 코어 E2E가 오프라인·무료로 관통돼 있고(`python examples/demo_e2e.py` → gate PASS),
+> metrics 임계값도 tier 체계로 확정됨. **다음 3개:** ①Extractor 실제 LLM 실측(로컬 Ollama/무료티어, `run_extractor.py --e2e`)
+> ②UI 연동(`report.to_dict()`·Impact Matrix → Streamlit/HTML) ③골드셋 100~120 확대(Phase 2).
+> **블로커:** 이 원격 환경엔 LLM 키 없음(무료 백엔드는 사용자 로컬 실행 필요). PR #2는 열려 있음(머지 대기).
 
 ---
 
@@ -21,7 +26,34 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-10)
+## ✅ 방금 완료 (2026-08-11)
+- **E2E 완결 — Assurance + Validation Report.** `src/regimpact/assurance/`(깊은 4 dimension 집계·gate·escalation),
+  `src/regimpact/report/`(검증보고서 Markdown + 승인상태 + audit trail), `src/regimpact/e2e.py`(`run_six_thirty_e2e`
+  오케스트레이터). 6·30을 **Source→추출→Impact→Proposal→TC→Regression→Assurance→Report** 끝까지 관통(gate PASS,
+  decision DRAFT=사람 승인 대기). Assurance는 D1 Citation grounding·D2 Change/Exception completeness·D3 Temporal
+  consistency·D4 Regression/Fidelity를 임계 대비 판정하고, 환각 인용·골드 누락을 실제로 잡아 REVIEW_REQUIRED로 승격
+  (테스트로 실패 경로 증명). 정직한 gap(유주택 기준부재)은 gate를 막지 않는 note로 분리. canonical 추출 인용을
+  **실제 원문 verbatim**으로 교정해 citation grounding 6/6·gold 완전성 100% 확보. audit source_hash=원문 sha256.
+  `examples/demo_e2e.py`. 테스트 11개(총 103). **→ 브리프 §18 "코어 완성" 정의 충족.**
+- **Proposal → Test Cases 연결** — `src/regimpact/tc_generator/from_proposal.py`. 변경안의 각 주장(claim)을
+  겨냥해 회귀 케이스 생성 + 케이스↔주장 **추적성**. 시점·경계는 proposal 값(effective_from, cutoff)에서 유도.
+  세 검증 산출: **Coverage**(모든 주장이 ≥1 케이스로 커버, 7/7), **Regression**(engine⟷oracle 재사용, 9/9=100%),
+  **Fidelity**(engine⟷proposal, 9/9). fidelity는 실행 기반이라 엔진 상수 독립 부분(REG_EFFECTIVE)은 못 잡음 →
+  `check_proposal_consistency`(상수 대조)와 상보(테스트로 문서화). mutation(잘못된 LTV/기준선)이 fidelity에
+  잡힘. `examples/demo_proposal_to_tc.py`. 테스트 14개(총 92). **→ 수직 슬라이스 관통: 추출→변경안→TC→회귀.**
+- **Rule Change Proposal** — `src/regimpact/proposal/` (schema·builder·consistency·samples). 브리프 §9 거버넌스
+  구현: LLM은 룰엔진 코드를 직접 수정하지 않고, 인용 근거가 붙은 추출을 이 모듈이 구조화 변경안으로
+  **deterministic 조립**(status=DRAFT). `build_proposal_from_extraction`(추출 카테고리→필드 매핑, 필드별 인용
+  추적), `check_proposal_consistency`(변경안↔엔진 상수/Impact Matrix 교차검증 9건), `apply_consistency_status`
+  (불일치 시 NEEDS_REVIEW 승격, 자동 승인 없음). 오프라인 canonical 추출 `six_thirty_extraction`(사람 확정
+  대리)로 API 키 없이 E2E 관통. **mutation 테스트**로 각 필드 손상 시 consistency가 반드시 잡는지 증명.
+  `examples/demo_rule_proposal.py`. 테스트 23개(총 78) 통과.
+- **Impact Matrix E2E** — `src/regimpact/impact/` (segments·matrix). 룰엔진을 **시행 전(2026-06-30)·후
+  (2026-07-02) 두 시점에 차등 실행**해 `지역×차주유형 → 기존 LTV/변경 LTV/경과규정/reason_code` 매트릭스를
+  산출(모든 LTV = 엔진 실측, 하드코딩 아님). before는 경과규정 이벤트 제거(구규제 기준선 순수 평가), after는
+  전부 반영. **정직한 escalation**: 유주택/다주택 '기존 LTV'는 명세 기준부재 → `검토필요`로 그대로 노출
+  (Stitch 목업의 조작값 "70%→0%"를 엔진 실측 "기준부재→0%"로 교체). `to_dict()`로 UI 연동 JSON 제공,
+  `format_report()`로 표 리포트. `examples/demo_impact_matrix.py`. 테스트 16개(총 55) 통과.
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
   **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
   명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
@@ -32,12 +64,30 @@
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- **Extractor 실제 LLM 1회 실행** — ⏸ 자격증명 대기. 배선·**무료 백엔드 어댑터** 완료.
+  `run_extractor.py`가 백엔드 3종을 지원(`REGIMPACT_EXTRACTOR_BACKEND`): **ollama**(로컬·무료·키불필요),
+  **openai**(무료 티어 호환), **anthropic**(유료). `--e2e`로 추출→전체 파이프라인 관통, `--offline`로 배선 검증.
+  **사용자 상황:** ANTHROPIC_API_KEY 없음·무료 희망 → Ollama(`ollama pull qwen2.5`) 또는 무료 티어 키로 실행 가능.
+  얻는 것: 실제 LLM 출력 기준 첫 Assurance 실측(소형 모델이면 grounding·recall 저하를 gate가 잡아냄).
+- ~~**Assurance + Report로 E2E 완결**~~ — ✅ 완료(2026-08-11). `assurance/`·`report/`·`e2e.py`. gate PASS, 코어 완성.
+  **후속:** ①metrics_spec 임계값 확정 후 `AssuranceThresholds` 교체 ②골드셋 100~120 확대 시 D2 실측 강화
+  ③UI(개요/Assurance 화면)에서 `report.to_dict()` 소비 ④검증보고서 15~20쪽으로 확장(브리프 §18 스트레치).
+- ~~**Rule Change Proposal**~~ — ✅ 완료(2026-08-11). `src/regimpact/proposal/`. 추출→구조화 변경안(DRAFT)+엔진 일치 검증.
+- ~~**Test Case Generator ↔ Proposal 연결**~~ — ✅ 완료(2026-08-11). `tc_generator/from_proposal.py`. 변경안 주장별
+  케이스+추적성+커버리지+fidelity. **수직 슬라이스(추출→변경안→TC→회귀) 관통 완료.**
+  **후속:** ①Assurance Evaluation 노드 + 검증보고서 stub로 E2E 완결(브리프 §18 "코어 완성"의 남은 꼬리)
+  ②UI Rule 변경안 화면에서 `to_dict()`/coverage 소비 ③실제 extractor LLM 출력으로 consistency·fidelity 실측.
+- ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-11). `src/regimpact/impact/`. 룰엔진 실측값으로 매트릭스 산출.
+  Stitch 하드코딩값 교체 가능(`to_dict()` JSON). **후속:** ①UI(Streamlit/HTML)에서 실제 `to_dict()` 소비
+  ②유주택 '기존 LTV' 기준부재를 Rule Change Proposal/보고서에서 명시적 gap으로 다룰지 확정
+  ③임계(15%p 하향 등) metrics_spec에 정식 등록.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
-- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
+- ~~**metrics_spec 임계값 확정**~~ — ✅ 완료(2026-08-11). tier 체계(T0 하드 / T1 recall 95% / T2 완전성 / T3 모니터링),
+  개별 miss escalation으로 silent error 방지. `AssuranceThresholds` 정렬. high-risk 케이스 5종 확정.
+  **후속:** 골드셋 100~120 확대 시 이 gate로 LOCKED 집계 측정, `AssuranceThresholds` 인자화로 튜닝 노출.
+- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수(Phase 2).
 
 ### (이전) Phase 0 기준선 항목
 
@@ -86,6 +136,12 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-11** — ✅ **metrics_spec 임계값 확정(tier 체계).** gate 철학=차등(안전핵심 0-tolerance + recall 95% + 개별 miss 자동 escalate). T0 하드(regression·conflict·boundary=100%, High-risk Miss=0, Source Contradiction=0, fidelity all-passed) / T1 recall 95%(exception·grandfathering·effective-date·policy-version·escalation) / T2 완전성(Change 90%, Citation 95%, Unsupported ≤5%) / T3 모니터링(precision·불필요 escalation, gate 없음). 핵심: 개별 miss는 escalation으로 쌓여 gate를 REVIEW_REQUIRED로 만듦 → 집계 Gate 무관 silent error 불가. high-risk 케이스 5종 확정(경과규정·시행일·예외·conflict·유주택 기준부재). `docs/metrics_spec.md` 전 표 갱신 + tier 범례, `assurance.AssuranceThresholds` 값·docstring·README 정렬, `02_DECISION_LOG` 기록. 테스트 111 통과.
+- **2026-08-11** — ✅ **무료 LLM 백엔드 어댑터 + Extractor→E2E 배선.** `extractor/backends.py`(`ollama_completion` 로컬·무료·키불필요, `openai_compatible_completion` 무료 티어; stdlib urllib만, 구조화 출력 강제, 코드펜스 방어 파싱). `run_extractor.py`에 백엔드 선택(`REGIMPACT_EXTRACTOR_BACKEND`=ollama|openai|anthropic) + `--e2e`(추출→전체 파이프라인 관통) + `--offline`(배선 검증). 사용자가 Anthropic 키 없이·무료로 실제 추출 가능. fake transport 주입 테스트 8개(총 111). **배경:** 이 세션은 API 키 없음(OAuth 전용) → 유료 실측 불가, 세션 OAuth 토큰 재사용은 자격증명 경계 위반이라 배제. 대신 모델 무관 주입 설계를 살려 무료 경로를 열었다.
+- **2026-08-11** — ✅ **E2E 완결(Assurance + Validation Report).** `src/regimpact/assurance/`(evaluate·README: 깊은 4 dimension 집계 D1 grounding/D2 completeness/D3 consistency/D4 regression·fidelity, gate PASS/REVIEW_REQUIRED, escalations vs notes 분리), `src/regimpact/report/`(validation_report·README: 검증보고서 Markdown 7섹션 + 결정상태 + audit trail §17), `src/regimpact/e2e.py`(run_six_thirty_e2e 오케스트레이터 + E2EResult 번들). 6·30 Source→추출→Impact→Proposal→TC→Regression→Assurance→Report 관통, gate PASS·decision DRAFT. 실패 경로(환각 인용·골드 누락)를 실제로 잡아 REVIEW_REQUIRED 승격(테스트 증명). 유주택 기준부재는 gate 무관 note로 분리. canonical 추출 인용을 실제 원문 verbatim으로 교정 → citation grounding 6/6, gold 완전성 100%. audit source_hash=원문 sha256. `examples/demo_e2e.py`(Markdown/--json/--save). 테스트 11개(총 103). **브리프 §18 "코어 완성" 정의 충족.**
+- **2026-08-11** — ✅ **Proposal → Test Cases 연결 구현.** `src/regimpact/tc_generator/from_proposal.py`. 변경안(RuleChangeProposal)의 주장(claim)별로 겨냥 회귀 케이스 생성 + 케이스↔주장 추적성(traceability). 시점·경계를 proposal 값(effective_from·cutoff)에서 유도(하드코딩 방지). 3검증: Coverage(주장 7/7 커버) + Regression(engine⟷oracle 하네스 재사용, 9/9=100%) + Fidelity(engine⟷proposal, 9/9). fidelity(실행 기반)와 consistency(엔진 상수 대조)의 역할 분담을 테스트로 문서화(시행일 오류는 consistency가, 값 오류는 fidelity가 잡음). mutation으로 잘못된 LTV/기준선을 fidelity가 잡음 증명. `examples/demo_proposal_to_tc.py`. 테스트 14개(총 92). **수직 슬라이스 관통: 추출→변경안→TC→회귀.**
+- **2026-08-11** — ✅ **Rule Change Proposal 구현.** `src/regimpact/proposal/`(schema·builder·consistency·samples·README). 브리프 §9 거버넌스: LLM은 룰엔진 코드 직접 수정 금지 → 인용 붙은 추출을 deterministic 코드가 구조화 변경안(DRAFT)으로 조립. `build_proposal_from_extraction`(카테고리별 필드 매핑 + 필드별 citation 추적), `check_proposal_consistency`(변경안↔엔진 상수/Impact Matrix 교차검증 9건, metrics 'Rule Regression·Policy-version Consistency' 정렬), `apply_consistency_status`(불일치→NEEDS_REVIEW, 자동승인 없음). API 키 없이 관통하도록 canonical 추출 `six_thirty_extraction`(사람 확정 대리, regulatory_facts 값·실제 source_doc_id 인용). mutation 테스트로 필드 손상 방어력 증명. `examples/demo_rule_proposal.py`(추출→변경안→검증 9/9). 테스트 23개(총 78) 통과.
+- **2026-08-11** — ✅ **Impact Matrix E2E 구현.** `src/regimpact/impact/`(segments·matrix·README). 룰엔진을 시행 전(6/30)·후(7/2) **두 시점 차등 실행**해 `지역×차주유형 → 기존/변경 LTV·경과규정·reason_code` 매트릭스 산출. 모든 LTV = 엔진 실측(하드코딩 아님, UI/Stitch 교체용 `to_dict()` JSON 제공). before는 경과규정 이벤트 제거(구규제 기준선 순수 평가) → before에 `grandfathering_applied` 오적용 방지. **정직한 escalation**: 유주택/다주택 '기존 LTV'는 명세 기준부재 → `검토필요(BASELINE_GAP)`로 노출, Stitch 목업 조작값("70%→0%")을 엔진 실측("기준부재→0%")으로 교체. `ImpactDirection`(TIGHTENED/EASED/UNCHANGED/BASELINE_GAP/NON_CORE), `high_impact`(0%·15%p↓·기준부재) 플래그(metrics high-risk 정렬). Discovery(정책대출)·Out-of-scope(전세) 코어 분리. `examples/demo_impact_matrix.py`. 테스트 16개(총 55) 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.
