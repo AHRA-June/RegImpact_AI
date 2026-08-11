@@ -59,8 +59,11 @@
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 확보 → `run_six_thirty_e2e(extraction=…)`에
-  물려 전 파이프라인을 실제 LLM 출력으로 관통(현재는 canonical). Assurance 4 dim 첫 실측 지표.
+- **Extractor 실제 LLM 1회 실행** — ⏸ **자격증명 대기(블로커).** 배선은 완료: `run_extractor.py --e2e`가 실제 추출을
+  `run_six_thirty_e2e(extraction=…)`에 물려 검증보고서까지 한 번에 산출(오프라인 `--offline`로 배선 검증 완료).
+  **막힌 이유:** 이 세션에 `ANTHROPIC_API_KEY` 없음(OAuth 세션, `ant` CLI 미설치) → 스크립트가 인증 불가.
+  **해제 방법:** `export ANTHROPIC_API_KEY=...`(또는 `ant auth login`) 후 `python examples/run_extractor.py --e2e`.
+  얻는 것: Assurance 4 dim 첫 실측(canonical 100%가 아닌 실제 LLM 출력 기준 grounding·completeness·consistency).
 - ~~**Assurance + Report로 E2E 완결**~~ — ✅ 완료(2026-08-11). `assurance/`·`report/`·`e2e.py`. gate PASS, 코어 완성.
   **후속:** ①metrics_spec 임계값 확정 후 `AssuranceThresholds` 교체 ②골드셋 100~120 확대 시 D2 실측 강화
   ③UI(개요/Assurance 화면)에서 `report.to_dict()` 소비 ④검증보고서 15~20쪽으로 확장(브리프 §18 스트레치).
