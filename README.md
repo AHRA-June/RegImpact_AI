@@ -53,9 +53,10 @@
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |
 | `src/regimpact/extractor/` | **RegChange Extractor(E) + Citation Assurance(A)** — 공문→추출→검증 |
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④) |
+| `src/regimpact/impact/` | **Impact Matrix** — 룰엔진 before/after 차등 실행 → 세그먼트별 영향 매트릭스(엔진 실측값) |
 | `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
-| `tests/` | 테스트 하네스 (pytest, 39개) |
-| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 |
+| `tests/` | 테스트 하네스 (pytest, 55개) |
+| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |

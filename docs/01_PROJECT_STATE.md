@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-11
+- **갱신자:** Claude (Impact Matrix E2E 구현 세션)
+- **개발 브랜치:** `claude/work-start-sp37fd`
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **Impact Matrix**(테스트 55 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -21,7 +21,13 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-10)
+## ✅ 방금 완료 (2026-08-11)
+- **Impact Matrix E2E** — `src/regimpact/impact/` (segments·matrix). 룰엔진을 **시행 전(2026-06-30)·후
+  (2026-07-02) 두 시점에 차등 실행**해 `지역×차주유형 → 기존 LTV/변경 LTV/경과규정/reason_code` 매트릭스를
+  산출(모든 LTV = 엔진 실측, 하드코딩 아님). before는 경과규정 이벤트 제거(구규제 기준선 순수 평가), after는
+  전부 반영. **정직한 escalation**: 유주택/다주택 '기존 LTV'는 명세 기준부재 → `검토필요`로 그대로 노출
+  (Stitch 목업의 조작값 "70%→0%"를 엔진 실측 "기준부재→0%"로 교체). `to_dict()`로 UI 연동 JSON 제공,
+  `format_report()`로 표 리포트. `examples/demo_impact_matrix.py`. 테스트 16개(총 55) 통과.
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
   **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
   명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
@@ -33,10 +39,13 @@
 
 ## 다음 액션 (NEXT)
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-11). `src/regimpact/impact/`. 룰엔진 실측값으로 매트릭스 산출.
+  Stitch 하드코딩값 교체 가능(`to_dict()` JSON). **후속:** ①UI(Streamlit/HTML)에서 실제 `to_dict()` 소비
+  ②유주택 '기존 LTV' 기준부재를 Rule Change Proposal/보고서에서 명시적 gap으로 다룰지 확정
+  ③임계(15%p 하향 등) metrics_spec에 정식 등록.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -86,6 +95,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-11** — ✅ **Impact Matrix E2E 구현.** `src/regimpact/impact/`(segments·matrix·README). 룰엔진을 시행 전(6/30)·후(7/2) **두 시점 차등 실행**해 `지역×차주유형 → 기존/변경 LTV·경과규정·reason_code` 매트릭스 산출. 모든 LTV = 엔진 실측(하드코딩 아님, UI/Stitch 교체용 `to_dict()` JSON 제공). before는 경과규정 이벤트 제거(구규제 기준선 순수 평가) → before에 `grandfathering_applied` 오적용 방지. **정직한 escalation**: 유주택/다주택 '기존 LTV'는 명세 기준부재 → `검토필요(BASELINE_GAP)`로 노출, Stitch 목업 조작값("70%→0%")을 엔진 실측("기준부재→0%")으로 교체. `ImpactDirection`(TIGHTENED/EASED/UNCHANGED/BASELINE_GAP/NON_CORE), `high_impact`(0%·15%p↓·기준부재) 플래그(metrics high-risk 정렬). Discovery(정책대출)·Out-of-scope(전세) 코어 분리. `examples/demo_impact_matrix.py`. 테스트 16개(총 55) 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.
