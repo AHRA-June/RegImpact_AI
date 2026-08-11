@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-11
-- **갱신자:** Claude (Impact Matrix E2E 구현 세션)
-- **개발 브랜치:** `claude/work-start-sp37fd`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **Impact Matrix**(테스트 55 통과)
+- **갱신자:** Claude (Impact Matrix + Rule Change Proposal 구현 세션)
+- **개발 브랜치:** `claude/work-start-sp37fd` (PR #2)
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator + **Impact Matrix** + **Rule Change Proposal**(테스트 78 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-11)
+- **Rule Change Proposal** — `src/regimpact/proposal/` (schema·builder·consistency·samples). 브리프 §9 거버넌스
+  구현: LLM은 룰엔진 코드를 직접 수정하지 않고, 인용 근거가 붙은 추출을 이 모듈이 구조화 변경안으로
+  **deterministic 조립**(status=DRAFT). `build_proposal_from_extraction`(추출 카테고리→필드 매핑, 필드별 인용
+  추적), `check_proposal_consistency`(변경안↔엔진 상수/Impact Matrix 교차검증 9건), `apply_consistency_status`
+  (불일치 시 NEEDS_REVIEW 승격, 자동 승인 없음). 오프라인 canonical 추출 `six_thirty_extraction`(사람 확정
+  대리)로 API 키 없이 E2E 관통. **mutation 테스트**로 각 필드 손상 시 consistency가 반드시 잡는지 증명.
+  `examples/demo_rule_proposal.py`. 테스트 23개(총 78) 통과.
 - **Impact Matrix E2E** — `src/regimpact/impact/` (segments·matrix). 룰엔진을 **시행 전(2026-06-30)·후
   (2026-07-02) 두 시점에 차등 실행**해 `지역×차주유형 → 기존 LTV/변경 LTV/경과규정/reason_code` 매트릭스를
   산출(모든 LTV = 엔진 실측, 하드코딩 아님). before는 경과규정 이벤트 제거(구규제 기준선 순수 평가), after는
@@ -39,6 +46,10 @@
 
 ## 다음 액션 (NEXT)
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+  → 이후 `build_proposal_from_extraction`에 실제 추출을 물려 proposal consistency 실측(현재는 canonical 입력).
+- ~~**Rule Change Proposal**~~ — ✅ 완료(2026-08-11). `src/regimpact/proposal/`. 추출→구조화 변경안(DRAFT)+엔진 일치 검증.
+  **후속:** ①Test Case Generator를 이 변경안에 연결(E2E 다음 노드) ②UI Rule 변경안 화면에서 `to_dict()` 소비
+  ③실제 extractor LLM 출력으로 consistency 실측.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-11). `src/regimpact/impact/`. 룰엔진 실측값으로 매트릭스 산출.
   Stitch 하드코딩값 교체 가능(`to_dict()` JSON). **후속:** ①UI(Streamlit/HTML)에서 실제 `to_dict()` 소비
   ②유주택 '기존 LTV' 기준부재를 Rule Change Proposal/보고서에서 명시적 gap으로 다룰지 확정
@@ -95,6 +106,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-11** — ✅ **Rule Change Proposal 구현.** `src/regimpact/proposal/`(schema·builder·consistency·samples·README). 브리프 §9 거버넌스: LLM은 룰엔진 코드 직접 수정 금지 → 인용 붙은 추출을 deterministic 코드가 구조화 변경안(DRAFT)으로 조립. `build_proposal_from_extraction`(카테고리별 필드 매핑 + 필드별 citation 추적), `check_proposal_consistency`(변경안↔엔진 상수/Impact Matrix 교차검증 9건, metrics 'Rule Regression·Policy-version Consistency' 정렬), `apply_consistency_status`(불일치→NEEDS_REVIEW, 자동승인 없음). API 키 없이 관통하도록 canonical 추출 `six_thirty_extraction`(사람 확정 대리, regulatory_facts 값·실제 source_doc_id 인용). mutation 테스트로 필드 손상 방어력 증명. `examples/demo_rule_proposal.py`(추출→변경안→검증 9/9). 테스트 23개(총 78) 통과.
 - **2026-08-11** — ✅ **Impact Matrix E2E 구현.** `src/regimpact/impact/`(segments·matrix·README). 룰엔진을 시행 전(6/30)·후(7/2) **두 시점 차등 실행**해 `지역×차주유형 → 기존/변경 LTV·경과규정·reason_code` 매트릭스 산출. 모든 LTV = 엔진 실측(하드코딩 아님, UI/Stitch 교체용 `to_dict()` JSON 제공). before는 경과규정 이벤트 제거(구규제 기준선 순수 평가) → before에 `grandfathering_applied` 오적용 방지. **정직한 escalation**: 유주택/다주택 '기존 LTV'는 명세 기준부재 → `검토필요(BASELINE_GAP)`로 노출, Stitch 목업 조작값("70%→0%")을 엔진 실측("기준부재→0%")으로 교체. `ImpactDirection`(TIGHTENED/EASED/UNCHANGED/BASELINE_GAP/NON_CORE), `high_impact`(0%·15%p↓·기준부재) 플래그(metrics high-risk 정렬). Discovery(정책대출)·Out-of-scope(전세) 코어 분리. `examples/demo_impact_matrix.py`. 테스트 16개(총 55) 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
