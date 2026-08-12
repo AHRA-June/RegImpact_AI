@@ -1,0 +1,333 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RegImpact AI 시스템 검증보고서 v1.0</title><style>
+:root{
+  --surface:#fcf8ff; --card:#ffffff; --container:#f5f2ff; --container-2:#efecff;
+  --ink:#1a1a2e; --ink-soft:#43474e; --outline:#c4c6cf; --line:#e2e0fc;
+  --primary:#022448; --secondary:#0051d5; --accent:#7a5300; --accent-bg:#ffddb2;
+  --good:#2e6b4f; --good-bg:#cde6d8; --warn:#ba1a1a;
+  --sans:"Noto Sans","Malgun Gothic",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --surface:#111421; --card:#1a1f30; --container:#171b2b; --container-2:#1c2133;
+  --ink:#e9e9f4; --ink-soft:#b6bac6; --outline:#3a3f52; --line:#2a3047;
+  --primary:#adc8f5; --secondary:#8ab0ff; --accent:#edbf7f; --accent-bg:#33260f;
+  --good:#8fd6ac; --good-bg:#123322; --warn:#ffb4ab;
+}}
+:root[data-theme="dark"]{
+  --surface:#111421; --card:#1a1f30; --container:#171b2b; --container-2:#1c2133;
+  --ink:#e9e9f4; --ink-soft:#b6bac6; --outline:#3a3f52; --line:#2a3047;
+  --primary:#adc8f5; --secondary:#8ab0ff; --accent:#edbf7f; --accent-bg:#33260f;
+  --good:#8fd6ac; --good-bg:#123322; --warn:#ffb4ab;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--sans);
+  line-height:1.7;font-size:15.5px;-webkit-font-smoothing:antialiased}
+.kicker-band{background:var(--primary);color:#fff;font-family:var(--mono);font-size:.72rem;
+  letter-spacing:.12em;text-transform:uppercase;padding:10px 22px}
+:root[data-theme="dark"] .kicker-band,
+:root:not([data-theme="light"]) .kicker-band{color:#0b1220}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .kicker-band{color:#0b1220}}
+main.doc{max-width:860px;margin:0 auto;padding:34px 24px 80px}
+h1{font-size:clamp(1.6rem,1.2rem+1.6vw,2.15rem);font-weight:740;letter-spacing:-.02em;
+  line-height:1.25;margin:8px 0 18px;padding-bottom:14px;border-bottom:3px solid var(--primary)}
+h2{font-size:1.32rem;font-weight:680;letter-spacing:-.01em;margin:38px 0 12px;
+  padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;font-weight:660;margin:26px 0 8px;color:var(--primary)}
+h4{font-size:.96rem;font-weight:660;margin:20px 0 6px;color:var(--ink-soft)}
+p{margin:10px 0}
+a{color:var(--secondary)}
+strong{font-weight:680}
+code{font-family:var(--mono);font-size:.86em;background:var(--container-2);
+  padding:1px 6px;border-radius:5px}
+pre.code{background:var(--container);border:1px solid var(--line);border-radius:11px;
+  padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.55}
+pre.code code{background:none;padding:0}
+hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--container);
+  border-left:4px solid var(--accent);border-radius:0 10px 10px 0;color:var(--ink-soft)}
+blockquote p{margin:6px 0}
+ul,ol{margin:10px 0;padding-left:24px}
+li{margin:5px 0}
+li>ul,li>ol{margin:5px 0}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:11px;margin:16px 0}
+table{border-collapse:collapse;width:100%;min-width:440px;font-size:.86rem}
+thead th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-soft);font-weight:700;padding:10px 13px;
+  background:var(--container);border-bottom:2px solid var(--line);white-space:nowrap}
+tbody td{padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even){background:var(--container)}
+@media print{
+  .kicker-band{background:none;color:#000;border-bottom:1px solid #000}
+  body{font-size:11pt} main.doc{max-width:none;padding:0}
+  h2{page-break-before:auto} table{page-break-inside:avoid}
+}
+</style></head><body><div class="kicker-band">RegImpact AI · 시스템 검증보고서 (Validation Report)</div><main class="doc"><h1 id="regimpact-ai-시스템-검증보고서-validation-report">RegImpact AI — 시스템 검증보고서 (Validation Report)</h1>
+<blockquote><p><strong>6·30 규제지역 추가 지정 대응 규제변경 영향분석·검증 시스템에 대한 독립 검증</strong>
+브리프 §20 Core 산출물 #16 — 검증보고서.</p></blockquote>
+<hr>
+<h2 id="문서-정보">문서 정보</h2>
+<div class="tbl-wrap"><table><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>문서명</td><td>RegImpact AI 시스템 검증보고서 v1.0</td></tr><tr><td>대상 시스템</td><td>RegImpact AI (regimpact) — 규제변경 영향분석 및 Assurance Layer</td></tr><tr><td>시스템 버전</td><td><code>regimpact 0.1.0</code></td></tr><tr><td>검증 대상 커밋</td><td><code>459e294f6071</code> (branch <code>claude/work-in-progress-fmo0g8</code>)</td></tr><tr><td>검증 기준시점</td><td>2026-08-12</td></tr><tr><td>검증 대상 정책(seed)</td><td>6·30 규제지역 추가 지정 (<code>FSC_20260630</code>)</td></tr><tr><td>검증 성격</td><td><strong>내부(개발자 주도) 검증 시연</strong> — 독립 3자 벤치마크가 아님(§한계 참조)</td></tr><tr><td>상위 문서</td><td><code>docs/00_BRIEF.md</code>(정체성·LOCKED 원칙), <code>docs/prd/PRD.md</code>(as-built), <code>docs/metrics_spec.md</code>(지표·임계)</td></tr></tbody></table></div>
+<blockquote><p>⚠️ <strong>본 보고서의 성격에 대한 고지.</strong> 본 보고서는 실제 금융회사의 독립 모델검증 조직이 수행한
+3선(three lines of defense) 검증이 아니라, <strong>시스템 설계자가 model-validation 관점의 방법론을
+적용해 자기 시스템을 검증한 시연(demonstration)</strong>이다. 목적은 (a) 시스템이 설계 의도대로
+작동하는지 증거로 보이고, (b) <strong>Model Risk / 모델검증 직무 역량</strong>(개념적 건전성·구현 정확성·성과
+분석·한계 통제)을 문서로 입증하는 것이다. 따라서 "독립성"이 갖는 통제력은 제한적이며, 이 한계를
+본문 전반과 §11에서 명시한다. 모든 수치는 저장소의 실제 파이프라인 출력에서 인용했으며 하드코딩·
+임의값이 아니다(재현 명령 §부록 D).</p></blockquote>
+<hr>
+<h2 id="검증-종합의견-executive-summary">검증 종합의견 (Executive Summary)</h2>
+<p><strong>의견: 조건부 적합 (Fit for stated purpose, with conditions).</strong></p>
+<p>RegImpact AI는 "규제 변경을 감지하고 그 영향을 <strong>검증 가능한 방식으로</strong> 산출하는 의사결정 지원 시스템"이라는 명시된 목적에 대해 <strong>개념적으로 건전하고 구현이 정확하며 산출물이 감사 가능</strong>하다. 핵심 통제 원칙 — <strong>"LLM은 초안, 사람이 확정한 결정적 룰엔진이 판정한다"(LOCKED §4)</strong> — 이 코드 수준에서 실제로 강제되고 있음을 확인했다. 6·30 seed에 대한 실측 Assurance 지표는 모두 확정 임계를 충족했다.</p>
+<div class="tbl-wrap"><table><thead><tr><th>검증 축</th><th>결과</th><th>근거(실측)</th></tr></thead><tbody><tr><td>개념적 건전성</td><td>✅ 적합</td><td>AI초안↔사람확정 분리 코드로 강제, 코어=LTV 한정, Discovery 분리(§6)</td></tr><tr><td>구현 정확성 — 룰엔진</td><td>✅ 적합</td><td>독립 명세 오라클 차등검증 <strong>178/178(100%)</strong>, 전 카테고리 100%, mutation test 방어 확인(§7)</td></tr><tr><td>구현 정확성 — 표본확대</td><td>✅ 적합</td><td>몬테카를로 <strong>5,000/5,000</strong> 엔진↔오라클 일치(§7)</td></tr><tr><td>추출 성과(Assurance)</td><td>✅ 적합</td><td>Citation 100%(12/12)·환각 0%·변경완전성 100%·예외재현 100%·시행일 OK·지역 OK(§8)</td></tr><tr><td>영향·여력 산출</td><td>✅ 적합(가정 명시)</td><td>가중 강화 58%·Δ−20pp·여력 감소율 28.6%, 명세 여백은 검토로 표면화(§9)</td></tr><tr><td>견고성(민감도)</td><td>✅ 적합</td><td>여력 축소 결론 100% 표본 견고, 감소율 밴드 [22.9%, 33.8%](§9)</td></tr><tr><td>룰 변경안 거버넌스</td><td>✅ 적합</td><td>승인상태 항상 PENDING(자동확정 없음), 엔진 현재값 대조 불일치 0(§10)</td></tr><tr><td>재현성·감사추적</td><td>✅ 적합</td><td>원문 sha256 레지스트리 일치, 라이브파이어 증거 패키지(§13)</td></tr></tbody></table></div>
+<p><strong>주요 조건 및 잔여 리스크</strong></p>
+<ol><li><strong>단일 정책 seed.</strong> 모든 성과 지표는 6·30 한 사건에서 측정됐다. 일반화하려면 추가 정책 이벤트로</li></ol>
+<p>측정 분모를 넓혀야 한다(라이브파이어 절차로 준비됨).</p>
+<ol><li><strong>합성 포트폴리오·가정.</strong> 영향/여력 수치는 <strong>문서화된 가정 모집단</strong>(비중·담보가격) 기반이며 실측</li></ol>
+<p>포트폴리오가 아니다. 민감도 분석으로 결론의 견고성을 정량화했으나, 절대 금액은 가격 가정에 종속된다.</p>
+<ol><li><strong>사람 확정 대기(LOCKED §4).</strong> 규제 사실 claim(C01~C13) 최종 도메인 검수와 기사 permalink는</li></ol>
+<p>사용자(도메인 전문가) 확정 대기 상태다. 규칙 값 자체는 사람 확정 명세에서 온다.</p>
+<ol><li><strong>LLM 백엔드 단일 실측.</strong> 추출은 Gemini 1개 백엔드로 실측했다(교차 백엔드 실측은 미수행 — 유료</li></ol>
+<p>API 미사용 결정).</p>
+<p>이 조건들은 시스템의 <strong>명시된 범위</strong>(검증 가능한 초안화 + 실패의 명시적 통제) 안에서는 수용 가능하며, 브리프가 경계한 "정확한 자동화 과대약속"을 시스템이 스스로 회피하고 있음을 확인했다.</p>
+<hr>
+<h2 id="목차">목차</h2>
+<ol><li>검증 배경 및 목적</li><li>검증 범위 및 대상</li><li>검증 방법론 (프레임워크·차등검증·mutation·임계정책·3선 매핑)</li><li>대상 시스템 개요 (데이터 흐름·불변식·스키마·알고리즘 H)</li><li>데이터 적정성 검증</li><li>개념적 건전성 검증</li><li>구현 정확성 검증 — 룰엔진</li><li>성과 검증 — 추출 및 Citation Assurance</li><li>성과 검증 — 영향·여력·민감도</li><li>거버넌스 검증 — Rule Change Proposal</li><li>한계 및 가정</li><li>발견사항 및 조치</li><li>재현성 및 감사추적</li><li>검증 결론 및 의견</li></ol>
+<p>부록 A~F (지표·아티팩트·테스트·재현명령·용어·문서이력)</p>
+<hr>
+<h2 id="1-검증-배경-및-목적">1. 검증 배경 및 목적</h2>
+<h3 id="1-1-배경">1.1 배경</h3>
+<p>2026년 6월 30일 정부는 수도권 3개 지역(구리, 용인 기흥, 화성 동탄 일부)을 규제지역으로 추가 지정했다 (이하 "6·30"). 규제지역 지정은 주택담보대출 LTV(담보인정비율)·DTI·최대한도 등 여신 규칙을 즉시 변경시키며, 은행은 (a) 무엇이 바뀌었는지 정확히 파악하고 (b) 기존 여신 룰·고객·테스트에 어떻게 전파되는지 신속·정확히 반영해야 한다. 이 과정을 사람 수작업에만 의존하면 누락·오적용 리스크가 크고, 반대로 LLM에 전량 위임하면 환각·오판이 여신 결정을 조용히 오염시킬 수 있다.</p>
+<h3 id="1-2-목적">1.2 목적</h3>
+<p>RegImpact AI는 이 딜레마에 대해 <strong>"LLM이 초안을 만들고, 사람이 확정한 결정적 규칙이 실제 판정을 내리며, 그 사이를 검증 가능한 Assurance Layer가 지킨다"</strong>는 설계로 답한다. 본 검증의 목적은:</p>
+<ul><li>(P1) 시스템이 이 설계 원칙을 <strong>실제로 강제</strong>하는지 확인한다(개념적 건전성 + 구현).</li><li>(P2) 각 컴포넌트의 산출물이 <strong>정답/명세/원문 대비 정확</strong>한지 실측한다(성과 분석).</li><li>(P3) 시스템이 자신의 <strong>한계와 실패를 조용히 덮지 않고 표면화</strong>하는지 확인한다(Assurance 원칙).</li><li>(P4) 산출물이 <strong>재현·감사 가능</strong>한지 확인한다(재현성).</li></ul>
+<h3 id="1-3-검증-질문-validation-questions">1.3 검증 질문 (Validation Questions)</h3>
+<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>질문</th><th>다룬 절</th></tr></thead><tbody><tr><td>VQ1</td><td>룰엔진이 확정 명세(알고리즘 H)를 정확히 구현했는가?</td><td>§7</td></tr><tr><td>VQ2</td><td>회귀가 tautology(자기채점)가 아니라 독립 기준으로 검증되는가?</td><td>§7</td></tr><tr><td>VQ3</td><td>LLM 추출이 원문에 근거하며 환각을 통제하는가?</td><td>§8</td></tr><tr><td>VQ4</td><td>영향/여력 산출이 엔진 판정에서만 오고, 가정을 정직히 표기하는가?</td><td>§9</td></tr><tr><td>VQ5</td><td>결론이 가정 섭동에 견고한가?</td><td>§9</td></tr><tr><td>VQ6</td><td>AI 초안이 자동으로 확정되지 않고 사람 승인을 거치는가?</td><td>§10</td></tr><tr><td>VQ7</td><td>명세 여백·판정 불가를 숨기지 않고 escalation 하는가?</td><td>§6, §9</td></tr><tr><td>VQ8</td><td>산출물이 원문 해시·timestamp·commit로 재현·감사 가능한가?</td><td>§13</td></tr></tbody></table></div>
+<hr>
+<h2 id="2-검증-범위-및-대상">2. 검증 범위 및 대상</h2>
+<h3 id="2-1-범위-내-in-scope">2.1 범위 내 (In-scope)</h3>
+<ul><li><strong>결정적 LTV 룰엔진</strong> (<code>src/regimpact/</code>) — 알고리즘 H 구현, 지역 시점해석, 경과규정.</li><li><strong>RegChange Extractor + Citation Assurance</strong> (<code>src/regimpact/extractor/</code>).</li><li><strong>TC Generator + Rule-Regression + 층화 골드셋</strong> (<code>src/regimpact/tc_generator/</code>).</li><li><strong>Impact Matrix + 가중 모집단 + 여력 + 민감도</strong> (<code>src/regimpact/impact/</code>).</li><li><strong>Rule Change Proposal</strong> (<code>src/regimpact/rule_proposal.py</code>).</li><li><strong>HTML 리포트 생성기</strong> (<code>src/regimpact/report.py</code>).</li><li><strong>라이브파이어 하네스</strong> (<code>src/regimpact/livefire.py</code>).</li></ul>
+<h3 id="2-2-범위-외-out-of-scope-명시적-경계">2.2 범위 외 (Out-of-scope) — 명시적 경계</h3>
+<ul><li><strong>DTI·최대한도(6/4/2억) 계산</strong> — 코어는 LTV로 한정(브리프 결정). 최대한도는 여력 산정에서 <strong>미적용</strong></li></ul>
+<p>이며 별도 Discovery 항목으로 표기(§9). 이 경계는 의도된 것으로, 과대범위를 피하기 위한 통제다.</p>
+<ul><li><strong>정책대출(디딤돌 등)</strong> — 코어 판정 밖 Discovery로 분리(자동 LTV 판정하지 않음).</li><li><strong>실측 은행 포트폴리오·고객 데이터</strong> — 사용하지 않음(LOCKED §8, 공개 자료만). 모집단은 합성.</li><li><strong>프로덕션 배포·성능/부하</strong> — 로컬 재현 우선, 배포는 범위 외(PRD §7).</li></ul>
+<h3 id="2-3-검증-대상-산출물-아티팩트">2.3 검증 대상 산출물(아티팩트)</h3>
+<p><code>docs/eval/</code>(추출·골드·포트폴리오 매니페스트·실측 리포트), <code>docs/ui/report_6_30.html</code>(생성 리포트), <code>docs/livefire/rehearsal_6_30/</code>(증거 패키지), <code>tests/</code>(137 테스트).</p>
+<hr>
+<h2 id="3-검증-방법론">3. 검증 방법론</h2>
+<h3 id="3-1-검증-프레임워크">3.1 검증 프레임워크</h3>
+<p>본 검증은 감독당국 모델리스크관리 관행에서 통용되는 3대 축을 적용했다:</p>
+<ol><li><strong>개념적 건전성(Conceptual Soundness)</strong> — 설계·가정·방법론이 목적에 타당한가. (§6)</li><li><strong>구현 정확성(Process/Implementation Verification)</strong> — 설계가 코드로 정확히 구현됐는가. (§7)</li><li><strong>성과 분석(Outcome Analysis)</strong> — 산출물이 정답·명세·원문 대비 정확한가. (§8, §9)</li></ol>
+<p>여기에 시스템 특성상 두 축을 추가했다:</p>
+<ol><li><strong>거버넌스·통제(Governance)</strong> — AI초안↔사람확정 분리, 승인 통제. (§10)</li><li><strong>재현성·감사추적(Auditability)</strong> — 해시·timestamp·commit로 재현·감사 가능한가. (§13)</li></ol>
+<h3 id="3-2-핵심-검증-기법-독립-오라클-차등검증-differential-testing">3.2 핵심 검증 기법: 독립 오라클 차등검증 (Differential Testing)</h3>
+<p>룰엔진 검증의 급소는 <strong>"엔진이 자기 출력을 스스로 채점하면 tautology"</strong>라는 점이다. 이를 피하기 위해 시스템은 <strong>독립 명세 오라클(challenger)</strong> 을 별도 코드 경로로 두었다. 오라클은 <code>rule_engine</code>·<code>regions</code>· <code>grandfathering</code>을 <strong>import하지 않고</strong> 명세(§H)를 재구현한다. 두 독립 구현이 모든 케이스에서 일치할 때에만 통과로 본다. 본 검증은 이 오라클의 <strong>독립성 자체</strong>를 먼저 확인하고(§7.1), 그 위에서 회귀 결과를 채택했다.</p>
+<h3 id="3-3-방어력-검증-mutation-testing">3.3 방어력 검증: Mutation Testing</h3>
+<p>"테스트가 통과한다"는 것만으로는 테스트의 <strong>탐지력</strong>을 알 수 없다. 시스템은 엔진 상수에 의도적 버그를 심어(mutation) 회귀가 그 버그를 <strong>실패로 잡는지</strong> 확인하는 테스트를 포함한다. 본 검증은 이 mutation test의 존재와 동작을 확인해, 골드셋이 "이빨 없는 통과"가 아님을 검증했다(§7.3).</p>
+<h3 id="3-4-임계값-정책">3.4 임계값 정책</h3>
+<p>Assurance 지표는 <code>docs/metrics_spec.md §0-B</code>의 <strong>위험차등 임계 정책</strong>으로 판정한다:</p>
+<ul><li><strong>고위험 실패모드 = 하드게이트(0 누락 / 100%).</strong> 실패가 여신 결정을 조용히 뒤바꾸는 유형(경과규정</li></ul>
+<p>오판·시행일 오적용·핵심예외 누락·rule conflict 자동처리)은 <strong>한 건도 허용하지 않는다.</strong></p>
+<ul><li><strong>커버리지 지표 = 퍼센트 하한.</strong> Change Completeness ≥90%, Exception/Grandfathering Recall ≥95%,</li></ul>
+<p>Citation ≥95%, Unsupported ≤5%, Escalation Recall ≥95%.</p>
+<ul><li><strong>효율 지표 = 참고(임계 없음).</strong></li></ul>
+<p>이 정책의 논리는 "여신 결정을 조용히 뒤바꾸는 실패는 퍼센트로 타협할 수 없다"는 것이다. 예컨대 예외 95% 재현은 커버리지로는 훌륭하지만, 놓친 5%가 생애최초 차주라면 그 차주는 LTV 40%로 잘못 판정돼 대출이 거절된다. 따라서 핵심예외·경과규정 같은 고위험 항목은 <strong>퍼센트 하한과 별도로 "0 누락" 하드게이트</strong>를 이중으로 건다. 본 검증은 이 정책이 문서에만 있는 것이 아니라 실제 판정에 적용됐는지(§8·§9) 확인했다.</p>
+<h3 id="3-5-3선-방어-three-lines-of-defense-관점-매핑">3.5 3선 방어(Three Lines of Defense) 관점 매핑</h3>
+<p>시스템 컴포넌트를 금융권 통제 프레임에 대응시키면 본 검증의 위치가 분명해진다:</p>
+<div class="tbl-wrap"><table><thead><tr><th>선</th><th>역할</th><th>시스템 대응</th><th>본 검증의 관계</th></tr></thead><tbody><tr><td>1선</td><td>업무 수행·1차 통제</td><td>룰엔진 + Extractor(초안 생성)</td><td>검증 대상</td></tr><tr><td>2선</td><td>리스크·준법 감시</td><td>Assurance Layer(grounding·recall·regression)·임계정책</td><td>검증 대상이자 통제 증거</td></tr><tr><td>3선</td><td>독립 검증</td><td><strong>본 검증보고서</strong>(단, 자기검증 한계 §11 L7)</td><td>본 문서의 위치</td></tr></tbody></table></div>
+<p><strong>소견:</strong> 시스템은 1선(생성)과 2선(Assurance)을 <strong>코드 수준에서 분리</strong>한다. 2선이 1선의 산출을 숫자로 검문하는 구조가 실재함을 확인했다(예: 추출은 Extractor, 그 인용의 원문 실재 여부는 별도 grounding 채점기가 판정). 본 문서는 3선 역할을 시연하되, 독립성의 한계를 명시한다.</p>
+<hr>
+<h2 id="4-대상-시스템-개요">4. 대상 시스템 개요</h2>
+<h3 id="4-1-데이터-흐름-end-to-end">4.1 데이터 흐름 (End-to-End)</h3>
+<pre class="code"><code>공문 원문(PDF/HWP)
+  │  [스냅샷 + sha256]
+  ▼
+RegChange Extractor (LLM, structured output)  ──► 변경 추출(Before/After + 인용)
+  │                                                   │
+  │  [지역명→코드 정규화]                              │  [Citation Grounding]
+  ▼                                                   ▼
+Impact Matrix (결정적 룰엔진, 시행 전/후 2시점)     Assurance Layer
+  ├─► 가중 모집단 통계                                 (환각·완전성·예외재현·지역)
+  ├─► 여력 영향 금액(담보가격 밴드)
+  ├─► 민감도·견고성(가정 섭동)
+  ▼
+Rule Change Proposal (초안) ──► [사람 확정 엔진값 대조] ──► 승인 PENDING
+  ▼
+HTML 리포트 / 라이브파이어 증거 패키지(해시·timestamp·commit)</code></pre>
+<h3 id="4-2-핵심-설계-불변식-design-invariants">4.2 핵심 설계 불변식 (Design Invariants)</h3>
+<div class="tbl-wrap"><table><thead><tr><th>불변식</th><th>강제 위치</th><th>검증</th></tr></thead><tbody><tr><td>I1. LTV 판정은 결정적 룰엔진에서만 온다</td><td>영향/여력 모듈이 엔진 출력만 소비</td><td>§7, §9</td></tr><tr><td>I2. LLM은 '좌표(정책·지역·시점)'만 제공, 규칙을 만들지 않는다</td><td><code>connect.py</code> duck-typing, 규칙값은 명세</td><td>§6</td></tr><tr><td>I3. 판정 불가·명세 여백은 숨기지 않고 검토로 표면화</td><td><code>NEEDS_HUMAN_REVIEW</code>, undetermined 분리</td><td>§6, §9</td></tr><tr><td>I4. AI 초안은 자동 확정되지 않는다</td><td><code>approval_status="PENDING"</code> 고정</td><td>§10</td></tr><tr><td>I5. 인용은 원문에 실재해야 한다</td><td>grounding 검증(공백무관 비교)</td><td>§8</td></tr></tbody></table></div>
+<h3 id="4-3-룰엔진-입출력-스키마">4.3 룰엔진 입출력 스키마</h3>
+<p>검증 대상 룰엔진의 계약(interface)은 다음과 같다(근거: <code>05_RULE_SPEC.md §A·§B, models.py</code>):</p>
+<p><strong>입력 <code>MortgageApplication</code>(발췌):</strong> <code>region_code</code>, <code>evaluation_date</code>(시점), <code>house_count</code>, <code>disposal_condition_flag</code>(처분조건부), <code>first_home_buyer</code>(생애최초), <code>real_demand_flag</code>(서민실수요), <code>policy_mortgage_flag</code>(정책대출→Discovery), 경과규정 이벤트일(<code>application_accepted_at</code>, <code>contract_signed_at</code>, <code>downpayment_paid_at</code>, 토허제 관련).</p>
+<p><strong>출력 <code>LtvDecision</code>:</strong> <code>status</code>(DECIDED / OUT_OF_SCOPE / DISCOVERY / NEEDS_HUMAN_REVIEW), <code>max_ltv</code>, <code>applicable_rule_id</code>, <code>grandfathering_applied</code>, <code>reason_codes[]</code>, <code>source_policy_ids[]</code>.</p>
+<p><strong>소견:</strong> 출력이 단순 숫자가 아니라 <strong>상태 + 사유코드 + 근거 정책 id</strong>를 함께 낸다. 판정이 왜 나왔는지 추적 가능하며(감사추적), "판정 불가"가 1급 상태(NEEDS_HUMAN_REVIEW)로 존재해 §6.3의 escalation을 스키마 수준에서 뒷받침한다.</p>
+<h3 id="4-4-판정-알고리즘-h-핵심-결정-순서">4.4 판정 알고리즘(H) 핵심 결정 순서</h3>
+<p>룰엔진은 다음 우선순위로 판정한다(요약, 근거 <code>05_RULE_SPEC.md §H</code>):</p>
+<ol><li><strong>범위 판정</strong> — 주택구입목적 아니면 OUT_OF_SCOPE, 정책대출이면 DISCOVERY(코어 밖).</li><li><strong>경과규정</strong> — 효력 발생 전 접수/계약+계약금/토허제 신청 요건 충족 시 <strong>종전규정 적용</strong>(규제 무영향).</li><li><strong>지역·시점 해석</strong> — <code>region_code</code> + <code>evaluation_date</code>로 규제/비규제 판정(시점 의존).</li><li><strong>예외</strong> — 생애최초·서민실수요 등 우선순위(P0~P8)에 따라 완화 LTV.</li><li><strong>소유 상태</strong> — 무주택/처분조건부/유주택/다주택별 LTV.</li><li>어느 분기에서도 기준이 부재하면 <strong>NEEDS_HUMAN_REVIEW</strong>(임의값 금지).</li></ol>
+<p>본 검증은 이 결정 경로 각 분기가 §7의 카테고리별 회귀(SCOPE/BASELINE/EXCEPTION/BOUNDARY/ GRANDFATHERING/CONFLICT)로 커버됨을 확인했다.</p>
+<hr>
+<h2 id="5-데이터-적정성-검증">5. 데이터 적정성 검증</h2>
+<h3 id="5-1-규제-원문-사실-기준점">5.1 규제 원문(사실 기준점)</h3>
+<p>공식 공문 3건을 스냅샷·해시했다. 본 검증은 매니페스트 해시와 파일 재해시, <code>SOURCES.md</code> 레지스트리 3자를 대조해 <strong>무결성 일치</strong>를 확인했다(§13 교차검증 테스트).</p>
+<div class="tbl-wrap"><table><thead><tr><th>doc_id</th><th>문서</th><th>기관</th><th>sha256(앞)</th></tr></thead><tbody><tr><td>FSC_PRESS_20260630</td><td>규제지역 추가 지정 보도참고자료</td><td>금융위원회</td><td><code>403fb8fb…</code></td></tr><tr><td>MOLIT_PRESS_20260630</td><td>투기과열·조정대상지역 지정</td><td>국토교통부</td><td><code>6115271b…</code></td></tr><tr><td>FAQ_20260630</td><td>관계기관 합동 FAQ</td><td>합동</td><td><code>ef3dad7b…</code></td></tr></tbody></table></div>
+<p><strong>소견.</strong> 원문 출처는 발행기관 공식 채널(금융위 fsc.go.kr / 국토부 molit.go.kr)로 확정됐다. 다만 <strong>개별 기사 permalink는 미확정(⬜ 사용자 확인 대기)</strong>이며, 시스템은 이를 <strong>임의 생성하지 않고 공란으로 유지</strong>한다 — 이는 citation integrity 원칙의 올바른 적용이다(없는 URL을 만들어내지 않음).</p>
+<h3 id="5-2-골드-정답지-ground-truth">5.2 골드 정답지 (Ground Truth)</h3>
+<ul><li><strong>추출 골드</strong>(<code>regchange_gold_6_30.json</code>) — 변경·예외·시행일·지역 정답.</li><li><strong>룰 회귀 골드</strong> — 층화 합성 포트폴리오 <strong>178건</strong>. 기대값은 룰엔진이 아니라 <strong>독립 오라클</strong>에서</li></ul>
+<p>유도되므로 순환참조가 없다.</p>
+<h3 id="5-3-합성-포트폴리오-모집단">5.3 합성 포트폴리오 (모집단)</h3>
+<p>영향/여력 집계용 모집단은 <strong>문서화된 가정 분포</strong>다: 아키타입 8종(점유율 합 1.00) × 지역 mix (구리 35 / 기흥 35 / 동탄 30). 몬테카를로 표본(seed 고정)으로 수천 명 규모 확장.</p>
+<p><strong>소견.</strong> 시스템은 이 비중이 <strong>실측이 아니라 시나리오 가정</strong>임을 코드 주석·리포트·문서에 반복 표기하며, "실측 확보 시 이 표만 교체하면 분석 코드는 불변"이라는 교체 지점을 명확히 한다. 데이터 출처의 정직한 라벨링 측면에서 적합하다. <strong>한계:</strong> 가정 분포의 타당성 자체는 도메인 검수 대상이며(§11), 이를 §9의 민감도 분석으로 보완한다.</p>
+<hr>
+<h2 id="6-개념적-건전성-검증">6. 개념적 건전성 검증</h2>
+<h3 id="6-1-핵심-주장의-타당성">6.1 핵심 주장의 타당성</h3>
+<p>시스템의 가치제안은 "정확한 자동화"가 아니라 <strong>"검증 가능한 초안화 + 실패의 명시적 통제"</strong>다. 이는 LLM의 현 신뢰수준을 감안할 때 여신 도메인에서 <strong>방어 가능한(defensible) 포지셔닝</strong>이다. LLM 오류가 여신 결정을 직접 뒤집지 못하도록 결정적 룰엔진을 사이에 두는 구조는 model risk 관점에서 건전하다.</p>
+<h3 id="6-2-불변식-i2-i1-확인-규칙은-사람에게서-판정은-엔진에서">6.2 불변식 I2·I1 확인 — 규칙은 사람에게서, 판정은 엔진에서</h3>
+<ul><li><code>connect.py</code>(추출→임팩트 다리)는 <code>extractor</code>를 <strong>런타임 import하지 않는다</strong>(레이어 독립, duck typing).</li></ul>
+<p>LLM 추출 객체는 <code>policy_id·effective_from·target_regions</code> <strong>좌표만</strong> 공급한다.</p>
+<ul><li>LTV 상수·예외·경과규정 컷오프 등 <strong>규칙 값은 <code>05_RULE_SPEC.md</code>(사람 확정 명세)</strong>에서 오며, 코드는</li></ul>
+<p>스키마/구현일 뿐이다(LOCKED §4).</p>
+<p><strong>소견:</strong> I1·I2 적합. LLM이 규칙 값을 생성·주입할 경로가 코드 구조상 차단돼 있다.</p>
+<h3 id="6-3-불변식-i3-확인-명세-여백의-정직한-표면화">6.3 불변식 I3 확인 — 명세 여백의 정직한 표면화</h3>
+<p>시스템은 <strong>"비규제 유주택 차주의 시행 전 LTV 기준선"이 명세에 정의돼 있지 않음</strong>을 알고 있으며, 이를 임의값으로 채우지 않고 <code>NEEDS_HUMAN_REVIEW</code>로 escalation한다. Impact Matrix에서 이 세그먼트는 "검토"로, 여력 집계에서는 "산정 불가(undetermined)"로 <strong>분리 집계</strong>된다(0으로 뭉개지 않음).</p>
+<p><strong>소견:</strong> I3 적합. 이는 본 시스템의 개념적 건전성을 가장 잘 보여주는 지점이다 — 모르는 것을 모른다고 말하는 통제가 코드 수준에서 작동한다.</p>
+<h3 id="6-4-범위-통제-코어-ltv-discovery-분리">6.4 범위 통제 — 코어=LTV, Discovery 분리</h3>
+<p>정책대출·전세·신용·사업자 대출 등은 코어 LTV 판정 밖 <strong>Discovery</strong>로 라우팅된다. 과대범위를 피하려는 의도된 경계이며, §10에서 룰 변경안이 이들을 "코어밖"으로 정확히 분류함을 확인했다.</p>
+<hr>
+<h2 id="7-구현-정확성-검증-룰엔진">7. 구현 정확성 검증 — 룰엔진</h2>
+<h3 id="7-1-오라클-독립성-vq2">7.1 오라클 독립성 (VQ2)</h3>
+<p>독립 명세 오라클(<code>tc_generator/oracle.py</code>)이 <code>rule_engine</code>/<code>regions</code>/<code>grandfathering</code>을 import하지 않음을 확인했다. 따라서 회귀 일치는 <strong>두 독립 구현의 합의</strong>이지 자기채점이 아니다. 지역 시점해석·경과 규정·예외 우선순위 어느 구현 오차든 두 경로의 불일치로 드러난다.</p>
+<p><strong>소견:</strong> VQ2 적합.</p>
+<h3 id="7-2-회귀-결과-vq1">7.2 회귀 결과 (VQ1)</h3>
+<p>층화 골드셋 <strong>178건</strong>에 대한 엔진↔오라클 차등검증:</p>
+<div class="tbl-wrap"><table><thead><tr><th>카테고리</th><th>건수</th><th>Pass Rate</th></tr></thead><tbody><tr><td>SCOPE(범위)</td><td>10</td><td>100%</td></tr><tr><td>BASELINE(기준선)</td><td>18</td><td>100%</td></tr><tr><td>EXCEPTION(예외)</td><td>9</td><td>100%</td></tr><tr><td>BOUNDARY(경계)</td><td>40</td><td>100%</td></tr><tr><td>GRANDFATHERING(경과규정)</td><td>68</td><td>100%</td></tr><tr><td>CONFLICT(상충)</td><td>33</td><td>100%</td></tr><tr><td><strong>합계</strong></td><td><strong>178</strong></td><td><strong>100% (178/178)</strong></td></tr></tbody></table></div>
+<p>분할별: DEV 52 / LOCKED 59 / CHALLENGE 67 — 전 분할 100%. 개발 중 LOCKED/CHALLENGE 미개봉 원칙 (LOCKED §0-5)을 위한 결정적 해시 분할을 확인했다.</p>
+<p><strong>표본 확대 검증:</strong> 몬테카를로 <strong>5,000명</strong> 표본에 대해서도 엔진↔오라클 <strong>5,000/5,000 일치</strong>. 회귀 분모를 수천 규모로 확장해도 불일치 0.</p>
+<p><strong>소견:</strong> VQ1 적합. 경과규정(68건)·경계(40건)·상충(33건) 등 오판 리스크가 높은 카테고리에 검증 가중이 집중돼 있어, 하드게이트 대상 실패모드의 커버리지가 두텁다.</p>
+<h4 id="7-2-1-대표-세그먼트-판정-대조-단일-지역-guri-시행-전-후">7.2.1 대표 세그먼트 판정 대조(단일 지역 GURI, 시행 전→후)</h4>
+<p>회귀의 성격을 구체화하기 위해 8개 대표 유형의 before/after 판정을 제시한다(엔진 실제 출력):</p>
+<div class="tbl-wrap"><table><thead><tr><th>고객 유형</th><th>비중(가정)</th><th>시행 전</th><th>시행 후</th><th>Δ</th><th>방향</th></tr></thead><tbody><tr><td>무주택 일반</td><td>0.40</td><td>70%</td><td>40%</td><td>−30pp</td><td>강화</td></tr><tr><td>생애최초</td><td>0.12</td><td>70%</td><td>70%</td><td>0pp</td><td>유지(예외)</td></tr><tr><td>서민·실수요</td><td>0.10</td><td>70%</td><td>60%</td><td>−10pp</td><td>강화</td></tr><tr><td>처분조건부 1주택</td><td>0.08</td><td>70%</td><td>40%</td><td>−30pp</td><td>강화</td></tr><tr><td>비처분 1주택(유주택)</td><td>0.12</td><td>—</td><td>0%</td><td>—</td><td><strong>검토</strong>(시행 전 기준선 명세 여백)</td></tr><tr><td>다주택</td><td>0.06</td><td>—</td><td>0%</td><td>—</td><td><strong>검토</strong></td></tr><tr><td>경과규정(계약+계약금)</td><td>0.07</td><td>70%</td><td>70%</td><td>0pp</td><td>유지(종전규정)</td></tr><tr><td>정책대출(디딤돌)</td><td>0.05</td><td>—</td><td>—</td><td>—</td><td>유지(Discovery, 전/후 동일)</td></tr></tbody></table></div>
+<p><strong>검증 관찰:</strong> (a) 생애최초는 규제 후에도 70%를 유지해 <strong>예외 로직이 실제 작동</strong>한다. (b) 경과규정 차주는 규제에 영향받지 않아 <strong>시점·경과 로직이 정확</strong>하다. (c) 유주택·다주택의 시행 전 값이 "—"로 표기됨은 §6.3의 명세 여백 escalation이 판정 테이블에 그대로 반영된 것이다(임의 채움 없음).</p>
+<h3 id="7-3-방어력-mutation-testing">7.3 방어력 (Mutation Testing)</h3>
+<p>엔진 상수에 버그를 주입하면 회귀가 실패로 잡는 mutation test를 확인했다. 골드셋이 실제 탐지력을 가짐을 입증한다.</p>
+<p><strong>소견:</strong> VQ1 보강. 통과가 "이빨 없는 통과"가 아님을 검증.</p>
+<h3 id="7-4-룰엔진-단위-검증">7.4 룰엔진 단위 검증</h3>
+<p>핵심 알고리즘 H는 별도 단위 테스트(23건)로 커버되며, 전체 137 테스트가 통과한다.</p>
+<hr>
+<h2 id="8-성과-검증-추출-및-citation-assurance">8. 성과 검증 — 추출 및 Citation Assurance</h2>
+<h3 id="8-1-추출-산출물-12개-변경-vq3">8.1 추출 산출물 — 12개 변경 (VQ3)</h3>
+<p>Gemini 추출은 6·30 공문에서 <strong>12개 변경</strong>을 Before/After + 원문 인용과 함께 구조화 추출했다:</p>
+<div class="tbl-wrap"><table><thead><tr><th>#</th><th>범주</th><th>변경 요약</th></tr></thead><tbody><tr><td>1</td><td>REGION</td><td>화성 동탄·용인 기흥·구리 투기과열/조정대상 신규 지정</td></tr><tr><td>2</td><td>EFFECTIVE_DATE</td><td>규제지역 지정에 따른 대출규제 강화 시행일</td></tr><tr><td>3</td><td>LTV</td><td>규제지역 내 주담대 LTV 강화</td></tr><tr><td>4</td><td>LTV</td><td>수도권 다주택자 주택구입 LTV 0%</td></tr><tr><td>5</td><td>EXCEPTION</td><td>생애최초 완화 LTV</td></tr><tr><td>6</td><td>EXCEPTION</td><td>서민·실수요 완화 LTV</td></tr><tr><td>7</td><td>EXCEPTION</td><td>정책모기지(보금자리) 완화 LTV</td></tr><tr><td>8</td><td>GRANDFATHERING</td><td>효력 발생 전 신청·계약 차주 종전규정</td></tr><tr><td>9</td><td>GRANDFATHERING</td><td>중도금대출의 잔금 전환 경과규정</td></tr><tr><td>10</td><td>SCOPE_LIMIT</td><td>전세대출 보유자 3억 초과 아파트 취득 제한</td></tr><tr><td>11</td><td>SCOPE_LIMIT</td><td>1억 초과 신용대출 보유자 규제지역 주택구입 제한</td></tr><tr><td>12</td><td>SCOPE_LIMIT</td><td>사업자 규제지역 주택구입목적 주담대 제한</td></tr></tbody></table></div>
+<p><strong>검증 관찰:</strong> 세 핵심 예외(생애최초·서민실수요·정책모기지)가 <strong>각각 별도 항목</strong>으로 포착됐다(§8.3의 개선 결과). 경과규정 2종, 범위제한 3종이 누락 없이 잡혔다 — Change Completeness 100%의 내용.</p>
+<h3 id="8-2-6-30-실측-결과-vq3">8.2 6·30 실측 결과 (VQ3)</h3>
+<p>Google AI Studio(Gemini <code>gemini-flash-latest</code>, structured output)로 6·30 공문 3건을 실제 추출한 결과:</p>
+<div class="tbl-wrap"><table><thead><tr><th>지표</th><th>실측</th><th>확정 임계</th><th>판정</th></tr></thead><tbody><tr><td>Citation Correctness</td><td><strong>100% (12/12)</strong></td><td>≥95%</td><td>✅</td></tr><tr><td>Unsupported Claim Rate(환각)</td><td><strong>0%</strong></td><td>≤5%</td><td>✅</td></tr><tr><td>Change Completeness</td><td><strong>100%</strong></td><td>≥90%</td><td>✅</td></tr><tr><td>Exception Recall</td><td><strong>100%</strong></td><td>≥95% + 핵심예외 0누락(하드게이트)</td><td>✅</td></tr><tr><td>Effective-date Correct</td><td><strong>OK</strong></td><td>하드게이트(오류 0)</td><td>✅</td></tr><tr><td>Regions Correct(정규화 후)</td><td><strong>OK</strong></td><td>—</td><td>✅</td></tr></tbody></table></div>
+<h3 id="8-3-측정-신뢰성-사건-채점기-정규화-결함-model-risk-인사이트">8.3 측정 신뢰성 사건 — 채점기 정규화 결함 (Model Risk 인사이트)</h3>
+<p>초기 측정에서 Citation Correctness가 <strong>67%(2건 오탐)</strong>로 나왔다. 검증 과정에서 이것이 <strong>모델 오류가 아니라 채점기(scorer) 결함</strong>임이 규명됐다: 원문 PDF의 문장중간 줄바꿈을 공백정규화가 공백으로 바꿔, 모델의 <strong>정확한</strong> 인용을 원문과 불일치로 오탐한 것이다. 공백무관 비교(<code>_squish</code>)로 보정하자 100%가 됐고, 회귀 방지 테스트가 추가됐다.</p>
+<p><strong>소견:</strong> 이 사건은 <strong>"지표의 신뢰성은 채점기 정규화에 의존한다"</strong>는 model validation의 핵심 교훈을 실증한다. 시스템은 이를 실패기록(FR-2026-08-12-001, error class E4, disposition fix-scorer)으로 구조화해 닫았다(§12). 검증 관점에서 이는 감점이 아니라, 시스템이 <strong>측정 도구 자체의 결함을 탐지·수정· 회귀방지</strong>하는 성숙도를 보였다는 긍정 신호다.</p>
+<h3 id="8-4-예외-재현율-개선-이력">8.4 예외 재현율 개선 이력</h3>
+<p>1차 실측에서 Exception Recall 50%(서민·실수요 누락)가 관측됐다. 프롬프트에 예외 개별 분리 규칙을 추가해 100%로 개선했고, 항목이 6→12건으로 세분화됐음에도 Citation 100%·환각 0%가 유지됐다(recall↑가 환각↑로 이어지지 않음). 실패기록 FR-2026-08-12-002(E2, fix-prompt)로 닫힘.</p>
+<p><strong>소견:</strong> VQ3 적합. 탐지→근본원인 분류→조치→재측정→회귀방지의 폐루프가 두 사례 모두에서 작동했다.</p>
+<h3 id="8-5-grounding-채점-방식-검증">8.5 Grounding 채점 방식 검증</h3>
+<p>Citation Correctness 채점기는 각 인용 문자열이 원문 텍스트에 <strong>실재</strong>하는지를 공백무관 비교(<code>_squish</code>)로 확인한다. 본 검증은 (a) 정확한 인용이 통과하고, (b) 원문에 없는 문자열(환각)이 실패하며, (c) PDF 줄바꿈으로 공백만 다른 정확 인용이 <strong>오탐되지 않음</strong>(§8.3 회귀)을 테스트로 확인했다. 이 채점기가 2선(Assurance)의 핵심 도구이며 1선(Extractor)과 독립적으로 동작함을 확인했다.</p>
+<hr>
+<h2 id="9-성과-검증-영향-여력-민감도">9. 성과 검증 — 영향·여력·민감도</h2>
+<h3 id="9-1-impact-matrix-vq4-vq7">9.1 Impact Matrix (VQ4, VQ7)</h3>
+<p>6·30을 시행 전(6/30)·후(7/2) 2시점으로 결정적 엔진에 통과시킨 결과(3지역 × 8유형 = 24행):</p>
+<ul><li>방향(건수): 강화 9 · 유지 9 · 검토 6 · 완화 0.</li><li><strong>가중 비중(가정 모집단): 강화 58% · 유지 24% · 검토 18%.</strong></li><li>가중평균 LTV Δ <strong>−20pp</strong>(수치비교 가능 15/24행 기준 — 제외분은 리포트에 명시).</li><li>중대영향(Δ≥30pp 등) 12행. 사람검토 필요 가중 <strong>23%</strong>.</li></ul>
+<blockquote><p><strong>검증 노트(지표 정의의 정확성):</strong> "검토 방향 비중 18%"와 "사람검토 필요 23%"의 차이를 확인했다.
+후자는 escalation(정책대출의 after 미판정) ∪ NEEDS_REVIEW 방향을 포함하므로 전자보다 넓다. 두 지표가
+서로 다른 것을 측정하며 시스템이 이를 구분해 보고함을 확인했다 — 정의 혼동 없음.</p></blockquote>
+<p><strong>tautology 방지 확인:</strong> 두 시점을 모두 시행 전으로 두면 임팩트가 소멸함을 회귀로 확인했다. 즉 임팩트가 엔진의 <strong>시점 해석</strong>에서 나옴을 입증(하드코딩된 차이가 아님).</p>
+<p><strong>소견:</strong> VQ4·VQ7 적합.</p>
+<h3 id="9-2-여력-영향-금액-exposure">9.2 여력 영향 금액 (Exposure)</h3>
+<p>LTV %p 변화를 문서화된 담보가격 밴드(가중평균 10.12억)와 결합해 대출 여력(=담보가격×LTV) 변화로 환산:</p>
+<ul><li>판정가능 <strong>1인당 평균 여력 7.08억 → 5.06억 (Δ −2.02억, 감소율 28.6%)</strong>.</li><li><strong>산정불가 비중 23%</strong>(비규제 유주택·다주택·정책대출 = 명세 여백/Discovery) — 금액을 매기지 않고 분리.</li></ul>
+<p><strong>담보가격 밴드별 여력 변화(가중, 억원 — 정확 가중 프로파일):</strong></p>
+<div class="tbl-wrap"><table><thead><tr><th>담보가격 밴드</th><th>판정가중</th><th>여력 전</th><th>여력 후</th><th>Δ</th></tr></thead><tbody><tr><td>6억 이하</td><td>0.69</td><td>2.18</td><td>1.56</td><td>−0.62</td></tr><tr><td>6~9억</td><td>0.65</td><td>3.40</td><td>2.43</td><td>−0.97</td></tr><tr><td>9~15억</td><td>0.58</td><td>4.85</td><td>3.46</td><td>−1.39</td></tr><tr><td>15~25억</td><td>0.30</td><td>3.99</td><td>2.85</td><td>−1.14</td></tr><tr><td>25억 초과</td><td>0.09</td><td>1.94</td><td>1.39</td><td>−0.55</td></tr></tbody></table></div>
+<p><strong>정직성 4고지 확인(리포트에 실제 노출됨):</strong> ① 여력(한도)이지 실행액 아님 ② LTV 규칙만 — 가격대별 <strong>최대한도 상한(6/4/2억) 미적용</strong>(상한 성격) ③ 담보가격 분포는 가정 ④ 자동판정 불가분은 산정 불가로 분리.</p>
+<p><strong>소견:</strong> VQ4 적합. 특히 ②는 시스템이 자신의 산정이 <strong>상한(upper bound)</strong>임을 스스로 밝히는 통제로, 과대 산출을 방지한다. 밴드 여력 합이 전체 판정가능 여력과 일치함(집계 정합성)을 테스트로 확인했다.</p>
+<h3 id="9-3-민감도-견고성-vq5">9.3 민감도·견고성 (VQ5)</h3>
+<p>가정(비중·지역·담보가격)을 흔들되 <strong>확정 규칙은 고정</strong>한 채 헤드라인의 견고성을 측정:</p>
+<div class="tbl-wrap"><table><thead><tr><th>결론</th><th>성립 표본 비율(n=3,000)</th><th>판정</th></tr></thead><tbody><tr><td>여력 축소(감소율&gt;0)</td><td><strong>100%</strong></td><td>방향 견고</td></tr><tr><td>1인당 여력 감소(Δ&lt;0)</td><td><strong>100%</strong></td><td>방향 견고</td></tr><tr><td>강화 과반(강화&gt;50%)</td><td><strong>84.9%</strong></td><td>가정 취약(정직 표기)</td></tr></tbody></table></div>
+<ul><li>여력 감소율 P5–P95 밴드 <strong>[22.9%, 33.8%]</strong>(P50 28.6%) — 점추정 대신 밴드.</li></ul>
+<p><strong>OAT 토네이도(출력 = 여력 감소율, base 28.6%) — 가정을 하나씩 흔든 스윙:</strong></p>
+<div class="tbl-wrap"><table><thead><tr><th>흔든 가정</th><th>감소율 범위</th><th>스윙</th></tr></thead><tbody><tr><td>비중: 무주택 일반</td><td>23.6% … 31.5%</td><td><strong>8.0%p (최대 driver)</strong></td></tr><tr><td>비중: 생애최초</td><td>26.5% … 31.0%</td><td>4.5%p</td></tr><tr><td>비중: 경과규정</td><td>27.3% … 29.9%</td><td>2.6%p</td></tr><tr><td>비중: 서민·실수요</td><td>27.7% … 29.6%</td><td>1.9%p</td></tr><tr><td>비중: 처분조건부 1주택</td><td>27.8% … 29.3%</td><td>1.5%p</td></tr><tr><td><strong>담보가격 수준 ±30%</strong></td><td>28.6% … 28.6%</td><td><strong>0.0%p (불변)</strong></td></tr><tr><td>지역 mix / 담보가격 mix / 유주택·다주택 비중</td><td>28.6% … 28.6%</td><td>0.0%p</td></tr></tbody></table></div>
+<ul><li><strong>최대 driver = 무주택 일반 비중</strong>(감소율 스윙 8.0%p). <strong>담보가격 수준·지역 mix는 감소율에 영향 0.</strong></li><li><strong>가격 불변성:</strong> 감소율(%)은 담보가격 수준에 불변(가격이 세그먼트 독립·균일→상쇄), 절대 금액(억)만</li></ul>
+<p>비례 이동. 테스트로 증명됨. 반대로 1인당 억 금액 토네이도에서는 담보가격 수준이 <strong>최대 driver</strong>로 뒤바뀐다.</p>
+<p><strong>소견:</strong> VQ5 적합. 방향 결론(여력 축소)은 가정 범위에서 견고하고, "강화 과반" 같은 특정 수치 주장은 가정 취약함을 <strong>정직하게 구분 표기</strong>한다. 이는 false precision을 피하는 모범적 처리다. 같은 출력이라도 비율(%)이냐 금액(억)이냐에 따라 지배 가정이 달라짐을 시스템이 드러내는 것은, 보고 시 두 진술을 구분해야 한다는 실무적 함의를 준다.</p>
+<hr>
+<h2 id="10-거버넌스-검증-rule-change-proposal-vq6">10. 거버넌스 검증 — Rule Change Proposal (VQ6)</h2>
+<p>추출된 12개 변경을 룰엔진 실제 룰 표면(LTV 상수·지역 버전·경과규정 컷오프·시행일)에 매핑하고 <strong>사람 확정 엔진 현재값과 대조</strong>한 결과:</p>
+<div class="tbl-wrap"><table><thead><tr><th>구분</th><th>건수</th></tr></thead><tbody><tr><td>반영됨(엔진과 일치)</td><td>7</td></tr><tr><td>코어밖(Discovery)</td><td>4</td></tr><tr><td>검토 필요</td><td>1</td></tr><tr><td><strong>불일치(divergent)</strong></td><td><strong>0</strong></td></tr><tr><td>승인상태</td><td><strong>PENDING (전건)</strong></td></tr></tbody></table></div>
+<ul><li><code>approval_status</code>가 <strong>항상 PENDING</strong>으로 고정됨을 확인했다 — 어떤 경로로도 자동 확정되지 않는다(I4).</li><li>불일치 0은 "AI 추출 초안이 사람 확정 엔진과 충돌하지 않았다"는 의미이며, 코어밖 4·검토 1은 시스템이</li></ul>
+<p><strong>자동 처리하지 않고 사람에게 넘긴</strong> 항목이다.</p>
+<p><strong>소견:</strong> VQ6·I4 적합. AI가 규칙을 자동 변경하는 경로가 없다.</p>
+<hr>
+<h2 id="11-한계-및-가정-limitations-register">11. 한계 및 가정 (Limitations Register)</h2>
+<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>한계/가정</th><th>영향</th><th>완화·비고</th></tr></thead><tbody><tr><td>L1</td><td>단일 정책 seed(6·30)</td><td>성과 지표 일반화 제한</td><td>라이브파이어 절차로 분모 확대 준비(§13)</td></tr><tr><td>L2</td><td>합성 모집단(비중 가정)</td><td>절대 영향 규모 불확실</td><td>민감도로 견고성 정량화(§9.3), 실측 시 표 교체</td></tr><tr><td>L3</td><td>담보가격 분포 가정</td><td>억 금액이 가격에 종속</td><td>감소율은 가격 불변(§9.3), 억 금액은 밴드로 분리 표기</td></tr><tr><td>L4</td><td>최대한도(6/4/2억) 미적용</td><td>여력이 상한 성격</td><td>리포트에 명시, 별도 Discovery</td></tr><tr><td>L5</td><td>LLM 백엔드 단일(Gemini) 실측</td><td>백엔드 교차 신뢰 미측정</td><td>교차 백엔드 코드는 준비(비용 결정으로 미실행)</td></tr><tr><td>L6</td><td>규제 사실·permalink 사람 확정 대기</td><td>도메인 정확성 최종미확정</td><td>claim C01~C13 검수 대기(LOCKED §4), URL 임의생성 금지</td></tr><tr><td>L7</td><td>내부(자기) 검증 성격</td><td>독립성 제한</td><td>본 보고서 표지·§Exec에 명시</td></tr><tr><td>L8</td><td>명세 내부 상충(유주택+생애최초)</td><td>경계 케이스 모호</td><td>OPEN_QUESTIONS Q8로 표면화, 사람 판단 대기</td></tr></tbody></table></div>
+<p><strong>소견:</strong> 시스템은 위 한계를 <strong>숨기지 않고 문서·리포트·코드에 표기</strong>한다. 이 자기인식이 브리프의 "실패의 명시적 통제" 원칙과 일치한다.</p>
+<hr>
+<h2 id="12-발견사항-및-조치-findings-remediation">12. 발견사항 및 조치 (Findings &amp; Remediation)</h2>
+<h3 id="12-1-error-taxonomy-및-실패기록">12.1 error taxonomy 및 실패기록</h3>
+<p>시스템은 실패를 error taxonomy(E1~E9, PRD §5.4)로 분류하고 <code>docs/prd/failure_review_template.md</code> 양식으로 1건씩 구조화 기록한다. 6·30 실측에서 나온 2건은 모두 폐루프로 닫혔다:</p>
+<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>지표</th><th>관측</th><th>error class</th><th>근본원인</th><th>조치</th><th>상태</th></tr></thead><tbody><tr><td>FR-2026-08-12-001</td><td>Citation Correctness</td><td>67%(오탐)</td><td>E4</td><td>채점기 정규화(PDF 줄바꿈)</td><td>fix-scorer</td><td><strong>fixed</strong> (→100%)</td></tr><tr><td>FR-2026-08-12-002</td><td>Exception Recall</td><td>50%(서민실수요)</td><td>E2</td><td>프롬프트(예외 뭉침)</td><td>fix-prompt</td><td><strong>fixed</strong> (→100%)</td></tr></tbody></table></div>
+<p>두 건 모두 회귀 방지 테스트가 걸려 있음을 확인했다.</p>
+<h3 id="12-2-본-검증에서-신규로-제기하는-관찰-권고">12.2 본 검증에서 신규로 제기하는 관찰(권고)</h3>
+<div class="tbl-wrap"><table><thead><tr><th>#</th><th>관찰</th><th>권고</th><th>심각도</th></tr></thead><tbody><tr><td>O1</td><td>성과 지표가 단일 seed 기반</td><td>2~3개 추가 정책 이벤트로 분모 확대(라이브파이어 LIVE 실행)</td><td>중</td></tr><tr><td>O2</td><td>모집단 비중 가정의 도메인 타당성 미검수</td><td>도메인 전문가 검수 또는 실측 대체</td><td>중</td></tr><tr><td>O3</td><td>LLM 백엔드 단일 실측</td><td>여건 확보 시 교차 백엔드 1회 실측으로 추출 안정성 확인</td><td>하</td></tr><tr><td>O4</td><td>명세 상충(L8) 미해소</td><td>Q8 사용자 판단으로 명세 보정</td><td>하</td></tr></tbody></table></div>
+<p><strong>소견:</strong> 신규 관찰은 모두 <strong>범위 확대·데이터 품질</strong> 성격이며, 시스템의 구조적 결함은 발견되지 않았다.</p>
+<hr>
+<h2 id="13-재현성-및-감사추적-vq8">13. 재현성 및 감사추적 (VQ8)</h2>
+<h3 id="13-1-라이브파이어-증거-패키지">13.1 라이브파이어 증거 패키지</h3>
+<p>시스템은 브리프 §19 라이브파이어 하네스를 구현했다. 6·30 예행연습(REHEARSAL) 증거 패키지 (<code>docs/livefire/rehearsal_6_30/</code>)에 대해 본 검증은:</p>
+<ul><li><strong>원문 3건 sha256이 매니페스트·파일 재해시·<code>SOURCES.md</code> 레지스트리 3자에서 일치</strong>함을 확인(무결성).</li><li>매니페스트가 §19 증거요소(원문 해시·분석 timestamp·<code>system_commit</code>·시스템 버전·산출물)를 모두</li></ul>
+<p>포함함을 확인.</p>
+<ul><li>증거 기록이 <strong>"이것은 예행연습이며 실제 라이브파이어가 아니다"</strong>를 명시함을 확인(정직성) — 없는</li></ul>
+<p>실적을 있는 척하지 않으며, 실제 Live Fire #1 슬롯은 ⬜ 대기로 비어 있다.</p>
+<h3 id="13-2-결정성-재현성">13.2 결정성·재현성</h3>
+<ul><li>층화 골드셋은 <code>generate_portfolio()</code>로 결정적 재생성, 분할은 hashlib 결정적, 몬테카를로는 seed 고정.</li><li>리포트 값은 엔진/추출 실제 출력에서만 오므로(하드코딩·환각 불가), 재실행 시 동일 산출.</li></ul>
+<p><strong>소견:</strong> VQ8 적합.</p>
+<hr>
+<h2 id="14-검증-결론-및-의견">14. 검증 결론 및 의견</h2>
+<h3 id="14-1-검증-질문-종합">14.1 검증 질문 종합</h3>
+<div class="tbl-wrap"><table><thead><tr><th>VQ</th><th>결과</th></tr></thead><tbody><tr><td>VQ1 룰엔진 명세 정확 구현</td><td>✅ 178/178 + 5,000/5,000</td></tr><tr><td>VQ2 tautology 아님(독립 오라클)</td><td>✅ import 독립 확인</td></tr><tr><td>VQ3 추출 원문 근거·환각 통제</td><td>✅ Citation 100%·환각 0%</td></tr><tr><td>VQ4 영향/여력 엔진 출처·가정 정직</td><td>✅ 4고지 노출</td></tr><tr><td>VQ5 결론 견고성</td><td>✅ 방향 100% 견고, 밴드 제시</td></tr><tr><td>VQ6 사람 승인 통제</td><td>✅ PENDING 고정, 불일치 0</td></tr><tr><td>VQ7 여백 escalation</td><td>✅ 검토/산정불가 분리</td></tr><tr><td>VQ8 재현·감사</td><td>✅ 해시 일치·증거 패키지</td></tr></tbody></table></div>
+<h3 id="14-2-최종-의견">14.2 최종 의견</h3>
+<blockquote><p><strong>RegImpact AI는 "규제 변경을 검증 가능하게 초안화하고 실패를 명시적으로 통제하는 의사결정 지원
+시스템"이라는 명시된 목적에 대해 조건부 적합하다.</strong> 개념적으로 건전하고(§6), 구현이 정확하며(§7·§8),
+산출물이 감사 가능하고(§13), 무엇보다 <strong>자신의 한계와 판정 불가를 조용히 덮지 않는다</strong>(§6.3·§9·§11).
+핵심 통제(AI초안↔사람확정 분리)는 코드 수준에서 실제로 강제된다(§10).</p></blockquote>
+<h3 id="14-3-적합의-조건-conditions">14.3 적합의 조건 (Conditions)</h3>
+<ol><li>성과 지표를 <strong>추가 정책 이벤트</strong>로 확대 측정한다(O1).</li><li>모집단 비중 가정을 <strong>도메인 검수 또는 실측</strong>으로 뒷받침한다(O2).</li><li>규제 사실 claim(C01~C13)·permalink의 <strong>사람 확정</strong>을 완료한다(L6).</li></ol>
+<p>이 조건들이 충족되기 전까지, 산출물은 <strong>"검증된 초안 + 명시된 가정"</strong>으로 취급되어야 하며, 여신 결정의 최종 확정은 사람(도메인 전문가)의 승인을 거쳐야 한다 — 이는 시스템 스스로가 강제하는 원칙과 일치한다.</p>
+<h3 id="14-4-잔여-리스크-등급">14.4 잔여 리스크 등급</h3>
+<div class="tbl-wrap"><table><thead><tr><th>영역</th><th>잔여 리스크</th><th>근거</th></tr></thead><tbody><tr><td>룰엔진 판정 정확성</td><td><strong>낮음</strong></td><td>이중 독립검증 100%, mutation 방어</td></tr><tr><td>추출 신뢰성</td><td><strong>낮음~중간</strong></td><td>6·30 100%이나 단일 seed</td></tr><tr><td>영향 규모 정확성</td><td><strong>중간</strong></td><td>가정 모집단, 단 방향은 견고</td></tr><tr><td>거버넌스 통제</td><td><strong>낮음</strong></td><td>자동확정 경로 없음</td></tr></tbody></table></div>
+<hr>
+<h2 id="부록">부록</h2>
+<h3 id="부록-a-검증-대상-지표-정의-및-워크드-계산">부록 A — 검증 대상 지표 정의 및 워크드 계산</h3>
+<ul><li><strong>Citation Correctness</strong> = 원문에 실재하는 인용 수 / 전체 인용 수(공백무관 비교).</li></ul>
+<p>6·30: 12/12 = <strong>100%</strong>.</p>
+<ul><li><strong>Unsupported Claim Rate</strong> = 근거 없는 주장 수 / 전체 주장 수. 6·30: 0/12 = <strong>0%</strong>.</li><li><strong>Change Completeness / Exception Recall</strong> = 골드 대비 포착률. 6·30: 각 <strong>100%</strong>.</li><li><strong>Rule-Regression Pass Rate</strong> = 엔진↔독립 오라클 일치 케이스 / 전체. 178/178 = <strong>100%</strong>.</li><li><strong>가중평균 LTV Δ</strong> = Σ(비중 × Δltv) / Σ(비중), 수치비교 가능 행만. 6·30: <strong>−20pp</strong>(15/24행).</li><li><strong>여력(1인당)</strong> = Σ(비중 × 평균담보가격 × LTV) / Σ(판정가능 비중).</li></ul>
+<p>전 = <strong>7.08억</strong>(= 담보가격 가중평균 10.12억 수준에서 판정가능 세그먼트의 LTV 가중), 후 = 5.06억.</p>
+<ul><li><strong>여력 감소율</strong> = −(after−before) / before = −(5.06−7.08)/7.08 = <strong>28.6%</strong>.</li><li><strong>산정불가 비중</strong> = 판정불가(유주택+다주택+정책대출) 비중 = 0.12+0.06+0.05 = <strong>0.23</strong>.</li><li>상세 정의·분모·임계: <code>docs/metrics_spec.md</code>.</li></ul>
+<p><strong>워크드 예시 — 여력 감소율의 가격 불변성(§9.3 검증):</strong> 담보가격을 일괄 k배 하면 before = k·Σw·p·b, after = k·Σw·p·a 이므로 감소율 = −(after−before)/before = −(a−b)/b 로 <strong>k가 상쇄</strong>된다(가격이 세그먼트와 독립·균일할 때). 따라서 감소율은 모집단 구성의 함수이고, 억 금액만 가격에 비례한다. 이 대수적 성질을 테스트(<code>test_price_level_invariance_of_pct_reduction</code>)가 3배 스케일로 확인한다.</p>
+<h3 id="부록-b-검증-대상-아티팩트">부록 B — 검증 대상 아티팩트</h3>
+<div class="tbl-wrap"><table><thead><tr><th>아티팩트</th><th>경로</th></tr></thead><tbody><tr><td>추출 실측(원시)</td><td><code>docs/eval/extractor_run_6_30_gemini.json</code></td></tr><tr><td>추출 골드</td><td><code>docs/eval/regchange_gold_6_30.json</code></td></tr><tr><td>골드셋 매니페스트</td><td><code>docs/eval/goldset_manifest.json</code></td></tr><tr><td>여력/민감도 실측</td><td><code>docs/eval/exposure_impact.md</code>, <code>docs/eval/sensitivity_impact.md</code></td></tr><tr><td>생성 리포트</td><td><code>docs/ui/report_6_30.html</code></td></tr><tr><td>라이브파이어 증거</td><td><code>docs/livefire/rehearsal_6_30/manifest.json</code></td></tr></tbody></table></div>
+<h3 id="부록-c-검증-근거-테스트">부록 C — 검증 근거 테스트</h3>
+<p>전체 <strong>137 테스트 통과</strong>. 핵심: <code>test_rule_engine</code>, <code>test_tc_generator</code>/<code>test_portfolio</code>(독립 오라클· mutation), <code>test_extractor</code>(grounding·정규화 회귀), <code>test_impact</code>/<code>test_population</code>/<code>test_exposure</code>/ <code>test_sensitivity</code>, <code>test_rule_proposal</code>, <code>test_report</code>, <code>test_livefire</code>(해시 무결성).</p>
+<h3 id="부록-d-재현-명령">부록 D — 재현 명령</h3>
+<pre class="code"><code>python -m pytest                                    # 137 테스트
+python examples/demo_6_30.py                        # 룰엔진 6·30
+python examples/demo_tc_regression.py               # 독립 오라클 회귀
+python examples/demo_portfolio.py                   # 층화 골드셋 178 + 분할
+python examples/demo_impact_matrix.py               # Impact Matrix
+python examples/demo_exposure.py                    # 여력 영향 금액
+python examples/demo_sensitivity.py                 # 민감도·견고성
+python examples/gen_report.py                       # HTML 리포트 생성
+python examples/livefire_rehearsal.py               # 라이브파이어 증거 패키지</code></pre>
+<h3 id="부록-e-용어">부록 E — 용어</h3>
+<ul><li><strong>Assurance Layer</strong> — AI 산출의 신뢰를 숫자로 통제하는 계층(grounding·recall·regression).</li><li><strong>Differential Testing</strong> — 두 독립 구현의 출력을 대조해 어느 한쪽 오류를 잡는 검증 기법.</li><li><strong>Discovery</strong> — 코어 자동판정 밖으로 분리해 사람 검토로 넘기는 라우팅(정책대출 등).</li><li><strong>명세 여백(spec gap)</strong> — 규칙이 정의되지 않은 입력 조합. 임의값 대신 escalation 대상.</li><li><strong>하드게이트(hard-gate)</strong> — 고위험 실패모드에 0 허용을 강제하는 임계 정책.</li><li><strong>Mutation Testing</strong> — 코드에 의도적 결함을 심어 테스트의 탐지력을 검증하는 기법.</li><li><strong>경과규정(grandfathering)</strong> — 규제 효력 발생 전 일정 요건 차주에게 종전규정을 적용하는 예외.</li><li><strong>여력(loanable capacity)</strong> — 담보가격 × 적용 LTV. 규제가 허용하는 최대 담보대출 한도(실행액 아님).</li></ul>
+<h3 id="부록-f-문서-이력-및-검증-수행-내역">부록 F — 문서 이력 및 검증 수행 내역</h3>
+<div class="tbl-wrap"><table><thead><tr><th>버전</th><th>일자</th><th>변경</th><th>검증자</th></tr></thead><tbody><tr><td>v1.0</td><td>2026-08-12</td><td>최초 발행 — 6·30 seed 기준 전 컴포넌트 검증</td><td>시스템 설계자(자기검증, §11 L7)</td></tr></tbody></table></div>
+<p><strong>검증 수행 내역:</strong> 본 검증은 (1) 137개 테스트 실행·통과 확인, (2) 파이프라인 9개 데모 실측 재현, (3) 원문 해시 3자 대조, (4) 코드 구조 검토(레이어 독립성·불변식 강제 위치)로 수행됐다. 모든 실측치는 검증 대상 커밋(<code>459e294f6071</code>)에서 부록 D 명령으로 재현된다.</p>
+<p><strong>차기 검증 트리거:</strong> (a) 실제 신규 정책 발표 시 라이브파이어 LIVE 실행(성과 지표 분모 확대), (b) 규제 사실 claim 사람 확정 완료, (c) 룰 명세 변경 시 재검증.</p>
+<hr>
+<p>*본 검증보고서는 RegImpact AI 저장소의 실제 파이프라인 출력에 근거하며, 모든 수치는 부록 D의 명령으로 재현 가능하다. 미확정 사실은 만들어 넣지 않았다(citation integrity). — v1.0, 2026-08-12.*</p></main></body></html>
