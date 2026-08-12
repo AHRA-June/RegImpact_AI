@@ -1,0 +1,100 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RegImpact AI — 포트폴리오 요약</title><style>
+:root{
+  --surface:#fcf8ff; --card:#ffffff; --container:#f5f2ff; --container-2:#efecff;
+  --ink:#1a1a2e; --ink-soft:#43474e; --outline:#c4c6cf; --line:#e2e0fc;
+  --primary:#022448; --secondary:#0051d5; --accent:#7a5300; --accent-bg:#ffddb2;
+  --good:#2e6b4f; --good-bg:#cde6d8; --warn:#ba1a1a;
+  --sans:"Noto Sans","Malgun Gothic",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --surface:#111421; --card:#1a1f30; --container:#171b2b; --container-2:#1c2133;
+  --ink:#e9e9f4; --ink-soft:#b6bac6; --outline:#3a3f52; --line:#2a3047;
+  --primary:#adc8f5; --secondary:#8ab0ff; --accent:#edbf7f; --accent-bg:#33260f;
+  --good:#8fd6ac; --good-bg:#123322; --warn:#ffb4ab;
+}}
+:root[data-theme="dark"]{
+  --surface:#111421; --card:#1a1f30; --container:#171b2b; --container-2:#1c2133;
+  --ink:#e9e9f4; --ink-soft:#b6bac6; --outline:#3a3f52; --line:#2a3047;
+  --primary:#adc8f5; --secondary:#8ab0ff; --accent:#edbf7f; --accent-bg:#33260f;
+  --good:#8fd6ac; --good-bg:#123322; --warn:#ffb4ab;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--sans);
+  line-height:1.7;font-size:15.5px;-webkit-font-smoothing:antialiased}
+.kicker-band{background:var(--primary);color:#fff;font-family:var(--mono);font-size:.72rem;
+  letter-spacing:.12em;text-transform:uppercase;padding:10px 22px}
+:root[data-theme="dark"] .kicker-band,
+:root:not([data-theme="light"]) .kicker-band{color:#0b1220}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .kicker-band{color:#0b1220}}
+main.doc{max-width:860px;margin:0 auto;padding:34px 24px 80px}
+h1{font-size:clamp(1.6rem,1.2rem+1.6vw,2.15rem);font-weight:740;letter-spacing:-.02em;
+  line-height:1.25;margin:8px 0 18px;padding-bottom:14px;border-bottom:3px solid var(--primary)}
+h2{font-size:1.32rem;font-weight:680;letter-spacing:-.01em;margin:38px 0 12px;
+  padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;font-weight:660;margin:26px 0 8px;color:var(--primary)}
+h4{font-size:.96rem;font-weight:660;margin:20px 0 6px;color:var(--ink-soft)}
+p{margin:10px 0}
+a{color:var(--secondary)}
+strong{font-weight:680}
+code{font-family:var(--mono);font-size:.86em;background:var(--container-2);
+  padding:1px 6px;border-radius:5px}
+pre.code{background:var(--container);border:1px solid var(--line);border-radius:11px;
+  padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.55}
+pre.code code{background:none;padding:0}
+hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--container);
+  border-left:4px solid var(--accent);border-radius:0 10px 10px 0;color:var(--ink-soft)}
+blockquote p{margin:6px 0}
+ul,ol{margin:10px 0;padding-left:24px}
+li{margin:5px 0}
+li>ul,li>ol{margin:5px 0}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:11px;margin:16px 0}
+table{border-collapse:collapse;width:100%;min-width:440px;font-size:.86rem}
+thead th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-soft);font-weight:700;padding:10px 13px;
+  background:var(--container);border-bottom:2px solid var(--line);white-space:nowrap}
+tbody td{padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even){background:var(--container)}
+@media print{
+  .kicker-band{background:none;color:#000;border-bottom:1px solid #000}
+  body{font-size:11pt} main.doc{max-width:none;padding:0}
+  h2{page-break-before:auto} table{page-break-inside:avoid}
+}
+</style></head><body><div class="kicker-band">RegImpact AI · 포트폴리오 요약 (Portfolio)</div><main class="doc"><h1 id="regimpact-ai-포트폴리오-요약">RegImpact AI — 포트폴리오 요약</h1>
+<blockquote><p><strong>생성형 AI 기반 주택담보대출 규제 변경 영향분석 · 검증 시스템</strong>
+금융권 Model Risk / 모델검증 / AI Governance / AI Assurance / AI Evaluation 직무 지원용</p></blockquote>
+<hr>
+<h2 id="한-줄-정의">한 줄 정의</h2>
+<p><strong>규제가 바뀌면 무엇을 고쳐야 하는지 AI가 초안하고, 그 초안이 틀리지 않았음을 검증 가능하게 증명하는 의사결정 지원 시스템.</strong> 챗봇이 아니라, <strong>사람이 확정한 결정적 룰엔진</strong> 위에서 도는 Assurance 파이프라인.</p>
+<h2 id="문제">문제</h2>
+<p>주택대출 규제(예: 2026-06-30 규제지역 추가 지정)가 바뀌면 은행은 공문에서 <strong>정확히 무엇이 바뀌었는지</strong>를 빨리 읽어 <strong>여신 룰·고객·내규·테스트</strong>에 반영해야 한다. 사람 수작업은 누락 위험이 크고, LLM 전면 위임은 <strong>환각</strong>이 여신 결정을 조용히 오염시킨다. 이 프로젝트는 그 사이의 <strong>"검증 가능한 중간"</strong>을 구현한다.</p>
+<h2 id="접근-세-겹-구조">접근 — 세 겹 구조</h2>
+<pre class="code"><code>[AI 초안]  →  [사람이 확정한 결정적 규칙]  →  [검증층이 감시]
+Extractor      Rule Engine                  Assurance
+"뭐가 바뀜?"   "그래서 LTV 얼마?"            "그 말 진짜야?"</code></pre>
+<ol><li><strong>AI는 초안만</strong> — 실제 LTV 판정·규칙 값은 사람이 확정한 명세에서 온다(자동 규칙 생성 없음).</li><li><strong>모르면 표면화</strong> — 규칙 미정의(명세 여백)는 임의값 대신 "사람 검토"로 escalation.</li><li><strong>모든 주장은 근거 대조</strong> — AI 인용이 원문에 실재하는지 기계 검증(환각 탐지).</li></ol>
+<p><strong>파이프라인:</strong> 공문(해시) → 추출 → 인용검증 → 지역정규화 → 룰엔진(전/후) → 임팩트 → 여력 금액 → 민감도 → 룰 변경안 → 내규 영향도 → 리포트/증거.</p>
+<h2 id="핵심-성과-6-30-실측-실제-파이프라인-출력">핵심 성과 (6·30 실측 — 실제 파이프라인 출력)</h2>
+<div class="tbl-wrap"><table><thead><tr><th>영역</th><th>결과</th></tr></thead><tbody><tr><td>추출 신뢰</td><td>Citation <strong>100%</strong> · 환각 <strong>0%</strong> · 변경완전성 <strong>100%</strong> · 예외재현 <strong>100%</strong></td></tr><tr><td>룰엔진 검증</td><td>독립 오라클 차등검증 <strong>178/178</strong> + 몬테카를로 <strong>5,000/5,000</strong></td></tr><tr><td>고객 영향</td><td>가중 강화 58%·유지 24%·검토 18% (Δ −20pp)</td></tr><tr><td>영향 금액</td><td>1인당 여력 7.08억→5.06억 (<strong>−28.6%</strong>), 민감도 밴드 [22.9%, 33.8%]</td></tr><tr><td>내규 영향도</td><td>모의 내규 13건 → 수정필요 9·검토 1·간접 1·<strong>무관 2</strong>(과잉플래그 없음)</td></tr><tr><td>스트레스</td><td>퍼징 5,000건 크래시 0·불일치 0 / 부하 50,000건 불일치 0</td></tr><tr><td>품질</td><td>테스트 <strong>162 통과</strong>, 런타임 의존성 <strong>0</strong></td></tr></tbody></table></div>
+<h2 id="역량-매핑">역량 매핑</h2>
+<ul><li><strong>모델검증 / Model Risk</strong> — 독립 명세 오라클 차등검증(자기채점 아님), mutation test, 위험차등 임계값</li></ul>
+<p>정책(하드게이트), error taxonomy(E1~E9), <strong>검증보고서 5축</strong>(개념·구현·성과·거버넌스·재현), 스트레스/역스트레스.</p>
+<ul><li><strong>AI Assurance / Evaluation</strong> — Citation grounding(환각 탐지), 층화 골드셋 178 + DEV/LOCKED/CHALLENGE</li></ul>
+<p>3분할, 지표 정의·분모·임계 명세, <strong>측정 아티팩트 자체 탐지·수정</strong>(채점기 결함 67%→100%).</p>
+<ul><li><strong>AI Governance</strong> — AI초안→사람확정(승인 PENDING), 명세 여백 escalation, 감사추적(라이브파이어 증거:</li></ul>
+<p>원문 해시·timestamp·commit), 한계·가정 정직 표기.</p>
+<ul><li><strong>금융 도메인</strong> — 주담대 LTV 규제 룰엔진(경과규정·예외·지역 시점해석), 여신 룰·내규 영향 전파.</li></ul>
+<h2 id="특징적-강점-검증자-관점">특징적 강점 (검증자 관점)</h2>
+<ul><li><strong>검증이 tautology가 아니다</strong> — 룰엔진을 <strong>독립 구현 오라클</strong>과 대조(엔진 미import). 둘이 100% 일치할 때만 통과.</li><li><strong>정직한 한계 보고</strong> — "여력 축소"는 가정 섭동에서 <strong>구조적으로 견고</strong>(100%), "강화 과반"은 <strong>85% 표본만</strong></li></ul>
+<p>성립. 뒤집히는 경계(역스트레스)까지 수치로 공개.</p>
+<ul><li><strong>측정 도구 자체를 검증</strong> — 초기 Citation 67%가 모델 오류가 아니라 <strong>채점기 정규화 결함</strong>임을 규명·수정·회귀방지.</li><li><strong>재현·감사 가능</strong> — 리포트 값은 엔진/추출 실제 출력에서만(하드코딩·환각 불가). 원문 sha256이 레지스트리와 일치.</li></ul>
+<h2 id="기술">기술</h2>
+<p>Python(표준 라이브러리만, <strong>런타임 의존성 0</strong>), pytest(162), 결정적 시뮬레이션(seed 고정), LLM structured output(Google AI Studio, REST/urllib), 자체완결 HTML 리포트·inline SVG 차트(zero-dep).</p>
+<h2 id="정직성-범위">정직성 · 범위</h2>
+<p>단일 정책 seed(6·30) 기준이며 독립 3자 벤치마크가 아니다. 모집단·담보가격은 <strong>문서화된 가정</strong>(실측 아님, 공개자료만 사용). 여신 최종 결정은 사람 승인을 거친다. 미확정 사실(규제 permalink 등)은 임의 생성하지 않는다.</p>
+<h2 id="산출물-재현">산출물 · 재현</h2>
+<ul><li><strong>프론트도어:</strong> <code>docs/index.html</code> · <strong>임팩트 리포트:</strong> <code>docs/ui/report_6_30.html</code></li><li><strong>검증보고서:</strong> <code>docs/validation/VALIDATION_REPORT.html</code> · <strong>라이브파이어 증거:</strong> <code>docs/livefire/rehearsal_6_30/</code></li><li><strong>재현:</strong> <code>python -m pytest &amp;&amp; python examples/gen_report.py</code> (오프라인, API 키 불필요)</li></ul>
+<hr>
+<p>*제출자: 〈이름〉 · 〈이메일〉 · 〈GitHub 저장소 URL〉 — 위 꺾쇠 항목을 채워 제출하세요.*</p></main></body></html>
