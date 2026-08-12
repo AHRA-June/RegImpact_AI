@@ -1,0 +1,40 @@
+{
+  "regions": [
+    "HWASEONG_DONGTAN",
+    "YONGIN_GIHEUNG",
+    "GURI"
+  ],
+  "unmapped_regions": [],
+  "rows": 24,
+  "direction_counts": {
+    "TIGHTENED": 9,
+    "LOOSENED": 0,
+    "UNCHANGED": 9,
+    "NEEDS_REVIEW": 6
+  },
+  "direction_weight_share": {
+    "TIGHTENED": 0.58,
+    "LOOSENED": 0.0,
+    "UNCHANGED": 0.24,
+    "NEEDS_REVIEW": 0.18
+  },
+  "review_weight_share": 0.23,
+  "exposure_pct_reduction": 0.2857,
+  "exposure_per_unit_delta_eok": -2.024,
+  "exposure_undetermined_share": 0.23,
+  "sensitivity_pct_reduction_band": [
+    0.2292,
+    0.3376
+  ],
+  "sensitivity_robustness": {
+    "여력 축소(감소율>0)": 1.0,
+    "1인당 여력 감소(Δ<0)": 1.0,
+    "강화 과반(강화>50%)": 0.8487
+  },
+  "proposal": {
+    "mapped_consistent": 7,
+    "out_of_scope": 4,
+    "review": 1,
+    "approval_status": "PENDING"
+  }
+}

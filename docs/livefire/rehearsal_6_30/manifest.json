@@ -1,0 +1,94 @@
+{
+  "kind": "livefire-evidence",
+  "mode": "REHEARSAL",
+  "label": "6·30 규제지역 추가 지정 (예행연습)",
+  "policy_id": "FSC_20260630",
+  "analysis_timestamp": "2026-08-12T09:00:00+09:00",
+  "system_name": "regimpact",
+  "system_version": "0.1.0",
+  "system_commit": "c9a939235449e44e9189d04f5db9841d1fa337e3",
+  "sources": [
+    {
+      "doc_id": "FSC_PRESS_20260630",
+      "filename": "fsc_press_20260630.pdf",
+      "sha256": "403fb8fbf8bb1d68cadc7524d1b6631abe11dd2a4c2f62550c9d2873e8f39d23",
+      "bytes": 333198
+    },
+    {
+      "doc_id": "MOLIT_PRESS_20260630",
+      "filename": "molit_press_20260630.pdf",
+      "sha256": "6115271bf81d487e752ccc1315585018e89ed6c5d4137f7ecca271cb66c11edd",
+      "bytes": 350091
+    },
+    {
+      "doc_id": "FAQ_20260630",
+      "filename": "faq_20260630.hwp",
+      "sha256": "ef3dad7b55b5781027393f6114fcb656db618962b627535d6a8da3bf14ea7c9a",
+      "bytes": 53760
+    }
+  ],
+  "extraction_sha256": "d3adc14ae3b52e31db760bee42714ecb4bfafef650d64b02b944868be254e88b",
+  "artifacts": {
+    "report": "report.html",
+    "extraction": "extraction.json",
+    "impact_summary": "impact_summary.json",
+    "record": "README.md"
+  },
+  "assurance": {
+    "citation_correctness": 1.0,
+    "unsupported_claim_rate": 0.0,
+    "citations": "12/12",
+    "rule_regression": "178/178",
+    "rule_regression_pass_rate": 1.0,
+    "change_completeness": 1.0,
+    "exception_recall": 1.0,
+    "effective_date_correct": true,
+    "regions_correct": true
+  },
+  "headline": {
+    "regions": [
+      "HWASEONG_DONGTAN",
+      "YONGIN_GIHEUNG",
+      "GURI"
+    ],
+    "unmapped_regions": [],
+    "rows": 24,
+    "direction_counts": {
+      "TIGHTENED": 9,
+      "LOOSENED": 0,
+      "UNCHANGED": 9,
+      "NEEDS_REVIEW": 6
+    },
+    "direction_weight_share": {
+      "TIGHTENED": 0.58,
+      "LOOSENED": 0.0,
+      "UNCHANGED": 0.24,
+      "NEEDS_REVIEW": 0.18
+    },
+    "review_weight_share": 0.23,
+    "exposure_pct_reduction": 0.2857,
+    "exposure_per_unit_delta_eok": -2.024,
+    "exposure_undetermined_share": 0.23,
+    "sensitivity_pct_reduction_band": [
+      0.2292,
+      0.3376
+    ],
+    "sensitivity_robustness": {
+      "여력 축소(감소율>0)": 1.0,
+      "1인당 여력 감소(Δ<0)": 1.0,
+      "강화 과반(강화>50%)": 0.8487
+    },
+    "proposal": {
+      "mapped_consistent": 7,
+      "out_of_scope": 4,
+      "review": 1,
+      "approval_status": "PENDING"
+    }
+  },
+  "honesty": [
+    "이것은 예행연습(REHEARSAL)이다 — 6·30 등 과거·골드셋 수록 사건으로 하네스가 턴키로 도는지 검증할 뿐, 실제 라이브파이어(발표 당일 신규 처리)가 아니다.",
+    "LTV 판정은 사람이 확정한 결정적 룰엔진 출력이다(AI가 규칙을 만들지 않음, LOCKED §4). 추출·변경요약만 AI 초안이며 인용으로 grounding 검증한다.",
+    "여력 금액·민감도는 문서화된 가정(담보가격 분포·비중) 기반이며 실행액이 아니다. 가격대별 최대한도 상한(6/4/2억) 미적용(상한 성격).",
+    "system_commit 은 분석 산출 시 HEAD(이 매니페스트는 다음 커밋으로 저장되므로 보통 부모 커밋)."
+  ]
+}

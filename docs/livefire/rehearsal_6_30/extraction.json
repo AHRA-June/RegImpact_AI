@@ -1,0 +1,143 @@
+{
+  "policy_id": "FSC_20260630",
+  "effective_from": "2026-07-01",
+  "target_regions": [
+    "화성시 동탄구",
+    "용인시 기흥구",
+    "구리시"
+  ],
+  "changes": [
+    {
+      "category": "REGION",
+      "summary": "화성시 동탄구, 용인시 기흥구, 구리시 투기과열지구 및 조정대상지역 신규 지정",
+      "before": "비규제지역",
+      "after": "투기과열지구 및 조정대상지역",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "경기도 화성시 동탄구, 용인시 기흥구, 구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다."
+      }
+    },
+    {
+      "category": "EFFECTIVE_DATE",
+      "summary": "규제지역 지정에 따른 대출규제 강화 시행일",
+      "before": null,
+      "after": "2026-07-01",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "강화된 대출규제가 7.1일부터 즉시 적용된다."
+      }
+    },
+    {
+      "category": "LTV",
+      "summary": "규제지역 내 주택담보대출 LTV 비율 강화",
+      "before": "70%",
+      "after": "40%",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"
+      }
+    },
+    {
+      "category": "LTV",
+      "summary": "수도권 내 다주택자 주택구입 시 LTV 0% 적용",
+      "before": null,
+      "after": "0%",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+      }
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "생애최초 주택구입자 완화 LTV 적용",
+      "before": "70%",
+      "after": "60~70%",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용"
+      }
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "서민·실수요자 완화 LTV 적용",
+      "before": "60%(아파트 限)",
+      "after": "60%(아파트 限)",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+      }
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "정책모기지(보금자리론) 완화 LTV 적용",
+      "before": "아파트70% / 非아파트65%",
+      "after": "아파트60% / 非아파트55%",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "보금자리론 아파트70% / 非아파트65% 아파트60% / 非아파트55%"
+      }
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "규제지역 효력 발생 전 대출신청 및 매매계약 체결 차주 종전규정 적용",
+      "before": null,
+      "after": "종전 규정이 그대로 적용",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실을 증명한 차주* 등에 대해서는 종전 규정이 그대로 적용된다."
+      }
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "규제지역 지정 전 중도금대출의 잔금대출 전환 시 LTV 경과규정",
+      "before": null,
+      "after": "해당 중도금대출 취급시점의 담보인정비율(LTV) 적용",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "중도금대출이 증액없이 잔금대출로 전환되는 경우에는 해당 중도금대출 취급시점의 담보인정비율(LTV)을 적용할 수 있음"
+      }
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "전세대출 보유 차주의 규제지역 내 3억원 초과 아파트 취득 및 취득자의 전세대출 제한",
+      "before": null,
+      "after": "전세대출 제한",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "전세대출 보유 차주의 규제지역 내 3억원 초과 APT 취득과 규제지역 내 3억원 초과 APT 취득자*의 전세대출 제한(투기과열지구)"
+      }
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "1억원 초과 신용대출 보유 차주의 규제지역 내 주택 구입 제한",
+      "before": null,
+      "after": "1년간 규제지역 내 주택 구입 제한",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터 1년간 규제지역 내 주택 구입 제한"
+      }
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "주택 매매·임대사업자 외 여타 사업자의 규제지역 내 주택구입목적 주담대 제한",
+      "before": null,
+      "after": "규제지역 내 주택구입목적 주담대(사업자대출) 제한",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "주택 매매·임대사업자* 외 여타 사업자도 규제지역 내 주택구입목적 주담대(사업자대출) 제한"
+      }
+    }
+  ]
+}

@@ -22,6 +22,16 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **라이브파이어 하네스 + 6·30 예행연습(livefire)** — `src/regimpact/livefire.py`(`run_livefire`→`EvidenceManifest`).
+  브리프 §19: 실제 신규 대책 발표 시 **당일 전 파이프라인을 돌려 사후 조작 불가 증거 패키지**(원문 해시 +
+  분석 timestamp + git commit + 시스템 버전 + 산출물)를 저장소에 남기는 턴키 러너. 한 번 호출로 공문
+  해시고정→추출→임팩트→여력→민감도→룰변경안→Assurance(grounding/gold/룰-회귀)→HTML 리포트→매니페스트를
+  생성. **6·30로 예행연습(REHEARSAL)** 실행(`examples/livefire_rehearsal.py`→`docs/livefire/rehearsal_6_30/`):
+  원문 3건 sha256이 **SOURCES.md 레지스트리와 정확 일치**(무결성 교차검증), Citation 100%·예외재현 100%·
+  룰회귀 178/178·강화 58%·여력 감소율 28.6%(밴드 [22.9%,33.8%]). **정직성 핵심: 리허설은 실적이 아님을
+  매니페스트·기록·상태판에 명시**(6·30은 과거·골드셋 수록 → 예행일 뿐, 실제 Live Fire #1 슬롯은 ⬜ 대기).
+  신규 정책은 `gold=None`으로 recall 미산정 + 골드 미비 고지(정답 불필요 지표만 보고). `docs/livefire/README.md`
+  상태판(실전 절차 포함). 테스트 7개 추가(총 137). livefire 는 표준 스모크 체인에 미포함(증거 timestamp 고정 의도).
 - **비중/가격 민감도·견고성 분석(sensitivity)** — `src/regimpact/impact/sensitivity.py`. 헤드라인 결론
   (여력 축소·강화 과반·감소율 28.6%)이 **문서화된 가정**(아키타입 비중·지역 mix·담보가격 분포/수준)에
   얼마나 **견고한가**를 측정. **확정 규칙(LTV·시행일·경과규정)은 절대 안 흔들고 가정 입력만 스트레스.**
@@ -130,7 +140,8 @@
   - ~~⑩**정식 PRD 작성**~~ — ✅ 완료(2026-08-12). `docs/prd/PRD.md`(as-built) + failure review template.
   - ~~⑪대출액/가격대 밴드 '영향 금액' 집계~~ — ✅ 완료(2026-08-12). `impact/exposure.py`(여력 변화 금액, 정직성 4고지).
   - ~~⑫비중/가격 민감도 분석~~ — ✅ 완료(2026-08-12). `impact/sensitivity.py`(OAT 토네이도·MC 밴드·견고성·가격 불변성).
-  - **후속:** ⑬(선택) 라이브파이어(브리프 §19).
+  - ~~⑬라이브파이어 하네스(브리프 §19)~~ — ✅ 완료(2026-08-12). `livefire.py`(증거 패키지) + 6·30 예행연습. **실제 Live Fire #1 은 다음 신규 대책 발표 시 `mode="LIVE"` 실행(⬜ 대기).**
+  - **로드맵 소진:** 계획된 Core/Stretch 조각 대부분 관통. 남은 건 사용자 확정 항목(아래)과 실전 라이브파이어.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -184,6 +195,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **라이브파이어 하네스 + 6·30 예행연습(livefire).** `src/regimpact/livefire.py`(`run_livefire`→`EvidenceManifest`, `render_evidence_record`). 브리프 §19: 실제 신규 대책 발표 당일 전 파이프라인을 돌려 **사후 조작 불가 증거 패키지**(원문 sha256 + 분석 timestamp + git commit + 시스템 버전 + 산출물)를 저장소에 남기는 턴키 러너. 한 호출로 공문 해시고정→`impact_from_extraction`→`compute_exposure`→`sensitivity_bands`→`build_proposal`→grounding/gold/`run_regression`→`render_report`→manifest.json/README.md/report.html/extraction.json/impact_summary.json 생성. **6·30 예행연습**(`examples/livefire_rehearsal.py`→`docs/livefire/rehearsal_6_30/`): 원문 3건 sha256이 SOURCES.md 레지스트리와 정확 일치(무결성 교차검증 테스트), Citation 100%·예외재현 100%·룰회귀 178/178·강화 58%·여력 감소율 28.6%(밴드 [22.9%,33.8%])·룰변경안 반영7/코어밖4/검토1/PENDING. **정직성: 리허설은 실적 아님을 매니페스트 mode=REHEARSAL·honesty·기록·상태판에 명시**(6·30은 과거·골드셋 수록 사건 → 예행일 뿐; 실제 Live Fire #1 슬롯 ⬜ 대기). 신규 정책은 `gold=None`→recall 미산정 + '골드셋 미비' 고지(정답 불필요 지표만). `system_commit`=분석 산출 시 HEAD(매니페스트는 다음 커밋에 저장→보통 부모 커밋, 문서화). `docs/livefire/README.md` 상태판+실전 절차. 상위 패키지 export. 테스트 7개 추가(총 137) 통과. livefire는 표준 스모크 체인 미포함(증거 timestamp 매 실행 변동 방지, 수동 실행).
 - **2026-08-12** — ✅ **비중/가격 민감도·견고성 분석(sensitivity).** `src/regimpact/impact/sensitivity.py`. 임팩트/여력 헤드라인이 문서화된 가정(아키타입 비중·지역 mix·담보가격 분포/수준)에 얼마나 견고한지 측정 — **확정 규칙(LTV·시행일·경과규정)은 고정, 가정 입력만 스트레스**(Model Risk 민감도 규율). (아키타입×지역) 응답표를 엔진으로 1회 산출(`build_response_table`) 후 모든 섭동은 순수 가중 산술(`compute_headline`) → 수천 표본 즉시(base가 analyze_impact/compute_exposure와 정확 일치, 교차확인 테스트). **① OAT 토네이도(`oat_tornado`)**: 여력 감소율(%) 최대 driver=무주택 일반 비중(스윙 8%p), 담보가격 수준·지역 mix·다주택/유주택 비중은 0; 1인당 억 금액은 담보가격 수준이 최대 driver(같은 출력도 비율%↔수준억에 따라 driver 뒤바뀜). **② 몬테카를로(`monte_carlo`/`sensitivity_bands`, Dirichlet 집중도 40+가격 로그정규 σ0.20, n=3000)**: 여력 감소율 base 28.6% → P5–P95 [22.9%, 33.8%]. **견고성: 여력 축소·1인당 감소 100% 표본 성립(방향 견고), '강화 과반'은 85% 표본만(가정 취약 — 정직 표기).** **③ 가격 불변성**: 감소율(%)은 담보가격 수준에 불변(가격이 세그먼트 독립·균일→상쇄), 절대 금액만 비례 이동(테스트로 증명). `report.py` 여력 패널에 견고성 밴드 한 줄 통합(`_sensitivity_note`, report_6_30.html 25.0KB) + `render_report(sensitivity=…)`/`gen_report.py` 연결. `examples/demo_sensitivity.py`·`docs/eval/sensitivity_impact.md`(정직성: 가정 민감도이지 실세계 불확실성 정량화 아님). 테스트 8개 추가(총 130) 통과.
 - **2026-08-12** — ✅ **대출 여력 영향 금액 집계(exposure).** `src/regimpact/impact/exposure.py`. Impact Matrix의 LTV %p 변화를 문서화된 담보가격 밴드(PRICE_BANDS: 6억이하 30%@4.5 / 6~9억 28%@7.5 / 9~15억 25%@12 / 15~25억 13%@19 / 25억초과 4%@30, 가중평균 10.12억 — 시나리오 가정)와 결합해 **대출 여력(loanable capacity)=담보가격×적용 LTV** 변화 금액으로 환산. before/after LTV는 가격 무관이라 세그먼트당 1회 평가 후 (weight×share×price)로 배분. `compute_exposure`→`ExposureReport`(밴드별/세그먼트별/집계, per-unit 여력). **6·30: 판정가능 1인당 평균 여력 7.08억→5.06억(Δ −2.02억, 감소율 28.6%), 산정불가 23%.** 두 경로 수렴(정확 가중 28.57% ≈ 몬테카를로 5000명+담보가격 몬테카를로 부여 28.80%). **정직성 4고지**(여력≠실행액 / LTV만·최대한도 상한 6·4·2억 미적용=상한 성격 / 담보가격 분포=가정 / 자동판정 불가분=금액 산정 불가로 분리, 조용한 누락 금지). `CustomerSegment.property_price` 필드 추가(exposure 전용, `.application()`에 미전달 → 룰 판정 무간섭·테스트로 확인). `report.py`에 '영향 금액 — 대출 여력(가정)' 패널 통합 + `gen_report.py` 연결(report_6_30.html 24.8KB). `examples/demo_exposure.py`·`docs/eval/exposure_impact.md`. 테스트 11개 추가(총 122) 통과.
 - **2026-08-12** — ✅ **정식 PRD 작성(as-built).** `docs/prd/PRD.md`(v1.0). 브리프 §25 전 항목을 구현 반영으로 구체화: 사용자·Use Case(primary user/trigger/workflow/human review point/success criteria), 데이터 8스키마(실제 dataclass 매핑 + 구현상태), 컴포넌트 12(모듈경로+상태), 평가(DEV/LOCKED/CHALLENGE·지표공식·확정임계·high-risk 정의·**error taxonomy E1~E9**·failure review template), 배포(local first·오프라인 재현·secrets·재현성). 아키텍처 다이어그램, Assurance 원칙 5, 로드맵/Non-goals, 문서 추적맵 포함. `docs/prd/failure_review_template.md` 신설(실측 실패 2건 예시=grounding 오탐·예외 recall). prd/README·STATE 갱신. 코드 변경 없음(테스트 112 유지).

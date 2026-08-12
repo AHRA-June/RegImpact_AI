@@ -36,6 +36,11 @@ from .rule_proposal import (
     build_proposal,
     format_proposal,
 )
+from .livefire import (
+    EvidenceManifest,
+    render_evidence_record,
+    run_livefire,
+)
 
 __all__ = [
     "evaluate",
@@ -67,4 +72,8 @@ __all__ = [
     "RuleChangeProposal",
     "RuleDelta",
     "Disposition",
+    # 라이브파이어 (증거 패키지)
+    "run_livefire",
+    "render_evidence_record",
+    "EvidenceManifest",
 ]
