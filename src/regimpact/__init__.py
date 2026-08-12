@@ -13,6 +13,13 @@ from .models import (
     RegulatedType,
 )
 from .rule_engine import evaluate
+from .impact import (
+    CustomerSegment,
+    ImpactMatrix,
+    SegmentImpact,
+    analyze_impact,
+    format_report,
+)
 
 __all__ = [
     "evaluate",
@@ -23,4 +30,10 @@ __all__ = [
     "ReasonCode",
     "RegionStatus",
     "RegulatedType",
+    # Impact Matrix (E2E)
+    "analyze_impact",
+    "format_report",
+    "ImpactMatrix",
+    "SegmentImpact",
+    "CustomerSegment",
 ]
