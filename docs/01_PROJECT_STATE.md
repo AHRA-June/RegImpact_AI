@@ -22,6 +22,12 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **Rule Change Proposal 구조화 산출** — `src/regimpact/rule_proposal.py` (`build_proposal`→`RuleChangeProposal`).
+  파이프라인 마지막 조각: 공문→추출→**룰 변경안(초안)**→사람 확정 룰 대조. 추출된 각 변경을 룰엔진 실제 룰
+  표면(LTV 상수·지역 버전·경과규정 컷오프·시행일)에 매핑하고 **엔진 현재값과 교차 대조**. disposition:
+  MAPPED_CONSISTENT(반영)/DIVERGENT(불일치검토)/OUT_OF_SCOPE(Discovery)/NEEDS_REVIEW. **approval_status는 항상
+  PENDING**(자동 확정 없음, LOCKED §4). 6·30: 12건 중 **반영 7 · 코어밖 4 · 검토 1 · 불일치 0**. HTML 리포트에
+  섹션 통합, `examples/demo_rule_proposal.py`. provenance(인용) 전건 보존. 테스트 15개 추가(총 105).
 - **골드셋 확대 — 층화 합성 포트폴리오** — `src/regimpact/tc_generator/portfolio.py`. seed 30건을 넘어
   입력 차원(지역/시점·소유·예외·경과규정·스코프)을 체계적으로 층화 스윕해 **178건** 결정적 생성.
   metrics_spec §3 분모 확대(Rule-regression **178/178 100%**, Boundary 40/40, Conflict 33/33). 기대값은
@@ -79,9 +85,10 @@
   - ~~③**추출→Impact Matrix 실제 연결**~~ — ✅ 완료(2026-08-12). `impact_from_extraction`. 공문→추출→임팩트 관통.
   - ~~④**UI 연동**~~ — ✅ 완료(2026-08-12). `report.py` HTML 리포트 생성기. 하드코딩값→엔진 실제 출력.
   - ~~⑥**골드셋 확대**~~ — ✅ 완료(2026-08-12). 층화 합성 포트폴리오 178건 + DEV/LOCKED/CHALLENGE 3분할.
+  - ~~⑦**Rule Change Proposal 구조화 산출·리포트 통합**~~ — ✅ 완료(2026-08-12). `rule_proposal.py`.
   - **보류** ⑤Anthropic 교차 실측 — 사용자 유료 API 미사용. 백엔드 코드는 준비(`REGIMPACT_LLM=anthropic`).
-  - **후속:** ⑦(선택) Rule Change Proposal 구조화 산출·리포트 통합 ⑧포트폴리오 수천까지 확장·비중 실측화
-    ⑨metrics_spec 임계값 확정 · regulatory_facts URL 채우기.
+  - **후속:** ⑧포트폴리오 수천까지 확장·비중 실측화 ⑨metrics_spec 임계값 확정 · regulatory_facts URL 채우기
+    ⑩(선택) 정식 PRD 작성(`docs/prd/`).
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -135,6 +142,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **Rule Change Proposal 구조화 산출 + 리포트 통합.** `src/regimpact/rule_proposal.py`(`build_proposal`→`RuleChangeProposal`/`RuleDelta`). 파이프라인 마지막 조각: 추출된 각 변경을 룰엔진 실제 룰 표면(LTV_REGULATED_STANDARD·LTV_FIRST_HOME·LTV_REAL_DEMAND·LTV_MULTI·REG_EFFECTIVE·GRANDFATHERING_CUTOFF·REGION_VERSIONS)에 매핑하고 **사람 확정 엔진 현재값과 교차 대조**. 값 파싱(퍼센트/범위) + 키워드 매핑(생애최초/서민실수요/정책모기지/다주택/유주택). disposition 4종. **approval_status 항상 PENDING**(자동 확정 없음, LOCKED §4). 6·30 실제 추출(12건): 반영 7·코어밖 4(정책모기지+전세/신용/사업자→Discovery)·검토 1(중도금→잔금 미묘 룰)·**불일치 0**(AI 추출이 확정 엔진과 충돌 안 함) → "AI 초안이 사람 확정 룰과 일치/코어밖" Assurance 스토리. provenance(인용) 전건 보존. `report.py`에 '제안된 룰 변경(초안)' 섹션 통합(report_6_30.html 23KB), `examples/demo_rule_proposal.py`, `gen_report.py`에 연결. 테스트 15개 추가(총 105) 통과.
 - **2026-08-12** — ✅ **골드셋 확대: 층화 합성 포트폴리오 + 3분할.** `tc_generator/portfolio.py`. 입력 차원(시나리오5·소유5·예외4·경과규정6·스코프)을 체계적 층화 스윕해 **178건** 결정적 생성(경과규정을 전용 층에 가두어 카테고리 균형; 초안 500/610→균형). 기대값은 독립 명세 오라클(`expected_outcome`, 엔진 미import)에서만 유도 → 대량에서도 tautology 아님. metrics_spec §3 분모 확대: **Rule-regression 178/178(100%)**, Boundary 40/40, Conflict 33/33. LOCKED §0-5: **DEV 52/LOCKED 59/CHALLENGE 67** 결정적 해시 분할(CHALLENGE 하드 카테고리 45% 가중), `cases_in_split()`로 개발중 DEV만 열람 강제 가능. `docs/eval/goldset_manifest.json`에 freeze(생성기와 정합성 테스트). regression에 `pass_rate_by_split()` + split×category 교차표. mutation test(엔진 상수 오염→회귀 실패)로 큰 골드셋의 이빨 확인. `examples/demo_portfolio.py`·`docs/eval/goldset_portfolio.md`. 테스트 9개 추가(총 90) 통과. **Anthropic 교차 실측은 사용자 결정으로 보류**(유료 API 미사용) — REST 백엔드는 준비 완료(`2dfc6cd`).
 - **2026-08-12** — ✅ **UI 연동: HTML 리포트 생성기.** `src/regimpact/report.py`(`render_report`). PolicyImpact + 추출 + Assurance(grounding/gold)를 자체완결 HTML 대시보드로 렌더. **모든 값이 엔진/추출 실제 출력에서만** 오므로 Stitch 목업의 도메인 환각(세종·부산·LTV 60→50, `docs/ui/stitch_review.md`) 문제가 구조적으로 불가능 — 이게 "UI 연동"의 본질. DESIGN.md 디자인 언어(Institutional Navy #022448, Noto Sans/JetBrains Mono, 라이트/다크 대응). 섹션: 헤더밴드(정책·시행일·지역·비교시점) / Assurance 타일(Citation·환각·완전성·예외재현·지역) / 무엇이 달라졌나(추출 변경+원문 인용) / 누가 영향받나(지역 그룹핑 임팩트 표). `examples/gen_report.py`로 저장 추출→오프라인 실제 리포트 생성(`docs/ui/report_6_30.html` 18KB, 24행, 전 지표 녹색). `regions.py`에 REGION_DISPLAY_NAME 추가. 테스트 6개(실제값 존재·환각값 부재 회귀 포함, 총 81) 통과.
 - **2026-08-12** — ✅ **추출 → Impact Matrix 실제 연결(E2E 진짜 데이터 관통).** `src/regimpact/impact/connect.py`(`impact_from_extraction`→`PolicyImpact`). LLM 추출의 policy_id·effective_from·target_regions(한글명)를 Impact Matrix 입력으로 연결: effective_from에서 before(−1일)/after(+1일) 유도, 지역명→코드 정규화(미상은 unmapped로 표면화), 각 정규화 지역 × 대표 고객유형(archetype 8종) → 세그먼트 → 룰엔진 before/after 차등. 저장 추출(`extractor_run_6_30_gemini.json`)로 오프라인 E2E 관통: 3지역×8=24행, 강화 9·유지 9·검토 6, 가중평균 Δ −20pp. LOCKED §4: LLM은 '정책·지역·시점' 좌표만 제공, LTV 판정은 deterministic 룰. `segments.py`를 archetype(지역 무관 템플릿)+`segments_for_region`으로 리팩터(하위호환 SIX_THIRTY_SEGMENTS 유지). connect는 extractor를 런타임 import하지 않음(레이어 독립, duck typing). ImpactMatrix에 regions/unmapped provenance, format_report에 노출. `examples/demo_extractor_to_impact.py`. 테스트 5개 추가(총 75) 통과.

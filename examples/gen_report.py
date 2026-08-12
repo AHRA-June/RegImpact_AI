@@ -21,6 +21,7 @@ from regimpact.extractor import (  # noqa: E402
 )
 from regimpact.impact import impact_from_extraction  # noqa: E402
 from regimpact.report import render_report  # noqa: E402
+from regimpact.rule_proposal import build_proposal  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 SAVED = REPO / "docs" / "eval" / "extractor_run_6_30_gemini.json"
@@ -35,12 +36,14 @@ def main() -> None:
     policy_impact = impact_from_extraction(extraction)
     grounding = check_citation_grounding(extraction, sources)
     gold = score_against_gold(extraction, GOLD)
+    proposal = build_proposal(extraction, generated_on=date(2026, 8, 12))
 
     html = render_report(
         policy_impact,
         extraction=extraction,
         grounding=grounding,
         gold=gold,
+        proposal=proposal,
         generated_on=date(2026, 8, 12),
     )
     OUT.write_text(html, encoding="utf-8")
@@ -49,6 +52,9 @@ def main() -> None:
     print(f"  Assurance: Citation {grounding.citation_correctness:.0%} · "
           f"환각 {grounding.unsupported_claim_rate:.0%} · "
           f"예외재현 {gold.exception_recall:.0%} · Regions {'OK' if gold.regions_correct else 'MISS'}")
+    pc = proposal.counts()
+    print(f"  Rule Proposal: 반영 {pc['MAPPED_CONSISTENT']} · 코어밖 {pc['OUT_OF_SCOPE']} · "
+          f"검토 {pc['MAPPED_DIVERGENT'] + pc['NEEDS_REVIEW']} · 승인={proposal.approval_status}")
 
 
 if __name__ == "__main__":

@@ -29,6 +29,13 @@ from .impact import (
     impact_from_extraction,
 )
 from .report import render_report
+from .rule_proposal import (
+    Disposition,
+    RuleChangeProposal,
+    RuleDelta,
+    build_proposal,
+    format_proposal,
+)
 
 __all__ = [
     "evaluate",
@@ -54,4 +61,10 @@ __all__ = [
     "CustomerSegment",
     # HTML 리포트(UI)
     "render_report",
+    # Rule Change Proposal
+    "build_proposal",
+    "format_proposal",
+    "RuleChangeProposal",
+    "RuleDelta",
+    "Disposition",
 ]

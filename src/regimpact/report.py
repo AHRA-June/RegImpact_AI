@@ -18,6 +18,7 @@ from typing import Any, Optional
 
 from .impact.matrix import EvaluationStatus, ImpactDirection, ImpactMatrix, SegmentImpact
 from .regions import region_display_name
+from .rule_proposal import Disposition, RuleChangeProposal
 
 _DIR_LABEL = {
     ImpactDirection.TIGHTENED: ("▼ 강화", "t"),
@@ -193,12 +194,64 @@ def _impact_section(matrix: ImpactMatrix) -> str:
     )
 
 
+_DISP_META = {
+    Disposition.MAPPED_CONSISTENT: ("반영됨", "ok"),
+    Disposition.MAPPED_DIVERGENT: ("검토(불일치)", "warn"),
+    Disposition.OUT_OF_SCOPE: ("코어밖", "muted"),
+    Disposition.NEEDS_REVIEW: ("검토필요", "warn"),
+}
+
+
+def _proposal_section(proposal: Any) -> str:
+    if proposal is None or not getattr(proposal, "deltas", None):
+        return ""
+    rows: list[str] = []
+    for d in proposal.deltas:
+        label, cls = _DISP_META[d.disposition]
+        cat = _CAT_KO.get(d.category, d.category)
+        ba = ""
+        if d.extracted_before or d.extracted_after:
+            b = _esc(d.extracted_before) if d.extracted_before else "—"
+            a = _esc(d.extracted_after) if d.extracted_after else "—"
+            ba = f'<span class="ba"><span class="b">{b}</span><span class="arr">→</span><span class="a">{a}</span></span>'
+        eng = _esc(d.engine_current) if d.engine_current else "—"
+        rows.append(
+            "<tr>"
+            f'<td><span class="cat cat-{_esc(d.category)}">{_esc(cat)}</span></td>'
+            f'<td class="seg">{_esc(d.summary)}{ba}</td>'
+            f'<td class="num">{_esc(d.target_field or "—")}</td>'
+            f'<td class="num">{eng}</td>'
+            f'<td><span class="disp {cls}">{_esc(label)}</span></td>'
+            "</tr>"
+        )
+    c = proposal.counts()
+    foot = (
+        f'<div class="tbl-foot">'
+        f'<span>제안 <b>{len(proposal.deltas)}</b>건</span>'
+        f'<span>✓ 반영 <b>{c["MAPPED_CONSISTENT"]}</b></span>'
+        f'<span>◦ 코어밖 <b>{c["OUT_OF_SCOPE"]}</b></span>'
+        f'<span>▲ 검토 <b>{c["MAPPED_DIVERGENT"] + c["NEEDS_REVIEW"]}</b></span>'
+        f'<span>승인상태 <b>{_esc(proposal.approval_status)}</b></span></div>'
+    )
+    return (
+        '<section class="panel"><h2>제안된 룰 변경 <span class="draft">초안</span></h2>'
+        '<p class="lead">추출된 각 변경을 룰엔진의 실제 룰 표면에 매핑하고 <b>사람이 확정한 룰엔진의 '
+        '현재값과 대조</b>합니다. “반영됨”=엔진과 일치, “코어밖”=Discovery(자동판정 밖), '
+        '“검토”=사람 판단 필요. <b>승인 전까지 적용되지 않습니다(자동 확정 없음).</b></p>'
+        '<div class="tbl-wrap"><table>'
+        '<thead><tr><th>구분</th><th>변경 요약</th><th>룰 필드</th>'
+        '<th>엔진 현재값</th><th>대조</th></tr></thead>'
+        f'<tbody>{"".join(rows)}</tbody></table>{foot}</div></section>'
+    )
+
+
 def render_report(
     policy_impact: Any,
     *,
     extraction: Any = None,
     grounding: Any = None,
     gold: Any = None,
+    proposal: Any = None,
     generated_on: Optional[date] = None,
     title: str = "규제 변경 영향분석 리포트",
 ) -> str:
@@ -234,6 +287,7 @@ def render_report(
         f'{header}<main>'
         f'{_assurance_section(grounding, gold)}'
         f'{_changes_section(extraction)}'
+        f'{_proposal_section(proposal)}'
         f'{_impact_section(matrix)}'
         f'</main>{footer}</body></html>'
     )
@@ -319,6 +373,12 @@ tr.grp td{background:var(--container-2);font-weight:640;font-size:.82rem;padding
 .dir.r{background:var(--review-bg);color:var(--review)}
 .dir.l{background:var(--hold-bg);color:var(--hold)}
 .star{color:var(--tighten);font-weight:700}
+.disp{font-family:var(--mono);font-size:.72rem;font-weight:650;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.disp.ok{background:var(--hold-bg);color:var(--hold)}
+.disp.warn{background:var(--review-bg);color:var(--review)}
+.disp.muted{background:var(--container-2);color:var(--ink-soft)}
+h2 .draft{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.08em;
+  vertical-align:middle;padding:2px 7px;border-radius:5px;background:var(--review-bg);color:var(--review);margin-left:8px}
 .tbl-foot{display:flex;flex-wrap:wrap;gap:6px 20px;padding:12px 15px;font-size:.8rem;color:var(--ink-soft);
   background:var(--container);border-top:1px solid var(--line)}
 .tbl-foot b{color:var(--ink);font-family:var(--mono)}
