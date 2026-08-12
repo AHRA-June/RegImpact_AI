@@ -473,6 +473,64 @@ def _proposal_section(proposal: Any) -> str:
     )
 
 
+_CAT_DISP_META = {
+    "EDIT_REQUIRED": ("수정필요", "warn"),
+    "NEEDS_REVIEW": ("검토", "warn"),
+    "INDIRECT": ("간접영향", "muted"),
+    "UNAFFECTED": ("무관", "ok"),
+}
+
+
+def _catalog_section(catalog: Any) -> str:
+    """내규 영향도 맵(선택) — 규제 변경이 어느 모의 내규를 건드리는지."""
+    if catalog is None or not getattr(catalog, "items", None):
+        return ""
+    order = {"EDIT_REQUIRED": 0, "NEEDS_REVIEW": 1, "INDIRECT": 2, "UNAFFECTED": 3}
+    items = sorted(catalog.items, key=lambda i: order.get(i.disposition.value, 9))
+    rows: list[str] = []
+    for it in items:
+        label, cls = _CAT_DISP_META.get(it.disposition.value, ("?", "muted"))
+        r = it.rule
+        if it.drivers:
+            d = it.drivers[0]
+            more = f' <span class="muted">외 {len(it.drivers)-1}건</span>' if len(it.drivers) > 1 else ""
+            driver = f'{_esc(d["summary"])}{more}'
+            edit = _esc(it.suggested_edit)
+        else:
+            driver = '<span class="muted">—</span>'
+            edit = '<span class="muted">영향 없음</span>'
+        rows.append(
+            "<tr>"
+            f'<td class="num">{_esc(r.rid)}</td>'
+            f'<td class="seg">{_esc(r.title)}<span class="muted"> · {_esc(r.category)}</span></td>'
+            f'<td>{driver}</td>'
+            f'<td>{edit}</td>'
+            f'<td><span class="disp {cls}">{_esc(label)}</span></td>'
+            "</tr>"
+        )
+    c = catalog.counts()
+    foot = (
+        f'<div class="tbl-foot">'
+        f'<span>내규 <b>{len(items)}</b>건</span>'
+        f'<span>✎ 수정필요 <b>{c["EDIT_REQUIRED"]}</b></span>'
+        f'<span>▲ 검토 <b>{c["NEEDS_REVIEW"]}</b></span>'
+        f'<span>◦ 간접 <b>{c["INDIRECT"]}</b></span>'
+        f'<span>· 무관 <b>{c["UNAFFECTED"]}</b></span>'
+        f'<span>승인상태 <b>{_esc(catalog.approval_status)}</b></span></div>'
+    )
+    return (
+        '<section class="panel"><h2>우리 규정 어디를 고치나 — 내규 영향도 맵 '
+        '<span class="draft">모의·초안</span></h2>'
+        '<p class="lead">규제 변경을 <b>여신 내규 대장</b>에 매핑해 <b>수정이 필요한 규정</b>을 짚습니다. '
+        '“무관”(예금·카드)까지 함께 보여 <b>과잉 플래그가 없음</b>을 확인합니다. '
+        '⚠️ 내규는 <b>모의(가짜) 규정</b>이며(실제 회사 문서 아님), 수정안은 <b>초안·승인 PENDING</b>입니다.</p>'
+        '<div class="tbl-wrap"><table>'
+        '<thead><tr><th>규정ID</th><th>내규</th><th>근거 규제변경</th>'
+        '<th>수정안(초안)</th><th>판정</th></tr></thead>'
+        f'<tbody>{"".join(rows)}</tbody></table>{foot}</div></section>'
+    )
+
+
 def render_report(
     policy_impact: Any,
     *,
@@ -480,6 +538,7 @@ def render_report(
     grounding: Any = None,
     gold: Any = None,
     proposal: Any = None,
+    catalog: Any = None,
     exposure: Any = None,
     sensitivity: Any = None,
     tornado: Any = None,
@@ -519,6 +578,7 @@ def render_report(
         f'{_assurance_section(grounding, gold)}'
         f'{_changes_section(extraction)}'
         f'{_proposal_section(proposal)}'
+        f'{_catalog_section(catalog)}'
         f'{_impact_section(matrix)}'
         f'{_exposure_section(exposure, sensitivity, tornado)}'
         f'</main>{footer}</body></html>'

@@ -16,6 +16,7 @@ FIX = {
                  "per_unit_delta": -2.02, "undetermined_share": 0.23},
     "sensitivity": {"band": [0.229, 0.338], "robust_shrink": 1.0, "robust_tighten": 0.849},
     "proposal": {"mapped": 7, "oos": 4, "review": 1, "status": "PENDING"},
+    "catalog": {"edits": 9, "review": 1, "indirect": 1, "unaffected": 2},
     "artifacts": [
         {"title": "임팩트 리포트", "tag": "HTML", "desc": "설명", "href": "ui/report_6_30.html"},
         {"title": "검증보고서", "tag": "HTML", "desc": "설명", "href": "validation/VALIDATION_REPORT.html"},

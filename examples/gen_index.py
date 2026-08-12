@@ -27,6 +27,7 @@ from regimpact.impact import (  # noqa: E402
 )
 from regimpact.landing import render_landing  # noqa: E402
 from regimpact.regions import region_display_name  # noqa: E402
+from regimpact.rule_catalog import map_catalog_impact  # noqa: E402
 from regimpact.rule_proposal import build_proposal  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
@@ -58,6 +59,8 @@ def main() -> None:
     ex = compute_exposure([r.segment for r in m.rows])
     sb = sensitivity_bands(build_response_table(), n=3000, seed=42)
     prop = build_proposal(ext, generated_on=date(2026, 8, 12))
+    cat = map_catalog_impact(ext)
+    cc = cat.counts()
     ds = m.direction_weight_share()
     pc = prop.counts()
     p5, _p50, p95 = sb.bands["exposure_pct_reduction"]
@@ -98,6 +101,12 @@ def main() -> None:
             "oos": pc["OUT_OF_SCOPE"],
             "review": pc["MAPPED_DIVERGENT"] + pc["NEEDS_REVIEW"],
             "status": prop.approval_status,
+        },
+        "catalog": {
+            "edits": cc["EDIT_REQUIRED"],
+            "review": cc["NEEDS_REVIEW"],
+            "indirect": cc["INDIRECT"],
+            "unaffected": cc["UNAFFECTED"],
         },
         "artifacts": [
             {"title": "임팩트 리포트", "tag": "HTML",

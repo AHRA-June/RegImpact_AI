@@ -41,6 +41,14 @@ from .livefire import (
     render_evidence_record,
     run_livefire,
 )
+from .rule_catalog import (
+    DEFAULT_CATALOG,
+    CatalogImpact,
+    InternalRule,
+    RuleImpact,
+    format_catalog,
+    map_catalog_impact,
+)
 
 __all__ = [
     "evaluate",
@@ -76,4 +84,11 @@ __all__ = [
     "run_livefire",
     "render_evidence_record",
     "EvidenceManifest",
+    # 내규 영향도 맵
+    "map_catalog_impact",
+    "format_catalog",
+    "CatalogImpact",
+    "InternalRule",
+    "RuleImpact",
+    "DEFAULT_CATALOG",
 ]

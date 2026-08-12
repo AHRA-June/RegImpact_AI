@@ -27,6 +27,7 @@ from regimpact.impact import (  # noqa: E402
     sensitivity_bands,
 )
 from regimpact.report import render_report  # noqa: E402
+from regimpact.rule_catalog import map_catalog_impact  # noqa: E402
 from regimpact.rule_proposal import build_proposal  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
@@ -43,6 +44,7 @@ def main() -> None:
     grounding = check_citation_grounding(extraction, sources)
     gold = score_against_gold(extraction, GOLD)
     proposal = build_proposal(extraction, generated_on=date(2026, 8, 12))
+    catalog = map_catalog_impact(extraction)
     exposure = compute_exposure([r.segment for r in policy_impact.matrix.rows])
     table = build_response_table()
     sensitivity = sensitivity_bands(table, n=3000, seed=42)
@@ -60,6 +62,7 @@ def main() -> None:
         grounding=grounding,
         gold=gold,
         proposal=proposal,
+        catalog=catalog,
         exposure=exposure,
         sensitivity=sensitivity,
         tornado=tornado,
@@ -74,6 +77,9 @@ def main() -> None:
     pc = proposal.counts()
     print(f"  Rule Proposal: 반영 {pc['MAPPED_CONSISTENT']} · 코어밖 {pc['OUT_OF_SCOPE']} · "
           f"검토 {pc['MAPPED_DIVERGENT'] + pc['NEEDS_REVIEW']} · 승인={proposal.approval_status}")
+    cc = catalog.counts()
+    print(f"  내규 영향도: 수정필요 {cc['EDIT_REQUIRED']} · 검토 {cc['NEEDS_REVIEW']} · "
+          f"간접 {cc['INDIRECT']} · 무관 {cc['UNAFFECTED']}")
     print(f"  Exposure: 여력 감소율 {exposure.pct_reduction:.1%} · "
           f"1인당 Δ {exposure.per_unit_delta():+.2f}억 · 산정불가 {exposure.undetermined_share:.0%}")
     sr = sensitivity.bands["exposure_pct_reduction"]

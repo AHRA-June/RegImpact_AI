@@ -22,6 +22,15 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **내규 영향도 맵(rule_catalog) + 임팩트 리포트 차트 3종 + 사람말 설명서** — (1) **`src/regimpact/rule_catalog.py`**:
+  "규제가 바뀌면 우리 규정 어디를 고쳐야 하나". `rule_proposal.py`(룰엔진 내부 파라미터)와 달리 **여신 내규
+  대장(규정 문서) 관점.** 모의 내규 13건에 6·30 매핑 → **수정필요 9·검토 1(DTI)·간접영향 1(최대한도)·무관 2
+  (예금·카드)** — 무관 규정까지 포함해 **과잉 플래그 없음** 증명. 결정적(카테고리+키워드), 수정안 초안·승인
+  PENDING, 내규는 모의(가짜)임을 명시(LOCKED §8). 리포트에 "내규 영향도 맵" 패널 + 프론트도어 sbox +
+  `examples/demo_rule_catalog.py`·`docs/eval/rule_catalog_impact.md`. (2) **임팩트 리포트 inline SVG 차트 3종**
+  (유형별 LTV Δ 막대·밴드별 여력 전후·민감도 토네이도, zero-dep, 표와 병기, Chromium 스크린샷 검증). (3) 버그
+  수정: `_display_label`이 "서민·실수요"를 "서민"으로 자르던 문제 → region_code 접미만 제거. (4) 사람말 설명서
+  `docs/06_WALKTHROUGH.md`(인계 0번). 테스트 8개 추가(catalog 6 + report 2, 총 156).
 - **프론트도어 허브 페이지 + 문서 HTML 렌더러** — `docs/index.html`(생성기 `examples/gen_index.py` +
   순수 렌더러 `src/regimpact/landing.py`). 시스템을 1분에 이해시키는 단일 진입점: 헤드라인 지표 6타일
   (Citation 100%·환각 0%·예외재현 100%·룰회귀 178/178·여력 −28.6%·사람검토 23%) + 파이프라인 10단계

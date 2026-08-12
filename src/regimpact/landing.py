@@ -123,7 +123,11 @@ def render_landing(m: dict[str, Any]) -> str:
         f'<div class="sbox"><div class="sb-k">룰 변경안</div><div class="sb-v">반영 {pr["mapped"]} · '
         f'코어밖 {pr["oos"]} · 검토 {pr["review"]}</div><div class="sb-n">승인 {_esc(pr["status"])}'
         ' — 자동확정 없음</div></div>'
-        '</div></section>'
+        + (f'<div class="sbox"><div class="sb-k">내규 영향도(모의)</div><div class="sb-v">수정필요 '
+           f'{m["catalog"]["edits"]} · 무관 {m["catalog"]["unaffected"]}</div>'
+           f'<div class="sb-n">규정 대장 매핑 — 과잉 플래그 없음</div></div>'
+           if m.get("catalog") else "")
+        + '</div></section>'
         '</main>'
         # FOOTER
         '<footer class="foot"><div class="inner">'
