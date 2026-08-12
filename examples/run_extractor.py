@@ -94,6 +94,9 @@ def main() -> None:
           f"Exception Recall: {s.exception_recall:.0%}  "
           f"Effective-date: {'OK' if s.effective_date_correct else 'MISS'}  "
           f"Regions: {'OK' if s.regions_correct else 'MISS'}")
+    print(f"    지역 정규화: {s.normalized_regions}")
+    if s.unmapped_regions:
+        print(f"    ⚠ 코드 매핑 실패(미상 지역): {s.unmapped_regions}")
     if s.missed_changes:
         print(f"    놓친 변경: {s.missed_changes}")
     if s.missed_exceptions:

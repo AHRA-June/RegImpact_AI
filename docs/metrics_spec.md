@@ -57,8 +57,9 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 | Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 | (미측정) |
 
 > ✅ **Exception Recall 50%→100%**(2026-08-12): 프롬프트 개선(예외 개별 분리)으로 서민·실수요 포착.
-> 항목 6→12건으로 세분화돼도 Citation 100%·환각 0% 유지. **Regions**는 지역을 한글명으로 반환해
-> 코드 불일치(MISS) — 추출은 정확하나 정규화 계층 필요(미해결). 상세 `extractor_run_6_30.md`.
+> 항목 6→12건으로 세분화돼도 Citation 100%·환각 0% 유지.
+> ✅ **Regions MISS→OK**(2026-08-12): 지역명→canonical code **정규화 계층**(`regions.normalize_regions`)
+> 추가. 추출은 한글명 보존, 채점 시점에만 코드로 대조. 미상 지역은 `unmapped`로 표면화. 상세 `extractor_run_6_30.md`.
 
 ## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2) — [DEEP] dimension ①
 

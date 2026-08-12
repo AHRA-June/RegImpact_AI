@@ -8,8 +8,9 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from ..regions import normalize_regions
 from .schema import RegChangeExtraction, RegChangeItem
 
 
@@ -72,6 +73,8 @@ class GoldReport:
     regions_correct: bool
     missed_changes: list[str]
     missed_exceptions: list[str]
+    normalized_regions: list[str] = field(default_factory=list)  # 코드로 정규화된 추출 지역
+    unmapped_regions: list[str] = field(default_factory=list)    # 코드 매핑 실패(표면화)
 
 
 def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldReport:
@@ -111,7 +114,10 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
             missed_exc.append(exc["name"])
     total_exc = len(gold.get("exceptions", [])) or 1
 
-    regions_correct = set(extraction.target_regions) >= set(gold.get("target_regions", []))
+    # 지역: 한글명 → canonical code 정규화 후 비교(추출 원본은 훼손 안 함).
+    # 매핑 실패명은 unmapped로 표면화(조용한 누락 금지).
+    norm_codes, unmapped = normalize_regions(extraction.target_regions)
+    regions_correct = set(norm_codes) >= set(gold.get("target_regions", []))
     eff_correct = (extraction.effective_from or "") == gold.get("effective_from", "")
 
     return GoldReport(
@@ -121,4 +127,6 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
         regions_correct=regions_correct,
         missed_changes=missed_changes,
         missed_exceptions=missed_exc,
+        normalized_regions=norm_codes,
+        unmapped_regions=unmapped,
     )

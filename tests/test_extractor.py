@@ -136,6 +136,30 @@ def test_score_against_gold():
     assert g.missed_changes == []
 
 
+def test_score_normalizes_korean_region_names():
+    """추출이 지역을 한글명으로 줘도 코드 정규화 후 Regions OK (발견 3 수정)."""
+    sources = load_sources()
+    d = _fake_extraction_dict(sources)
+    d["target_regions"] = ["경기도 화성시 동탄구", "용인시 기흥구", "구리시"]
+    ext = extract_regchange(sources, complete=lambda s, u: d)
+    g = score_against_gold(ext, GOLD)
+    assert g.regions_correct is True
+    assert set(g.normalized_regions) == {"HWASEONG_DONGTAN", "YONGIN_GIHEUNG", "GURI"}
+    assert g.unmapped_regions == []
+    # 추출 원본은 훼손하지 않는다(원문 충실)
+    assert ext.target_regions[0] == "경기도 화성시 동탄구"
+
+
+def test_score_surfaces_unmapped_region():
+    sources = load_sources()
+    d = _fake_extraction_dict(sources)
+    d["target_regions"] = ["구리시", "용인시 기흥구", "화성시 동탄구", "서울시 강남구"]
+    ext = extract_regchange(sources, complete=lambda s, u: d)
+    g = score_against_gold(ext, GOLD)
+    assert g.regions_correct is True                 # 골드 3개는 다 포함
+    assert g.unmapped_regions == ["서울시 강남구"]    # 미상은 표면화
+
+
 def test_score_detects_missing_exception():
     sources = load_sources()
     d = _fake_extraction_dict(sources)

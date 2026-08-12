@@ -13,6 +13,12 @@ from .models import (
     RegulatedType,
 )
 from .rule_engine import evaluate
+from .regions import (
+    KNOWN_REGION_CODES,
+    normalize_regions,
+    resolve_region_code,
+    resolve_region_status,
+)
 from .impact import (
     CustomerSegment,
     ImpactMatrix,
@@ -30,6 +36,11 @@ __all__ = [
     "ReasonCode",
     "RegionStatus",
     "RegulatedType",
+    # 지역 정규화
+    "resolve_region_code",
+    "resolve_region_status",
+    "normalize_regions",
+    "KNOWN_REGION_CODES",
     # Impact Matrix (E2E)
     "analyze_impact",
     "format_report",

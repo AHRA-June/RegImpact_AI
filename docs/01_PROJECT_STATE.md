@@ -22,10 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **지역명→canonical code 정규화 계층** — `regions.py`에 `resolve_region_code`/`normalize_regions` 추가
+  (distinctive token 매칭, code에 idempotent, 미상은 None/unmapped로 표면화). 채점(`score_against_gold`)이
+  추출 원본을 훼손하지 않고 **비교 시점에만** 코드로 정규화. 저장된 2차 추출 오프라인 재채점: **Regions MISS→OK**.
+  발견 3 해결. 테스트 14개 추가(총 70). 다음: 추출→Impact Matrix 실제 연결.
 - **Extractor 예외 recall 개선·재측정** — 프롬프트에 예외 개별 분리(규칙 6 + 체크리스트) 반영 후 2차 실측.
   **Exception Recall 50%→100%**(생애최초/서민·실수요/정책모기지 각각 분리 추출). 항목 6→12건으로 세분화돼도
   **Citation 100%(12/12)·환각 0% 유지**(recall↑가 환각↑로 안 이어지게 규칙 1 우선 통제). 다른 지표 회귀 없음.
-  남은 이슈: **Regions MISS**(지역 한글명↔코드 정규화 미해결, 발견 3).
 - **Extractor 첫 실측(Gemini)** — Google AI Studio(Gemini `gemini-flash-latest`, structured output)로
   6·30 공문 3건 실제 추출. **프로젝트 최초 실측 지표 확보:** Citation Correctness 100%·Unsupported 0%·
   Change Completeness 100%·Effective-date OK. 실행 중 **측정 아티팩트 발견·수정**(PDF 줄바꿈이 정확한 인용을
@@ -52,8 +55,9 @@
 ## 다음 액션 (NEXT)
 - ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-12, Gemini). 첫 실측 지표 확보. `docs/eval/extractor_run_6_30.md`.
   - ~~①**서민·실수요 예외 recall 개선**~~ — ✅ 완료(2026-08-12). 50%→100%. 재측정 반영.
-  - **후속:** ②**지역명→canonical code 매핑 계층** 추가 → Regions match 정상화 + Impact Matrix 연동 전제(다음 우선)
-    ③Anthropic 백엔드로 교차 실측(모델 간 비교) ④골드셋 확대 후 분모 키워 신뢰구간 확보.
+  - ~~②**지역명→canonical code 매핑 계층**~~ — ✅ 완료(2026-08-12). Regions MISS→OK. `regions.normalize_regions`.
+  - **후속:** ③**추출→Impact Matrix 실제 연결**(정규화 코드로, 현재 매트릭스는 하드코딩 세그먼트) — 다음 우선
+    ④Anthropic 백엔드로 교차 실측(모델 간 비교) ⑤골드셋 확대 후 분모 키워 신뢰구간 확보.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -107,6 +111,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **지역명→canonical code 정규화 계층.** 6·30 실측의 Regions MISS(발견 3: 추출이 지역을 한글명 "화성시 동탄구"로 반환, 룰엔진·골드는 code GURI 등) 대응. `regions.py`에 `resolve_region_code`(distinctive token '구리'·'기흥'·'동탄' 매칭 → 접두 '경기도'·'시'·'구'에 견고, code에 idempotent, 미상은 None) + `normalize_regions`((코드목록, 매핑실패목록) 반환 → 조용한 누락 금지) 추가. LOCKED §4: 지역 도메인 사전은 사람 확정. 채점(`score_against_gold`)은 추출 원본을 훼손하지 않고 비교 시점에만 코드로 정규화, `normalized_regions`/`unmapped_regions` 필드로 표면화. 저장된 2차 추출 오프라인 재채점 → **Regions MISS→OK**. `run_extractor.py` 출력에 정규화 지역 노출, 상위 패키지 export. 테스트 14개 추가(총 70) 통과. 다음: 추출→Impact Matrix 실제 연결.
 - **2026-08-12** — ✅ **예외 recall 개선·재측정.** 1차 실측의 Exception Recall 50%(서민·실수요 놓침) 대응 — 프롬프트에 규칙 6(여러 예외를 한 항목으로 뭉치지 말고 개별 EXCEPTION 항목으로 분리, summary에 예외명 명시) + EXCEPTION 체크리스트(생애최초/서민·실수요/정책모기지) 추가, 규칙 1(원문에 없으면 생략) 유지로 환각 통제. 2차 재측정: **Exception Recall 50%→100%**(세 예외 각각 분리 추출), 추출 6→12건 세분화(다주택 LTV 0%·중도금→잔금 경과규정·사업자대출 제한 추가 포착)에도 **Citation 100%(12/12)·환각 0% 유지**. metrics_spec 현재값·리포트(`extractor_run_6_30.md` 1차→2차) 갱신. 남은 이슈: Regions 한글명↔코드(발견 3). 오프라인 테스트 56 통과(프롬프트 변경은 텍스트라 회귀 없음).
 - **2026-08-12** — ✅ **Extractor 첫 실측(Gemini) + Gemini 백엔드 추가.** Google AI Studio(Gemini `gemini-flash-latest`, responseSchema structured output)로 6·30 공문 3건 실제 추출 — **프로젝트 최초 실측 지표.** Citation Correctness 100%(6/6)·Unsupported 0%·Change Completeness 100%(4/4)·Effective-date OK·Exception Recall 50%(⚠️서민실수요 놓침)·Regions MISS(⚠️한글명↔코드). 실행 중 **측정 아티팩트 발견·수정**: 원문 PDF 문장중간 줄바꿈을 공백정규화가 공백으로 바꿔 정확한 인용을 환각 오탐(초기 Citation 67%) → grounding을 공백무관(`_squish`) 비교로 보정(100%), 회귀 테스트 추가. Gemini 백엔드는 SDK(google-genai)가 환경 cryptography와 충돌해 **의존성 없는 urllib REST**로 구현(`gemini_completion`+`to_gemini_schema`). `run_extractor.py` 백엔드 자동선택(GEMINI_API_KEY 우선). 원시추출 `docs/eval/extractor_run_6_30_gemini.json`, 리포트 `docs/eval/extractor_run_6_30.md`, metrics_spec 현재값 반영. 테스트 3개 추가(총 56) 통과.
 - **2026-08-12** — ✅ **Impact Matrix E2E 구현(Walking Skeleton 관통).** `src/regimpact/impact/`(matrix·segments·README). 룰엔진을 같은 세그먼트에 대해 시행 전(6/30)·후(7/2) 두 시점으로 차등 평가 → LTV delta·방향(강화/완화/유지/검토)·상태전이·중대영향 표 산출. **새 규칙 없이 deterministic 엔진 위에서만 동작**(LOCKED §4). 6·30 대표 8세그먼트로 파이프라인 끝까지 관통(`examples/demo_impact_matrix.py`). 집계는 수치비교 가능 행만 가중평균하고 제외분을 리포트에 명시(조용한 누락 금지). 비규제 유주택 기준선 명세 여백을 NEEDS_REVIEW로 표면화(정직한 escalation). tautology 방지 회귀(두 날짜를 모두 시행 전으로 두면 임팩트 소멸)로 임팩트가 엔진 시점해석에서 나옴을 증명. 각 행에 before/after status·reason_codes 보존(감사 추적). 테스트 14개(총 53) 통과. `regimpact.__init__` 에 analyze_impact/format_report 노출.

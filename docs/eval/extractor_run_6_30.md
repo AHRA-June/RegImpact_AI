@@ -21,7 +21,9 @@
 | **Change Completeness** | 100% (4/4) | **100%** (4/4) | ✅ LTV·시행일·경과규정·지역 모두 포착 |
 | **Exception Recall** | 50% (1/2) | **100%** (2/2) | ✅ 발견 2 수정으로 서민·실수요 포착 |
 | **Effective-date Accuracy** | OK | **OK** | ✅ 2026-07-01 정확 |
-| **Regions match** | MISS | **MISS** | ⚠️ 지역을 한글명으로 반환(코드 아님) — 발견 3, 미해결 |
+| **Regions match** | MISS | **OK**† | ✅ 발견 3 수정(지역명→코드 정규화 계층) 후 코드 대조 통과 |
+
+† Regions는 2차 추출(한글명)에 **정규화 계층**을 적용해 code 대조한 결과. 추출 원본은 한글명 보존.
 
 - 1차 추출 6건 → **2차 12건**(예외를 생애최초/서민·실수요/정책모기지로 분리, 다주택 LTV 0%·
   중도금→잔금 경과규정·사업자대출 제한 등 세분화). **항목이 2배로 늘어도 Citation 100%·환각 0% 유지**
@@ -67,19 +69,31 @@ Exception Recall **50% → 100%**, missed_exceptions 없음. 다른 지표 회�
 > 주: 프롬프트로 완전성을 높이되 "원문에 없으면 생략"(규칙 1)을 최우선으로 둬, recall↑가
 > 환각↑로 이어지지 않도록 통제했다. 이 트레이드오프 통제가 Assurance의 핵심.
 
-## 발견 3 — 지역명 → canonical code 정규화 부재
+## 발견 3 — 지역명 → canonical code 정규화 부재 → ✅ 수정 완료
 
-`target_regions`가 `["경기도 화성시 동탄구","용인시 기흥구","구리시"]`(원문 한글명)로 나와,
+`target_regions`가 `["화성시 동탄구","용인시 기흥구","구리시"]`(원문 한글명)로 나와,
 룰엔진/regions.py의 코드(`GURI`,`YONGIN_GIHEUNG`,`HWASEONG_DONGTAN`)와 불일치 → Regions MISS.
+추출 자체는 올바르고 **표현형만 다른** 문제.
 
-- 개선 방향: 추출 후처리로 지역명→코드 매핑(경량 사전) 추가. Impact Matrix 연동의 전제.
-  (추출 자체는 올바름 — 표현형만 다름. 채점을 별도 정규화 계층으로 분리하는 게 정석.)
+**수정:** 지역명→코드 **정규화 계층**을 `regions.py`에 추가(도메인 권위, LOCKED §4).
+`resolve_region_code(name)`은 distinctive token('구리'·'기흥'·'동탄') 포함으로 매칭 —
+접두("경기도"·"시"·"구")에 견고하고, code 입력엔 idempotent, 미상 지역은 `None`.
+`normalize_regions(names)`는 `(코드목록, 매핑실패목록)`을 반환해 **조용한 누락을 막는다**.
+
+채점(`score_against_gold`)은 추출 원본을 훼손하지 않고 **비교 시점에만** 지역을 코드로 정규화한 뒤
+골드와 대조. 저장된 2차 추출로 오프라인 재채점: **Regions MISS→OK**(`normalized_regions`
+= [HWASEONG_DONGTAN, YONGIN_GIHEUNG, GURI], `unmapped_regions`=[]). 미상 지역은 리포트에 표면화.
+
+> 설계 원칙: 추출기는 원문에 충실(한글명 그대로 보존), 정규화는 별도 계층. 6·30 밖 지역이
+> 오면 code로 조용히 만들지 않고 `unmapped`로 노출 → 사람이 사전 확장 여부를 판단.
 
 ---
 
 ## 다음 실측 액션
 
 1. ~~예외 recall 개선 후 재측정~~ — ✅ 완료(2026-08-12, 발견 2). Exception Recall 100%. 임계값은 골드 확대 후 확정.
-2. **지역명→코드 매핑 계층 추가** → Regions match 정상화 → Impact Matrix E2E와 연결(발견 3).
-3. 골드셋 확대(DEV 우선) 후 지표에 분모를 키워 신뢰구간 확보(현재 n=1 정책, 소규모 seed).
-4. Anthropic 백엔드로 교차 실측(모델 간 비교) — 프롬프트 개선이 모델 무관하게 유효한지 확인.
+2. ~~지역명→코드 매핑 계층 추가~~ — ✅ 완료(2026-08-12, 발견 3). Regions OK. `regions.normalize_regions`.
+3. **추출→Impact Matrix 연결** — 정규화된 코드로 추출 결과를 Impact Matrix 입력에 연결(현재 매트릭스는
+   하드코딩 세그먼트). 정규화 계층이 그 전제였음.
+4. 골드셋 확대(DEV 우선) 후 지표에 분모를 키워 신뢰구간 확보(현재 n=1 정책, 소규모 seed).
+5. Anthropic 백엔드로 교차 실측(모델 간 비교) — 프롬프트 개선이 모델 무관하게 유효한지 확인.
