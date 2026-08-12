@@ -49,6 +49,12 @@ from .rule_catalog import (
     format_catalog,
     map_catalog_impact,
 )
+from .stress import (
+    fuzz_differential,
+    load_consistency,
+    reverse_stress,
+    scenario_battery,
+)
 
 __all__ = [
     "evaluate",
@@ -91,4 +97,9 @@ __all__ = [
     "InternalRule",
     "RuleImpact",
     "DEFAULT_CATALOG",
+    # 스트레스 테스트
+    "scenario_battery",
+    "reverse_stress",
+    "fuzz_differential",
+    "load_consistency",
 ]
