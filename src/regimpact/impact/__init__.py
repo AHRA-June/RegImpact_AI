@@ -34,6 +34,18 @@ from .population import (
     sample_portfolio,
     weight_model_note,
 )
+from .sensitivity import (
+    HeadlineMetrics,
+    SensitivityBands,
+    TornadoBar,
+    build_response_table,
+    compute_headline,
+    format_bands,
+    format_tornado,
+    monte_carlo,
+    oat_tornado,
+    sensitivity_bands,
+)
 from .segments import (
     DEFAULT_ARCHETYPES,
     SIX_THIRTY_SEGMENTS,
@@ -74,4 +86,15 @@ __all__ = [
     "BandExposure",
     "SegmentExposure",
     "ExposureReport",
+    # 민감도·견고성
+    "build_response_table",
+    "compute_headline",
+    "oat_tornado",
+    "monte_carlo",
+    "sensitivity_bands",
+    "format_tornado",
+    "format_bands",
+    "HeadlineMetrics",
+    "TornadoBar",
+    "SensitivityBands",
 ]

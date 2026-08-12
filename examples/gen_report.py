@@ -19,7 +19,12 @@ from regimpact.extractor import (  # noqa: E402
     load_sources,
     score_against_gold,
 )
-from regimpact.impact import compute_exposure, impact_from_extraction  # noqa: E402
+from regimpact.impact import (  # noqa: E402
+    build_response_table,
+    compute_exposure,
+    impact_from_extraction,
+    sensitivity_bands,
+)
 from regimpact.report import render_report  # noqa: E402
 from regimpact.rule_proposal import build_proposal  # noqa: E402
 
@@ -38,6 +43,7 @@ def main() -> None:
     gold = score_against_gold(extraction, GOLD)
     proposal = build_proposal(extraction, generated_on=date(2026, 8, 12))
     exposure = compute_exposure([r.segment for r in policy_impact.matrix.rows])
+    sensitivity = sensitivity_bands(build_response_table(), n=3000, seed=42)
 
     html = render_report(
         policy_impact,
@@ -46,6 +52,7 @@ def main() -> None:
         gold=gold,
         proposal=proposal,
         exposure=exposure,
+        sensitivity=sensitivity,
         generated_on=date(2026, 8, 12),
     )
     OUT.write_text(html, encoding="utf-8")
@@ -59,6 +66,10 @@ def main() -> None:
           f"검토 {pc['MAPPED_DIVERGENT'] + pc['NEEDS_REVIEW']} · 승인={proposal.approval_status}")
     print(f"  Exposure: 여력 감소율 {exposure.pct_reduction:.1%} · "
           f"1인당 Δ {exposure.per_unit_delta():+.2f}억 · 산정불가 {exposure.undetermined_share:.0%}")
+    sr = sensitivity.bands["exposure_pct_reduction"]
+    print(f"  Sensitivity: 감소율 밴드 [{sr[0]:.1%}, {sr[2]:.1%}] · "
+          f"여력 축소 {sensitivity.robustness['여력 축소(감소율>0)']:.0%} 견고 · "
+          f"강화 과반 {sensitivity.robustness['강화 과반(강화>50%)']:.0%} 표본")
 
 
 if __name__ == "__main__":

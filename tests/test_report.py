@@ -13,7 +13,12 @@ from regimpact.extractor import (
     load_sources,
     score_against_gold,
 )
-from regimpact.impact import compute_exposure, impact_from_extraction
+from regimpact.impact import (
+    build_response_table,
+    compute_exposure,
+    impact_from_extraction,
+    sensitivity_bands,
+)
 from regimpact.report import render_report
 
 REPO = Path(__file__).resolve().parents[1]
@@ -91,3 +96,16 @@ def test_report_exposure_panel_when_provided():
     assert "대출 여력" in html
     assert "최대한도 상한(6/4/2억) 미적용" in html   # 정직성 고지 노출
     assert "산정 불가" in html                        # 명세 여백 분리 표기
+    assert "민감도" not in html                        # sensitivity 미제공 → 견고성 줄 생략
+
+
+def test_report_sensitivity_note_when_provided():
+    """sensitivity 전달 시 여력 패널에 견고성 밴드가 규칙-고정 문구와 함께 노출."""
+    ext = RegChangeExtraction.from_dict(SAVED)
+    pi = impact_from_extraction(ext)
+    exp = compute_exposure([r.segment for r in pi.matrix.rows])
+    sb = sensitivity_bands(build_response_table(), n=500, seed=42)
+    html = render_report(pi, exposure=exp, sensitivity=sb)
+    assert "민감도" in html
+    assert "규칙 고정" in html          # 확정 규칙은 흔들지 않음 명시
+    assert "견고" in html

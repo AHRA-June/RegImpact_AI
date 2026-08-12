@@ -210,7 +210,25 @@ def _won(eok: float) -> str:
     return f"{sign}{v:.1f}억"
 
 
-def _exposure_section(exposure) -> str:
+def _sensitivity_note(sb) -> str:
+    """민감도 밴드(선택)를 여력 패널에 견고성 한 줄로 덧붙인다."""
+    if sb is None or not getattr(sb, "bands", None):
+        return ""
+    p5, _p50, p95 = sb.bands["exposure_pct_reduction"]
+    rob = sb.robustness
+    shrink = rob.get("여력 축소(감소율>0)", 0.0)
+    tight = rob.get("강화 과반(강화>50%)", 0.0)
+    return (
+        f'<div class="tbl-foot">'
+        f'<span class="muted">민감도(가정 섭동 n={sb.n}, 규칙 고정):</span>'
+        f'<span>감소율 밴드 <b>[{p5:.1%}, {p95:.1%}]</b></span>'
+        f'<span>여력 축소 결론 <b>{shrink:.0%}</b> 견고</span>'
+        f'<span class="muted">강화 과반 {tight:.0%} 표본(가정 취약)</span>'
+        f'</div>'
+    )
+
+
+def _exposure_section(exposure, sensitivity=None) -> str:
     if exposure is None or not getattr(exposure, "by_band", None):
         return ""
     rows: list[str] = []
@@ -252,7 +270,7 @@ def _exposure_section(exposure) -> str:
         '<div class="tbl-wrap"><table>'
         '<thead><tr><th>담보가격 밴드</th><th class="r">여력 전</th><th class="r">여력 후</th>'
         '<th class="r">Δ</th></tr></thead>'
-        f'<tbody>{"".join(rows)}</tbody></table>{foot}</div></section>'
+        f'<tbody>{"".join(rows)}</tbody></table>{foot}{_sensitivity_note(sensitivity)}</div></section>'
     )
 
 
@@ -315,6 +333,7 @@ def render_report(
     gold: Any = None,
     proposal: Any = None,
     exposure: Any = None,
+    sensitivity: Any = None,
     generated_on: Optional[date] = None,
     title: str = "규제 변경 영향분석 리포트",
 ) -> str:
@@ -352,7 +371,7 @@ def render_report(
         f'{_changes_section(extraction)}'
         f'{_proposal_section(proposal)}'
         f'{_impact_section(matrix)}'
-        f'{_exposure_section(exposure)}'
+        f'{_exposure_section(exposure, sensitivity)}'
         f'</main>{footer}</body></html>'
     )
 

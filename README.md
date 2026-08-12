@@ -54,23 +54,23 @@
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |
 | `src/regimpact/extractor/` | **RegChange Extractor(E) + Citation Assurance(A)** — 공문→추출→검증 |
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression + 층화 골드셋 포트폴리오** — 독립 명세 오라클로 룰엔진 차등 검증(178건, DEV/LOCKED/CHALLENGE 3분할) |
-| `src/regimpact/impact/` | **Impact Matrix E2E + 가중 합성 모집단 + 여력 영향 금액** — before/after 차등 임팩트 + 문서화된 비중 가중 포트폴리오(수천 명 표본) + 담보가격 밴드로 대출 여력 변화 금액 환산(exposure) |
+| `src/regimpact/impact/` | **Impact Matrix E2E + 가중 합성 모집단 + 여력 영향 금액 + 민감도** — before/after 차등 임팩트 + 문서화된 비중 가중 포트폴리오(수천 명 표본) + 담보가격 밴드로 대출 여력 변화 금액 환산(exposure) + 가정 섭동 민감도·견고성(sensitivity: OAT 토네이도·MC 밴드) |
 | `src/regimpact/report.py` | **HTML 리포트 생성기** — 파이프라인 실제 출력을 자체완결 HTML로(환각·하드코딩 불가) |
 | `src/regimpact/rule_proposal.py` | **Rule Change Proposal** — 추출→룰 변경안(초안)→사람 확정 룰 대조(승인 PENDING) |
 | `docs/ui/report_6_30.html` | 생성된 6·30 리포트(실제 엔진 출력, `examples/gen_report.py` 산출) |
 | `docs/eval/` | 골드 정답지 · 층화 합성 포트폴리오 매니페스트 · 실측 리포트 |
-| `tests/` | 테스트 하네스 (pytest, 122개) |
-| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E / HTML 리포트 생성 / 골드셋 포트폴리오 / 룰 변경안 / 가중 모집단 / 여력 영향 금액 |
+| `tests/` | 테스트 하네스 (pytest, 130개) |
+| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E / HTML 리포트 생성 / 골드셋 포트폴리오 / 룰 변경안 / 가중 모집단 / 여력 영향 금액 / 민감도 분석 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | **정식 PRD(as-built)** + 실패 기록 양식(error taxonomy) |
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + Impact Matrix E2E + 여력 영향 금액 + HTML 리포트(6·30 관통) 구현(테스트 122개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + Impact Matrix E2E + 여력 영향 금액 + 민감도·견고성 + HTML 리포트(6·30 관통) 구현(테스트 130개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
-python -m pytest && python examples/demo_6_30.py && python examples/demo_tc_regression.py && python examples/demo_impact_matrix.py && python examples/demo_portfolio.py && python examples/demo_exposure.py && python examples/gen_report.py
+python -m pytest && python examples/demo_6_30.py && python examples/demo_tc_regression.py && python examples/demo_impact_matrix.py && python examples/demo_portfolio.py && python examples/demo_exposure.py && python examples/demo_sensitivity.py && python examples/gen_report.py
 ```
 
 ## 개발 브랜치
