@@ -59,10 +59,11 @@
 | `src/regimpact/report.py` | **HTML 리포트 생성기** — 파이프라인 실제 출력을 자체완결 HTML로(환각·하드코딩 불가) |
 | `src/regimpact/rule_proposal.py` | **Rule Change Proposal** — 추출→룰 변경안(초안)→사람 확정 룰 대조(승인 PENDING) |
 | `src/regimpact/livefire.py` | **라이브파이어 하네스(§19)** — 신규 대책 발표 당일 전 파이프라인+증거 패키지(원문 해시·timestamp·commit·버전·산출물). 6·30 예행연습 완료 |
+| `docs/index.html` | **프론트도어 허브** — 헤드라인 지표 타일 + 파이프라인 + 산출물 링크(실측 주입, `examples/gen_index.py`) |
 | `docs/ui/report_6_30.html` | 생성된 6·30 리포트(실제 엔진 출력, `examples/gen_report.py` 산출) |
 | `docs/eval/` | 골드 정답지 · 층화 합성 포트폴리오 매니페스트 · 실측 리포트 |
 | `docs/livefire/` | **라이브파이어 상태판 + 증거 패키지** — 6·30 예행연습(rehearsal_6_30), 실제 Live Fire #1 ⬜ 대기 |
-| `tests/` | 테스트 하네스 (pytest, 137개) |
+| `tests/` | 테스트 하네스 (pytest, 148개) |
 | `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E / HTML 리포트 생성 / 골드셋 포트폴리오 / 룰 변경안 / 가중 모집단 / 여력 영향 금액 / 민감도 분석 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |

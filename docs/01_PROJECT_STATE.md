@@ -22,6 +22,15 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **프론트도어 허브 페이지 + 문서 HTML 렌더러** — `docs/index.html`(생성기 `examples/gen_index.py` +
+  순수 렌더러 `src/regimpact/landing.py`). 시스템을 1분에 이해시키는 단일 진입점: 헤드라인 지표 6타일
+  (Citation 100%·환각 0%·예외재현 100%·룰회귀 178/178·여력 −28.6%·사람검토 23%) + 파이프라인 10단계
+  흐름 + 산출물 3링크 카드(임팩트·검증·라이브파이어) + Assurance 원칙 5 + 스토리 그리드. **모든 값은 실제
+  파이프라인 출력 주입(하드코딩·환각 불가), git commit provenance 포함.** 더불어 **zero-dep 마크다운→HTML
+  문서 렌더러** `src/regimpact/docrender.py`(`markdown_to_html`: 제목·표·굵게·코드·인용·목록 2단중첩·
+  코드펜스, 마크다운 누출 0·escape) + `examples/render_validation.py`로 **검증보고서 HTML**(`docs/validation/
+  VALIDATION_REPORT.html`, 42KB, 인쇄→PDF 배포용). report.py와 같은 디자인 언어(Navy, 라이트/다크). 테스트
+  11개 추가(landing 5 + docrender 6, 총 148).
 - **시스템 검증보고서 v1.0(브리프 §20 Core #16)** — `docs/validation/VALIDATION_REPORT.md`(~17쪽, 표 30+).
   독립 검증 관점에서 전 컴포넌트를 **5축**(개념적 건전성·구현 정확성·성과 분석·거버넌스·재현성)으로 검증.
   **종합의견: 조건부 적합.** 8개 검증질문(VQ1~8) 전부 충족: 룰엔진 이중 독립검증 178/178+5,000/5,000,
@@ -204,6 +213,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **프론트도어 허브 + 문서 HTML 렌더러.** (1) `docs/index.html`(생성기 `examples/gen_index.py` + 순수 렌더러 `src/regimpact/landing.py`): 헤드라인 6타일(Citation 100%·환각 0%·예외재현 100%·룰회귀 178/178·여력 −28.6%·사람검토 23%) + 파이프라인 10단계 + 산출물 3링크(임팩트/검증/라이브파이어) + Assurance 원칙 5 + 스토리 그리드(가중임팩트·여력·견고성·룰변경안). 모든 값 실제 파이프라인 주입(하드코딩 없음), git commit provenance. (2) `src/regimpact/docrender.py`(`markdown_to_html`, zero-dep: 제목·표·굵게·코드·인용·수평선·목록 2단중첩·코드펜스, escape·누출0) + `examples/render_validation.py` → `docs/validation/VALIDATION_REPORT.html`(42KB, 인쇄→PDF). report.py 디자인 언어(Navy, Noto Sans/JetBrains Mono, 라이트/다크). 사용자 선택으로 '프론트도어' 우선 진행. 테스트 11개 추가(landing 5 + docrender 6, 총 148) 통과.
 - **2026-08-12** — ✅ **시스템 검증보고서 v1.0(§20 Core #16).** `docs/validation/VALIDATION_REPORT.md`(~17쪽 상당, 표 30+). 독립 검증 관점 5축(개념적 건전성·구현 정확성·성과 분석·거버넌스·재현성) 종합. 검증질문 VQ1~8 전부 충족: 룰엔진 독립 오라클 차등검증 178/178·몬테카를로 5,000/5,000, 오라클 import 독립성 확인, mutation test 방어력, 대표 8세그먼트 판정 대조표, 추출 12변경·Citation 100%(12/12)·환각 0%·예외재현 100%·시행일/지역 OK, 채점기 정규화 결함 사건(67%→100%, E4 fix-scorer)을 Model Risk 인사이트로 정리, Impact 24행·가중 강화 58%·Δ−20pp, 여력 1인당 7.08→5.06억(−28.6%)·밴드별 표·산정불가 23%, 민감도 밴드 [22.9%,33.8%]·토네이도 표·가격 불변성 대수 증명, 룰변경안 PENDING·불일치 0. 임계정책(하드게이트/퍼센트하한)·3선 방어 매핑·룰 알고리즘 H 결정순서·입출력 스키마·error taxonomy 실패기록 2건·한계 L1~L8·신규 관찰 O1~O4·재현 명령 부록 D 포함. **정직성: 자기검증 시연이지 독립 3자 검증 아님(§11 L7), 단일 seed·합성 모집단·백엔드 단일 실측 한계 명시, 미확정 사실 임의생성 금지.** `docs/validation/README.md`·README 문서지도 갱신. 코드 변경 없음(테스트 137 유지).
 - **2026-08-12** — ✅ **라이브파이어 하네스 + 6·30 예행연습(livefire).** `src/regimpact/livefire.py`(`run_livefire`→`EvidenceManifest`, `render_evidence_record`). 브리프 §19: 실제 신규 대책 발표 당일 전 파이프라인을 돌려 **사후 조작 불가 증거 패키지**(원문 sha256 + 분석 timestamp + git commit + 시스템 버전 + 산출물)를 저장소에 남기는 턴키 러너. 한 호출로 공문 해시고정→`impact_from_extraction`→`compute_exposure`→`sensitivity_bands`→`build_proposal`→grounding/gold/`run_regression`→`render_report`→manifest.json/README.md/report.html/extraction.json/impact_summary.json 생성. **6·30 예행연습**(`examples/livefire_rehearsal.py`→`docs/livefire/rehearsal_6_30/`): 원문 3건 sha256이 SOURCES.md 레지스트리와 정확 일치(무결성 교차검증 테스트), Citation 100%·예외재현 100%·룰회귀 178/178·강화 58%·여력 감소율 28.6%(밴드 [22.9%,33.8%])·룰변경안 반영7/코어밖4/검토1/PENDING. **정직성: 리허설은 실적 아님을 매니페스트 mode=REHEARSAL·honesty·기록·상태판에 명시**(6·30은 과거·골드셋 수록 사건 → 예행일 뿐; 실제 Live Fire #1 슬롯 ⬜ 대기). 신규 정책은 `gold=None`→recall 미산정 + '골드셋 미비' 고지(정답 불필요 지표만). `system_commit`=분석 산출 시 HEAD(매니페스트는 다음 커밋에 저장→보통 부모 커밋, 문서화). `docs/livefire/README.md` 상태판+실전 절차. 상위 패키지 export. 테스트 7개 추가(총 137) 통과. livefire는 표준 스모크 체인 미포함(증거 timestamp 매 실행 변동 방지, 수동 실행).
 - **2026-08-12** — ✅ **비중/가격 민감도·견고성 분석(sensitivity).** `src/regimpact/impact/sensitivity.py`. 임팩트/여력 헤드라인이 문서화된 가정(아키타입 비중·지역 mix·담보가격 분포/수준)에 얼마나 견고한지 측정 — **확정 규칙(LTV·시행일·경과규정)은 고정, 가정 입력만 스트레스**(Model Risk 민감도 규율). (아키타입×지역) 응답표를 엔진으로 1회 산출(`build_response_table`) 후 모든 섭동은 순수 가중 산술(`compute_headline`) → 수천 표본 즉시(base가 analyze_impact/compute_exposure와 정확 일치, 교차확인 테스트). **① OAT 토네이도(`oat_tornado`)**: 여력 감소율(%) 최대 driver=무주택 일반 비중(스윙 8%p), 담보가격 수준·지역 mix·다주택/유주택 비중은 0; 1인당 억 금액은 담보가격 수준이 최대 driver(같은 출력도 비율%↔수준억에 따라 driver 뒤바뀜). **② 몬테카를로(`monte_carlo`/`sensitivity_bands`, Dirichlet 집중도 40+가격 로그정규 σ0.20, n=3000)**: 여력 감소율 base 28.6% → P5–P95 [22.9%, 33.8%]. **견고성: 여력 축소·1인당 감소 100% 표본 성립(방향 견고), '강화 과반'은 85% 표본만(가정 취약 — 정직 표기).** **③ 가격 불변성**: 감소율(%)은 담보가격 수준에 불변(가격이 세그먼트 독립·균일→상쇄), 절대 금액만 비례 이동(테스트로 증명). `report.py` 여력 패널에 견고성 밴드 한 줄 통합(`_sensitivity_note`, report_6_30.html 25.0KB) + `render_report(sensitivity=…)`/`gen_report.py` 연결. `examples/demo_sensitivity.py`·`docs/eval/sensitivity_impact.md`(정직성: 가정 민감도이지 실세계 불확실성 정량화 아님). 테스트 8개 추가(총 130) 통과.
