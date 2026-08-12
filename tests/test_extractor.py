@@ -11,7 +11,9 @@ from regimpact.extractor import (
     extract_regchange,
     load_sources,
     score_against_gold,
+    to_gemini_schema,
 )
+from regimpact.extractor.schema import REGCHANGE_JSON_SCHEMA
 
 REPO = Path(__file__).resolve().parents[1]
 GOLD = json.loads((REPO / "docs" / "eval" / "regchange_gold_6_30.json").read_text(encoding="utf-8"))
@@ -121,3 +123,25 @@ def test_score_detects_missing_exception():
     g = score_against_gold(ext, GOLD)
     assert g.exception_recall == 0.0
     assert "first_home_buyer" in g.missed_exceptions
+
+
+# ---------- Gemini 스키마 변환기 (오프라인) ----------
+def test_to_gemini_schema_maps_types_and_nullable():
+    gs = to_gemini_schema(REGCHANGE_JSON_SCHEMA)
+    assert gs["type"] == "OBJECT"
+    # nullable 합성: ["string","null"] → STRING + nullable:true
+    eff = gs["properties"]["effective_from"]
+    assert eff["type"] == "STRING" and eff["nullable"] is True
+    # 배열 items 재귀
+    assert gs["properties"]["target_regions"]["items"]["type"] == "STRING"
+    # required 보존 + propertyOrdering 부여
+    assert set(gs["required"]) == {"policy_id", "effective_from", "target_regions", "changes"}
+
+
+def test_to_gemini_schema_preserves_enum_and_drops_additionalprops():
+    gs = to_gemini_schema(REGCHANGE_JSON_SCHEMA)
+    item = gs["properties"]["changes"]["items"]
+    assert "additionalProperties" not in item          # Gemini 미지원 → 제거
+    assert item["properties"]["category"]["enum"][0] == "LTV"
+    # 중첩 object(citation)도 변환
+    assert item["properties"]["citation"]["type"] == "OBJECT"

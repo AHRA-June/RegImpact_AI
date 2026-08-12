@@ -1,5 +1,10 @@
 """RegChange Extractor — 공문에서 Before/After 변경을 구조화 추출(E) + 검증(A)."""
-from .extractor import anthropic_completion, extract_regchange
+from .extractor import (
+    anthropic_completion,
+    extract_regchange,
+    gemini_completion,
+    to_gemini_schema,
+)
 from .evaluate import (
     GoldReport,
     GroundingReport,
@@ -11,7 +16,9 @@ from .sources import load_sources
 
 __all__ = [
     "extract_regchange",
+    "gemini_completion",
     "anthropic_completion",
+    "to_gemini_schema",
     "check_citation_grounding",
     "score_against_gold",
     "GroundingReport",
