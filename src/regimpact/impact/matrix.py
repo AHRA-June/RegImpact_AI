@@ -75,6 +75,9 @@ class ImpactMatrix:
     before_date: date
     after_date: date
     rows: list[SegmentImpact] = field(default_factory=list)
+    # 추출(RegChange)에서 연결된 경우의 provenance (직접 호출 시 비어 있음)
+    regions: list[str] = field(default_factory=list)          # 정규화된 대상지역 code
+    unmapped_regions: list[str] = field(default_factory=list)  # 코드 매핑 실패(표면화)
 
     # --- 집계 (분모/분자 명확히) ---
     def count_by_direction(self) -> dict[str, int]:
@@ -217,6 +220,10 @@ def format_report(matrix: ImpactMatrix) -> str:
         f"Impact Matrix — policy={matrix.policy_id}  "
         f"before={matrix.before_date}  after={matrix.after_date}"
     )
+    if matrix.regions:
+        lines.append(f"대상지역(정규화): {', '.join(matrix.regions)}")
+    if matrix.unmapped_regions:
+        lines.append(f"⚠ 코드 매핑 실패(미상 지역): {', '.join(matrix.unmapped_regions)}")
     header = (
         f"{'세그먼트':<22} {'before':>6} {'after':>6} {'Δ':>7}  "
         f"{'방향':<7} {'중대':^4} {'reason(after)'}"

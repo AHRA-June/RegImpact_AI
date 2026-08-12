@@ -14,16 +14,27 @@ from .matrix import (
     analyze_segment,
     format_report,
 )
-from .segments import SIX_THIRTY_SEGMENTS
+from .connect import PolicyImpact, impact_from_extraction
+from .segments import (
+    DEFAULT_ARCHETYPES,
+    SIX_THIRTY_SEGMENTS,
+    SegmentArchetype,
+    segments_for_region,
+)
 
 __all__ = [
     "analyze_impact",
     "analyze_segment",
     "format_report",
+    "impact_from_extraction",
+    "PolicyImpact",
     "ImpactMatrix",
     "SegmentImpact",
     "CustomerSegment",
     "ImpactDirection",
+    "SegmentArchetype",
+    "segments_for_region",
+    "DEFAULT_ARCHETYPES",
     "SIX_THIRTY_SEGMENTS",
     "BEFORE_DATE",
     "AFTER_DATE",

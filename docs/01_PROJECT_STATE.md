@@ -22,6 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **추출 → Impact Matrix 실제 연결 (E2E 진짜 데이터 관통)** — `src/regimpact/impact/connect.py`
+  (`impact_from_extraction`, `PolicyImpact`). 추출의 policy_id·effective_from·target_regions(한글명)를
+  Impact Matrix 입력으로 흘려보냄: effective_from→before/after 시점 유도, 지역명→코드 정규화,
+  각 지역×대표 유형(archetype 8종)→세그먼트→룰엔진 차등. 저장 추출로 오프라인 E2E: 3지역×8=24행,
+  가중평균 Δ -20pp. LOCKED §4: LLM은 '좌표(정책·지역·시점)'만, LTV 판정은 deterministic 룰. segments를
+  archetype으로 리팩터(지역 주입 가능), extractor 런타임 import 없이 duck typing. `examples/demo_extractor_to_impact.py`.
+  테스트 5개 추가(총 75). 다음: Anthropic 교차 실측 / 골드셋 확대 / UI 연동.
 - **지역명→canonical code 정규화 계층** — `regions.py`에 `resolve_region_code`/`normalize_regions` 추가
   (distinctive token 매칭, code에 idempotent, 미상은 None/unmapped로 표면화). 채점(`score_against_gold`)이
   추출 원본을 훼손하지 않고 **비교 시점에만** 코드로 정규화. 저장된 2차 추출 오프라인 재채점: **Regions MISS→OK**.
@@ -56,8 +63,9 @@
 - ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-12, Gemini). 첫 실측 지표 확보. `docs/eval/extractor_run_6_30.md`.
   - ~~①**서민·실수요 예외 recall 개선**~~ — ✅ 완료(2026-08-12). 50%→100%. 재측정 반영.
   - ~~②**지역명→canonical code 매핑 계층**~~ — ✅ 완료(2026-08-12). Regions MISS→OK. `regions.normalize_regions`.
-  - **후속:** ③**추출→Impact Matrix 실제 연결**(정규화 코드로, 현재 매트릭스는 하드코딩 세그먼트) — 다음 우선
-    ④Anthropic 백엔드로 교차 실측(모델 간 비교) ⑤골드셋 확대 후 분모 키워 신뢰구간 확보.
+  - ~~③**추출→Impact Matrix 실제 연결**~~ — ✅ 완료(2026-08-12). `impact_from_extraction`. 공문→추출→임팩트 관통.
+  - **후속:** ④UI(Stitch) 연동 — 하드코딩값을 이 매트릭스 실제 출력으로 교체(다음 우선, 사용자 시각화 요청)
+    ⑤Anthropic 백엔드로 교차 실측(모델 간 비교) ⑥골드셋 확대 후 분모 키워 신뢰구간 확보.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -111,6 +119,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **추출 → Impact Matrix 실제 연결(E2E 진짜 데이터 관통).** `src/regimpact/impact/connect.py`(`impact_from_extraction`→`PolicyImpact`). LLM 추출의 policy_id·effective_from·target_regions(한글명)를 Impact Matrix 입력으로 연결: effective_from에서 before(−1일)/after(+1일) 유도, 지역명→코드 정규화(미상은 unmapped로 표면화), 각 정규화 지역 × 대표 고객유형(archetype 8종) → 세그먼트 → 룰엔진 before/after 차등. 저장 추출(`extractor_run_6_30_gemini.json`)로 오프라인 E2E 관통: 3지역×8=24행, 강화 9·유지 9·검토 6, 가중평균 Δ −20pp. LOCKED §4: LLM은 '정책·지역·시점' 좌표만 제공, LTV 판정은 deterministic 룰. `segments.py`를 archetype(지역 무관 템플릿)+`segments_for_region`으로 리팩터(하위호환 SIX_THIRTY_SEGMENTS 유지). connect는 extractor를 런타임 import하지 않음(레이어 독립, duck typing). ImpactMatrix에 regions/unmapped provenance, format_report에 노출. `examples/demo_extractor_to_impact.py`. 테스트 5개 추가(총 75) 통과.
 - **2026-08-12** — ✅ **지역명→canonical code 정규화 계층.** 6·30 실측의 Regions MISS(발견 3: 추출이 지역을 한글명 "화성시 동탄구"로 반환, 룰엔진·골드는 code GURI 등) 대응. `regions.py`에 `resolve_region_code`(distinctive token '구리'·'기흥'·'동탄' 매칭 → 접두 '경기도'·'시'·'구'에 견고, code에 idempotent, 미상은 None) + `normalize_regions`((코드목록, 매핑실패목록) 반환 → 조용한 누락 금지) 추가. LOCKED §4: 지역 도메인 사전은 사람 확정. 채점(`score_against_gold`)은 추출 원본을 훼손하지 않고 비교 시점에만 코드로 정규화, `normalized_regions`/`unmapped_regions` 필드로 표면화. 저장된 2차 추출 오프라인 재채점 → **Regions MISS→OK**. `run_extractor.py` 출력에 정규화 지역 노출, 상위 패키지 export. 테스트 14개 추가(총 70) 통과. 다음: 추출→Impact Matrix 실제 연결.
 - **2026-08-12** — ✅ **예외 recall 개선·재측정.** 1차 실측의 Exception Recall 50%(서민·실수요 놓침) 대응 — 프롬프트에 규칙 6(여러 예외를 한 항목으로 뭉치지 말고 개별 EXCEPTION 항목으로 분리, summary에 예외명 명시) + EXCEPTION 체크리스트(생애최초/서민·실수요/정책모기지) 추가, 규칙 1(원문에 없으면 생략) 유지로 환각 통제. 2차 재측정: **Exception Recall 50%→100%**(세 예외 각각 분리 추출), 추출 6→12건 세분화(다주택 LTV 0%·중도금→잔금 경과규정·사업자대출 제한 추가 포착)에도 **Citation 100%(12/12)·환각 0% 유지**. metrics_spec 현재값·리포트(`extractor_run_6_30.md` 1차→2차) 갱신. 남은 이슈: Regions 한글명↔코드(발견 3). 오프라인 테스트 56 통과(프롬프트 변경은 텍스트라 회귀 없음).
 - **2026-08-12** — ✅ **Extractor 첫 실측(Gemini) + Gemini 백엔드 추가.** Google AI Studio(Gemini `gemini-flash-latest`, responseSchema structured output)로 6·30 공문 3건 실제 추출 — **프로젝트 최초 실측 지표.** Citation Correctness 100%(6/6)·Unsupported 0%·Change Completeness 100%(4/4)·Effective-date OK·Exception Recall 50%(⚠️서민실수요 놓침)·Regions MISS(⚠️한글명↔코드). 실행 중 **측정 아티팩트 발견·수정**: 원문 PDF 문장중간 줄바꿈을 공백정규화가 공백으로 바꿔 정확한 인용을 환각 오탐(초기 Citation 67%) → grounding을 공백무관(`_squish`) 비교로 보정(100%), 회귀 테스트 추가. Gemini 백엔드는 SDK(google-genai)가 환경 cryptography와 충돌해 **의존성 없는 urllib REST**로 구현(`gemini_completion`+`to_gemini_schema`). `run_extractor.py` 백엔드 자동선택(GEMINI_API_KEY 우선). 원시추출 `docs/eval/extractor_run_6_30_gemini.json`, 리포트 `docs/eval/extractor_run_6_30.md`, metrics_spec 현재값 반영. 테스트 3개 추가(총 56) 통과.

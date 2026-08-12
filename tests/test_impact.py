@@ -9,15 +9,27 @@
 """
 from datetime import date
 
+import pytest
+
 from regimpact import EvaluationStatus, analyze_impact, format_report
 from regimpact.impact import (
     AFTER_DATE,
     BEFORE_DATE,
     CustomerSegment,
+    DEFAULT_ARCHETYPES,
     ImpactDirection,
     SIX_THIRTY_SEGMENTS,
     analyze_segment,
+    impact_from_extraction,
 )
+
+
+class _FakeExtraction:
+    """impact_from_extraction 의 duck typing 입력(추출기 import 없이)."""
+    def __init__(self, policy_id, effective_from, target_regions):
+        self.policy_id = policy_id
+        self.effective_from = effective_from
+        self.target_regions = target_regions
 
 
 def _matrix():
@@ -151,3 +163,51 @@ def test_no_impact_when_both_dates_pre_effective():
     imp = analyze_segment(seg, before_date=date(2026, 6, 28), after_date=date(2026, 6, 30))
     assert imp.direction == ImpactDirection.UNCHANGED
     assert imp.ltv_delta == 0.0
+
+
+# ---------- 추출 → Impact Matrix 연결 (E2E) ----------
+def test_impact_from_extraction_derives_dates_and_regions():
+    """추출의 effective_from → before/after 유도, 한글 지역명 → 코드 정규화."""
+    ext = _FakeExtraction("FSC_20260630", "2026-07-01",
+                          ["화성시 동탄구", "용인시 기흥구", "구리시"])
+    result = impact_from_extraction(ext)
+    assert result.before_date == date(2026, 6, 30)   # eff - 1
+    assert result.after_date == date(2026, 7, 2)     # eff + 1
+    assert set(result.regions) == {"HWASEONG_DONGTAN", "YONGIN_GIHEUNG", "GURI"}
+    assert result.unmapped_regions == []
+    # 3지역 × 8 archetype = 24행
+    assert len(result.matrix.rows) == len(DEFAULT_ARCHETYPES) * 3
+    assert result.matrix.policy_id == "FSC_20260630"
+
+
+def test_impact_from_extraction_single_region_labels_plain():
+    ext = _FakeExtraction("P", "2026-07-01", ["구리시"])
+    result = impact_from_extraction(ext)
+    assert result.regions == ["GURI"]
+    assert len(result.matrix.rows) == len(DEFAULT_ARCHETYPES)
+    # 단일 지역이면 라벨에 지역 미표기
+    assert any(r.label == "무주택 일반" for r in result.matrix.rows)
+
+
+def test_impact_from_extraction_surfaces_unmapped_region():
+    ext = _FakeExtraction("P", "2026-07-01", ["구리시", "서울시 강남구"])
+    result = impact_from_extraction(ext)
+    assert result.regions == ["GURI"]
+    assert result.unmapped_regions == ["서울시 강남구"]   # 조용한 누락 금지
+    report = format_report(result.matrix)
+    assert "미상 지역" in report
+
+
+def test_impact_from_extraction_requires_effective_from():
+    ext = _FakeExtraction("P", None, ["구리시"])
+    with pytest.raises(ValueError):
+        impact_from_extraction(ext)
+
+
+def test_impact_from_extraction_drives_real_ltv_change():
+    """연결이 진짜 룰엔진 판정을 관통하는지: 무주택 일반은 70%→40%."""
+    ext = _FakeExtraction("FSC_20260630", "2026-07-01", ["구리시"])
+    result = impact_from_extraction(ext)
+    row = _row(result.matrix, "무주택 일반")
+    assert row.before.max_ltv == 0.70 and row.after.max_ltv == 0.40
+    assert row.direction == ImpactDirection.TIGHTENED

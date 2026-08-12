@@ -93,7 +93,6 @@ Exception Recall **50% → 100%**, missed_exceptions 없음. 다른 지표 회�
 
 1. ~~예외 recall 개선 후 재측정~~ — ✅ 완료(2026-08-12, 발견 2). Exception Recall 100%. 임계값은 골드 확대 후 확정.
 2. ~~지역명→코드 매핑 계층 추가~~ — ✅ 완료(2026-08-12, 발견 3). Regions OK. `regions.normalize_regions`.
-3. **추출→Impact Matrix 연결** — 정규화된 코드로 추출 결과를 Impact Matrix 입력에 연결(현재 매트릭스는
-   하드코딩 세그먼트). 정규화 계층이 그 전제였음.
+3. ~~추출→Impact Matrix 연결~~ — ✅ 완료(2026-08-12). `impact_from_extraction`. 저장 추출로 24행 관통.
 4. 골드셋 확대(DEV 우선) 후 지표에 분모를 키워 신뢰구간 확보(현재 n=1 정책, 소규모 seed).
 5. Anthropic 백엔드로 교차 실측(모델 간 비교) — 프롬프트 개선이 모델 무관하게 유효한지 확인.
