@@ -63,7 +63,7 @@
 | `docs/ui/report_6_30.html` | 생성된 6·30 리포트(실제 엔진 출력, `examples/gen_report.py` 산출) |
 | `docs/eval/` | 골드 정답지 · 층화 합성 포트폴리오 매니페스트 · 실측 리포트 |
 | `docs/livefire/` | **라이브파이어 상태판 + 증거 패키지** — 6·30 예행연습(rehearsal_6_30), 실제 Live Fire #1 ⬜ 대기 |
-| `tests/` | 테스트 하네스 (pytest, 148개) |
+| `tests/` | 테스트 하네스 (pytest, 150개) |
 | `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E / HTML 리포트 생성 / 골드셋 포트폴리오 / 룰 변경안 / 가중 모집단 / 여력 영향 금액 / 민감도 분석 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |

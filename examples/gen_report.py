@@ -23,6 +23,7 @@ from regimpact.impact import (  # noqa: E402
     build_response_table,
     compute_exposure,
     impact_from_extraction,
+    oat_tornado,
     sensitivity_bands,
 )
 from regimpact.report import render_report  # noqa: E402
@@ -43,7 +44,15 @@ def main() -> None:
     gold = score_against_gold(extraction, GOLD)
     proposal = build_proposal(extraction, generated_on=date(2026, 8, 12))
     exposure = compute_exposure([r.segment for r in policy_impact.matrix.rows])
-    sensitivity = sensitivity_bands(build_response_table(), n=3000, seed=42)
+    table = build_response_table()
+    sensitivity = sensitivity_bands(table, n=3000, seed=42)
+    _base, bars = oat_tornado(table)
+    tornado = [
+        {"label": b.assumption, "lo": min(b.low.exposure_pct_reduction, b.high.exposure_pct_reduction),
+         "hi": max(b.low.exposure_pct_reduction, b.high.exposure_pct_reduction),
+         "swing": b.swing("exposure_pct_reduction")}
+        for b in bars
+    ]
 
     html = render_report(
         policy_impact,
@@ -53,6 +62,7 @@ def main() -> None:
         proposal=proposal,
         exposure=exposure,
         sensitivity=sensitivity,
+        tornado=tornado,
         generated_on=date(2026, 8, 12),
     )
     OUT.write_text(html, encoding="utf-8")

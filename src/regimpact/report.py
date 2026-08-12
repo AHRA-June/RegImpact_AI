@@ -68,8 +68,14 @@ def _rows_by_region(matrix: ImpactMatrix) -> list[tuple[str, list[SegmentImpact]
 
 
 def _display_label(imp: SegmentImpact) -> str:
-    # 다지역 라벨은 "무주택 일반·GURI" → 지역 접미 제거(지역은 그룹 헤더로 표기)
-    return imp.label.split("·")[0]
+    # 다지역 라벨은 "서민·실수요·GURI" → 지역 접미(·CODE)만 제거. 유형명에도 '·'가 있으므로
+    # split이 아니라 실제 region_code 접미를 정확히 벗겨낸다.
+    code = imp.segment.attrs.get("region_code", "")
+    label = imp.label
+    suffix = f"·{code}"
+    if code and label.endswith(suffix):
+        return label[: -len(suffix)]
+    return label
 
 
 def _metric_tile(label: str, value: str, note: str, tone: str = "") -> str:
@@ -147,6 +153,128 @@ def _changes_section(extraction) -> str:
     )
 
 
+def _archetype_rows(matrix: ImpactMatrix):
+    """지역 중복을 접어 대표 유형별 1행(첫 등장 기준). 차트용."""
+    seen: dict[str, Any] = {}
+    order: list[str] = []
+    for r in matrix.rows:
+        lbl = _display_label(r)
+        if lbl not in seen:
+            seen[lbl] = r
+            order.append(lbl)
+    return [seen[l] for l in order]
+
+
+def _svg_impact(matrix: ImpactMatrix) -> str:
+    """유형별 LTV Δ(pp) 수평 막대 — 길이=변화 크기, 색=방향(표와 동일 의미)."""
+    rows = _archetype_rows(matrix)
+    if not rows:
+        return ""
+    n = len(rows)
+    row_h, label_w, x0, bar_max, top, pad_r = 30, 128, 138, 188, 30, 66
+    W, H = x0 + bar_max + pad_r, top + n * row_h + 12
+    max_pp = 30.0
+    color = {ImpactDirection.TIGHTENED: "var(--tighten)",
+             ImpactDirection.UNCHANGED: "var(--hold)",
+             ImpactDirection.NEEDS_REVIEW: "var(--review)"}
+    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" '
+           f'aria-label="유형별 LTV 변화 막대차트">']
+    out.append(f'<text class="c-cap" x="{x0}" y="18">← LTV 축소 (pp) · 색=방향</text>')
+    out.append(f'<line class="c-axis" x1="{x0}" y1="{top-4}" x2="{x0}" y2="{H-8}"/>')
+    for i, r in enumerate(rows):
+        y = top + i * row_h
+        lbl = _esc(_display_label(r))
+        out.append(f'<text class="c-lbl" x="{label_w}" y="{y+15}" text-anchor="end">{lbl}</text>')
+        if r.ltv_delta is None:
+            out.append(f'<text class="c-review" x="{x0+6}" y="{y+15}">검토 · 산정불가</text>')
+            continue
+        pp = r.ltv_delta * 100
+        col = color.get(r.direction, "var(--hold)")
+        if pp == 0:
+            out.append(f'<circle cx="{x0+4}" cy="{y+11}" r="3.5" fill="{col}"/>')
+            out.append(f'<text class="c-val" x="{x0+14}" y="{y+15}">0pp (유지)</text>')
+        else:
+            w = max(3.0, abs(pp) / max_pp * bar_max)
+            out.append(f'<rect x="{x0}" y="{y+4}" width="{w:.1f}" height="14" rx="3" '
+                       f'fill="{col}"><title>{lbl}: {pp:+.0f}pp</title></rect>')
+            out.append(f'<text class="c-val" x="{x0+w+6:.1f}" y="{y+15}">'
+                       f'{("%+.0f" % pp).replace("-", "−")}pp</text>')
+    out.append("</svg>")
+    return f'<div class="chart-wrap">{"".join(out)}</div>'
+
+
+def _svg_exposure(exposure: Any) -> str:
+    """밴드별 대출 여력 전/후 — 전(옅음) 위에 후(진함)를 겹쳐 감소분을 시각화."""
+    bands = list(getattr(exposure, "by_band", []) or [])
+    if not bands:
+        return ""
+    n = len(bands)
+    row_h, label_w, x0, bar_max, top, pad_r = 34, 88, 96, 210, 34, 92
+    W, H = x0 + bar_max + pad_r, top + n * row_h + 10
+    max_cap = max((b.before_capacity for b in bands), default=1.0) or 1.0
+    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" '
+           f'aria-label="담보가격 밴드별 대출 여력 전후 막대차트">']
+    # 범례
+    out.append(f'<rect x="{x0}" y="8" width="12" height="10" rx="2" fill="var(--outline)" opacity="0.5"/>')
+    out.append(f'<text class="c-cap" x="{x0+16}" y="17">여력 전</text>')
+    out.append(f'<rect x="{x0+58}" y="8" width="12" height="10" rx="2" fill="var(--secondary)"/>')
+    out.append(f'<text class="c-cap" x="{x0+74}" y="17">여력 후 (억, 가중)</text>')
+    for i, b in enumerate(bands):
+        y = top + i * row_h
+        out.append(f'<text class="c-lbl" x="{label_w}" y="{y+16}" text-anchor="end">{_esc(b.label)}</text>')
+        wb = max(2.0, b.before_capacity / max_cap * bar_max)
+        wa = max(1.0, b.after_capacity / max_cap * bar_max)
+        out.append(f'<rect x="{x0}" y="{y+4}" width="{wb:.1f}" height="18" rx="3" '
+                   f'fill="var(--outline)" opacity="0.4"><title>{_esc(b.label)} 여력 전 '
+                   f'{b.before_capacity:.2f}억</title></rect>')
+        out.append(f'<rect x="{x0}" y="{y+4}" width="{wa:.1f}" height="18" rx="3" '
+                   f'fill="var(--secondary)"><title>{_esc(b.label)} 여력 후 '
+                   f'{b.after_capacity:.2f}억</title></rect>')
+        out.append(f'<text class="c-val" x="{x0+wb+7:.1f}" y="{y+17}">'
+                   f'{("%.2f" % b.delta_capacity).replace("-", "−")}억</text>')
+    out.append("</svg>")
+    return f'<div class="chart-wrap">{"".join(out)}</div>'
+
+
+def _svg_tornado(tornado: list[dict], base: float) -> str:
+    """민감도 토네이도 — 가정을 하나씩 흔든 여력 감소율 범위(base 기준선)."""
+    if not tornado:
+        return ""
+    data = sorted(tornado, key=lambda d: d["swing"], reverse=True)[:7]
+    n = len(data)
+    row_h, label_w, x0, plot_w, top, pad_r = 30, 150, 160, 210, 40, 60
+    W, H = x0 + plot_w + pad_r, top + n * row_h + 14
+    los = [d["lo"] for d in data] + [base]
+    his = [d["hi"] for d in data] + [base]
+    lo, hi = min(los), max(his)
+    span = (hi - lo) or 1.0
+    lo -= span * 0.08
+    hi += span * 0.08
+    span = hi - lo
+
+    def sx(v: float) -> float:
+        return x0 + (v - lo) / span * plot_w
+
+    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" '
+           f'aria-label="민감도 토네이도 차트">']
+    bx = sx(base)
+    out.append(f'<line class="c-base" x1="{bx:.1f}" y1="{top-6}" x2="{bx:.1f}" y2="{H-10}"/>')
+    out.append(f'<text class="c-base-lbl" x="{bx:.1f}" y="{H-2}" text-anchor="middle">'
+               f'base {base:.1%}</text>')
+    for i, d in enumerate(data):
+        y = top + i * row_h
+        out.append(f'<text class="c-lbl" x="{label_w}" y="{y+15}" text-anchor="end">'
+                   f'{_esc(d["label"])}</text>')
+        xa, xb = sx(d["lo"]), sx(d["hi"])
+        w = max(3.0, xb - xa)
+        out.append(f'<rect x="{xa:.1f}" y="{y+4}" width="{w:.1f}" height="14" rx="3" '
+                   f'fill="var(--secondary)" opacity="0.85"><title>{_esc(d["label"])}: '
+                   f'{d["lo"]:.1%}–{d["hi"]:.1%} (스윙 {d["swing"]:.1%})</title></rect>')
+        out.append(f'<text class="c-val" x="{xb+6:.1f}" y="{y+15}">{d["swing"]:.1%}</text>')
+    out.append("</svg>")
+    return f'<div class="chart-wrap">{"".join(out)}</div>'
+
+
 def _impact_section(matrix: ImpactMatrix) -> str:
     groups = _rows_by_region(matrix)
     body: list[str] = []
@@ -194,6 +322,7 @@ def _impact_section(matrix: ImpactMatrix) -> str:
         '<section class="panel"><h2>누가 영향받나 — Impact Matrix</h2>'
         '<p class="lead">시행 전/후 두 시점을 결정적 룰엔진으로 판정한 고객 유형별 LTV 변화. '
         '★ = 중대영향, “검토” = 명세 여백을 정직하게 사람에게 넘긴 건.</p>'
+        f'{_svg_impact(matrix)}'
         '<div class="tbl-wrap"><table>'
         '<thead><tr><th>고객 유형</th><th class="r">시행 전</th><th class="r">시행 후</th>'
         '<th class="r">Δ</th><th>방향</th></tr></thead>'
@@ -228,7 +357,7 @@ def _sensitivity_note(sb) -> str:
     )
 
 
-def _exposure_section(exposure, sensitivity=None) -> str:
+def _exposure_section(exposure, sensitivity=None, tornado=None) -> str:
     if exposure is None or not getattr(exposure, "by_band", None):
         return ""
     rows: list[str] = []
@@ -267,10 +396,29 @@ def _exposure_section(exposure, sensitivity=None) -> str:
         '변화 금액으로 환산. 주의: (1) 실행액이 아닌 <b>한도 여력</b> (2) LTV 규칙만 — '
         '가격대별 <b>최대한도 상한(6/4/2억) 미적용</b>(상한 성격) (3) 담보가격 분포는 <b>가정</b>(실측 아님) '
         '(4) 자동판정 불가분은 금액 <b>산정 불가</b>로 분리(0으로 뭉개지 않음).</p>'
+        f'{_svg_exposure(exposure)}'
         '<div class="tbl-wrap"><table>'
         '<thead><tr><th>담보가격 밴드</th><th class="r">여력 전</th><th class="r">여력 후</th>'
         '<th class="r">Δ</th></tr></thead>'
-        f'<tbody>{"".join(rows)}</tbody></table>{foot}{_sensitivity_note(sensitivity)}</div></section>'
+        f'<tbody>{"".join(rows)}</tbody></table>{foot}{_sensitivity_note(sensitivity)}</div>'
+        + _tornado_block(sensitivity, tornado)
+        + '</section>'
+    )
+
+
+def _tornado_block(sensitivity, tornado) -> str:
+    """민감도 토네이도 차트(선택). base는 sensitivity.base에서."""
+    if not tornado or sensitivity is None:
+        return ""
+    base = getattr(getattr(sensitivity, "base", None), "exposure_pct_reduction", None)
+    if base is None:
+        return ""
+    svg = _svg_tornado(tornado, base)
+    if not svg:
+        return ""
+    return (
+        '<div class="sub-chart"><div class="sc-cap">민감도 — 어떤 가정이 여력 감소율을 '
+        '가장 크게 좌우하나 (규칙 고정, 가정만 섭동)</div>' + svg + '</div>'
     )
 
 
@@ -334,6 +482,7 @@ def render_report(
     proposal: Any = None,
     exposure: Any = None,
     sensitivity: Any = None,
+    tornado: Any = None,
     generated_on: Optional[date] = None,
     title: str = "규제 변경 영향분석 리포트",
 ) -> str:
@@ -371,7 +520,7 @@ def render_report(
         f'{_changes_section(extraction)}'
         f'{_proposal_section(proposal)}'
         f'{_impact_section(matrix)}'
-        f'{_exposure_section(exposure, sensitivity)}'
+        f'{_exposure_section(exposure, sensitivity, tornado)}'
         f'</main>{footer}</body></html>'
     )
 
@@ -465,6 +614,18 @@ h2 .draft{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing
 .tbl-foot{display:flex;flex-wrap:wrap;gap:6px 20px;padding:12px 15px;font-size:.8rem;color:var(--ink-soft);
   background:var(--container);border-top:1px solid var(--line)}
 .tbl-foot b{color:var(--ink);font-family:var(--mono)}
+.chart-wrap{overflow-x:auto;margin:2px 0 16px}
+svg.chart{max-width:100%;height:auto;min-width:340px}
+svg.chart text{font-family:var(--sans)}
+.c-lbl{fill:var(--ink);font-size:12px}
+.c-val{fill:var(--ink-soft);font-size:11px;font-family:var(--mono)}
+.c-cap{fill:var(--ink-soft);font-size:11px}
+.c-review{fill:var(--review);font-size:11.5px;font-weight:600}
+.c-axis{stroke:var(--outline);stroke-width:1}
+.c-base{stroke:var(--primary);stroke-width:1.5;stroke-dasharray:3 3}
+.c-base-lbl{fill:var(--primary);font-size:10px;font-family:var(--mono)}
+.sub-chart{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.sc-cap{font-size:.82rem;color:var(--ink-soft);margin-bottom:8px}
 .disc{max-width:940px;margin:0 auto;padding:8px 22px 40px;color:var(--ink-soft);font-size:.78rem}
 .disc b{color:var(--ink)} .disc .gen{font-family:var(--mono);font-size:.7rem;opacity:.7;margin-top:6px}
 """

@@ -99,6 +99,35 @@ def test_report_exposure_panel_when_provided():
     assert "민감도" not in html                        # sensitivity 미제공 → 견고성 줄 생략
 
 
+def test_report_charts_render_when_data_provided():
+    """차트: 임팩트 Δ 막대 + 여력 전후 막대 + 민감도 토네이도가 SVG로 렌더된다."""
+    from regimpact.impact import build_response_table, oat_tornado, sensitivity_bands
+    ext = RegChangeExtraction.from_dict(SAVED)
+    pi = impact_from_extraction(ext)
+    exp = compute_exposure([r.segment for r in pi.matrix.rows])
+    table = build_response_table()
+    sb = sensitivity_bands(table, n=400, seed=42)
+    _b, bars = oat_tornado(table)
+    tornado = [{"label": b.assumption,
+                "lo": min(b.low.exposure_pct_reduction, b.high.exposure_pct_reduction),
+                "hi": max(b.low.exposure_pct_reduction, b.high.exposure_pct_reduction),
+                "swing": b.swing("exposure_pct_reduction")} for b in bars]
+    html = render_report(pi, exposure=exp, sensitivity=sb, tornado=tornado)
+    assert html.count('<svg class="chart"') == 3       # 임팩트·여력·토네이도
+    assert html.count("<svg") == html.count("</svg>")   # 모두 닫힘
+    assert "−30pp" in html                              # 임팩트 막대 직접 라벨
+    assert "base " in html                              # 토네이도 base 기준선 라벨
+
+
+def test_display_label_strips_only_region_suffix():
+    """유형명에 '·'가 있어도(서민·실수요) 지역 접미만 제거되어 온전히 표기된다."""
+    ext = RegChangeExtraction.from_dict(SAVED)
+    pi = impact_from_extraction(ext)
+    html = render_report(pi)
+    assert "서민·실수요" in html
+    assert ">서민<" not in html            # '서민'으로 잘리지 않음
+
+
 def test_report_sensitivity_note_when_provided():
     """sensitivity 전달 시 여력 패널에 견고성 밴드가 규칙-고정 문구와 함께 노출."""
     ext = RegChangeExtraction.from_dict(SAVED)
