@@ -105,16 +105,17 @@ def _http_post_json(url: str, payload: dict, timeout: int = 120) -> dict:
 
 
 def gemini_completion(
-    model: str = "gemini-2.5-flash",
-    max_tokens: int = 8192,
+    model: str = "gemini-flash-latest",
+    max_tokens: int = 16000,
     api_key: Optional[str] = None,
-    thinking_budget: int = 0,
+    thinking_budget: Optional[int] = None,
 ) -> CompletionFn:
     """Google AI Studio(Gemini) 호출 함수를 만든다 (structured output, REST).
 
     인증: 인자 api_key 또는 환경변수 GEMINI_API_KEY / GOOGLE_API_KEY.
-    thinking_budget=0 은 2.5 계열의 사고 토큰을 꺼서 structured 출력이 max_tokens에 잘리지
-    않게 한다(추출 태스크엔 사고 불필요). 미지원 모델이면 이 필드를 무시하도록 예외 처리.
+    thinking_budget: None(기본)이면 thinkingConfig를 보내지 않는다 — Gemini 3.x 계열은
+    thinkingBudget=0(사고 끄기)을 거부하므로 기본은 모델 기본 사고에 맡기고 max_tokens를
+    넉넉히 둔다. 특정 2.5 모델에서 사고를 끄려면 thinking_budget=0을 명시.
     """
     key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:

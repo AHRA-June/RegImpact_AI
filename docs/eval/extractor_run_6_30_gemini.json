@@ -1,0 +1,77 @@
+{
+  "policy_id": "FSC_20260630",
+  "effective_from": "2026-07-01",
+  "target_regions": [
+    "경기도 화성시 동탄구",
+    "용인시 기흥구",
+    "구리시"
+  ],
+  "changes": [
+    {
+      "category": "REGION",
+      "summary": "화성시 동탄구, 용인시 기흥구, 구리시 투기과열지구 및 조정대상지역 신규 지정",
+      "before": "비규제지역",
+      "after": "투기과열지구 및 조정대상지역",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "최근 큰 폭으로 집값이 상승한 경기도 화성시 동탄구, 용인시 기흥구, 구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다."
+      }
+    },
+    {
+      "category": "LTV",
+      "summary": "규제지역 내 주택담보대출 LTV 비율 강화",
+      "before": "70%",
+      "after": "40%",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"
+      }
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "생애최초 주택구입 및 정책모기지 등에 대한 완화된 LTV 규제비율 적용",
+      "before": null,
+      "after": "60~70%",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용"
+      }
+    },
+    {
+      "category": "EFFECTIVE_DATE",
+      "summary": "규제지역 지정에 따른 대출규제 강화 조치 시행일",
+      "before": null,
+      "after": "2026-07-01",
+      "confidence": 1.0,
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "강화된 대출규제가 7.1일부터 즉시 적용된다."
+      }
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "효력 발생일 전일까지 대출 신청 접수 또는 매매계약 체결 및 계약금 납부 시 종전 규정 적용",
+      "before": null,
+      "after": "종전 규정 적용",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "(일반 주담대) 규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능"
+      }
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "1억원 초과 신용대출 보유 차주의 규제지역 내 주택 구입 제한",
+      "before": null,
+      "after": "대출실행일로부터 1년간 규제지역 내 주택 구입 제한",
+      "confidence": 0.95,
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "1억원 초과 신용대출 보유 차주는 대출 실행일로부터 1년간 규제지역* 내 주택 구입이 제한"
+      }
+    }
+  ]
+}

@@ -18,6 +18,17 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _squish(s: str) -> str:
+    """모든 공백을 제거해 layout 무관 비교용 문자열을 만든다.
+
+    근거: 원문은 PDF/HWP에서 추출돼 문장 중간에 줄바꿈이 섞인다(예: '전일(6.30일)'↵'까지').
+    단순 공백정규화는 그 줄바꿈을 공백으로 바꿔, 모델이 정확히 인용해도('(6.30일)까지')
+    substring 매칭에 실패해 **정확한 인용을 환각으로 오탐**한다. 공백을 전부 제거하면
+    이 아티팩트가 사라진다(실제 지어낸 인용은 공백을 지워도 원문에 없으므로 여전히 잡힘).
+    """
+    return re.sub(r"\s+", "", s)
+
+
 @dataclass
 class GroundingReport:
     total: int
@@ -40,12 +51,12 @@ def check_citation_grounding(
 
     존재하지 않으면 unsupported(환각 가능성)로 분류. 완전 deterministic — 오프라인 실측.
     """
-    norm_sources = {doc_id: _norm(text) for doc_id, text in sources.items()}
+    squished_sources = {doc_id: _squish(text) for doc_id, text in sources.items()}
     grounded = 0
     ungrounded: list[RegChangeItem] = []
     for item in extraction.changes:
-        src = norm_sources.get(item.citation.source_doc_id)
-        quote = _norm(item.citation.quote)
+        src = squished_sources.get(item.citation.source_doc_id)
+        quote = _squish(item.citation.quote)
         if src is not None and quote and quote in src:
             grounded += 1
         else:

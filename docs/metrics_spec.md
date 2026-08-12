@@ -44,23 +44,34 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 ## 1. RegChange / RAG 계열 (브리프 §13.1) — [DEEP] dimension ②③
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk |
-|---|---|---|---|---|---|
-| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | TBD | 놓침=위험 |
-| Exception Recall | 예외조건(생애최초·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | TBD | ★ 높음 |
-| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | TBD | ★ 높음 |
-| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | TBD | ★ 높음 |
-| Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 |
-| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 |
+> 📊 **첫 실측(2026-08-12):** Gemini(`gemini-flash-latest`)로 6·30 공문 3건 추출.
+> 상세·발견은 `docs/eval/extractor_run_6_30.md`. 아래 "현재값"은 정책 n=1 seed 기준(소규모).
+
+| 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk | 현재값(6·30) |
+|---|---|---|---|---|---|---|
+| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | TBD | 놓침=위험 | **100%** (4/4) |
+| Exception Recall | 예외조건(생애최초·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | TBD | ★ 높음 | **50%** (1/2) ⚠️ |
+| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | TBD | ★ 높음 | 포착(정성) |
+| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | TBD | ★ 높음 | **OK** (1/1) |
+| Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 | **100%** (6/6) |
+| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 | (미측정) |
+
+> ⚠️ **Exception Recall 50%** — 서민·실수요 예외 놓침(실제 품질 이슈). **Regions**는 지역을
+> 한글명으로 반환해 코드 불일치(MISS) — 추출은 정확하나 정규화 계층 필요. `extractor_run_6_30.md` 참고.
 
 ## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2) — [DEEP] dimension ①
 
 > `hallucination rate` 단일 지표로 뭉뚱그리지 않는다.
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계 |
-|---|---|---|---|---|
-| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD |
-| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD |
+| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값(6·30) |
+|---|---|---|---|---|---|
+| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD | **0%** (0/6) |
+| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD | (미측정) |
+
+> ⚠️ **측정 아티팩트 주의(2026-08-12 실측에서 발견):** 초기 Unsupported Claim Rate가 33%로
+> 나왔으나, 이는 원문 PDF의 문장 중간 줄바꿈을 공백정규화가 공백으로 바꿔 **정확한 인용을 오탐**한
+> 것이었다. grounding 비교를 공백 무관(`_squish`)으로 보정 후 0%. → 지표 신뢰성은 채점기의
+> 텍스트 정규화 견고성에 의존. 상세: `docs/eval/extractor_run_6_30.md`.
 
 ## 3. Rule / Test 계열 (브리프 §13.3) — [DEEP] dimension ④
 

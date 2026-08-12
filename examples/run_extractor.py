@@ -40,7 +40,7 @@ def _select_backend():
     use_anthropic = forced == "anthropic" or (forced == "" and not has_gemini and has_anthropic)
 
     if use_gemini:
-        model = model_override or "gemini-2.5-flash"
+        model = model_override or "gemini-flash-latest"
         return "Gemini", model, gemini_completion(model=model)
     if use_anthropic:
         model = model_override or "claude-opus-5"

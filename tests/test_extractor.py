@@ -91,6 +91,28 @@ def test_citation_grounding_catches_hallucination():
     assert abs(report.unsupported_claim_rate - (1 / 6)) < 1e-9
 
 
+def test_grounding_ignores_pdf_linewrap_whitespace():
+    """원문이 문장 중간에서 줄바꿈돼도(PDF/HWP 추출 아티팩트) 정확한 인용은 grounded.
+
+    실측에서 발견: '...전일(6.30일)\n까지...' 원문을 모델이 '(6.30일)까지'로 정확히 인용하면,
+    공백정규화만으로는 오탐(환각)이 났다. 공백 무관 비교(_squish)로 방어.
+    """
+    sources = {"DOC": "규제지역 효력 발생일 전일(6.30일)\n까지 접수 완료 시 종전규정 적용"}
+    d = {
+        "policy_id": "P", "effective_from": None, "target_regions": [],
+        "changes": [{
+            "category": "GRANDFATHERING", "summary": "경과규정",
+            "before": None, "after": "종전규정", "confidence": 0.9,
+            # 원문엔 '(6.30일) 까지'(줄바꿈)지만 모델은 붙여서 정확히 인용
+            "citation": {"source_doc_id": "DOC", "quote": "전일(6.30일)까지 접수 완료"},
+        }],
+    }
+    ext = extract_regchange(sources, complete=lambda s, u: d)
+    report = check_citation_grounding(ext, sources)
+    assert report.grounded == 1
+    assert report.ungrounded == []
+
+
 def test_grounding_perfect_when_all_real():
     sources = load_sources()
     d = _fake_extraction_dict(sources)
