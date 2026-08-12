@@ -31,6 +31,7 @@
 6. `docs/regulatory_facts.md` ← 6·30 규제 사실의 단일 기준점
 7. `docs/metrics_spec.md` ← 평가지표 정의·확정 임계
 8. `docs/prd/PRD.md` ← 정식 PRD(as-built) — 사용자·데이터·컴포넌트·평가·배포 구체화
+9. `docs/validation/VALIDATION_REPORT.md` ← 시스템 검증보고서(§20 #16) — 5축 종합 검증, 조건부 적합
 
 > ⚠️ 이 프로젝트는 개발 도중 Claude 계정이 교체됩니다.
 > **모든 상태는 이 저장소 안에만** 존재합니다. 대화 메모리에 의존하지 마세요.
@@ -66,6 +67,7 @@
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | **정식 PRD(as-built)** + 실패 기록 양식(error taxonomy) |
+| `docs/validation/` | **시스템 검증보고서(§20 #16)** — 독립 검증 관점 5축(개념·구현·성과·거버넌스·재현) 종합, 조건부 적합 |
 
 ## 현재 상태
 
