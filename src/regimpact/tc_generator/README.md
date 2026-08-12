@@ -50,6 +50,24 @@ print(report.pass_rate_by_category())           # {카테고리: (통과, 전체
 
 데모: `python examples/demo_tc_regression.py`
 
+## 골드셋 확대 — 층화 합성 포트폴리오 (`portfolio.py`)
+
+seed 30건을 넘어 입력 차원을 **체계적으로 층화 스윕**해 178건을 결정적으로 생성한다. 분모를 키워
+metrics_spec §3 지표의 신뢰를 확보하고, LOCKED §0-5의 **DEV/LOCKED/CHALLENGE 3분할**을 코드로 실현.
+
+```python
+from regimpact.tc_generator import generate_portfolio, run_regression, cases_in_split
+
+cases = generate_portfolio()              # 178건, 각 케이스에 category + split
+report = run_regression(cases)            # 엔진 ⟷ 오라클 (현재 178/178 100%)
+print(report.pass_rate_by_split())        # {DEV/LOCKED/CHALLENGE: (통과,전체,비율)}
+dev_only = cases_in_split(cases, "DEV")   # 개발 중 DEV만 열람(LOCKED §0-5)
+```
+
+- 기대값은 여전히 **오라클**에서만 온다 → 대량에서도 tautology 아님.
+- 분할은 **결정적**(hashlib) + CHALLENGE 하드 카테고리 가중. `docs/eval/goldset_manifest.json`에 freeze.
+- 데모/freeze: `python examples/demo_portfolio.py`. 상세: `docs/eval/goldset_portfolio.md`.
+
 ## fixture에 이빨이 있는가? (mutation test)
 
 `tests/test_tc_generator.py` 는 엔진에 의도적 버그를 심어(LTV 상수 변조, 경과규정 무력화)

@@ -10,6 +10,13 @@
 """
 from .generator import Category, GeneratedCase, generate_all
 from .oracle import ExpectedOutcome, expected_outcome
+from .portfolio import (
+    assign_split,
+    cases_in_split,
+    category_counts,
+    generate_portfolio,
+    split_counts,
+)
 from .regression import (
     CaseResult,
     RegressionReport,
@@ -22,6 +29,11 @@ __all__ = [
     "Category",
     "GeneratedCase",
     "generate_all",
+    "generate_portfolio",
+    "assign_split",
+    "cases_in_split",
+    "split_counts",
+    "category_counts",
     "ExpectedOutcome",
     "expected_outcome",
     "CaseResult",

@@ -66,6 +66,17 @@ class RegressionReport:
         by = self.pass_rate_by_category().get(category.value)
         return None if by is None else by[2]
 
+    def pass_rate_by_split(self) -> dict[str, tuple[int, int, float]]:
+        """DEV/LOCKED/CHALLENGE 분할 → (통과, 전체, 비율). split 미배정 케이스는 제외."""
+        out: dict[str, tuple[int, int, float]] = {}
+        for split in ("DEV", "LOCKED", "CHALLENGE"):
+            subset = [r for r in self.results if r.case.split == split]
+            if not subset:
+                continue
+            p = sum(1 for r in subset if r.passed)
+            out[split] = (p, len(subset), p / len(subset))
+        return out
+
 
 def _compare(expected: ExpectedOutcome, actual: LtvDecision) -> tuple[bool, tuple[str, ...]]:
     """오라클 기대값과 엔진 출력을 비교. (통과여부, 불일치설명들)."""
@@ -119,10 +130,17 @@ def format_report(report: RegressionReport) -> str:
         f"Rule-regression Pass Rate: {report.passed}/{report.total} "
         f"= {report.pass_rate:.1%}"
     )
+    by_split = report.pass_rate_by_split()
+    if by_split:
+        lines.append("")
+        lines.append("By split (DEV/LOCKED/CHALLENGE — LOCKED §0-5):")
+        for split, (p, n, rate) in by_split.items():
+            lines.append(f"  {split:<10} {p:>3}/{n:<3} {rate:.0%}")
+
     lines.append("")
     lines.append("By category:")
     for cat, (p, n, rate) in report.pass_rate_by_category().items():
-        lines.append(f"  {cat:<15} {p:>2}/{n:<2}  {rate:.0%}")
+        lines.append(f"  {cat:<15} {p:>3}/{n:<3}  {rate:.0%}")
 
     if report.failures:
         lines.append("")

@@ -49,6 +49,7 @@ class GeneratedCase:
     app: MortgageApplication
     expected: ExpectedOutcome
     spec_note: Optional[str] = None   # 알려진 명세 모호성·주의사항(있으면)
+    split: Optional[str] = None       # DEV / LOCKED / CHALLENGE (포트폴리오에서 배정)
 
 
 def _app(**kw) -> MortgageApplication:

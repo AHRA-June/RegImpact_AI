@@ -82,14 +82,17 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 > `run_regression()` 이 아래 지표를 카테고리별로 산출(`report.pass_rate_by_category()`).
 > mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 30 케이스 전 항목 100%.
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값 |
-|---|---|---|---|---|---|
-| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) |
-| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 |
-| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 |
-| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 |
+| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값(seed 30) | 현재값(포트폴리오 178) |
+|---|---|---|---|---|---|---|
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) | **178/178 (100%)** |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 | **178/178** |
+| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 | **40/40** |
+| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 | **33/33** |
 
-> 주: 현재값은 6·30 시나리오 소규모 seed 케이스 기준. 층화 합성 포트폴리오(2,000~5,000, `04_PLAN.md` Phase 2)로 확대 예정.
+> ✅ **골드셋 확대(2026-08-12):** 층화 합성 포트폴리오 **178건**(DEV 52 / LOCKED 59 / CHALLENGE 67,
+> CHALLENGE 하드 카테고리 가중)으로 분모 확대. 기대값은 독립 명세 오라클에서 유도(tautology 방지),
+> 결정적 생성 + `docs/eval/goldset_manifest.json` freeze(LOCKED §0-5 3분할). mutation test로 이빨 확인.
+> 상세: `docs/eval/goldset_portfolio.md`. 스케일: 층 상한 확대로 수천까지 가능(Phase 2의 2,000~5,000).
 
 ## 4. Human Escalation 계열 (브리프 §13.4) — [ROADMAP]
 

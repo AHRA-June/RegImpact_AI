@@ -1,0 +1,909 @@
+{
+  "_note": "층화 합성 골드셋 freeze. generate_portfolio()로 결정적 재생성 가능. 개발 중 LOCKED/CHALLENGE 미개봉(LOCKED §0-5).",
+  "total": 178,
+  "split_counts": {
+    "DEV": 52,
+    "LOCKED": 59,
+    "CHALLENGE": 67
+  },
+  "category_counts": {
+    "SCOPE": 10,
+    "BASELINE": 18,
+    "EXCEPTION": 9,
+    "BOUNDARY": 40,
+    "GRANDFATHERING": 68,
+    "CONFLICT": 33
+  },
+  "cases": [
+    {
+      "case_id": "PF-A-REG-hc0-plain",
+      "category": "EXCEPTION",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-A-REG-hc0-fh",
+      "category": "EXCEPTION",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc0-rd",
+      "category": "EXCEPTION",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc0-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc1-plain",
+      "category": "EXCEPTION",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc1-fh",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc1-rd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc1-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc1disp-plain",
+      "category": "EXCEPTION",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc1disp-fh",
+      "category": "EXCEPTION",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-A-REG-hc1disp-rd",
+      "category": "EXCEPTION",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-A-REG-hc1disp-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc2-plain",
+      "category": "EXCEPTION",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-A-REG-hc2-fh",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-A-REG-hc2-rd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc2-fhrd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc3-plain",
+      "category": "EXCEPTION",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc3-fh",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-A-REG-hc3-rd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-A-REG-hc3-fhrd",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc0-plain",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc0-fh",
+      "category": "BASELINE",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc0-rd",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc0-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1-plain",
+      "category": "BASELINE",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1-fh",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1-rd",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1-fhrd",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1disp-plain",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1disp-fh",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1disp-rd",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc1disp-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc2-plain",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc2-fh",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc2-rd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc2-fhrd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc3-plain",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc3-fh",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc3-rd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-NONREG-hc3-fhrd",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc0-plain",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc0-fh",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc0-rd",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc0-fhrd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1-plain",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1-fh",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1-rd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1-fhrd",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1disp-plain",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1disp-fh",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1disp-rd",
+      "category": "BASELINE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc1disp-fhrd",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc2-plain",
+      "category": "BASELINE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc2-fh",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc2-rd",
+      "category": "CONFLICT",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc2-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc3-plain",
+      "category": "BASELINE",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc3-fh",
+      "category": "CONFLICT",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc3-rd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-B-UNREG-hc3-fhrd",
+      "category": "CONFLICT",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc0-plain",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc0-fh",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc0-rd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc0-fhrd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1-plain",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1-fh",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1-rd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1-fhrd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1disp-plain",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1disp-fh",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1disp-rd",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc1disp-fhrd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc2-plain",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc2-fh",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc2-rd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc2-fhrd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc3-plain",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc3-fh",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc3-rd",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-EFFDAY-hc3-fhrd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc0-plain",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc0-fh",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc0-rd",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc0-fhrd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1-plain",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1-fh",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1-rd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1-fhrd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1disp-plain",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1disp-fh",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1disp-rd",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc1disp-fhrd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc2-plain",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc2-fh",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc2-rd",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc2-fhrd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc3-plain",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc3-fh",
+      "category": "BOUNDARY",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc3-rd",
+      "category": "BOUNDARY",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-C-PREEFF-hc3-fhrd",
+      "category": "BOUNDARY",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g1in-REG-hc0",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1in-REG-hc1",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1in-REG-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1in-REG-hc2",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g1in-REG-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1in-PREEFF-hc0",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g1in-PREEFF-hc1",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g1in-PREEFF-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g1in-PREEFF-hc2",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1in-PREEFF-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1out-REG-hc0",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g1out-REG-hc1",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g1out-REG-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g1out-REG-hc2",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g1out-REG-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1out-PREEFF-hc0",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g1out-PREEFF-hc1",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1out-PREEFF-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g1out-PREEFF-hc2",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g1out-PREEFF-hc3",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2-REG-hc0",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2-REG-hc1",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2-REG-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g2-REG-hc2",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g2-REG-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2-PREEFF-hc0",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2-PREEFF-hc1",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2-PREEFF-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2-PREEFF-hc2",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g2-PREEFF-hc3",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g2ndp-REG-hc0",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2ndp-REG-hc1",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2ndp-REG-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2ndp-REG-hc2",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g2ndp-REG-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2ndp-PREEFF-hc0",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2ndp-PREEFF-hc1",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g2ndp-PREEFF-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2ndp-PREEFF-hc2",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g2ndp-PREEFF-hc3",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g3-REG-hc0",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g3-REG-hc1",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-D-g3-REG-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g3-REG-hc2",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g3-REG-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g3-PREEFF-hc0",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g3-PREEFF-hc1",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g3-PREEFF-hc1disp",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-D-g3-PREEFF-hc2",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-D-g3-PREEFF-hc3",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g1in-hc0-fh",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g1in-hc0-rd",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g1in-hc1-fh",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g1in-hc1-rd",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g1in-hc2-fh",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g1in-hc2-rd",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g2-hc0-fh",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g2-hc0-rd",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g2-hc1-fh",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g2-hc1-rd",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g2-hc2-fh",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g2-hc2-rd",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-E-g3-hc0-fh",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-E-g3-hc0-rd",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g3-hc1-fh",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-E-g3-hc1-rd",
+      "category": "GRANDFATHERING",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-E-g3-hc2-fh",
+      "category": "GRANDFATHERING",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-E-g3-hc2-rd",
+      "category": "GRANDFATHERING",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-F-policy-hc0",
+      "category": "SCOPE",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-F-other-hc0",
+      "category": "SCOPE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-F-policy-hc1",
+      "category": "SCOPE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-F-other-hc1",
+      "category": "SCOPE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-F-policy-hc1disp",
+      "category": "SCOPE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-F-other-hc1disp",
+      "category": "SCOPE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-F-policy-hc2",
+      "category": "SCOPE",
+      "split": "DEV"
+    },
+    {
+      "case_id": "PF-F-other-hc2",
+      "category": "SCOPE",
+      "split": "CHALLENGE"
+    },
+    {
+      "case_id": "PF-F-policy-hc3",
+      "category": "SCOPE",
+      "split": "LOCKED"
+    },
+    {
+      "case_id": "PF-F-other-hc3",
+      "category": "SCOPE",
+      "split": "DEV"
+    }
+  ]
+}
