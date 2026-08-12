@@ -29,7 +29,8 @@
 4. `docs/04_PLAN.md` ← 현재 유효한 실행 계획(수직 슬라이스 우선, 9~10주)
 5. `docs/03_OPEN_QUESTIONS.md` ← 사용자 확인이 필요한 대기 항목
 6. `docs/regulatory_facts.md` ← 6·30 규제 사실의 단일 기준점
-7. `docs/metrics_spec.md` ← 평가지표 정의
+7. `docs/metrics_spec.md` ← 평가지표 정의·확정 임계
+8. `docs/prd/PRD.md` ← 정식 PRD(as-built) — 사용자·데이터·컴포넌트·평가·배포 구체화
 
 > ⚠️ 이 프로젝트는 개발 도중 Claude 계정이 교체됩니다.
 > **모든 상태는 이 저장소 안에만** 존재합니다. 대화 메모리에 의존하지 마세요.
@@ -62,7 +63,7 @@
 | `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E / HTML 리포트 생성 / 골드셋 포트폴리오 / 룰 변경안 / 가중 모집단 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
-| `docs/prd/` | 정식 PRD (작성 예정) |
+| `docs/prd/` | **정식 PRD(as-built)** + 실패 기록 양식(error taxonomy) |
 
 ## 현재 상태
 

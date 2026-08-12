@@ -22,6 +22,10 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **정식 PRD 작성(as-built)** — `docs/prd/PRD.md`(v1.0). 브리프 §25 전 항목(사용자·Use Case / 데이터 8스키마 /
+  컴포넌트 12 / 평가 / 배포)을 **구현 반영**으로 구체화 — 각 항목에 구현상태(✅/🟡/⬜/◦)·모듈경로·실측값 매핑.
+  **error taxonomy(E1~E9)** + **failure review template** 신설(`docs/prd/failure_review_template.md`, 실측 2건 예시).
+  prd/README 갱신. 코드 변경 없음(테스트 112 유지).
 - **metrics_spec 임계값 확정 + regulatory_facts URL 채움** — 임계값 정책(§0-B): **고위험 실패모드=하드게이트
   (0누락/100%), 커버리지=퍼센트 하한, 효율=참고**. 전 지표 임계 확정 + high-risk 정의 4종 확정
   (경과규정 오판·시행일 오적용·핵심예외 누락·rule conflict 자동처리). 실측값 전 지표 임계 충족.
@@ -102,7 +106,8 @@
   - ~~⑨**metrics_spec 임계값 확정 · regulatory_facts URL**~~ — ✅ 완료(2026-08-12). 하드게이트 정책 + 발행기관 URL.
   - **보류** ⑤Anthropic 교차 실측 — 사용자 유료 API 미사용. 백엔드 코드는 준비(`REGIMPACT_LLM=anthropic`).
   - **사용자 확정 대기(LOCKED §4):** claim C01~C13 최종 도메인 검수 · 기사 permalink(발행기관 게시판에서 검색).
-  - **후속:** ⑩(선택) 정식 PRD 작성(`docs/prd/`) ⑪(선택) 대출액/가격대 밴드 '영향 금액' 집계·비중 민감도 분석.
+  - ~~⑩**정식 PRD 작성**~~ — ✅ 완료(2026-08-12). `docs/prd/PRD.md`(as-built) + failure review template.
+  - **후속:** ⑪(선택) 대출액/가격대 밴드 '영향 금액' 집계·비중 민감도 분석 ⑫(선택) 라이브파이어(브리프 §19).
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -156,6 +161,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **정식 PRD 작성(as-built).** `docs/prd/PRD.md`(v1.0). 브리프 §25 전 항목을 구현 반영으로 구체화: 사용자·Use Case(primary user/trigger/workflow/human review point/success criteria), 데이터 8스키마(실제 dataclass 매핑 + 구현상태), 컴포넌트 12(모듈경로+상태), 평가(DEV/LOCKED/CHALLENGE·지표공식·확정임계·high-risk 정의·**error taxonomy E1~E9**·failure review template), 배포(local first·오프라인 재현·secrets·재현성). 아키텍처 다이어그램, Assurance 원칙 5, 로드맵/Non-goals, 문서 추적맵 포함. `docs/prd/failure_review_template.md` 신설(실측 실패 2건 예시=grounding 오탐·예외 recall). prd/README·STATE 갱신. 코드 변경 없음(테스트 112 유지).
 - **2026-08-12** — ✅ **metrics_spec 임계값 확정 + regulatory_facts URL 채움.** 임계값 정책 §0-B 신설: 실패가 여신 결정을 조용히 뒤바꾸는 **고위험 실패모드=하드게이트(0누락/100%)**, 커버리지 지표=퍼센트 하한(Change ≥90%·Exception/Grandfathering Recall ≥95%·Citation ≥95%·Unsupported ≤5%·Escalation Recall ≥95%), 효율 지표=참고(임계 없음). 하드게이트: Effective-date·Policy-version·Source Contradiction·Rule-regression 전 카테고리·High-risk Miss·핵심예외/경과규정 고위험 누락. **high-risk 정의 4종 확정**(경과규정 오판·시행일 오적용·핵심예외 누락·rule conflict 자동처리) — §0-B 하드게이트와 1:1. 실측값 전 지표 임계 충족. metrics_spec §1~4 임계 컬럼·헤더 갱신. regulatory_facts: 문서 메타데이터(문서명·기관·발표/시행일·hash·retrieved_at) + **발행기관 공식출처**(금융위 www.fsc.go.kr / 국토부 www.molit.go.kr 보도자료) 확정 기입, **기사 permalink는 ⬜ 사용자 확인**(AI가 정부 URL 임의생성 금지 = citation integrity, LOCKED §8 정합). SOURCES.md 비고 갱신. DECISION_LOG 2건 기록. (코드 변경 없음 → 테스트 112 유지)
 - **2026-08-12** — ✅ **가중 합성 모집단: 비중 실측화 + 수천 건 확장.** `src/regimpact/impact/population.py`. 세그먼트 weight를 문서화된 비중 모델(아키타입 모집단 점유율=DEFAULT_ARCHETYPES.weight, 지역 mix GURI35/YONGIN35/HWASEONG30 — 시나리오 가정·실측 아님)로 부여. `enumerate_weighted_profiles()`(아키타입×지역 24, weight=결합확률 합1) / `sample_portfolio(n=5000,seed=42)`(몬테카를로, 결정적 `random.Random`). `matrix.py`에 가중 집계 `direction_weight_share`/`review_weight_share`/`total_weight` 추가. **가중 임팩트(가정 기준): 강화 58% · 유지 24% · 검토 18% · 가중평균 Δ −20pp · 사람검토 필요 23%** — 몬테카를로 5000명이 정확 가중값에 수렴(테스트로 확인). **표본 회귀 5000/5000(engine⟷독립 오라클)** → metrics_spec §3 분모 수천 확대. `report.py` 임팩트 섹션에 '비중 기준' 요약 통합(report_6_30.html 갱신). `examples/demo_population.py`·`docs/eval/population_impact.md`(정직성 고지: 비중=가정, 실측 확보 시 표만 교체). 테스트 7개 추가(총 112) 통과.
 - **2026-08-12** — ✅ **Rule Change Proposal 구조화 산출 + 리포트 통합.** `src/regimpact/rule_proposal.py`(`build_proposal`→`RuleChangeProposal`/`RuleDelta`). 파이프라인 마지막 조각: 추출된 각 변경을 룰엔진 실제 룰 표면(LTV_REGULATED_STANDARD·LTV_FIRST_HOME·LTV_REAL_DEMAND·LTV_MULTI·REG_EFFECTIVE·GRANDFATHERING_CUTOFF·REGION_VERSIONS)에 매핑하고 **사람 확정 엔진 현재값과 교차 대조**. 값 파싱(퍼센트/범위) + 키워드 매핑(생애최초/서민실수요/정책모기지/다주택/유주택). disposition 4종. **approval_status 항상 PENDING**(자동 확정 없음, LOCKED §4). 6·30 실제 추출(12건): 반영 7·코어밖 4(정책모기지+전세/신용/사업자→Discovery)·검토 1(중도금→잔금 미묘 룰)·**불일치 0**(AI 추출이 확정 엔진과 충돌 안 함) → "AI 초안이 사람 확정 룰과 일치/코어밖" Assurance 스토리. provenance(인용) 전건 보존. `report.py`에 '제안된 룰 변경(초안)' 섹션 통합(report_6_30.html 23KB), `examples/demo_rule_proposal.py`, `gen_report.py`에 연결. 테스트 15개 추가(총 105) 통과.
