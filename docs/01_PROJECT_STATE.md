@@ -22,6 +22,16 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **대출 여력 영향 금액 집계(exposure)** — `src/regimpact/impact/exposure.py`. Impact Matrix의 LTV %p 변화를
+  **문서화된 담보가격 밴드**(6억이하~25억초과 5밴드, 가중평균 10.12억, 시나리오 가정·실측 아님)와 결합해
+  차주 1인당·포트폴리오 전체의 **대출 여력(loanable capacity) 변화 금액**으로 환산. 여력=담보가격×적용 LTV.
+  **6·30 결과: 판정가능 1인당 평균 여력 7.08억 → 5.06억(Δ −2.02억, 감소율 28.6%), 산정불가 비중 23%.**
+  두 경로 수렴(정확 가중 28.57% ≈ 몬테카를로 5000명 28.80%). **정직성 고지 4종**을 리포트에 노출:
+  ①여력(한도)이지 실행액 아님 ②LTV 규칙만 — **가격대별 최대한도 상한(6/4/2억) 미적용**(상한 성격)
+  ③담보가격 분포는 가정 ④자동판정 불가분(명세 여백=비규제 유주택 시행 전 기준선)은 **금액 산정 불가로 분리**
+  (0으로 뭉개지 않음). `CustomerSegment.property_price` 필드 추가(룰 판정 무간섭). HTML 리포트에 '영향 금액'
+  패널 통합(report_6_30.html 24.8KB), `examples/demo_exposure.py`·`docs/eval/exposure_impact.md`. 테스트 11개
+  추가(총 122).
 - **정식 PRD 작성(as-built)** — `docs/prd/PRD.md`(v1.0). 브리프 §25 전 항목(사용자·Use Case / 데이터 8스키마 /
   컴포넌트 12 / 평가 / 배포)을 **구현 반영**으로 구체화 — 각 항목에 구현상태(✅/🟡/⬜/◦)·모듈경로·실측값 매핑.
   **error taxonomy(E1~E9)** + **failure review template** 신설(`docs/prd/failure_review_template.md`, 실측 2건 예시).
@@ -107,7 +117,8 @@
   - **보류** ⑤Anthropic 교차 실측 — 사용자 유료 API 미사용. 백엔드 코드는 준비(`REGIMPACT_LLM=anthropic`).
   - **사용자 확정 대기(LOCKED §4):** claim C01~C13 최종 도메인 검수 · 기사 permalink(발행기관 게시판에서 검색).
   - ~~⑩**정식 PRD 작성**~~ — ✅ 완료(2026-08-12). `docs/prd/PRD.md`(as-built) + failure review template.
-  - **후속:** ⑪(선택) 대출액/가격대 밴드 '영향 금액' 집계·비중 민감도 분석 ⑫(선택) 라이브파이어(브리프 §19).
+  - ~~⑪대출액/가격대 밴드 '영향 금액' 집계~~ — ✅ 완료(2026-08-12). `impact/exposure.py`(여력 변화 금액, 정직성 4고지).
+  - **후속:** ⑫(선택) 비중/가격 민감도 분석 ⑬(선택) 라이브파이어(브리프 §19).
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -161,6 +172,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **대출 여력 영향 금액 집계(exposure).** `src/regimpact/impact/exposure.py`. Impact Matrix의 LTV %p 변화를 문서화된 담보가격 밴드(PRICE_BANDS: 6억이하 30%@4.5 / 6~9억 28%@7.5 / 9~15억 25%@12 / 15~25억 13%@19 / 25억초과 4%@30, 가중평균 10.12억 — 시나리오 가정)와 결합해 **대출 여력(loanable capacity)=담보가격×적용 LTV** 변화 금액으로 환산. before/after LTV는 가격 무관이라 세그먼트당 1회 평가 후 (weight×share×price)로 배분. `compute_exposure`→`ExposureReport`(밴드별/세그먼트별/집계, per-unit 여력). **6·30: 판정가능 1인당 평균 여력 7.08억→5.06억(Δ −2.02억, 감소율 28.6%), 산정불가 23%.** 두 경로 수렴(정확 가중 28.57% ≈ 몬테카를로 5000명+담보가격 몬테카를로 부여 28.80%). **정직성 4고지**(여력≠실행액 / LTV만·최대한도 상한 6·4·2억 미적용=상한 성격 / 담보가격 분포=가정 / 자동판정 불가분=금액 산정 불가로 분리, 조용한 누락 금지). `CustomerSegment.property_price` 필드 추가(exposure 전용, `.application()`에 미전달 → 룰 판정 무간섭·테스트로 확인). `report.py`에 '영향 금액 — 대출 여력(가정)' 패널 통합 + `gen_report.py` 연결(report_6_30.html 24.8KB). `examples/demo_exposure.py`·`docs/eval/exposure_impact.md`. 테스트 11개 추가(총 122) 통과.
 - **2026-08-12** — ✅ **정식 PRD 작성(as-built).** `docs/prd/PRD.md`(v1.0). 브리프 §25 전 항목을 구현 반영으로 구체화: 사용자·Use Case(primary user/trigger/workflow/human review point/success criteria), 데이터 8스키마(실제 dataclass 매핑 + 구현상태), 컴포넌트 12(모듈경로+상태), 평가(DEV/LOCKED/CHALLENGE·지표공식·확정임계·high-risk 정의·**error taxonomy E1~E9**·failure review template), 배포(local first·오프라인 재현·secrets·재현성). 아키텍처 다이어그램, Assurance 원칙 5, 로드맵/Non-goals, 문서 추적맵 포함. `docs/prd/failure_review_template.md` 신설(실측 실패 2건 예시=grounding 오탐·예외 recall). prd/README·STATE 갱신. 코드 변경 없음(테스트 112 유지).
 - **2026-08-12** — ✅ **metrics_spec 임계값 확정 + regulatory_facts URL 채움.** 임계값 정책 §0-B 신설: 실패가 여신 결정을 조용히 뒤바꾸는 **고위험 실패모드=하드게이트(0누락/100%)**, 커버리지 지표=퍼센트 하한(Change ≥90%·Exception/Grandfathering Recall ≥95%·Citation ≥95%·Unsupported ≤5%·Escalation Recall ≥95%), 효율 지표=참고(임계 없음). 하드게이트: Effective-date·Policy-version·Source Contradiction·Rule-regression 전 카테고리·High-risk Miss·핵심예외/경과규정 고위험 누락. **high-risk 정의 4종 확정**(경과규정 오판·시행일 오적용·핵심예외 누락·rule conflict 자동처리) — §0-B 하드게이트와 1:1. 실측값 전 지표 임계 충족. metrics_spec §1~4 임계 컬럼·헤더 갱신. regulatory_facts: 문서 메타데이터(문서명·기관·발표/시행일·hash·retrieved_at) + **발행기관 공식출처**(금융위 www.fsc.go.kr / 국토부 www.molit.go.kr 보도자료) 확정 기입, **기사 permalink는 ⬜ 사용자 확인**(AI가 정부 URL 임의생성 금지 = citation integrity, LOCKED §8 정합). SOURCES.md 비고 갱신. DECISION_LOG 2건 기록. (코드 변경 없음 → 테스트 112 유지)
 - **2026-08-12** — ✅ **가중 합성 모집단: 비중 실측화 + 수천 건 확장.** `src/regimpact/impact/population.py`. 세그먼트 weight를 문서화된 비중 모델(아키타입 모집단 점유율=DEFAULT_ARCHETYPES.weight, 지역 mix GURI35/YONGIN35/HWASEONG30 — 시나리오 가정·실측 아님)로 부여. `enumerate_weighted_profiles()`(아키타입×지역 24, weight=결합확률 합1) / `sample_portfolio(n=5000,seed=42)`(몬테카를로, 결정적 `random.Random`). `matrix.py`에 가중 집계 `direction_weight_share`/`review_weight_share`/`total_weight` 추가. **가중 임팩트(가정 기준): 강화 58% · 유지 24% · 검토 18% · 가중평균 Δ −20pp · 사람검토 필요 23%** — 몬테카를로 5000명이 정확 가중값에 수렴(테스트로 확인). **표본 회귀 5000/5000(engine⟷독립 오라클)** → metrics_spec §3 분모 수천 확대. `report.py` 임팩트 섹션에 '비중 기준' 요약 통합(report_6_30.html 갱신). `examples/demo_population.py`·`docs/eval/population_impact.md`(정직성 고지: 비중=가정, 실측 확보 시 표만 교체). 테스트 7개 추가(총 112) 통과.

@@ -19,7 +19,7 @@ from regimpact.extractor import (  # noqa: E402
     load_sources,
     score_against_gold,
 )
-from regimpact.impact import impact_from_extraction  # noqa: E402
+from regimpact.impact import compute_exposure, impact_from_extraction  # noqa: E402
 from regimpact.report import render_report  # noqa: E402
 from regimpact.rule_proposal import build_proposal  # noqa: E402
 
@@ -37,6 +37,7 @@ def main() -> None:
     grounding = check_citation_grounding(extraction, sources)
     gold = score_against_gold(extraction, GOLD)
     proposal = build_proposal(extraction, generated_on=date(2026, 8, 12))
+    exposure = compute_exposure([r.segment for r in policy_impact.matrix.rows])
 
     html = render_report(
         policy_impact,
@@ -44,6 +45,7 @@ def main() -> None:
         grounding=grounding,
         gold=gold,
         proposal=proposal,
+        exposure=exposure,
         generated_on=date(2026, 8, 12),
     )
     OUT.write_text(html, encoding="utf-8")
@@ -55,6 +57,8 @@ def main() -> None:
     pc = proposal.counts()
     print(f"  Rule Proposal: 반영 {pc['MAPPED_CONSISTENT']} · 코어밖 {pc['OUT_OF_SCOPE']} · "
           f"검토 {pc['MAPPED_DIVERGENT'] + pc['NEEDS_REVIEW']} · 승인={proposal.approval_status}")
+    print(f"  Exposure: 여력 감소율 {exposure.pct_reduction:.1%} · "
+          f"1인당 Δ {exposure.per_unit_delta():+.2f}억 · 산정불가 {exposure.undetermined_share:.0%}")
 
 
 if __name__ == "__main__":

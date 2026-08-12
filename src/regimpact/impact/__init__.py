@@ -15,6 +15,18 @@ from .matrix import (
     format_report,
 )
 from .connect import PolicyImpact, impact_from_extraction
+from .exposure import (
+    PRICE_BANDS,
+    BandExposure,
+    ExposureReport,
+    PriceBand,
+    SegmentExposure,
+    attach_sampled_prices,
+    compute_exposure,
+    format_exposure,
+    mean_property_price,
+    price_model_note,
+)
 from .population import (
     ARCHETYPE_SHARE,
     REGION_MIX,
@@ -51,4 +63,15 @@ __all__ = [
     "weight_model_note",
     "ARCHETYPE_SHARE",
     "REGION_MIX",
+    # 대출 여력 영향 금액 (exposure)
+    "compute_exposure",
+    "format_exposure",
+    "attach_sampled_prices",
+    "price_model_note",
+    "mean_property_price",
+    "PRICE_BANDS",
+    "PriceBand",
+    "BandExposure",
+    "SegmentExposure",
+    "ExposureReport",
 ]

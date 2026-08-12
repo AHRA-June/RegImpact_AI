@@ -42,11 +42,14 @@ class CustomerSegment:
     `attrs`는 MortgageApplication 생성 kwargs에서 **evaluation_date를 제외한** 것.
     evaluation_date는 임팩트의 축(시행 전/후)이므로 분석기가 주입한다.
     weight는 포트폴리오 내 상대 비중(집계 영향 산출용, 예시값 — 실측 아님).
+    property_price는 담보가격(억원, 선택) — 대출 여력 영향 금액 산정(exposure)에만 쓰이며
+    룰엔진 판정에는 관여하지 않는다(attrs로 전달되지 않음).
     """
     label: str
     attrs: dict = field(default_factory=dict)
     weight: float = 1.0
     note: str = ""
+    property_price: Optional[float] = None
 
     def application(self, evaluation_date: date) -> MortgageApplication:
         return MortgageApplication(evaluation_date=evaluation_date, **self.attrs)

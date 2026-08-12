@@ -202,6 +202,60 @@ def _impact_section(matrix: ImpactMatrix) -> str:
     )
 
 
+def _won(eok: float) -> str:
+    sign = "−" if eok < 0 else ""
+    v = abs(eok)
+    if v >= 10000:
+        return f"{sign}{v / 10000:.2f}조원"
+    return f"{sign}{v:.1f}억"
+
+
+def _exposure_section(exposure) -> str:
+    if exposure is None or not getattr(exposure, "by_band", None):
+        return ""
+    rows: list[str] = []
+    for b in exposure.by_band:
+        d = b.delta_capacity
+        dcls = "neg" if d < 0 else ("pos" if d > 0 else "")
+        rows.append(
+            "<tr>"
+            f'<td class="seg">{_esc(b.label)}</td>'
+            f'<td class="r num">{_won(b.before_capacity)}</td>'
+            f'<td class="r num">{_won(b.after_capacity)}</td>'
+            f'<td class="r"><span class="delta {dcls}">{_won(d)}</span></td>'
+            "</tr>"
+        )
+    pct = exposure.pct_reduction
+    pct_s = "—" if pct is None else f"{pct:.1%}"
+    pu_b, pu_a = exposure.per_unit_before(), exposure.per_unit_after()
+    pu_d = exposure.per_unit_delta()
+    per_unit = ""
+    if pu_b is not None:
+        per_unit = (
+            f'<span>1인당 평균 여력 <b>{pu_b:.2f}억</b> → <b>{pu_a:.2f}억</b> '
+            f'<span class="delta neg">{pu_d:+.2f}억</span></span>'
+        )
+    foot = (
+        f'<div class="tbl-foot">'
+        f'<span>판정가능 여력 {_won(exposure.before_capacity)} → {_won(exposure.after_capacity)} '
+        f'<span class="delta neg">{_won(exposure.delta_capacity)}</span></span>'
+        f'<span>감소율 <b>{pct_s}</b></span>{per_unit}'
+        f'<span class="muted">산정불가 비중 {exposure.undetermined_share:.0%}</span>'
+        f'</div>'
+    )
+    return (
+        '<section class="panel"><h2>영향 금액 — 대출 여력 <span class="draft">가정</span></h2>'
+        '<p class="lead">LTV %p 변화를 <b>문서화된 담보가격 밴드</b>와 결합해 대출 <b>여력(한도)</b> '
+        '변화 금액으로 환산. 주의: (1) 실행액이 아닌 <b>한도 여력</b> (2) LTV 규칙만 — '
+        '가격대별 <b>최대한도 상한(6/4/2억) 미적용</b>(상한 성격) (3) 담보가격 분포는 <b>가정</b>(실측 아님) '
+        '(4) 자동판정 불가분은 금액 <b>산정 불가</b>로 분리(0으로 뭉개지 않음).</p>'
+        '<div class="tbl-wrap"><table>'
+        '<thead><tr><th>담보가격 밴드</th><th class="r">여력 전</th><th class="r">여력 후</th>'
+        '<th class="r">Δ</th></tr></thead>'
+        f'<tbody>{"".join(rows)}</tbody></table>{foot}</div></section>'
+    )
+
+
 _DISP_META = {
     Disposition.MAPPED_CONSISTENT: ("반영됨", "ok"),
     Disposition.MAPPED_DIVERGENT: ("검토(불일치)", "warn"),
@@ -260,6 +314,7 @@ def render_report(
     grounding: Any = None,
     gold: Any = None,
     proposal: Any = None,
+    exposure: Any = None,
     generated_on: Optional[date] = None,
     title: str = "규제 변경 영향분석 리포트",
 ) -> str:
@@ -297,6 +352,7 @@ def render_report(
         f'{_changes_section(extraction)}'
         f'{_proposal_section(proposal)}'
         f'{_impact_section(matrix)}'
+        f'{_exposure_section(exposure)}'
         f'</main>{footer}</body></html>'
     )
 

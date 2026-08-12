@@ -13,7 +13,7 @@ from regimpact.extractor import (
     load_sources,
     score_against_gold,
 )
-from regimpact.impact import impact_from_extraction
+from regimpact.impact import compute_exposure, impact_from_extraction
 from regimpact.report import render_report
 
 REPO = Path(__file__).resolve().parents[1]
@@ -79,3 +79,15 @@ def test_render_works_without_optional_sections():
     assert html.startswith("<!doctype html>")
     assert "Impact Matrix" in html
     assert "무엇이 달라졌나" not in html   # 추출 미제공 → 섹션 생략
+    assert "대출 여력" not in html          # exposure 미제공 → 섹션 생략
+
+
+def test_report_exposure_panel_when_provided():
+    """exposure 전달 시 영향 금액 패널이 정직성 고지와 함께 렌더된다."""
+    ext = RegChangeExtraction.from_dict(SAVED)
+    pi = impact_from_extraction(ext)
+    exp = compute_exposure([r.segment for r in pi.matrix.rows])
+    html = render_report(pi, exposure=exp)
+    assert "대출 여력" in html
+    assert "최대한도 상한(6/4/2억) 미적용" in html   # 정직성 고지 노출
+    assert "산정 불가" in html                        # 명세 여백 분리 표기
