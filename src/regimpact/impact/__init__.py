@@ -15,6 +15,13 @@ from .matrix import (
     format_report,
 )
 from .connect import PolicyImpact, impact_from_extraction
+from .population import (
+    ARCHETYPE_SHARE,
+    REGION_MIX,
+    enumerate_weighted_profiles,
+    sample_portfolio,
+    weight_model_note,
+)
 from .segments import (
     DEFAULT_ARCHETYPES,
     SIX_THIRTY_SEGMENTS,
@@ -38,4 +45,10 @@ __all__ = [
     "SIX_THIRTY_SEGMENTS",
     "BEFORE_DATE",
     "AFTER_DATE",
+    # 가중 합성 모집단
+    "enumerate_weighted_profiles",
+    "sample_portfolio",
+    "weight_model_note",
+    "ARCHETYPE_SHARE",
+    "REGION_MIX",
 ]

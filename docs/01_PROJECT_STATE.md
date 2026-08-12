@@ -22,6 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **가중 합성 모집단 — 비중 실측화 + 수천 건 확장** — `src/regimpact/impact/population.py`. 세그먼트 weight를
+  **문서화된 비중 모델**(아키타입 모집단 점유율 + 지역 mix, 시나리오 가정·실측 아님)로 부여 → 가중 포트폴리오
+  통계 의미화. 두 경로: `enumerate_weighted_profiles()`(정확 가중 24) / `sample_portfolio(n=5000,seed)`(몬테카를로,
+  결정적). **가중 임팩트: 강화 58% · 유지 24% · 검토 18% · 가중평균 Δ −20pp · 사람검토 23%**. 5,000명 표본
+  **회귀 5,000/5,000(engine⟷독립 오라클)**로 룰-회귀 분모 수천 확대. `matrix.py`에 가중 집계(direction_weight_share/
+  review_weight_share). 리포트에 '비중 기준' 요약 통합. `examples/demo_population.py`·`docs/eval/population_impact.md`.
+  테스트 7개 추가(총 112). **비중은 가정임을 정직 표기**(실측 확보 시 표만 교체).
 - **Rule Change Proposal 구조화 산출** — `src/regimpact/rule_proposal.py` (`build_proposal`→`RuleChangeProposal`).
   파이프라인 마지막 조각: 공문→추출→**룰 변경안(초안)**→사람 확정 룰 대조. 추출된 각 변경을 룰엔진 실제 룰
   표면(LTV 상수·지역 버전·경과규정 컷오프·시행일)에 매핑하고 **엔진 현재값과 교차 대조**. disposition:
@@ -86,9 +93,10 @@
   - ~~④**UI 연동**~~ — ✅ 완료(2026-08-12). `report.py` HTML 리포트 생성기. 하드코딩값→엔진 실제 출력.
   - ~~⑥**골드셋 확대**~~ — ✅ 완료(2026-08-12). 층화 합성 포트폴리오 178건 + DEV/LOCKED/CHALLENGE 3분할.
   - ~~⑦**Rule Change Proposal 구조화 산출·리포트 통합**~~ — ✅ 완료(2026-08-12). `rule_proposal.py`.
+  - ~~⑧**포트폴리오 수천까지 확장·비중 실측화**~~ — ✅ 완료(2026-08-12). `population.py`(5000명 표본·가중 임팩트).
   - **보류** ⑤Anthropic 교차 실측 — 사용자 유료 API 미사용. 백엔드 코드는 준비(`REGIMPACT_LLM=anthropic`).
-  - **후속:** ⑧포트폴리오 수천까지 확장·비중 실측화 ⑨metrics_spec 임계값 확정 · regulatory_facts URL 채우기
-    ⑩(선택) 정식 PRD 작성(`docs/prd/`).
+  - **후속:** ⑨metrics_spec 임계값 확정 · regulatory_facts URL 채우기 ⑩(선택) 정식 PRD 작성(`docs/prd/`)
+    ⑪(선택) 대출액/가격대 밴드로 '영향 금액' 집계 · 시나리오별 비중 민감도 분석.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -142,6 +150,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **가중 합성 모집단: 비중 실측화 + 수천 건 확장.** `src/regimpact/impact/population.py`. 세그먼트 weight를 문서화된 비중 모델(아키타입 모집단 점유율=DEFAULT_ARCHETYPES.weight, 지역 mix GURI35/YONGIN35/HWASEONG30 — 시나리오 가정·실측 아님)로 부여. `enumerate_weighted_profiles()`(아키타입×지역 24, weight=결합확률 합1) / `sample_portfolio(n=5000,seed=42)`(몬테카를로, 결정적 `random.Random`). `matrix.py`에 가중 집계 `direction_weight_share`/`review_weight_share`/`total_weight` 추가. **가중 임팩트(가정 기준): 강화 58% · 유지 24% · 검토 18% · 가중평균 Δ −20pp · 사람검토 필요 23%** — 몬테카를로 5000명이 정확 가중값에 수렴(테스트로 확인). **표본 회귀 5000/5000(engine⟷독립 오라클)** → metrics_spec §3 분모 수천 확대. `report.py` 임팩트 섹션에 '비중 기준' 요약 통합(report_6_30.html 갱신). `examples/demo_population.py`·`docs/eval/population_impact.md`(정직성 고지: 비중=가정, 실측 확보 시 표만 교체). 테스트 7개 추가(총 112) 통과.
 - **2026-08-12** — ✅ **Rule Change Proposal 구조화 산출 + 리포트 통합.** `src/regimpact/rule_proposal.py`(`build_proposal`→`RuleChangeProposal`/`RuleDelta`). 파이프라인 마지막 조각: 추출된 각 변경을 룰엔진 실제 룰 표면(LTV_REGULATED_STANDARD·LTV_FIRST_HOME·LTV_REAL_DEMAND·LTV_MULTI·REG_EFFECTIVE·GRANDFATHERING_CUTOFF·REGION_VERSIONS)에 매핑하고 **사람 확정 엔진 현재값과 교차 대조**. 값 파싱(퍼센트/범위) + 키워드 매핑(생애최초/서민실수요/정책모기지/다주택/유주택). disposition 4종. **approval_status 항상 PENDING**(자동 확정 없음, LOCKED §4). 6·30 실제 추출(12건): 반영 7·코어밖 4(정책모기지+전세/신용/사업자→Discovery)·검토 1(중도금→잔금 미묘 룰)·**불일치 0**(AI 추출이 확정 엔진과 충돌 안 함) → "AI 초안이 사람 확정 룰과 일치/코어밖" Assurance 스토리. provenance(인용) 전건 보존. `report.py`에 '제안된 룰 변경(초안)' 섹션 통합(report_6_30.html 23KB), `examples/demo_rule_proposal.py`, `gen_report.py`에 연결. 테스트 15개 추가(총 105) 통과.
 - **2026-08-12** — ✅ **골드셋 확대: 층화 합성 포트폴리오 + 3분할.** `tc_generator/portfolio.py`. 입력 차원(시나리오5·소유5·예외4·경과규정6·스코프)을 체계적 층화 스윕해 **178건** 결정적 생성(경과규정을 전용 층에 가두어 카테고리 균형; 초안 500/610→균형). 기대값은 독립 명세 오라클(`expected_outcome`, 엔진 미import)에서만 유도 → 대량에서도 tautology 아님. metrics_spec §3 분모 확대: **Rule-regression 178/178(100%)**, Boundary 40/40, Conflict 33/33. LOCKED §0-5: **DEV 52/LOCKED 59/CHALLENGE 67** 결정적 해시 분할(CHALLENGE 하드 카테고리 45% 가중), `cases_in_split()`로 개발중 DEV만 열람 강제 가능. `docs/eval/goldset_manifest.json`에 freeze(생성기와 정합성 테스트). regression에 `pass_rate_by_split()` + split×category 교차표. mutation test(엔진 상수 오염→회귀 실패)로 큰 골드셋의 이빨 확인. `examples/demo_portfolio.py`·`docs/eval/goldset_portfolio.md`. 테스트 9개 추가(총 90) 통과. **Anthropic 교차 실측은 사용자 결정으로 보류**(유료 API 미사용) — REST 백엔드는 준비 완료(`2dfc6cd`).
 - **2026-08-12** — ✅ **UI 연동: HTML 리포트 생성기.** `src/regimpact/report.py`(`render_report`). PolicyImpact + 추출 + Assurance(grounding/gold)를 자체완결 HTML 대시보드로 렌더. **모든 값이 엔진/추출 실제 출력에서만** 오므로 Stitch 목업의 도메인 환각(세종·부산·LTV 60→50, `docs/ui/stitch_review.md`) 문제가 구조적으로 불가능 — 이게 "UI 연동"의 본질. DESIGN.md 디자인 언어(Institutional Navy #022448, Noto Sans/JetBrains Mono, 라이트/다크 대응). 섹션: 헤더밴드(정책·시행일·지역·비교시점) / Assurance 타일(Citation·환각·완전성·예외재현·지역) / 무엇이 달라졌나(추출 변경+원문 인용) / 누가 영향받나(지역 그룹핑 임팩트 표). `examples/gen_report.py`로 저장 추출→오프라인 실제 리포트 생성(`docs/ui/report_6_30.html` 18KB, 24행, 전 지표 녹색). `regions.py`에 REGION_DISPLAY_NAME 추가. 테스트 6개(실제값 존재·환각값 부재 회귀 포함, 총 81) 통과.

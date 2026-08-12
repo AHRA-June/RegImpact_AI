@@ -92,7 +92,12 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 > ✅ **골드셋 확대(2026-08-12):** 층화 합성 포트폴리오 **178건**(DEV 52 / LOCKED 59 / CHALLENGE 67,
 > CHALLENGE 하드 카테고리 가중)으로 분모 확대. 기대값은 독립 명세 오라클에서 유도(tautology 방지),
 > 결정적 생성 + `docs/eval/goldset_manifest.json` freeze(LOCKED §0-5 3분할). mutation test로 이빨 확인.
-> 상세: `docs/eval/goldset_portfolio.md`. 스케일: 층 상한 확대로 수천까지 가능(Phase 2의 2,000~5,000).
+> 상세: `docs/eval/goldset_portfolio.md`.
+>
+> ✅ **수천 건 확장 + 비중 실측화(2026-08-12):** 문서화된 비중 모델에서 **5,000명 몬테카를로 표본**을
+> 뽑아 룰-회귀 분모를 수천으로 확대 → **5,000/5,000 100%**(engine ⟷ 독립 오라클). 동시에 **가중
+> 포트폴리오 임팩트**(강화 58% · 유지 24% · 검토 18% · 가중평균 Δ −20pp · 사람검토 23%) 산출.
+> 비중은 실측 아닌 문서화된 가정. 상세: `docs/eval/population_impact.md`.
 
 ## 4. Human Escalation 계열 (브리프 §13.4) — [ROADMAP]
 

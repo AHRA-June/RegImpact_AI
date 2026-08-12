@@ -172,6 +172,8 @@ def _impact_section(matrix: ImpactMatrix) -> str:
     counts = matrix.count_by_direction()
     wmd = matrix.weighted_mean_delta()
     wmd_s = "—" if wmd is None else f"{wmd * 100:+.0f}pp".replace("+", "+").replace("-", "−")
+    ds = matrix.direction_weight_share()
+    rev = matrix.review_weight_share()
     foot = (
         f'<div class="tbl-foot">'
         f'<span>전체 <b>{len(matrix.rows)}</b>행</span>'
@@ -180,6 +182,12 @@ def _impact_section(matrix: ImpactMatrix) -> str:
         f'<span>중대영향 <b>{matrix.high_impact_count}</b>행</span>'
         f'<span>가중평균 Δ <b>{wmd_s}</b> '
         f'<span class="muted">(수치비교 {matrix.comparable_count}/{len(matrix.rows)}행)</span></span>'
+        f'</div>'
+        f'<div class="tbl-foot">'
+        f'<span class="muted">비중(가정) 기준:</span>'
+        f'<span>강화 <b>{ds["TIGHTENED"]:.0%}</b> · 유지 <b>{ds["UNCHANGED"]:.0%}</b> · '
+        f'검토 <b>{ds["NEEDS_REVIEW"]:.0%}</b></span>'
+        f'<span>사람검토 필요 <b>{rev:.0%}</b></span>'
         f'</div>'
     )
     return (

@@ -94,6 +94,34 @@ class ImpactMatrix:
     def high_impact_count(self) -> int:
         return sum(1 for r in self.rows if r.high_impact)
 
+    @property
+    def total_weight(self) -> float:
+        return sum(r.segment.weight for r in self.rows)
+
+    def direction_weight_share(self) -> dict[str, float]:
+        """방향별 가중 비중(세그먼트 weight 기준). 합 ≈ 1."""
+        tw = self.total_weight
+        out = {d.value: 0.0 for d in ImpactDirection}
+        if tw == 0:
+            return out
+        for r in self.rows:
+            out[r.direction.value] += r.segment.weight / tw
+        return out
+
+    def review_weight_share(self) -> float:
+        """시행 후 자동판정 불가(사람 검토 필요) 행의 가중 비중.
+
+        escalation_required(after가 검토/Discovery) 또는 NEEDS_REVIEW 방향을 포함.
+        """
+        tw = self.total_weight
+        if tw == 0:
+            return 0.0
+        need = sum(
+            r.segment.weight for r in self.rows
+            if r.escalation_required or r.direction == ImpactDirection.NEEDS_REVIEW
+        )
+        return need / tw
+
     def weighted_mean_delta(self) -> Optional[float]:
         """수치 비교 가능한(둘 다 DECIDED) 행에 한해 가중 평균 LTV delta.
 
