@@ -3,8 +3,9 @@
 > **이 파일은 브리프 §13 지표에 공식·분모·임계값을 부여한다.** 코드보다 먼저 채운다.
 > Model Risk 직무에서 실력이 드러나는 지점이므로 각 지표의 분모/분자를 모호하지 않게 정의한다.
 >
-> ⚠️ **상태: 스켈레톤.** 아래 정의는 초안이며 사용자 도메인 검수·확정 필요.
-> 각 지표: `정의 / 분모 / 분자 / pass-fail 임계 / high-risk 여부 / 산출 데이터원`.
+> ✅ **임계값 확정(2026-08-12):** §0-B 정책(고위험=하드게이트, 나머지=퍼센트 하한)으로 전 지표 임계 확정.
+> high-risk failure 정의도 확정. 모두 ADJUSTABLE(방법론 결정, LOCKED 아님). 실측값은 현재 전 지표 임계 충족.
+> 각 지표: `정의 / 분모 / 분자 / pass-fail 임계 / high-risk 여부 / 현재값`.
 
 ---
 
@@ -42,19 +43,38 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 ---
 
+## 0-B. 임계값 정책 (2026-08-12 확정 · ADJUSTABLE)
+
+> 임계값은 임의의 퍼센트가 아니라 **risk tolerance의 표현**이다. 실패가 실제 차주의 여신 결정을
+> 조용히 뒤바꿀 수 있으면 tolerance는 **0**이다.
+
+- **하드 게이트(0 누락 / 100%)** — 실패가 의사결정을 뒤바꾸는 고위험 실패모드에 적용.
+  단 1건이라도 위반하면 **fail**(퍼센트로 완화하지 않는다).
+  → Effective-date Accuracy, Policy-version Consistency, Source Contradiction Rate,
+    Rule-regression(전 카테고리), High-risk Miss Rate, 그리고 핵심 예외·경과규정의 **고위험 누락**.
+- **퍼센트 하한** — 누락이 사람 검토로 포착되고 결정을 조용히 뒤바꾸지 않는 커버리지 지표에 적용.
+  → Change Completeness ≥ 90%, Exception/Grandfathering Recall ≥ 95%, Citation Correctness ≥ 95%,
+    Unsupported Claim Rate ≤ 5%, Escalation Recall ≥ 95%.
+- **참고(임계 없음)** — 효율 지표. 방향만 본다. → Escalation Precision, Unnecessary Escalation Rate.
+
+근거: 임의의 95%/99%보다 "고위험=0 tolerance"가 Model Risk 관점에서 방어 가능하고, 이 프로젝트의
+high-risk 정의(아래)와 직접 연결된다. **표기 규칙:** 아래 표의 임계는 `퍼센트 하한` 또는 `하드게이트`.
+
+---
+
 ## 1. RegChange / RAG 계열 (브리프 §13.1) — [DEEP] dimension ②③
 
 > 📊 **첫 실측(2026-08-12):** Gemini(`gemini-flash-latest`)로 6·30 공문 3건 추출.
 > 상세·발견은 `docs/eval/extractor_run_6_30.md`. 아래 "현재값"은 정책 n=1 seed 기준(소규모).
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk | 현재값(6·30) |
+| 지표 | 정의 | 분모 | 분자 | 임계(확정) | high-risk | 현재값(6·30) |
 |---|---|---|---|---|---|---|
-| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | TBD | 놓침=위험 | **100%** (4/4) |
-| Exception Recall | 예외조건(생애최초·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | TBD | ★ 높음 | **100%** (2/2) ✅ |
-| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | TBD | ★ 높음 | 포착(정성) |
-| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | TBD | ★ 높음 | **OK** (1/1) |
-| Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 | **100%** (12/12) |
-| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 | (미측정) |
+| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | **≥ 90%** | 놓침=위험 | **100%** (4/4) |
+| Exception Recall | 예외조건(생애최초·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | **≥ 95% + 핵심예외 0누락(하드게이트)** | ★ 높음 | **100%** (2/2) ✅ |
+| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | **≥ 95% + 고위험 0누락(하드게이트)** | ★ 높음 | 포착(정성) |
+| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | **100%(하드게이트)** | ★ 높음 | **OK** (1/1) |
+| Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | **≥ 95%** | 중 | **100%** (12/12) |
+| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | **100%(하드게이트)** | ★ 높음 | (미측정) |
 
 > ✅ **Exception Recall 50%→100%**(2026-08-12): 프롬프트 개선(예외 개별 분리)으로 서민·실수요 포착.
 > 항목 6→12건으로 세분화돼도 Citation 100%·환각 0% 유지.
@@ -65,10 +85,10 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 > `hallucination rate` 단일 지표로 뭉뚱그리지 않는다.
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값(6·30) |
+| 지표 | 정의 | 분모 | 분자 | 임계(확정) | 현재값(6·30) |
 |---|---|---|---|---|---|
-| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD | **0%** (0/6) |
-| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD | (미측정) |
+| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | **≤ 5%** (목표 0%) | **0%** (0/6) |
+| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | **0%(하드게이트)** | (미측정) |
 
 > ⚠️ **측정 아티팩트 주의(2026-08-12 실측에서 발견):** 초기 Unsupported Claim Rate가 33%로
 > 나왔으나, 이는 원문 PDF의 문장 중간 줄바꿈을 공백정규화가 공백으로 바꿔 **정확한 인용을 오탐**한
@@ -84,10 +104,14 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 | 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값(seed 30) | 현재값(포트폴리오 178) |
 |---|---|---|---|---|---|---|
-| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) | **178/178 (100%)** |
-| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 | **178/178** |
-| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 | **40/40** |
-| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 | **33/33** |
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | **100%(하드게이트)** | 30/30 (100%) | **178/178 (100%)** |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | **100%(하드게이트)** | 30/30 | **178/178** |
+| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | **100%(하드게이트)** | 8/8 | **40/40** |
+| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | **100%(하드게이트)** | 5/5 | **33/33** |
+
+> **왜 하드게이트인가:** 오라클은 확정 명세(§H)에서 독립 유도되므로, 단 1건의 disagreement도
+> "엔진이 명세를 틀리게 구현" 또는 "명세 모호성"을 뜻한다 — 퍼센트로 완화할 수 없다. 표본 회귀
+> 5,000/5,000도 100%(`population_impact.md`).
 
 > ✅ **골드셋 확대(2026-08-12):** 층화 합성 포트폴리오 **178건**(DEV 52 / LOCKED 59 / CHALLENGE 67,
 > CHALLENGE 하드 카테고리 가중)으로 분모 확대. 기대값은 독립 명세 오라클에서 유도(tautology 방지),
@@ -106,24 +130,28 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 >
 > `human override rate` 자체를 품질지표로 쓰지 않는다.
 
-| 지표 | 정의(초안) | 분모 | 분자 | high-risk |
-|---|---|---|---|---|
-| Escalation Recall | 반드시 사람 검토 필요한 건 중 escalate한 비율 | 검토 필수 건 | escalate된 건 | ★ 최고 |
-| Escalation Precision | 사람에게 넘긴 건 중 실제 검토 필요 비율 | escalate된 건 | 실제 필요 건 | 중 |
-| High-risk Miss Rate | 반드시 escalate해야 할 고위험 건을 자동처리한 비율 | 고위험 건 | 자동처리된 고위험 건 | ★ 최고 (0 목표) |
-| Unnecessary Escalation Rate | 자동처리 가능 건을 불필요하게 넘긴 비율 | 자동처리 가능 건 | 넘긴 건 | 낮음 |
+| 지표 | 정의 | 분모 | 분자 | 임계(확정) | high-risk |
+|---|---|---|---|---|---|
+| Escalation Recall | 반드시 사람 검토 필요한 건 중 escalate한 비율 | 검토 필수 건 | escalate된 건 | **≥ 95%** | ★ 최고 |
+| Escalation Precision | 사람에게 넘긴 건 중 실제 검토 필요 비율 | escalate된 건 | 실제 필요 건 | 참고(임계 없음) | 중 |
+| High-risk Miss Rate | 반드시 escalate해야 할 고위험 건을 자동처리한 비율 | 고위험 건 | 자동처리된 고위험 건 | **0%(하드게이트)** | ★ 최고 |
+| Unnecessary Escalation Rate | 자동처리 가능 건을 불필요하게 넘긴 비율 | 자동처리 가능 건 | 넘긴 건 | 참고(임계 없음) | 낮음 |
 
 ---
 
-## high-risk failure 정의 (초안 — 확정 필요)
+## high-risk failure 정의 (2026-08-12 확정 · ADJUSTABLE)
 
-> "High-risk Miss Rate" 등을 측정하려면 **어떤 케이스가 high-risk인지**를 먼저 정의해야 한다.
+> "High-risk Miss Rate"·하드게이트 임계의 기준. **아래 4종은 실패 시 여신 결정을 조용히 뒤바꾸므로
+> tolerance = 0**(자동처리로 덮으면 fail). 위 §0-B 하드게이트와 1:1 대응.
 
-high-risk 후보 (사용자 검수 필요):
-- 경과규정 오판으로 종전/신규 규정을 뒤바꾸는 케이스
-- 시행일을 잘못 적용해 규제 전/후를 뒤바꾸는 케이스
-- 예외(생애최초·정책대출)를 놓쳐 LTV를 과소/과대 적용하는 케이스
-- 서로 다른 정책 간 rule conflict를 자동처리로 덮는 케이스
+**high-risk = 아래 중 하나에 해당하는 실패:**
+1. **경과규정 오판** — 종전/신규 규정을 뒤바꿔 LTV를 뒤집는 경우. (↔ Grandfathering Recall 하드게이트)
+2. **시행일 오적용** — 규제 전/후를 뒤바꾸는 경우(효력일 경계 ±1일). (↔ Effective-date / Policy-version)
+3. **핵심 예외 누락** — 생애최초·서민실수요·정책대출을 놓쳐 LTV를 과소/과대 적용. (↔ Exception Recall 하드게이트)
+4. **rule conflict 자동처리** — 우선순위 충돌·명세 여백(비규제 유주택 등)을 escalate하지 않고 자동 판정.
+
+> 룰엔진은 이미 이 원칙을 구현: 명세 여백(비규제 유주택 기준선)은 `NEEDS_HUMAN_REVIEW`로 escalate하고,
+> 자동 확정하지 않는다(정직한 실패 통제). CHALLENGE 골드셋이 이 4종을 집중 커버(`goldset_portfolio.md`).
 
 ---
 

@@ -27,6 +27,25 @@
 
 ## 결정 로그
 
+### 2026-08-12 · metrics_spec 임계값 확정 + high-risk 정의 확정 · ✅ 확정(ADJUSTABLE)
+- **결정:** 전 지표의 pass-fail 임계를 확정. 원칙(§0-B): **실패가 여신 결정을 조용히 뒤바꾸는 고위험
+  실패모드 = 하드게이트(0 누락/100%), 나머지 커버리지 지표 = 퍼센트 하한, 효율 지표 = 참고(임계 없음).**
+- **하드게이트:** Effective-date Accuracy, Policy-version Consistency, Source Contradiction Rate,
+  Rule-regression(전 카테고리), High-risk Miss Rate, 핵심예외·경과규정 **고위험 누락**.
+- **퍼센트 하한:** Change Completeness ≥90%, Exception/Grandfathering Recall ≥95%, Citation ≥95%,
+  Unsupported ≤5%, Escalation Recall ≥95%.
+- **high-risk 정의 확정(4종):** 경과규정 오판 / 시행일 오적용 / 핵심예외 누락 / rule conflict 자동처리.
+- **근거:** 임의 95%/99%보다 "고위험=0 tolerance"가 Model Risk 관점에서 방어 가능하고 high-risk 정의와
+  1:1 대응. **LOCKED 무관**(방법론·ADJUSTABLE). 현재 실측값은 전 지표 임계 충족.
+
+### 2026-08-12 · regulatory_facts 문서 메타데이터 확정 + URL 채움 규율 · ✅ 확정
+- **결정:** 문서별 메타데이터(공식 문서명·발행기관·발표일·시행일·source_hash·retrieved_at)와
+  **발행기관 공식출처**(금융위 `www.fsc.go.kr`, 국토부 `www.molit.go.kr` 보도자료)를 확정 기입.
+- **기사 permalink는 ⬜ 사용자 확인란으로 유지** — AI가 정부 보도자료 URL을 임의 생성하면 가짜 규제
+  출처가 되어 Assurance 브랜드를 훼손(프로젝트가 싸우는 환각 그 자체). **확인된 URL만 채운다**는 규율.
+- **무결성:** 파일 스냅샷(`sources/original/`) + sha256(`SOURCES.md`)으로 이미 확보 → permalink는 공개
+  추적성용. **claim(C01~C13) 최종 도메인 검수는 여전히 사용자 확정 대기**(LOCKED §4).
+
 ### 2026-08-10 · RegChange Extractor 구현 + LLM 선택 · ✅ 완료
 - **LLM:** Anthropic Claude, 기본 `claude-opus-5` (ADJUSTABLE §0 — 비용/성능 따라 교체 가능). structured output(`output_config.format`).
 - **아키텍처:** LLM 호출 주입 가능(injectable) → API 키·비용 없이 오프라인 테스트. `src/regimpact/extractor/`.

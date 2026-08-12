@@ -22,6 +22,11 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **metrics_spec 임계값 확정 + regulatory_facts URL 채움** — 임계값 정책(§0-B): **고위험 실패모드=하드게이트
+  (0누락/100%), 커버리지=퍼센트 하한, 효율=참고**. 전 지표 임계 확정 + high-risk 정의 4종 확정
+  (경과규정 오판·시행일 오적용·핵심예외 누락·rule conflict 자동처리). 실측값 전 지표 임계 충족.
+  regulatory_facts: 문서 메타데이터·발행기관 공식출처(금융위 fsc.go.kr / 국토부 molit.go.kr) 확정 기입,
+  **기사 permalink는 ⬜ 사용자 확인**(AI가 정부 URL 임의생성 금지 = citation integrity). DECISION_LOG 2건 기록.
 - **가중 합성 모집단 — 비중 실측화 + 수천 건 확장** — `src/regimpact/impact/population.py`. 세그먼트 weight를
   **문서화된 비중 모델**(아키타입 모집단 점유율 + 지역 mix, 시나리오 가정·실측 아님)로 부여 → 가중 포트폴리오
   통계 의미화. 두 경로: `enumerate_weighted_profiles()`(정확 가중 24) / `sample_portfolio(n=5000,seed)`(몬테카를로,
@@ -94,9 +99,10 @@
   - ~~⑥**골드셋 확대**~~ — ✅ 완료(2026-08-12). 층화 합성 포트폴리오 178건 + DEV/LOCKED/CHALLENGE 3분할.
   - ~~⑦**Rule Change Proposal 구조화 산출·리포트 통합**~~ — ✅ 완료(2026-08-12). `rule_proposal.py`.
   - ~~⑧**포트폴리오 수천까지 확장·비중 실측화**~~ — ✅ 완료(2026-08-12). `population.py`(5000명 표본·가중 임팩트).
+  - ~~⑨**metrics_spec 임계값 확정 · regulatory_facts URL**~~ — ✅ 완료(2026-08-12). 하드게이트 정책 + 발행기관 URL.
   - **보류** ⑤Anthropic 교차 실측 — 사용자 유료 API 미사용. 백엔드 코드는 준비(`REGIMPACT_LLM=anthropic`).
-  - **후속:** ⑨metrics_spec 임계값 확정 · regulatory_facts URL 채우기 ⑩(선택) 정식 PRD 작성(`docs/prd/`)
-    ⑪(선택) 대출액/가격대 밴드로 '영향 금액' 집계 · 시나리오별 비중 민감도 분석.
+  - **사용자 확정 대기(LOCKED §4):** claim C01~C13 최종 도메인 검수 · 기사 permalink(발행기관 게시판에서 검색).
+  - **후속:** ⑩(선택) 정식 PRD 작성(`docs/prd/`) ⑪(선택) 대출액/가격대 밴드 '영향 금액' 집계·비중 민감도 분석.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -150,6 +156,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **metrics_spec 임계값 확정 + regulatory_facts URL 채움.** 임계값 정책 §0-B 신설: 실패가 여신 결정을 조용히 뒤바꾸는 **고위험 실패모드=하드게이트(0누락/100%)**, 커버리지 지표=퍼센트 하한(Change ≥90%·Exception/Grandfathering Recall ≥95%·Citation ≥95%·Unsupported ≤5%·Escalation Recall ≥95%), 효율 지표=참고(임계 없음). 하드게이트: Effective-date·Policy-version·Source Contradiction·Rule-regression 전 카테고리·High-risk Miss·핵심예외/경과규정 고위험 누락. **high-risk 정의 4종 확정**(경과규정 오판·시행일 오적용·핵심예외 누락·rule conflict 자동처리) — §0-B 하드게이트와 1:1. 실측값 전 지표 임계 충족. metrics_spec §1~4 임계 컬럼·헤더 갱신. regulatory_facts: 문서 메타데이터(문서명·기관·발표/시행일·hash·retrieved_at) + **발행기관 공식출처**(금융위 www.fsc.go.kr / 국토부 www.molit.go.kr 보도자료) 확정 기입, **기사 permalink는 ⬜ 사용자 확인**(AI가 정부 URL 임의생성 금지 = citation integrity, LOCKED §8 정합). SOURCES.md 비고 갱신. DECISION_LOG 2건 기록. (코드 변경 없음 → 테스트 112 유지)
 - **2026-08-12** — ✅ **가중 합성 모집단: 비중 실측화 + 수천 건 확장.** `src/regimpact/impact/population.py`. 세그먼트 weight를 문서화된 비중 모델(아키타입 모집단 점유율=DEFAULT_ARCHETYPES.weight, 지역 mix GURI35/YONGIN35/HWASEONG30 — 시나리오 가정·실측 아님)로 부여. `enumerate_weighted_profiles()`(아키타입×지역 24, weight=결합확률 합1) / `sample_portfolio(n=5000,seed=42)`(몬테카를로, 결정적 `random.Random`). `matrix.py`에 가중 집계 `direction_weight_share`/`review_weight_share`/`total_weight` 추가. **가중 임팩트(가정 기준): 강화 58% · 유지 24% · 검토 18% · 가중평균 Δ −20pp · 사람검토 필요 23%** — 몬테카를로 5000명이 정확 가중값에 수렴(테스트로 확인). **표본 회귀 5000/5000(engine⟷독립 오라클)** → metrics_spec §3 분모 수천 확대. `report.py` 임팩트 섹션에 '비중 기준' 요약 통합(report_6_30.html 갱신). `examples/demo_population.py`·`docs/eval/population_impact.md`(정직성 고지: 비중=가정, 실측 확보 시 표만 교체). 테스트 7개 추가(총 112) 통과.
 - **2026-08-12** — ✅ **Rule Change Proposal 구조화 산출 + 리포트 통합.** `src/regimpact/rule_proposal.py`(`build_proposal`→`RuleChangeProposal`/`RuleDelta`). 파이프라인 마지막 조각: 추출된 각 변경을 룰엔진 실제 룰 표면(LTV_REGULATED_STANDARD·LTV_FIRST_HOME·LTV_REAL_DEMAND·LTV_MULTI·REG_EFFECTIVE·GRANDFATHERING_CUTOFF·REGION_VERSIONS)에 매핑하고 **사람 확정 엔진 현재값과 교차 대조**. 값 파싱(퍼센트/범위) + 키워드 매핑(생애최초/서민실수요/정책모기지/다주택/유주택). disposition 4종. **approval_status 항상 PENDING**(자동 확정 없음, LOCKED §4). 6·30 실제 추출(12건): 반영 7·코어밖 4(정책모기지+전세/신용/사업자→Discovery)·검토 1(중도금→잔금 미묘 룰)·**불일치 0**(AI 추출이 확정 엔진과 충돌 안 함) → "AI 초안이 사람 확정 룰과 일치/코어밖" Assurance 스토리. provenance(인용) 전건 보존. `report.py`에 '제안된 룰 변경(초안)' 섹션 통합(report_6_30.html 23KB), `examples/demo_rule_proposal.py`, `gen_report.py`에 연결. 테스트 15개 추가(총 105) 통과.
 - **2026-08-12** — ✅ **골드셋 확대: 층화 합성 포트폴리오 + 3분할.** `tc_generator/portfolio.py`. 입력 차원(시나리오5·소유5·예외4·경과규정6·스코프)을 체계적 층화 스윕해 **178건** 결정적 생성(경과규정을 전용 층에 가두어 카테고리 균형; 초안 500/610→균형). 기대값은 독립 명세 오라클(`expected_outcome`, 엔진 미import)에서만 유도 → 대량에서도 tautology 아님. metrics_spec §3 분모 확대: **Rule-regression 178/178(100%)**, Boundary 40/40, Conflict 33/33. LOCKED §0-5: **DEV 52/LOCKED 59/CHALLENGE 67** 결정적 해시 분할(CHALLENGE 하드 카테고리 45% 가중), `cases_in_split()`로 개발중 DEV만 열람 강제 가능. `docs/eval/goldset_manifest.json`에 freeze(생성기와 정합성 테스트). regression에 `pass_rate_by_split()` + split×category 교차표. mutation test(엔진 상수 오염→회귀 실패)로 큰 골드셋의 이빨 확인. `examples/demo_portfolio.py`·`docs/eval/goldset_portfolio.md`. 테스트 9개 추가(총 90) 통과. **Anthropic 교차 실측은 사용자 결정으로 보류**(유료 API 미사용) — REST 백엔드는 준비 완료(`2dfc6cd`).
