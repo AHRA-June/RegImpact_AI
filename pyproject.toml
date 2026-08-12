@@ -7,9 +7,8 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
-# RegChange Extractor 실제 실행용 (오프라인 테스트엔 불필요).
-# Gemini(기본) 백엔드는 SDK 없이 urllib REST로 동작 → 추가 의존성 없음(GEMINI_API_KEY만).
-llm = ["anthropic>=0.40"]   # Anthropic 백엔드 선택 시에만 필요
+# RegChange Extractor 실제 실행: Gemini·Anthropic 백엔드 모두 SDK 없이 urllib REST로 동작
+# → 추가 의존성 0. 키만 있으면 됨(GEMINI_API_KEY 또는 ANTHROPIC_API_KEY).
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

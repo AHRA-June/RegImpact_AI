@@ -77,7 +77,13 @@ def to_gemini_schema(schema: dict) -> dict:
     return out
 
 
-def _http_post_json(url: str, payload: dict, timeout: int = 120) -> dict:
+def _http_post_json(
+    url: str,
+    payload: dict,
+    timeout: int = 180,
+    headers: Optional[dict] = None,
+    provider: str = "HTTP",
+) -> dict:
     """urllib로 JSON POST. HTTPS_PROXY와 CA 번들(있으면)을 존중한다(프록시 샌드박스 호환)."""
     import ssl
     import urllib.error
@@ -92,16 +98,17 @@ def _http_post_json(url: str, payload: dict, timeout: int = 120) -> dict:
         handlers.append(urllib.request.ProxyHandler({"https": proxy, "http": proxy}))
     opener = urllib.request.build_opener(*handlers)
 
+    hdrs = {"Content-Type": "application/json"}
+    if headers:
+        hdrs.update(headers)
     data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        url, data=data, headers={"Content-Type": "application/json"}, method="POST"
-    )
+    req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
     try:
         with opener.open(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", "replace")
-        raise RuntimeError(f"Gemini HTTP {e.code}: {body[:500]}") from None
+        raise RuntimeError(f"{provider} HTTP {e.code}: {body[:500]}") from None
 
 
 def gemini_completion(
@@ -143,7 +150,7 @@ def gemini_completion(
             "generationConfig": gen_cfg,
         }
         url = f"{base}/{model}:generateContent?key={key}"
-        resp = _http_post_json(url, payload)
+        resp = _http_post_json(url, payload, provider="Gemini")
 
         candidates = resp.get("candidates") or []
         if not candidates:
@@ -159,28 +166,46 @@ def gemini_completion(
     return _complete
 
 
-def anthropic_completion(model: str = "claude-opus-5", max_tokens: int = 16000) -> CompletionFn:
-    """실제 Anthropic Claude 호출 함수를 만든다 (structured output).
+def anthropic_completion(
+    model: str = "claude-opus-5",
+    max_tokens: int = 16000,
+    api_key: Optional[str] = None,
+) -> CompletionFn:
+    """실제 Anthropic Claude 호출 함수를 만든다 (Messages API, structured output, REST).
 
-    ANTHROPIC_API_KEY(또는 `ant auth login` 프로필)로 인증. import는 지연(테스트는 불필요).
-    모델은 ADJUSTABLE — 비용/성능에 따라 claude-sonnet-5 등으로 교체 가능.
+    Gemini 백엔드와 동일하게 **SDK 없이 urllib REST**로 동작(추가 의존성 0). 인증: 인자 api_key
+    또는 환경변수 ANTHROPIC_API_KEY. output_config.format(GA)로 스키마 강제. 모델은 ADJUSTABLE.
     """
-    import anthropic  # 지연 import: 오프라인 테스트에는 SDK가 필요 없음
-
-    client = anthropic.Anthropic()
+    key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+    if not key:
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY가 없습니다. https://console.anthropic.com/ 에서 발급 후 설정하세요."
+        )
+    base = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com").rstrip("/")
+    hdrs = {"x-api-key": key, "anthropic-version": "2023-06-01"}
 
     def _complete(system: str, user: str) -> dict:
-        resp = client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-            output_config={
+        payload = {
+            "model": model,
+            "max_tokens": max_tokens,
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+            "output_config": {
                 "format": {"type": "json_schema", "schema": REGCHANGE_JSON_SCHEMA}
             },
+        }
+        resp = _http_post_json(
+            f"{base}/v1/messages", payload, headers=hdrs, provider="Anthropic"
         )
-        # output_config.format 보장: 첫 text 블록이 유효 JSON
-        text = next(b.text for b in resp.content if b.type == "text")
+        if resp.get("stop_reason") == "refusal":
+            raise RuntimeError("Anthropic 안전 분류기가 요청을 거부(stop_reason=refusal).")
+        # output_config.format 보장: text 블록이 유효 JSON
+        blocks = resp.get("content") or []
+        text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text").strip()
+        if not text:
+            raise RuntimeError(
+                f"Anthropic 빈 응답(stop_reason={resp.get('stop_reason')}). max_tokens 확인."
+            )
         return json.loads(text)
 
     return _complete
