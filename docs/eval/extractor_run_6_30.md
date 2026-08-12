@@ -8,21 +8,24 @@
 - **입력:** `docs/sources/raw/{fsc_press,molit_press,faq}_20260630.txt` (3건, 사람 확정 스냅샷)
 - **골드:** `docs/eval/regchange_gold_6_30.json`
 - **재현:** `GEMINI_API_KEY=... python examples/run_extractor.py` (또는 저장된 JSON으로 오프라인 채점)
+- **실행 2회:** 1차(초기 프롬프트) → 발견 2 대응 프롬프트 개선 → 2차 재측정. 저장 JSON은 **2차** 결과.
 
 ---
 
-## 실측 지표 (첫 숫자)
+## 실측 지표 (1차 → 2차 프롬프트 개선 후)
 
-| 지표 | 값 | 판정 |
-|---|---|---|
-| **Citation Correctness** | **100%** (6/6) | ✅ 인용이 모두 원문에 실재 |
-| **Unsupported Claim Rate** | **0%** | ✅ 환각 인용 없음 |
-| **Change Completeness** | **100%** (4/4) | ✅ LTV·시행일·경과규정·지역 신규지정 모두 포착 |
-| **Exception Recall** | **50%** (1/2) | ⚠️ 서민·실수요(real_demand) **놓침** |
-| **Effective-date Accuracy** | **OK** | ✅ 2026-07-01 정확 추출 |
-| **Regions match** | **MISS** | ⚠️ 지역을 한글명으로 반환(코드 아님) — 정규화 부재 |
+| 지표 | 1차 | 2차(개선 후) | 판정 |
+|---|---|---|---|
+| **Citation Correctness** | 100% (6/6) | **100%** (12/12) | ✅ 인용이 모두 원문에 실재 |
+| **Unsupported Claim Rate** | 0% | **0%** | ✅ 환각 인용 없음 |
+| **Change Completeness** | 100% (4/4) | **100%** (4/4) | ✅ LTV·시행일·경과규정·지역 모두 포착 |
+| **Exception Recall** | 50% (1/2) | **100%** (2/2) | ✅ 발견 2 수정으로 서민·실수요 포착 |
+| **Effective-date Accuracy** | OK | **OK** | ✅ 2026-07-01 정확 |
+| **Regions match** | MISS | **MISS** | ⚠️ 지역을 한글명으로 반환(코드 아님) — 발견 3, 미해결 |
 
-추출 6건: REGION / LTV(70%→40%) / EXCEPTION / EFFECTIVE_DATE / GRANDFATHERING / SCOPE_LIMIT.
+- 1차 추출 6건 → **2차 12건**(예외를 생애최초/서민·실수요/정책모기지로 분리, 다주택 LTV 0%·
+  중도금→잔금 경과규정·사업자대출 제한 등 세분화). **항목이 2배로 늘어도 Citation 100%·환각 0% 유지**
+  → recall을 올리면서 precision(근거 정확성)을 잃지 않음.
 
 ---
 
@@ -42,14 +45,27 @@
 > Model Risk 함의: "hallucination rate"는 원문 정규화 방식에 민감하다. 지표를 신뢰하려면
 > **채점기의 텍스트 정규화가 소스 레이아웃 아티팩트에 견고해야** 한다.
 
-## 발견 2 — 서민·실수요 예외 recall 미스 (실제 품질 이슈)
+## 발견 2 — 서민·실수요 예외 recall 미스 → ✅ 수정·재측정 완료
 
-EXCEPTION 항목이 "생애최초 주택구입 및 정책모기지 등 완화된 LTV(60~70%)"로 **생애최초·정책모기지만**
+**1차:** EXCEPTION 항목이 "생애최초 주택구입 및 정책모기지 등 완화된 LTV(60~70%)"로 **생애최초·정책모기지만**
 언급하고 **서민·실수요자**를 별도 항목/키워드로 남기지 않았다 → Exception Recall 50%.
 서민·실수요는 규제지역 LTV 60%의 핵심 예외(`regulatory_facts.md`)이므로 놓치면 위험(metrics_spec ★).
 
-- 개선 방향: 프롬프트에 예외 카테고리 체크리스트 명시(생애최초/서민·실수요/정책모기지 각각 분리 추출),
-  또는 예외 전용 2차 패스. 골드 확대(Phase 2) 시 재측정.
+**수정:** 프롬프트에 **규칙 6**(여러 예외가 한 문장에 나열돼도 각각을 별도 EXCEPTION 항목으로 분리,
+summary에 예외명 명시) + EXCEPTION 카테고리 체크리스트(①생애최초 ②서민·실수요 ③정책모기지) 추가.
+규칙 1(원문에 없으면 지어내지 않음)은 유지해 환각을 막음. (`src/regimpact/extractor/prompt.py`)
+
+**2차 결과:** 모델이 세 예외를 각각 분리 추출 →
+```
+[EXCEPTION] 생애최초 주택구입자 완화 LTV 적용      (70% → 60~70%)
+[EXCEPTION] 서민·실수요자 완화 LTV 적용            (60%(아파트 限))
+[EXCEPTION] 정책모기지(보금자리론) 완화 LTV 적용   (아파트60% / 非아파트55%)
+```
+Exception Recall **50% → 100%**, missed_exceptions 없음. 다른 지표 회귀 없음(오히려 세분화되며
+다주택 LTV 0%·중도금→잔금 경과규정·사업자대출 제한 등 추가 포착). 환각 0% 유지.
+
+> 주: 프롬프트로 완전성을 높이되 "원문에 없으면 생략"(규칙 1)을 최우선으로 둬, recall↑가
+> 환각↑로 이어지지 않도록 통제했다. 이 트레이드오프 통제가 Assurance의 핵심.
 
 ## 발견 3 — 지역명 → canonical code 정규화 부재
 
@@ -63,6 +79,7 @@ EXCEPTION 항목이 "생애최초 주택구입 및 정책모기지 등 완화된
 
 ## 다음 실측 액션
 
-1. 예외 recall 개선(프롬프트/2차 패스) 후 재측정 → Exception Recall 목표 임계 설정.
-2. 지역명→코드 매핑 계층 추가 → Regions match 정상화 → Impact Matrix E2E와 연결.
+1. ~~예외 recall 개선 후 재측정~~ — ✅ 완료(2026-08-12, 발견 2). Exception Recall 100%. 임계값은 골드 확대 후 확정.
+2. **지역명→코드 매핑 계층 추가** → Regions match 정상화 → Impact Matrix E2E와 연결(발견 3).
 3. 골드셋 확대(DEV 우선) 후 지표에 분모를 키워 신뢰구간 확보(현재 n=1 정책, 소규모 seed).
+4. Anthropic 백엔드로 교차 실측(모델 간 비교) — 프롬프트 개선이 모델 무관하게 유효한지 확인.
