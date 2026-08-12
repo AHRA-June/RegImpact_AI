@@ -1,5 +1,10 @@
 # Stitch 1차 산출물 리뷰 + 데이터 정정 프롬프트 (2026-08-10)
 
+> ✅ **해결(2026-08-12):** 이 문서가 지적한 "화면마다 도메인 데이터 환각" 문제는 근본 해결됨.
+> `src/regimpact/report.py`(HTML 리포트 생성기)가 **엔진/추출 실제 출력만으로** 리포트를 렌더 →
+> 하드코딩·환각이 구조적으로 불가능. 생성물 `docs/ui/report_6_30.html`(`examples/gen_report.py`).
+> Stitch export는 이제 **디자인 참고용**으로만 보존(아래 리뷰는 그 맥락에서 읽을 것).
+
 > Stitch에서 5개 화면 생성 완료. 디자인 시스템(DESIGN.md)은 마스터 컨텍스트를 잘 반영(Institutional Navy, Noto Sans, JetBrains Mono, 상태색, 고밀도).
 > **문제: Stitch가 도메인 데이터를 화면마다 다르게 환각.** 아래 정정 프롬프트로 재생성하거나 HTML 직접 수정.
 

@@ -68,6 +68,18 @@ _CODE_MATCH_TOKENS: dict[str, tuple[str, ...]] = {
 
 KNOWN_REGION_CODES: frozenset[str] = frozenset(_CODE_MATCH_TOKENS)
 
+# code → 사람이 읽는 지역 표시명 (UI/리포트용). LOCKED §4 도메인 사실.
+REGION_DISPLAY_NAME: dict[str, str] = {
+    "GURI": "구리시",
+    "YONGIN_GIHEUNG": "용인시 기흥구",
+    "HWASEONG_DONGTAN": "화성시 동탄",
+}
+
+
+def region_display_name(code: str) -> str:
+    """code의 표시명. 미등록 code는 code 그대로 반환."""
+    return REGION_DISPLAY_NAME.get(code, code)
+
 
 def resolve_region_code(name: str) -> Optional[str]:
     """지역명(또는 이미 code)을 canonical code로 정규화. 미상이면 None.

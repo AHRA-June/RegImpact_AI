@@ -54,19 +54,21 @@
 | `src/regimpact/extractor/` | **RegChange Extractor(E) + Citation Assurance(A)** — 공문→추출→검증 |
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④) |
 | `src/regimpact/impact/` | **Impact Matrix E2E** — 룰엔진 before/after 차등 임팩트(6·30 관통, Walking Skeleton) |
+| `src/regimpact/report.py` | **HTML 리포트 생성기** — 파이프라인 실제 출력을 자체완결 HTML로(환각·하드코딩 불가) |
+| `docs/ui/report_6_30.html` | 생성된 6·30 리포트(실제 엔진 출력, `examples/gen_report.py` 산출) |
 | `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
-| `tests/` | 테스트 하네스 (pytest, 75개) |
-| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E |
+| `tests/` | 테스트 하네스 (pytest, 81개) |
+| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 / 추출→임팩트 E2E / HTML 리포트 생성 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + Impact Matrix E2E(6·30 관통) 구현(테스트 75개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + Impact Matrix E2E + HTML 리포트(6·30 관통) 구현(테스트 81개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
-python -m pytest && python examples/demo_6_30.py && python examples/demo_tc_regression.py && python examples/demo_impact_matrix.py
+python -m pytest && python examples/demo_6_30.py && python examples/demo_tc_regression.py && python examples/demo_impact_matrix.py && python examples/gen_report.py
 ```
 
 ## 개발 브랜치

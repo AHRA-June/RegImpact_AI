@@ -22,6 +22,12 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-12)
+- **UI 연동 — HTML 리포트 생성기** — `src/regimpact/report.py` (`render_report`). 파이프라인 실제 출력
+  (추출 + 정규화 + Impact Matrix + Assurance 지표)을 자체완결 HTML 대시보드로 렌더. **모든 값이 엔진/추출에서만
+  오므로 Stitch 목업의 도메인 환각(세종·부산, LTV 60→50) 문제가 구조적으로 불가능.** DESIGN.md 디자인 언어
+  (Institutional Navy, Noto Sans/JetBrains Mono, 라이트/다크). 지역 그룹핑, 추출 변경+인용, 임팩트 표, Assurance 타일.
+  `examples/gen_report.py`로 저장 추출→오프라인 실제 리포트 생성(`docs/ui/report_6_30.html`, 24행·전 지표 녹색).
+  테스트 6개(실제값 존재·환각값 부재 회귀 포함, 총 81). 다음: Anthropic 교차 실측 / 골드셋 확대.
 - **추출 → Impact Matrix 실제 연결 (E2E 진짜 데이터 관통)** — `src/regimpact/impact/connect.py`
   (`impact_from_extraction`, `PolicyImpact`). 추출의 policy_id·effective_from·target_regions(한글명)를
   Impact Matrix 입력으로 흘려보냄: effective_from→before/after 시점 유도, 지역명→코드 정규화,
@@ -64,8 +70,9 @@
   - ~~①**서민·실수요 예외 recall 개선**~~ — ✅ 완료(2026-08-12). 50%→100%. 재측정 반영.
   - ~~②**지역명→canonical code 매핑 계층**~~ — ✅ 완료(2026-08-12). Regions MISS→OK. `regions.normalize_regions`.
   - ~~③**추출→Impact Matrix 실제 연결**~~ — ✅ 완료(2026-08-12). `impact_from_extraction`. 공문→추출→임팩트 관통.
-  - **후속:** ④UI(Stitch) 연동 — 하드코딩값을 이 매트릭스 실제 출력으로 교체(다음 우선, 사용자 시각화 요청)
-    ⑤Anthropic 백엔드로 교차 실측(모델 간 비교) ⑥골드셋 확대 후 분모 키워 신뢰구간 확보.
+  - ~~④**UI 연동**~~ — ✅ 완료(2026-08-12). `report.py` HTML 리포트 생성기. 하드코딩값→엔진 실제 출력.
+  - **후속:** ⑤Anthropic 백엔드로 교차 실측(모델 간 비교) ⑥골드셋 확대 후 분모 키워 신뢰구간 확보
+    ⑦(선택) Rule Change Proposal 구조화 산출 · 리포트에 통합.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-12). `src/regimpact/impact/`, 8세그먼트 6·30 관통.
   - **후속(선택):** ①세그먼트 → 층화 합성 포트폴리오(2,000~5,000)로 확대 + 비중 실측/시나리오화
     ②고객영향 행·구조화 Rule Change Proposal 연동 ③UI(Stitch) 하드코딩값을 이 매트릭스 실제 출력으로 교체.
@@ -119,6 +126,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-12** — ✅ **UI 연동: HTML 리포트 생성기.** `src/regimpact/report.py`(`render_report`). PolicyImpact + 추출 + Assurance(grounding/gold)를 자체완결 HTML 대시보드로 렌더. **모든 값이 엔진/추출 실제 출력에서만** 오므로 Stitch 목업의 도메인 환각(세종·부산·LTV 60→50, `docs/ui/stitch_review.md`) 문제가 구조적으로 불가능 — 이게 "UI 연동"의 본질. DESIGN.md 디자인 언어(Institutional Navy #022448, Noto Sans/JetBrains Mono, 라이트/다크 대응). 섹션: 헤더밴드(정책·시행일·지역·비교시점) / Assurance 타일(Citation·환각·완전성·예외재현·지역) / 무엇이 달라졌나(추출 변경+원문 인용) / 누가 영향받나(지역 그룹핑 임팩트 표). `examples/gen_report.py`로 저장 추출→오프라인 실제 리포트 생성(`docs/ui/report_6_30.html` 18KB, 24행, 전 지표 녹색). `regions.py`에 REGION_DISPLAY_NAME 추가. 테스트 6개(실제값 존재·환각값 부재 회귀 포함, 총 81) 통과.
 - **2026-08-12** — ✅ **추출 → Impact Matrix 실제 연결(E2E 진짜 데이터 관통).** `src/regimpact/impact/connect.py`(`impact_from_extraction`→`PolicyImpact`). LLM 추출의 policy_id·effective_from·target_regions(한글명)를 Impact Matrix 입력으로 연결: effective_from에서 before(−1일)/after(+1일) 유도, 지역명→코드 정규화(미상은 unmapped로 표면화), 각 정규화 지역 × 대표 고객유형(archetype 8종) → 세그먼트 → 룰엔진 before/after 차등. 저장 추출(`extractor_run_6_30_gemini.json`)로 오프라인 E2E 관통: 3지역×8=24행, 강화 9·유지 9·검토 6, 가중평균 Δ −20pp. LOCKED §4: LLM은 '정책·지역·시점' 좌표만 제공, LTV 판정은 deterministic 룰. `segments.py`를 archetype(지역 무관 템플릿)+`segments_for_region`으로 리팩터(하위호환 SIX_THIRTY_SEGMENTS 유지). connect는 extractor를 런타임 import하지 않음(레이어 독립, duck typing). ImpactMatrix에 regions/unmapped provenance, format_report에 노출. `examples/demo_extractor_to_impact.py`. 테스트 5개 추가(총 75) 통과.
 - **2026-08-12** — ✅ **지역명→canonical code 정규화 계층.** 6·30 실측의 Regions MISS(발견 3: 추출이 지역을 한글명 "화성시 동탄구"로 반환, 룰엔진·골드는 code GURI 등) 대응. `regions.py`에 `resolve_region_code`(distinctive token '구리'·'기흥'·'동탄' 매칭 → 접두 '경기도'·'시'·'구'에 견고, code에 idempotent, 미상은 None) + `normalize_regions`((코드목록, 매핑실패목록) 반환 → 조용한 누락 금지) 추가. LOCKED §4: 지역 도메인 사전은 사람 확정. 채점(`score_against_gold`)은 추출 원본을 훼손하지 않고 비교 시점에만 코드로 정규화, `normalized_regions`/`unmapped_regions` 필드로 표면화. 저장된 2차 추출 오프라인 재채점 → **Regions MISS→OK**. `run_extractor.py` 출력에 정규화 지역 노출, 상위 패키지 export. 테스트 14개 추가(총 70) 통과. 다음: 추출→Impact Matrix 실제 연결.
 - **2026-08-12** — ✅ **예외 recall 개선·재측정.** 1차 실측의 Exception Recall 50%(서민·실수요 놓침) 대응 — 프롬프트에 규칙 6(여러 예외를 한 항목으로 뭉치지 말고 개별 EXCEPTION 항목으로 분리, summary에 예외명 명시) + EXCEPTION 체크리스트(생애최초/서민·실수요/정책모기지) 추가, 규칙 1(원문에 없으면 생략) 유지로 환각 통제. 2차 재측정: **Exception Recall 50%→100%**(세 예외 각각 분리 추출), 추출 6→12건 세분화(다주택 LTV 0%·중도금→잔금 경과규정·사업자대출 제한 추가 포착)에도 **Citation 100%(12/12)·환각 0% 유지**. metrics_spec 현재값·리포트(`extractor_run_6_30.md` 1차→2차) 갱신. 남은 이슈: Regions 한글명↔코드(발견 3). 오프라인 테스트 56 통과(프롬프트 변경은 텍스트라 회귀 없음).

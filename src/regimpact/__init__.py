@@ -22,10 +22,13 @@ from .regions import (
 from .impact import (
     CustomerSegment,
     ImpactMatrix,
+    PolicyImpact,
     SegmentImpact,
     analyze_impact,
     format_report,
+    impact_from_extraction,
 )
+from .report import render_report
 
 __all__ = [
     "evaluate",
@@ -44,7 +47,11 @@ __all__ = [
     # Impact Matrix (E2E)
     "analyze_impact",
     "format_report",
+    "impact_from_extraction",
+    "PolicyImpact",
     "ImpactMatrix",
     "SegmentImpact",
     "CustomerSegment",
+    # HTML 리포트(UI)
+    "render_report",
 ]
