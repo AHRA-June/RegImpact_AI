@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix E2E 관통 세션)
 - **개발 브랜치:** `claude/work-start-dq1gtz`
-- **전체 단계:** 🟢 Phase 1 관통 완료 → Phase 2 진행 — 룰엔진 v1 + Extractor(실측 run1) + TC Generator/Rule-Regression + Impact Matrix E2E + 층화 합성 포트폴리오(~3천) + **골드셋 인프라·seed 32(AI_DRAFT)**(테스트 66 통과)
+- **전체 단계:** 🟢 Phase 1 관통 완료 → Phase 2 진행 — 룰엔진 v1 + Extractor(실측 run1) + TC Generator/Rule-Regression + Impact Matrix E2E + 층화 합성 포트폴리오(~3천) + **골드셋 115문항 완성(AI_DRAFT, 규모 목표 도달)**(테스트 68 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,14 +22,14 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
-- **골드 평가셋 100~120 착수 — 인프라 + seed 32(AI_DRAFT).** `src/regimpact/goldset/`
-  (schema·evaluate·coverage) + `docs/eval/goldset/`(dev 24 · challenge 8 · locked 스캐폴드 · README).
-  브리프 §11 8필드 스키마 + 10 카테고리 + DEV/LOCKED/CHALLENGE 분리. **채점은 전부 결정적**
-  (LOCKED §4 금지선: LLM이 LLM 채점 금지) — scenario 아이템은 검증된 룰엔진으로, 근거는 원문 grounding으로.
-  **실측:** scenario 28/28(100%), Escalation Recall/Precision 100%, grounding 8/8(100%).
-  CHALLENGE 가중 카테고리(EXCEPTION·GRANDFATHERING·EFFECTIVE_DATE·CONFLICT) 강조. `load_goldset()` 기본 DEV만
-  (누수 방지). **전 항목 AI_DRAFT** — regulatory_facts(검수대기)에서 파생, claim_refs로 연결. 진척 32/115(28%).
-  `examples/demo_goldset.py`. 테스트 9개(총 66) 통과. **후속:** 사용자 도메인 검수→HUMAN_CONFIRMED, DEV40/LOCKED40/CHALLENGE35까지 확대 후 freeze.
+- **골드 평가셋 115문항 완성 (AI_DRAFT) — 규모 목표 도달.** `src/regimpact/goldset/`(schema·evaluate·coverage)
+  + `docs/eval/goldset/`(dev 40 · locked 40 · challenge 35 · README). 브리프 §11 8필드 + 10 카테고리 전부 커버
+  (GRANDFATHERING 20·CONFLICT 18·EXCEPTION 14·EFFECTIVE_DATE 14 등 CHALLENGE 가중). **채점 전부 결정적**
+  (LOCKED §4 금지선: LLM이 LLM 채점 금지) — scenario는 검증된 룰엔진, 근거는 원문 grounding.
+  **실측(전 split):** scenario 86/86(100%), Escalation R/P 100%, grounding 34/34(100%). 각 scenario 기대값이
+  룰엔진과 정확 일치, 각 인용이 원문 verbatim. `load_goldset()` 기본 DEV만(누수 방지). **전 항목 AI_DRAFT** —
+  regulatory_facts(검수대기) 파생, claim_refs 연결. `examples/demo_goldset.py`. 테스트 11개(총 68).
+  **남은 것은 사용자 도메인 검수(AI_DRAFT→HUMAN_CONFIRMED) 후 freeze.**
 - **층화 합성 포트폴리오(Phase 2) — 룰엔진 차등검증 seed 30 → ~3,024건 확대.**
   `src/regimpact/tc_generator/portfolio.py`. 5축(scope·region_time·ownership·exception·grandfather)
   곱집합 **432 strata 전수 커버**, 판정 관련(scope=home) 셀에 가중. 결정적(seed 고정, 재현 가능).
@@ -77,7 +77,7 @@
   **독립 실측치**(오염 없는 run2) 확보 → run1과 대조.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). ~~①합성 포트폴리오 확대~~ ✅ 완료(2026-08-13, ~3,024건 층화, 100%).
   - **후속(선택):** ②CFL-04(Q8) 도메인 확정 후 반영 ③포트폴리오 규모 5,000까지 확대(target_n 조정).
-- ~~골드셋 100~120 작성 착수~~ — ✅ 착수(2026-08-13): 인프라+seed 32(AI_DRAFT, 32/115). **후속:** 도메인 검수→확정, 115까지 확대·freeze.
+- ~~골드셋 100~120 작성~~ — ✅ **115문항 완성(AI_DRAFT, 2026-08-13)**. 규모 목표 도달. **남은 것: 사용자 도메인 검수→HUMAN_CONFIRMED→freeze.**
 - (병행) `regulatory_facts.md` URL·hash 채우기, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -127,6 +127,9 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **골드 평가셋 115문항 완성(AI_DRAFT).** dev 40·locked 40·challenge 35. 10 카테고리 전수 커버,
+  CHALLENGE 가중(GRANDFATHERING 20·CONFLICT 18·EXCEPTION 14·EFFECTIVE_DATE 14). 결정적 채점: scenario 86/86,
+  Escalation R/P 100%, grounding 34/34. 전 항목 AI_DRAFT. 전체 무결성 회귀 테스트 추가(총 68). 규모 목표 도달 → 남은 것은 사람 확정.
 - **2026-08-13** — ✅ **골드 평가셋 착수 — 인프라 + seed 32(AI_DRAFT).** `src/regimpact/goldset/`
   (schema·evaluate·coverage), `docs/eval/goldset/`(dev 24·challenge 8·locked 스캐폴드·README). 브리프 §11 8필드·10카테고리·
   DEV/LOCKED/CHALLENGE 분리. 결정적 채점(LOCKED §4 금지선): scenario→룰엔진, 근거→원문 grounding.
