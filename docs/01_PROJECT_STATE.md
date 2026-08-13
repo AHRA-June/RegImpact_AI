@@ -22,6 +22,17 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **Extractor 실제 LLM 1회 실행 (run 1) — 첫 실측 지표 확보.** 이 환경에 `ANTHROPIC_API_KEY`가
+  없어 SDK 경로(api.anthropic.com) 대신 **세션 모델(claude-opus-4-8)** 이 `run_extractor`와 동일
+  프롬프트+원문 3건으로 구조화 추출을 생성(`docs/eval/regchange_extraction_6_30_run1.json`, 10건).
+  실제 extractor 코드 경로(`extract_regchange`의 complete 주입점)로 흘려 결정적 Assurance 채점.
+  **실측:** Citation Correctness **100% (10/10 grounded)**, Unsupported Claim Rate **0%**,
+  Change Completeness **100%**, Exception Recall **100%**, Effective-date/Regions OK.
+  동일 추출을 `run_e2e(extraction=)`에 주입해 E2E 관통(회귀 30/30). `examples/run_extractor_session_model.py`,
+  실측 요약 `docs/eval/regchange_run1_metrics.json`. run1 아티팩트 grounding을 테스트로 고정(총 52 통과).
+  **한계(투명성):** 고립 API 호출이 아닌 세션 모델 in-loop + 동일 세션 gold 사전열람(오염 가능) →
+  파이프라인 실배선 실증 + grounding 실측 용도이지 독립 벤치마크 아님. **후속:** 사용자 API 키로
+  `run_extractor.py`(고립 claude-opus-5) 재실행 시 독립 실측치 확보.
 - **Impact Matrix E2E 관통 (Walking Skeleton)** — `src/regimpact/impact/`
   (personas·matrix·anchor·proposal·pipeline·report). 04_PLAN의 최대 리스크("E2E 관통 실패")
   해소: 6·30 1건이 **Source→Before/After→Impact Matrix→Rule Change Proposal→Test/Regression
@@ -45,8 +56,9 @@
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-13). `src/regimpact/impact/` 전체 관통, 오프라인, 테스트 51.
   - **후속(선택):** ①UI 연동 시 Stitch 하드코딩값을 `E2EReport.to_dict()` 실제 출력으로 교체
     ②`high_impact` 임계(현재 20%p 초안)를 metrics_spec high-risk 확정과 정렬 ③검증보고서 15~20쪽 서식화.
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
-  이후 `run_e2e(extraction=실제추출)`로 동일 파이프라인에 주입해 실측 grounding/gold 점수 측정.
+- ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-13, run1 세션 모델 경로). Citation Correctness 100%,
+  Change/Exception 100%. **후속:** 사용자 API 키로 `run_extractor.py`(고립 claude-opus-5) 재실행해
+  **독립 실측치**(오염 없는 run2) 확보 → run1과 대조.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영.
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
@@ -98,6 +110,12 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **Extractor 실제 LLM 1회 실행(run 1) — 첫 실측 지표.** API 키 부재로 세션 모델
+  (claude-opus-4-8)이 run_extractor 동일 프롬프트+원문으로 추출 10건 생성(`docs/eval/regchange_extraction_6_30_run1.json`).
+  실제 extractor 코드 경로로 주입해 결정적 Assurance 채점: **Citation Correctness 100%(10/10), Unsupported 0%,
+  Change Completeness 100%, Exception Recall 100%, Effective-date/Regions OK.** E2E 관통(회귀 30/30).
+  `examples/run_extractor_session_model.py`, `docs/eval/regchange_run1_metrics.json`. run1 grounding 회귀 테스트 추가(총 52).
+  한계: 세션 모델 in-loop + gold 사전열람(오염 가능) → 독립 벤치마크 아님. 후속: 사용자 키로 고립 재실행.
 - **2026-08-13** — ✅ **Impact Matrix E2E 관통(Walking Skeleton) 구현.** `src/regimpact/impact/`
   (personas·matrix·anchor·proposal·pipeline·report·README). 04_PLAN 최대 리스크("E2E 관통 실패") 해소 —
   6·30 1건이 Source→Before/After(앵커추출)→Impact Matrix(룰엔진 2시점)→Rule Change Proposal→

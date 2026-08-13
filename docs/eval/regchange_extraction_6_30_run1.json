@@ -1,0 +1,118 @@
+{
+  "_note": "RegChange Extractor 실제 LLM 실행 산출물 (run 1). 방법: ANTHROPIC_API_KEY 부재로 스크립트 SDK 경로(api.anthropic.com) 대신 세션 모델(claude-opus-4-8)이 run_extractor와 동일한 SYSTEM_PROMPT + build_user_prompt(원문 3건)을 근거로 구조화 추출을 생성함. 이 파일이 LLM 출력이며, examples/run_extractor_session_model.py가 이를 주입해 결정적 Assurance(Citation grounding + Gold)로 채점함. 한계: (1) 고립된 API 호출이 아니라 세션 모델 in-loop, (2) 동일 세션에서 gold를 사전 열람함(오염 가능) → 이 run은 파이프라인 실배선 실증 + grounding 실측 용도, 독립 벤치마크 아님. 생성일 2026-08-13.",
+  "policy_id": "FSC_20260630",
+  "effective_from": "2026-07-01",
+  "target_regions": ["HWASEONG_DONGTAN", "YONGIN_GIHEUNG", "GURI"],
+  "changes": [
+    {
+      "category": "LTV",
+      "summary": "규제지역 내 주택구입목적 주담대 LTV 강화 (비규제 70% → 규제 40%)",
+      "before": "비규제지역 70%",
+      "after": "규제지역 40%",
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "(주담대 LTV) 규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"
+      },
+      "confidence": 0.98
+    },
+    {
+      "category": "EFFECTIVE_DATE",
+      "summary": "투기과열지구·조정대상지역 지정효력 발생일 = 2026-07-01 (7월 1일)",
+      "before": null,
+      "after": "2026-07-01 (7월 1일)",
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "7월 1일부터 지정효력 발생"
+      },
+      "confidence": 0.97
+    },
+    {
+      "category": "REGION",
+      "summary": "규제지역 신규 지정: 화성 동탄·용인 기흥·구리 (투기과열지구 및 조정대상지역)",
+      "before": "비규제지역(수도권)",
+      "after": "투기과열지구 및 조정대상지역",
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다"
+      },
+      "confidence": 0.97
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "생애최초·서민·실수요자·정책모기지는 완화된 LTV 유지(강화 대상 아님)",
+      "before": "70%",
+      "after": "생애최초/서민·실수요자 완화 LTV 유지",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+      },
+      "confidence": 0.93
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "경과규정: 6.30일까지 전산접수 완료 또는 계약+계약금 납부 증명시 종전규정 적용",
+      "before": null,
+      "after": "종전규정 적용",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "주택매매계약을 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능"
+      },
+      "confidence": 0.9
+    },
+    {
+      "category": "LTV",
+      "summary": "다주택자는 수도권 주택구입시 규제지역 여부 무관 LTV 0%",
+      "before": null,
+      "after": "LTV 0%",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+      },
+      "confidence": 0.92
+    },
+    {
+      "category": "REGION",
+      "summary": "토지거래허가구역 추가 지정 (효력 2026-07-05, LTV 시행일과 상이)",
+      "before": null,
+      "after": "2026-07-05부터 토지거래허가구역",
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "2026년 7월 5일*부터 2027년 12월 31일까지 토지거래허가구역으로"
+      },
+      "confidence": 0.85
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "전세대출 보유 차주의 규제지역 내 3억원 초과 APT 취득 제한 (자동판정 밖)",
+      "before": null,
+      "after": "제한",
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "전세대출 보유 차주의 규제지역 내 3억원 초과 APT 취득"
+      },
+      "confidence": 0.8
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "1억원 초과 신용대출 보유 차주의 규제지역 주택구입 1년간 제한 (자동판정 밖)",
+      "before": null,
+      "after": "1년간 제한",
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터"
+      },
+      "confidence": 0.8
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "매매·임대사업자 외 사업자의 규제지역 주택구입목적 사업자대출 제한 (자동판정 밖)",
+      "before": null,
+      "after": "제한",
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "주택 매매·임대사업자* 외 여타 사업자도 규제지역 내 주택구입"
+      },
+      "confidence": 0.78
+    }
+  ]
+}

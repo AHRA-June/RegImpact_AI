@@ -153,3 +153,31 @@ def test_e2e_detects_ungrounded_injection():
     report = run_e2e(extraction=extraction)
     assert report.unsupported_claim_rate > 0.0
     assert report.e2e_ok is False
+
+
+# --- run1 실측 아티팩트 회귀 가드 -------------------------------------------
+def test_run1_extraction_artifact_grounds_and_passes():
+    """세션 모델 실측 산출물(run1)이 원문에 100% grounding + gold 통과함을 고정한다.
+
+    docs/eval/regchange_extraction_6_30_run1.json 은 실제 LLM 실행(run 1) 결과다.
+    이 테스트가 실패하면 원문/추출 아티팩트가 어긋난 것(회귀)이다."""
+    import json
+    from pathlib import Path
+
+    from regimpact.extractor import check_citation_grounding, load_sources, score_against_gold
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    eval_dir = Path(__file__).resolve().parents[1] / "docs" / "eval"
+    raw = json.loads((eval_dir / "regchange_extraction_6_30_run1.json").read_text(encoding="utf-8"))
+    gold = json.loads((eval_dir / "regchange_gold_6_30.json").read_text(encoding="utf-8"))
+    extraction = RegChangeExtraction.from_dict(raw)
+
+    g = check_citation_grounding(extraction, load_sources())
+    assert g.citation_correctness == 1.0, f"ungrounded: {[u.summary for u in g.ungrounded]}"
+    assert g.total == 10
+
+    s = score_against_gold(extraction, gold)
+    assert s.change_completeness == 1.0
+    assert s.exception_recall == 1.0
+    assert s.effective_date_correct is True
+    assert s.regions_correct is True

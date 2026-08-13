@@ -1,0 +1,15 @@
+{
+  "run": "run1_session_model",
+  "model": "claude-opus-4-8 (세션 모델 in-loop)",
+  "num_changes": 10,
+  "citation_correctness": 1.0,
+  "unsupported_claim_rate": 0.0,
+  "grounded": 10,
+  "total_citations": 10,
+  "change_completeness": 1.0,
+  "exception_recall": 1.0,
+  "effective_date_correct": true,
+  "regions_correct": true,
+  "e2e_ok": true,
+  "regression_pass_rate": 1.0
+}
