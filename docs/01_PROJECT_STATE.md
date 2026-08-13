@@ -22,6 +22,11 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **AI Risk Register v1** — `docs/risk/regchange-ai/regchange-ai_risk_register_v1.md`(+CHANGELOG·README).
+  Model/System Card 리스크 요약을 정식 리스크 관리 형식으로 확장: **19건 5범주**(AI/모델·데이터·룰/의사결정·
+  거버넌스·운영), 각 건 **고유위험(L×I) → 통제[유형] → 잔여위험** + 소유자·상태·모니터링/escalation 트리거.
+  히트맵(Critical 잔여 없음)·Top 잔여위험 6종·리뷰 주기. 수용 리스크(단일앵커·Q8) 근거 명시. 통제는 실제
+  구현(grounding·임계값·mutation·escalation·hash·결정론) 근거. 버전 규칙 적용.
 - **Model/System Card v1** — `docs/cards/regchange-ai/regchange-ai_card_v1.md`(+CHANGELOG, README).
   하이브리드 특성 반영 **System Card(A) + LLM 컴포넌트 Model Card(B: RegChange Extractor)** 통합. A:
   시스템 요약·구성·사용목적·범위외·데이터(PII 없음)·정량결과(12/12 PASS·격자 3,200)·**리스크 레지스터
@@ -148,6 +153,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **AI Risk Register v1 작성.** `docs/risk/regchange-ai/regchange-ai_risk_register_v1.md`(+CHANGELOG·README). Model/System Card 리스크 요약(8종)을 정식 리스크 관리 형식으로 확장 — 19건 5범주(R-AI 5·R-DAT 4·R-RUL 4·R-GOV 3·R-OPS 3). 평가 척도(L×I 1~5, Low/Med/High/Critical), 각 건 고유위험→통제[검증/설계/프로세스/계획]→잔여위험 + 소유자·상태·모니터링/escalation 트리거. 리스크 히트맵(Critical 잔여 없음, 대부분 Low~Medium), Top 잔여위험 6종, 리뷰 주기·수용 리스크(R-DAT-04 단일앵커·R-RUL-04 Q8) 근거. 통제는 실제 구현(grounding·임계값 스코어카드·mutation·escalation·hash·결정론 재현) 근거. 버전 규칙 적용. README·STATE 갱신. (코드 무변경, 테스트 110 유지.)
 - **2026-08-13** — ✅ **Model/System Card v1 작성.** `docs/cards/regchange-ai/regchange-ai_card_v1.md`(+CHANGELOG·README). 하이브리드(LLM 추출+결정론 룰엔진) 특성상 **System Card(A) + LLM 컴포넌트 Model Card(B)** 통합. A: 시스템 요약·컴포넌트 상태표·사용목적·범위외/오용방지·데이터(공개 공문·합성, PII 없음)·정량 결과(Assurance 12/12 PASS·격자 3,200/3,200)·**리스크 레지스터 8종**·공정성/윤리(규제 공개기준만·차별 판정 없음)·거버넌스·한계. B(RegChange Extractor): 모델 상세(claude-opus-5 기본·추출 전용)·입출력 스키마·지표(6·30)·factors·failure modes·caveats. 실측 근거 + provenance(세션 수동 grounded 추출, 자동 무인 API는 키 확보 후) 명시. 버전 규칙 적용. README·STATE 갱신. (코드 무변경, 테스트 110 유지.)
 - **2026-08-13** — ✅ **정식 검증보고서(15~20쪽 분석 서사) 작성.** `docs/reports/validation_report_6_30_full.md`(약 17쪽/28.8k자, 14개 대섹션). 모델검증 보고서 형식의 authored 분석 문서 — Executive Summary·검증 범위·목적·대상 시스템 개요·방법론(차등검증·오라클·인용 grounding·시점 프로브·임계값·mutation)·데이터/평가셋(3계층·DEV/LOCKED/CHALLENGE 정당성·골드셋 n=1 한계)·Assurance Dimension별 발견사항·룰엔진 심층(우선순위·커버리지·방어력·escalation)·영향 매트릭스/룰 제안 검토·**고위험 실패 분석(서민실수요 예외 누락 → Assurance 포착 → 보완 피드백 루프)**·한계 6종·거버넌스/Human Review/감사추적·결론/권고 5종·부록(스코어카드 전문·임계값·평가셋 통계·error taxonomy·재현 명령). 모든 수치 실측 근거(12/12 PASS·3,200/3,200·106/106). 브리프 §18 코어 완성 정의 충족. validation-report **v3**·workflow-e2e **v7** 승격. (코드 변경 없음, 테스트 110 유지.)
 - **2026-08-13** — ✅ **PRD v1 작성.** `docs/prd/regchange-ai/regchange-ai_v1.md`(+CHANGELOG). 브리프 §25 필수 항목(사용자·Use Case·데이터/컴포넌트 스키마·평가·배포)을 구체화하고 **현행 구현 상태(구현됨/부분/계획)를 매트릭스로 명시**(과대약속 금지). 데이터 스키마 11종·컴포넌트 12종 상태표, 평가 프로토콜(3계층·DEV/LOCKED/CHALLENGE·error taxonomy 4종), Assurance 4 dimension 확정 임계값, Human Review·Audit, 배포·재현성, 성공기준·리스크·로드맵. PRD도 버전 규칙 적용. `docs/prd/README.md`·top README 갱신.
