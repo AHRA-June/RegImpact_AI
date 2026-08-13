@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix 구현 세션)
 - **개발 브랜치:** `claude/work-in-progress-d2et38`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **Impact Matrix(Before/After)** 구현(테스트 53 통과)
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator + Impact Matrix + **Rule Proposal + Validation Report** 구현(테스트 72 통과). **6·30 E2E 파이프라인 핵심 관통 완료.**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,12 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **E2E 파이프라인 핵심 관통** — [4] Rule Change Proposal(`src/regimpact/proposal/`) + [7] Human Review
+  (approval envelope) + [8] Validation Report(`src/regimpact/validation/`, stub) 구현. 이제
+  [2]Extractor→[3]Impact Matrix→[R]룰엔진→[4]Proposal→[7]Review→[5]Regression→[8]Report 가 관통
+  (`is_pipeline_complete=True`). `examples/demo_e2e.py`→`docs/reports/validation_6_30.md`. 제안·보고서
+  값은 ImpactMatrix에서만 유도(하드코딩 0), 제안은 AI초안(PENDING_REVIEW). 테스트 +14(총 72).
+  workflow-e2e 문서 **v2**로 승격(v1 보존, before→after 기록).
 - **Impact Matrix (Before/After)** — `src/regimpact/impact/` (matrix·segments·report). Walking Skeleton의
   **Before/After → Impact Matrix 노드.** 룰엔진을 시행 전/후 두 시점으로 **차등 실행(temporal diff)** 해
   세그먼트별 LTV 변화를 산출. 규칙값을 자체 보유하지 않음(LOCKED §4 준수). 6·30 6개 세그먼트: 무주택
@@ -96,6 +102,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **E2E 파이프라인 완주(핵심 관통).** [4] Rule Change Proposal(`src/regimpact/proposal/`: build_proposal + record_decision) + [7] Human Review(approval envelope, LOCKED §4 AI초안→사람확정) + [8] Validation Report(`src/regimpact/validation/`: build_report + format_report_md, stub) 구현. 6·30 1건이 [2]Extractor→[3]Impact Matrix→[R]룰엔진→[4]Proposal→[7]Review→[5]Rule-Regression→[8]Report 관통(`is_pipeline_complete=True`). 제안·보고서 값은 ImpactMatrix 실제 산출에서만 유도(하드코딩 0), 회귀 30/30 100% 포함. `examples/demo_e2e.py`→`docs/reports/validation_6_30.md`. 기능단위 문서 rule-proposal·validation-report v1 신규, **workflow-e2e v2 승격**(v1 보존, 변경이력 기록), features/README·README·STATE 갱신. 테스트 +14(총 72).
 - **2026-08-13** — ✅ **기능단위·워크플로우 문서 + 버전관리 규칙 도입.** `docs/features/` 신설. 규칙 `_VERSIONING.md`(시맨틱 vN, 새 파일=전체 스냅샷·이전 보존, 각 버전파일 상단 before→after + 폴더 CHANGELOG 누적, PRD 동일 적용). 구현된 5개 기능단위(rule-engine·extractor-assurance·tc-generator·impact-matrix·ui-render) + E2E 워크플로우(workflow-e2e) 각 v1 작성(폴더별 `_v1.md`+`CHANGELOG.md`), `features/README.md` 인덱스. README 문서지도·인계순서 반영.
 - **2026-08-13** — ✅ **Impact Matrix UI 렌더 구현.** `src/regimpact/impact/render_html.py`(`render_matrix_html`/`render_6_30`). Stitch 목업(`_1`)의 하드코딩·환각값("60%→50%", 세종·부산 등)을 **룰엔진 실제 산출(ImpactMatrix)에 바인딩된 self-contained HTML로 교체.** DESIGN.md 디자인 토큰 인라인, 근거(reason_code·출처) 표시, REVIEW 세그먼트 별도 노출. `examples/render_impact_ui.py`→`docs/ui/generated/impact_matrix.html`. 렌더 테스트 5건(환각값 부재 단언 포함, 총 58).
 - **2026-08-13** — ✅ **Impact Matrix (Before/After) 구현.** `src/regimpact/impact/`(matrix·segments·report·README). Walking Skeleton(04_PLAN Phase 1)의 **Before/After → Impact Matrix 노드.** 룰엔진(`evaluate`)을 시행 전(2026-06-30)/후(2026-07-02) 두 시점으로 **차등 실행(temporal diff)** 해 세그먼트별 LTV 변화를 산출. 규칙값을 자체 보유하지 않음(temporal diff만) → **LOCKED §4 준수.** 6·30 6개 표준 세그먼트: 무주택 70→40%(강화), 생애최초 70→70%(예외 보호=동일), 서민실수요 70→60%, 처분조건부1주택 70→40%, **유주택(비처분1주택·다주택)은 非규제 유주택 기준값이 명세에 없어 시행 전이 escalation → 델타를 억지로 만들지 않고 `REVIEW`로 정직 표면화**(브리프 §12 가치제안). `analyze_from_extraction(extraction, …)`으로 RegChange Extractor(effective_from) → Impact Matrix **E2E 연결**(before=효력일 전일, after=효력일+2). 테스트 14개(총 53) 통과. `examples/demo_impact_matrix.py`.

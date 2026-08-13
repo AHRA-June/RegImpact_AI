@@ -55,20 +55,23 @@
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |
 | `src/regimpact/extractor/` | **RegChange Extractor(E) + Citation Assurance(A)** — 공문→추출→검증 |
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④) |
-| `src/regimpact/impact/` | **Impact Matrix(Before/After)** — 룰엔진 시행 전/후 temporal diff로 세그먼트별 LTV 영향 산출 |
+| `src/regimpact/impact/` | **Impact Matrix(Before/After)** — 룰엔진 시행 전/후 temporal diff로 세그먼트별 LTV 영향 산출 + UI 렌더 |
+| `src/regimpact/proposal/` | **Rule Change Proposal** — ImpactMatrix→구조화 룰변경 초안(AI초안→사람확정) |
+| `src/regimpact/validation/` | **Validation Report(stub)** — 파이프라인 산출을 검증보고서로 조립 |
 | `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
-| `tests/` | 테스트 하네스 (pytest, 53개) |
-| `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / Impact Matrix 데모 |
+| `tests/` | 테스트 하네스 (pytest, 72개) |
+| `examples/` | 6·30 룰엔진 / Extractor / TC 회귀 / Impact Matrix / UI 렌더 / **E2E 파이프라인** 데모 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + Impact Matrix(Before/After) 구현(테스트 53개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + Impact Matrix + Rule Proposal + Validation Report 구현(테스트 72개 통과). **6·30 E2E 파이프라인 핵심 관통 완료.** 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
-python -m pytest && python examples/demo_6_30.py && python examples/demo_tc_regression.py && python examples/demo_impact_matrix.py
+python -m pytest              # 72개
+python examples/demo_e2e.py   # 원문→판정→영향→제안→검증 관통 보고서
 ```
 
 ## 개발 브랜치
