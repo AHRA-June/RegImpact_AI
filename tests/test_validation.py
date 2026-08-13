@@ -17,7 +17,11 @@ from regimpact.impact import (  # noqa: E402
 )
 from regimpact.proposal import ApprovalStatus, build_proposal, record_decision  # noqa: E402
 from regimpact.tc_generator import run_regression  # noqa: E402
-from regimpact.validation import build_report, format_report_md  # noqa: E402
+from regimpact.validation import (  # noqa: E402
+    build_report,
+    format_report_md,
+    render_report_html,
+)
 
 BEFORE = date(2026, 6, 30)
 AFTER = date(2026, 7, 2)
@@ -93,3 +97,37 @@ def test_format_md_flags_pending_when_not_approved():
     md = format_report_md(build_report("t", extraction=ext, matrix=m, proposal=prop))
     assert "PENDING_REVIEW" in md
     assert "초안" in md
+
+
+# --- 정식 HTML 보고서 ---------------------------------------------------------
+def test_render_html_self_contained_and_bound():
+    doc = render_report_html(_full_report())
+    assert "<!doctype html>" in doc.lower()
+    assert "cdn" not in doc.lower().replace("cdn.jsdelivr", "")  # 외부 스크립트 없음
+    # 실데이터 바인딩
+    assert "무주택 일반" in doc
+    assert "APPROVED" in doc
+    assert "Pass Rate" in doc
+    assert "FSC_20260630" in doc
+    assert "Citation Correctness" in doc or "Assurance" in doc
+    assert "한계" in doc                       # 정직성 섹션
+
+
+def test_render_html_shows_all_pipeline_nodes():
+    doc = render_report_html(_full_report())
+    for label in ("RegChange Extractor", "Impact Matrix", "Rule Change Proposal",
+                  "Rule-Regression"):
+        assert label in doc
+
+
+def test_render_html_partial_pipeline_marks_missing():
+    """제안·회귀 없는 부분 관통은 '부분 관통'으로 표기."""
+    r = build_report("t", extraction=_extraction(), matrix=_matrix())
+    doc = render_report_html(r)
+    assert "부분 관통" in doc
+
+
+def test_render_html_no_hardcoded_hallucinations():
+    doc = render_report_html(_full_report())
+    for bad in ("세종", "부산", "강남", "50%→50%"):
+        assert bad not in doc

@@ -33,7 +33,11 @@ from regimpact.proposal import (  # noqa: E402
     record_decision,
 )
 from regimpact.tc_generator import run_regression  # noqa: E402
-from regimpact.validation import build_report, format_report_md  # noqa: E402
+from regimpact.validation import (  # noqa: E402
+    build_report,
+    format_report_md,
+    render_report_html,
+)
 
 GOLD = json.loads((ROOT / "docs/eval/regchange_gold_6_30.json").read_text(encoding="utf-8"))
 EXTRACTED = json.loads((ROOT / "docs/eval/regchange_extracted_6_30.json").read_text(encoding="utf-8"))
@@ -90,9 +94,12 @@ def main() -> None:
 
     out_dir = ROOT / "docs" / "reports"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "validation_6_30.md"
-    out_path.write_text(md + "\n", encoding="utf-8")
-    print(f"\n\n생성됨: {out_path.relative_to(ROOT)}  (pipeline_complete={report.is_pipeline_complete})")
+    md_path = out_dir / "validation_6_30.md"
+    md_path.write_text(md + "\n", encoding="utf-8")
+    html_path = out_dir / "validation_6_30.html"
+    html_path.write_text(render_report_html(report), encoding="utf-8")
+    print(f"\n\n생성됨: {md_path.relative_to(ROOT)}, {html_path.relative_to(ROOT)}  "
+          f"(pipeline_complete={report.is_pipeline_complete})")
 
 
 if __name__ == "__main__":

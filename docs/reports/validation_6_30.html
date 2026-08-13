@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>검증보고서 — 2026-06-30 규제지역 추가 지정</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --surface:#fcf8ff; --surface-container-lowest:#ffffff; --surface-container-low:#f5f2ff;
+  --surface-container-high:#e8e5ff; --surface-variant:#e2e0fc;
+  --on-surface:#1a1a2e; --on-surface-variant:#43474e; --outline:#74777f; --outline-variant:#c4c6cf;
+  --primary:#022448; --on-primary:#ffffff; --primary-container:#1e3a5f;
+  --secondary:#0051d5; --on-secondary:#ffffff; --secondary-container:#316bf3; --on-secondary-container:#fefcff;
+  --error:#ba1a1a; --error-container:#ffdad6; --on-error-container:#93000a;
+  --ok:#0f7b3f; --ok-container:#c8f2d6; --on-ok-container:#00391a;
+  --tertiary-fixed:#ffddb2; --on-tertiary-fixed-variant:#60410c;
+  --background:#fcf8ff;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--background);color:var(--on-surface);
+  font-family:"Noto Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:14px;line-height:20px;}
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 56px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-bottom:16px;border-bottom:2px solid var(--primary);margin-bottom:24px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--primary);font-size:20px;}
+.scenario{display:inline-flex;align-items:center;gap:8px;background:var(--surface-container-low);
+  border:1px solid var(--outline-variant);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;}
+h1{font-size:28px;line-height:36px;letter-spacing:-.02em;font-weight:700;color:var(--primary);margin:0 0 6px;}
+.meta{color:var(--on-surface-variant);font-size:13px;margin-bottom:20px;}
+h2{font-size:18px;font-weight:600;color:var(--on-surface);margin:28px 0 12px;
+  padding-bottom:6px;border-bottom:1px solid var(--outline-variant);}
+.verdict{display:inline-flex;align-items:center;gap:8px;border-radius:9999px;padding:6px 16px;
+  font-weight:700;font-size:14px;margin:4px 0 8px;}
+.verdict.complete{background:var(--ok-container);color:var(--on-ok-container);}
+.verdict.partial{background:var(--tertiary-fixed);color:var(--on-tertiary-fixed-variant);}
+.nodes{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px;}
+.node{display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:6px 12px;
+  font-size:12px;font-weight:600;border:1px solid var(--outline-variant);background:var(--surface-container-lowest);}
+.node.on{border-color:var(--ok);color:var(--on-ok-container);background:var(--ok-container);}
+.node.off{color:var(--outline);}
+.panel{background:var(--surface-container-lowest);border:1px solid var(--outline-variant);
+  border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface-container-low);color:var(--on-surface-variant);text-align:left;
+  font-size:12px;font-weight:600;padding:10px 14px;border-bottom:1px solid var(--outline-variant);white-space:nowrap;}
+tbody td{padding:10px 14px;border-bottom:1px solid rgba(196,198,207,.4);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--surface-container-low);}
+.seg{font-weight:600;color:var(--secondary);}
+.ltv{font-family:"JetBrains Mono",monospace;font-weight:500;}
+.delta-down{color:var(--error);font-weight:600;} .delta-up{color:var(--secondary);font-weight:600;}
+.delta-flat,.na{color:var(--on-surface-variant);}
+.na{color:var(--outline);}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:9999px;padding:2px 9px;
+  font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:500;white-space:nowrap;}
+.badge-error{background:var(--error-container);color:var(--on-error-container);}
+.badge-warn{background:var(--tertiary-fixed);color:var(--on-tertiary-fixed-variant);}
+.badge-neutral{background:var(--surface-variant);color:var(--on-surface-variant);}
+.badge-info{background:var(--secondary-container);color:var(--on-secondary-container);}
+.badge-ok{background:var(--ok-container);color:var(--on-ok-container);}
+.reason{font-family:"JetBrains Mono",monospace;font-size:11px;background:var(--surface-variant);
+  color:var(--on-surface-variant);padding:1px 7px;border-radius:4px;}
+.cite{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--on-surface-variant);}
+.tiles{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0;}
+.tile{flex:1 1 150px;background:var(--surface-container-lowest);border:1px solid var(--outline-variant);
+  border-radius:8px;padding:12px 14px;}
+.tile .k{font-size:12px;color:var(--on-surface-variant);}
+.tile .v{font-size:20px;font-weight:700;font-family:"JetBrains Mono",monospace;margin-top:2px;}
+.tile .v.good{color:var(--ok);} .tile .v.warn{color:var(--on-tertiary-fixed-variant);}
+ul.changes{margin:6px 0;padding-left:0;list-style:none;}
+ul.changes li{padding:8px 0;border-bottom:1px solid rgba(196,198,207,.35);}
+ul.changes li:last-child{border-bottom:none;}
+.limits{background:var(--surface-container-high);border:1px dashed var(--outline-variant);
+  border-radius:8px;padding:16px 18px;margin-top:16px;}
+.limits h2{border:none;margin-top:0;}
+.limits li{margin-bottom:6px;color:var(--on-surface-variant);}
+.footnote{margin-top:22px;color:var(--outline);font-size:12px;}
+</style></head>
+<body><div class="wrap">
+<div class="topbar">
+  <div class="brand">🛡 RegImpact AI</div>
+  <div class="scenario">🎯 검증보고서 (Validation Report)</div>
+</div>
+<h1>2026-06-30 규제지역 추가 지정</h1>
+<div class="meta">정책 <span class="mono">FSC_20260630</span> ·
+  시행일 <span class="mono">2026-07-01</span> · 대상지역 <span class="mono">GURI</span>, <span class="mono">YONGIN_GIHEUNG</span>, <span class="mono">HWASEONG_DONGTAN</span></div>
+<h2>1. 파이프라인 관통 현황</h2><div class="verdict complete">✔ 관통 (핵심 노드 완결)</div><div class="nodes"><span class="node on">✅ [2] RegChange Extractor</span><span class="node on">✅ [3] Impact Matrix</span><span class="node on">✅ [4] Rule Change Proposal</span><span class="node on">✅ [5] TC / Rule-Regression</span><span class="node on">✅ [6] Assurance</span></div>
+<h2>2. 규제 변경 요약 (원문 추출)</h2><div class="meta">추출 변경 항목 10건 (인용 = 원문 verbatim)</div><ul class="changes"><li><span class="reason">LTV</span> 규제지역 내 주담대 LTV 70%→40% 강화<div class="cite">⤷ FAQ_20260630: &ldquo;규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용…&rdquo;</div></li><li><span class="reason">LTV</span> 유주택자 규제지역 LTV 0%, 무주택(처분조건부 1주택 포함) 40%<div class="cite">⤷ MOLIT_PRESS_20260630: &ldquo;무주택(처분조건부 1주택 포함) 40%, 유주택 0%…&rdquo;</div></li><li><span class="reason">EXCEPTION</span> 생애최초·정책모기지 등은 완화된 LTV(60~70%) 적용<div class="cite">⤷ FAQ_20260630: &ldquo;생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용…&rdquo;</div></li><li><span class="reason">EXCEPTION</span> 서민·실수요자 주담대도 규제지역에서 완화된 LTV 적용(예외)<div class="cite">⤷ FAQ_20260630: &ldquo;규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨…&rdquo;</div></li><li><span class="reason">EXCEPTION</span> 다주택자는 수도권 내 주택구입시 규제지역 여부 무관 LTV 0%<div class="cite">⤷ FAQ_20260630: &ldquo;다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용…&rdquo;</div></li><li><span class="reason">GRANDFATHERING</span> 6.30까지 접수완료 또는 계약체결+계약금 증명시 종전규정 적용<div class="cite">⤷ FAQ_20260630: &ldquo;규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 …&rdquo;</div></li><li><span class="reason">GRANDFATHERING</span> 토지거래허가 대상 주택은 6.30까지 허가 신청 접수시 이후 계약해도 종전규정<div class="cite">⤷ FAQ_20260630: &ldquo;토지거래허가제 적용 주택의 경우, 규제지역 효력 발생일 전일(6.30일)까지 관할 지자체에 토지거래허가를 신청 접수시, 그 이…&rdquo;</div></li><li><span class="reason">EFFECTIVE_DATE</span> 규제지역 지정효력 2026-07-01 발생<div class="cite">⤷ MOLIT_PRESS_20260630: &ldquo;조정대상지역을 추가 지정하였다.(7월 1일부터 지정효력 발생)…&rdquo;</div></li><li><span class="reason">REGION</span> 화성 동탄·용인 기흥·구리 3곳 투기과열지구·조정대상지역 신규 지정<div class="cite">⤷ MOLIT_PRESS_20260630: &ldquo;구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다.…&rdquo;</div></li><li><span class="reason">SCOPE_LIMIT</span> 1억원 초과 신용대출 보유 차주 1년간 규제지역 주택구입 제한<div class="cite">⤷ FAQ_20260630: &ldquo;1억원 초과 신용대출 보유 차주는 대출 실행일로부터 1년간 규제지역* 내 주택 구입이 제한…&rdquo;</div></li></ul>
+<h2>3. 시행 전/후 영향 매트릭스</h2><div class="meta">지역 <span class="mono">GURI</span> · 전 <span class="mono">2026-06-30</span> → 후 <span class="mono">2026-07-03</span> · 강화 3 · 완화 0 · 동일 1 · 검토 2</div><div class="panel"><table><thead><tr><th>세그먼트</th><th>시행 전</th><th>시행 후</th><th>Δ</th><th>방향</th></tr></thead><tbody><tr><td class='seg'>무주택 일반</td><td><span class="ltv">70%</span></td><td><span class="ltv">40%</span></td><td><span class="delta-down">-30pp</span></td><td><span class='badge badge-error'>강화</span></td></tr><tr><td class='seg'>생애최초</td><td><span class="ltv">70%</span></td><td><span class="ltv">70%</span></td><td><span class="delta-flat">0pp</span></td><td><span class='badge badge-neutral'>동일</span></td></tr><tr><td class='seg'>서민·실수요</td><td><span class="ltv">70%</span></td><td><span class="ltv">60%</span></td><td><span class="delta-down">-10pp</span></td><td><span class='badge badge-error'>강화</span></td></tr><tr><td class='seg'>비처분 1주택</td><td><span class="na">NEEDS_HUMAN_REVIEW</span></td><td><span class="ltv">0%</span></td><td><span class="na">—</span></td><td><span class='badge badge-warn'>검토</span></td></tr><tr><td class='seg'>처분조건부 1주택</td><td><span class="ltv">70%</span></td><td><span class="ltv">40%</span></td><td><span class="delta-down">-30pp</span></td><td><span class='badge badge-error'>강화</span></td></tr><tr><td class='seg'>다주택</td><td><span class="na">NEEDS_HUMAN_REVIEW</span></td><td><span class="ltv">0%</span></td><td><span class="na">—</span></td><td><span class='badge badge-warn'>검토</span></td></tr></tbody></table></div>
+<h2>4. 룰 변경 제안 <span class="badge badge-ok">APPROVED</span></h2><div class="meta">제안 ID <span class="mono">FSC_20260630::GURI</span> · 검토자 심사역 · 제안 행 6건 (사람 검토 필요 2건) · AI초안→사람확정(LOCKED §4)</div><div class="meta">검토 노트: 6·30 표준 변경 확인</div><div class="panel"><table><thead><tr><th>세그먼트</th><th>rule_id</th><th>전→후</th><th>근거</th><th>검토</th></tr></thead><tbody><tr><td class='seg'>무주택 일반</td><td class='mono'>REG_STD</td><td><span class="ltv">70%</span> → <span class="ltv">40%</span></td><td><span class="reason">LTV_REGULATED_40</span></td><td></td></tr><tr><td class='seg'>생애최초</td><td class='mono'>REG_FIRSTHOME</td><td><span class="ltv">70%</span> → <span class="ltv">70%</span></td><td><span class="reason">EXCEPTION_FIRST_HOME</span></td><td></td></tr><tr><td class='seg'>서민·실수요</td><td class='mono'>REG_REALDEMAND</td><td><span class="ltv">70%</span> → <span class="ltv">60%</span></td><td><span class="reason">EXCEPTION_REAL_DEMAND</span></td><td></td></tr><tr><td class='seg'>비처분 1주택</td><td class='mono'>REG_OWNER_0</td><td><span class="na">—</span> → <span class="ltv">0%</span></td><td><span class="reason">LTV_OWNER_0</span></td><td><span class="badge badge-warn">검토</span></td></tr><tr><td class='seg'>처분조건부 1주택</td><td class='mono'>REG_STD</td><td><span class="ltv">70%</span> → <span class="ltv">40%</span></td><td><span class="reason">LTV_REGULATED_40</span></td><td></td></tr><tr><td class='seg'>다주택</td><td class='mono'>MULTI_0</td><td><span class="na">—</span> → <span class="ltv">0%</span></td><td><span class="reason">LTV_MULTI_HOME_0</span></td><td><span class="badge badge-warn">검토</span></td></tr></tbody></table></div>
+<h2>5. 룰 회귀 검증 (엔진 ⟷ 독립 오라클)</h2><div class="tiles"><div class="tile"><div class="k">Pass Rate 100%</div><div class="v good">30/30</div></div></div><div class="panel" style="margin-top:12px"><table><thead><tr><th>카테고리</th><th>통과</th><th>비율</th></tr></thead><tbody><tr><td>SCOPE</td><td class='mono'>3/3</td><td class='mono'>100%</td></tr><tr><td>BASELINE</td><td class='mono'>3/3</td><td class='mono'>100%</td></tr><tr><td>EXCEPTION</td><td class='mono'>5/5</td><td class='mono'>100%</td></tr><tr><td>BOUNDARY</td><td class='mono'>8/8</td><td class='mono'>100%</td></tr><tr><td>GRANDFATHERING</td><td class='mono'>6/6</td><td class='mono'>100%</td></tr><tr><td>CONFLICT</td><td class='mono'>5/5</td><td class='mono'>100%</td></tr></tbody></table></div>
+<h2>6. Assurance (실측)</h2><div class="tiles"><div class="tile"><div class="k">Citation Correctness</div><div class="v good">100%</div></div><div class="tile"><div class="k">Unsupported Claim Rate</div><div class="v good">0%</div></div><div class="tile"><div class="k">Change Completeness</div><div class="v good">100%</div></div><div class="tile"><div class="k">Exception Recall</div><div class="v good">100%</div></div><div class="tile"><div class="k">Effective-date</div><div class="v good">OK</div></div><div class="tile"><div class="k">Region</div><div class="v good">OK</div></div></div>
+<div class="limits"><h2>7. 한계 (정직성)</h2><ul><li>이 보고서는 6·30 단일 앵커 기준이다(정식 15~20쪽 분석 서사는 Phase 3).</li><li>사람 검토 필요 세그먼트 2건 — 자동 확정 보류(escalation).</li><li>룰 회귀의 오라클은 challenger(제3자 벤치마크 아님) — 100%는 '엔진=명세' 일치를 뜻한다.</li></ul></div>
+<div class="footnote">이 보고서는 <span class="mono">regimpact.validation.render_report_html</span>로
+파이프라인 실제 산출(Extractor·Impact Matrix·Rule Proposal·Rule-Regression·Assurance)에서 생성됨 —
+하드코딩 없음. LOCKED §4: 규칙값은 확정 명세→엔진에서만.</div>
+</div></body></html>

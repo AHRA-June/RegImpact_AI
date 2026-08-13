@@ -2,6 +2,11 @@
 
 > 최신이 위. 각 항목은 해당 버전 파일(`workflow-e2e_vN.md`)의 변경 요약이다.
 
+## v5 (2026-08-13)
+- [8] Validation Report stub(md) → **정식 HTML 보고서 추가**(`render_report_html`, DESIGN.md 시스템).
+  demo_e2e가 md+html 동시 산출. [5] 격자 3,200 반영. 테스트 92→96. 정식 15~20쪽 서사는 Phase 3.
+- 이전(v4) 대비 상세: `workflow-e2e_v5.md` 상단 "변경 이력" 참고.
+
 ## v4 (2026-08-13)
 - [6] Exception Recall 50%→100%(서민·실수요 보완) 반영. **하위 지표 수치를 워크플로우 문서에
   하드코딩하지 않고 features/extractor-assurance 참조로 디커플링**(반복 버전 churn 방지).

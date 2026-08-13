@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix 구현 세션)
 - **개발 브랜치:** `claude/work-in-progress-d2et38`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 92 통과). **6·30 E2E 전 노드 관통 · Assurance 실측(Citation 100%/Recall 100%) · 룰 평가셋 3계층(seed 30/큐레이션 106/격자 3,200) 전부 100%.**
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 96 통과). **6·30 E2E 전 노드 관통(검증보고서 정식 HTML) · Assurance 실측(Citation 100%/Recall 100%) · 룰 평가셋 3계층(30/106/3,200) 전부 100%.**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,11 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **Validation Report 정식 HTML 보고서** — `src/regimpact/validation/render_html.py`(`render_report_html`).
+  DESIGN.md 디자인 시스템(Institutional Navy·Noto Sans·JetBrains Mono) 기반 self-contained HTML, 7개 섹션
+  (관통현황·추출·영향매트릭스·룰제안·회귀·Assurance·한계) 데이터바인딩(하드코딩 0). demo_e2e가 md+html
+  동시 생성→`docs/reports/validation_6_30.html`. 정식 15~20쪽 분석 서사는 Phase 3(프레젠테이션은 완료).
+  HTML 렌더 테스트 4건. validation-report **v2**·workflow-e2e **v5** 승격. 테스트 92→96.
 - **룰 평가셋 수천 건 확대(조합 격자 3,200건)** — `generate_grid()` 결정론 cartesian(지역·시점·house_count·
   처분·생애최초·서민실수요·경과규정 6-way + 스코프). 정답은 오라클 유도(손라벨 없음). **Pass Rate 3,200/3,200
   100%**, split 전량 측정 각 100%, 생성+회귀 ≈0.05s. `docs/reports/rule_grid_stats.md`. mutation(경과규정
@@ -122,6 +127,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **Validation Report 정식 HTML 보고서.** `src/regimpact/validation/render_html.py`(`render_report_html`) — DESIGN.md 디자인 시스템 기반 self-contained HTML(외부 스크립트 없음), 7개 섹션(파이프라인 관통현황 배지·규제변경 요약·영향 매트릭스·룰 변경 제안+승인상태·룰 회귀·Assurance 타일·정직성 한계) 전부 ValidationReport 실데이터 바인딩(하드코딩 0). 관통 verdict 배지, escalation/초안 미승인/오라클 challenger 한계 노출. demo_e2e가 md+html 동시 산출→`docs/reports/validation_6_30.html`. 정식 15~20쪽 분석 서사는 Phase 3(프레젠테이션 골격 완료). HTML 렌더 테스트 4건. validation-report **v2**·workflow-e2e **v5** 승격. 테스트 92→96.
 - **2026-08-13** — ✅ **룰 평가셋 수천 건 확대(조합 격자 3,200건).** `generate_grid()` — 결정론 cartesian(지역4·시점4·house_count4·처분2·생애최초2·서민실수요2·경과규정6 + 스코프 격자). 정답은 독립 오라클 유도(손라벨 없음). **Pass Rate 3,200/3,200 100%**, split 전량 측정(DEV 1200/LOCKED 1088/CHALLENGE 912 각 100%), 생성+회귀 ≈0.05s. 커버리지 status 4·rule_id 6·reason_code 11. mutation(경과규정 무력화)로 격자 방어력 확인(GRANDFATHERING 실패 포착). temporal 축 의도적 과표집 → GRANDFATHERING 다수(카테고리 균형은 큐레이션 106이 보완). `format_portfolio_stats(title=...)`, `demo_portfolio.py`가 106+3,200 동시 산출→`docs/reports/rule_grid_stats.md`. tc-generator **v3** 승격. 테스트 86→92.
 - **2026-08-13** — ✅ **룰엔진 평가셋 100~120 확대·통계화(층화 합성 포트폴리오 106건).** `src/regimpact/tc_generator/portfolio.py` — 입력 차원(지역·시점·house_count·예외·경과규정·스코프)을 중첩 루프로 층화, 결정론(난수 없음)·case_id 안정. 정답은 독립 오라클 유도(차등검증)→손라벨 없이 확장. **Pass Rate 106/106 100%**, split(DEV 36/LOCKED 35/CHALLENGE 35) 전량 측정 각 100%, 커버리지 status 4·rule_id 6·reason_code 11. `GeneratedCase.split` 필드, `pass_rate_by_split()`·`format_portfolio_stats()`·`coverage()` 추가. mutation test 포트폴리오 적용(LTV 상수·유주택 규칙 변조 시 실패 포착). split 전량 측정 정당성: 결정론 엔진(튜닝 루프 없음)→누수 위험 없음(04_PLAN §0-5), LLM 골드셋 봉인과 별개. `examples/demo_portfolio.py`→`docs/reports/rule_portfolio_stats.md`. metrics_spec §3 seed/포트폴리오 비교, tc-generator **v2** 승격. 테스트 75→86.
 - **2026-08-13** — ✅ **Assurance Exception Recall 50%→100% 보완(피드백 루프 완결).** v1 추출이 놓친 서민·실수요 예외를 FAQ Q2 원문 근거(verbatim, line 52 "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨")로 보완(추출 9→10건). Citation Correctness 10/10·Unsupported 0% 유지, Exception Recall 100% 달성. **측정→결함 포착→보완**의 Assurance 검증 루프가 실제로 한 바퀴 돈 사례. `regchange_extracted_6_30.json` `_meta.iteration` 기록, measure 리포트·metrics_spec에 v1/v2 비교·서사 반영. test_assurance_measure 기대값 갱신(75 통과 유지). extractor-assurance **v3**·workflow-e2e **v4**(지표 디커플링) 승격.

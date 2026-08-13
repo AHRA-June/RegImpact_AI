@@ -8,10 +8,12 @@
 Walking Skeleton [8] Validation Report 노드. 각 노드 실제 산출을 묶어 관통을 보이고,
 present/missing·사람검토 필요 건수를 정직하게 노출한다.
 """
+from .render_html import render_report_html
 from .report import ValidationReport, build_report, format_report_md
 
 __all__ = [
     "ValidationReport",
     "build_report",
     "format_report_md",
+    "render_report_html",
 ]
