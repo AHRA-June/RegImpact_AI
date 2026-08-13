@@ -27,6 +27,13 @@
 
 ## 결정 로그
 
+### 2026-08-13 · Assurance 임계값 확정(Strict) + 종합 판정 규칙 · ✅ 승인됨
+- **결정:** Assurance 4 dimension 임계값 프로파일 = **Strict**(Model Risk 보수), 종합 판정 = **고위험(★) 지표가 FAIL이면 전체 FAIL**(그 외 FAIL/WARN은 전체 WARN).
+- **임계(확정):** Exception/Grandfathering Recall ≥0.95, Citation Correctness ≥0.95, Unsupported ≤0.05, Source Contradiction =0, Effective-date/Region/Policy-version =100%, Rule-regression/Conflict =100%. 상세는 `metrics_spec.md §0-C`, 코드 `src/regimpact/assurance/thresholds.py`.
+- **이유:** 검증 시스템의 급소는 고위험 누락(예외·경과규정·시점)을 놓치는 것. 금융권 모델검증 관행상 이들은 보수적(높은) 기준·안전 우선 판정이 정석. 이전값: metrics_spec §1~2 임계 `TBD`.
+- **완성:** 누락됐던 3지표 추가(Source Contradiction Rate, Grandfathering Recall, Policy-version Consistency) → 4 dimension 12지표 완비. 6·30 스코어카드 12/12 PASS. `docs/reports/assurance_scorecard.md`.
+- **상태:** ✅ 승인됨(사용자 확정). Q2 잔여(escalation 승격 여부)는 [ROADMAP] 유지.
+
 ### 2026-08-10 · RegChange Extractor 구현 + LLM 선택 · ✅ 완료
 - **LLM:** Anthropic Claude, 기본 `claude-opus-5` (ADJUSTABLE §0 — 비용/성능 따라 교체 가능). structured output(`output_config.format`).
 - **아키텍처:** LLM 호출 주입 가능(injectable) → API 키·비용 없이 오프라인 테스트. `src/regimpact/extractor/`.

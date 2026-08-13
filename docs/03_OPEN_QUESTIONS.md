@@ -10,11 +10,11 @@
 - 상세는 `02_DECISION_LOG.md` 2026-08-10 항목, `metrics_spec.md` "평가셋 규모·split" 섹션.
 - **잔여:** CHALLENGE 내 카테고리별 세부 건수는 골드셋 설계 단계에서 도메인 검수로 확정.
 
-## Q2. Assurance 11개 체크 중 "깊게 구현할 4개" — `[✅ 해결 2026-08-10]`
-- **결정: 수를 줄임.** 깊게 정량 측정하는 4개 dimension + 나머지 로드맵/인프라. 상세는 `02_DECISION_LOG.md` 2026-08-10 항목.
+## Q2. Assurance 깊은 4 dimension + 임계값 — `[✅ 해결 2026-08-10 / 임계값 확정 2026-08-13]`
+- **결정: 수를 줄임.** 깊게 정량 측정하는 4개 dimension + 나머지 로드맵/인프라. 상세는 `02_DECISION_LOG.md`.
 - 깊게: ①Source Grounding & Citation ②Change & Exception Completeness ③Temporal/Policy-Version Consistency ④Rule Regression & Conflict.
-- 레이어는 유지(LOCKED §0-6 정합), 구현 깊이만 차등.
-- **잔여 여백:** escalation을 4번 대신 승격할지 여부만 열려 있음(현재는 위 4개 확정).
+- **임계값 확정(2026-08-13):** 프로파일 **Strict**, 종합 판정 **고위험 FAIL→전체 FAIL**. 12지표 완비·6·30 스코어카드 12/12 PASS. 상세 `metrics_spec.md §0-C`, `02_DECISION_LOG.md` 2026-08-13.
+- **잔여 여백:** escalation을 5번째 [DEEP]로 승격할지 여부만 열려 있음(현재 [ROADMAP] 유지).
 
 ## Q3. 주차 계획 재배열(수직 슬라이스 우선) 수용 여부 — `[✅ 해결 2026-08-10]`
 - **결정: 재배열 수용 + 총 9~10주.** 상세 계획 `docs/04_PLAN.md`, 결정 근거 `02_DECISION_LOG.md`.

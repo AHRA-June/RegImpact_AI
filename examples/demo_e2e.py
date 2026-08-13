@@ -16,11 +16,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from regimpact.extractor import (  # noqa: E402
-    check_citation_grounding,
-    load_sources,
-    score_against_gold,
-)
+from regimpact.assurance import build_scorecard  # noqa: E402
+from regimpact.extractor import load_sources  # noqa: E402
 from regimpact.extractor.schema import RegChangeExtraction  # noqa: E402
 from regimpact.impact import (  # noqa: E402
     DEFAULT_REGION,
@@ -43,20 +40,10 @@ GOLD = json.loads((ROOT / "docs/eval/regchange_gold_6_30.json").read_text(encodi
 EXTRACTED = json.loads((ROOT / "docs/eval/regchange_extracted_6_30.json").read_text(encoding="utf-8"))
 
 
-def measure_assurance(ext: RegChangeExtraction) -> dict:
-    """[6] Assurance — 결정론 채점 하네스로 실측 지표를 만든다."""
-    sources = load_sources()
-    g = check_citation_grounding(ext, sources)
-    s = score_against_gold(ext, GOLD)
-    return {
-        "Citation Correctness": f"{g.citation_correctness:.0%}",
-        "Unsupported Claim Rate": f"{g.unsupported_claim_rate:.0%}",
-        "Change Completeness": f"{s.change_completeness:.0%}",
-        "Exception Recall": f"{s.exception_recall:.0%}"
-        + (f" (놓침 {s.missed_exceptions})" if s.missed_exceptions else ""),
-        "Effective-date": "OK" if s.effective_date_correct else "MISS",
-        "Region": "OK" if s.regions_correct else "MISS",
-    }
+def measure_assurance(ext: RegChangeExtraction, regression) -> dict:
+    """[6] Assurance — 4 dimension 스코어카드(확정 임계값)의 차원별 요약."""
+    sc = build_scorecard(ext, load_sources(), GOLD, regression)
+    return sc.dimension_summary()
 
 
 def main() -> None:
@@ -77,8 +64,8 @@ def main() -> None:
     # [5] Rule-Regression (엔진 ⟷ 독립 오라클)
     regression = run_regression()
 
-    # [6] Assurance (결정론 채점 실측)
-    assurance = measure_assurance(extraction)
+    # [6] Assurance (4 dimension 스코어카드, 확정 임계값)
+    assurance = measure_assurance(extraction, regression)
 
     # [8] Validation Report
     report = build_report(

@@ -64,13 +64,12 @@
   - GRANDFATHERING: 6/6 (100%)
   - CONFLICT: 5/5 (100%)
 
-## 6. Assurance (부분 측정)
-- Citation Correctness: 100%
-- Unsupported Claim Rate: 0%
-- Change Completeness: 100%
-- Exception Recall: 100%
-- Effective-date: OK
-- Region: OK
+## 6. Assurance (4 dimension 스코어카드, 확정 임계값)
+- ① Source Grounding & Citation: PASS
+- ② Change & Exception Completeness: PASS
+- ③ Temporal / Policy-Version Consistency: PASS
+- ④ Rule Regression & Conflict: PASS
+- Overall: PASS
 
 ## 7. 한계 (정직성)
 - 이 보고서는 6·30 단일 앵커 기준 stub 이다(정식 15~20쪽 아님).

@@ -12,12 +12,13 @@
 | Impact Matrix (시행 전/후) | [`impact-matrix/`](./impact-matrix/impact-matrix_v1.md) | v1 | ✅ |
 | Impact Matrix UI 렌더 | [`ui-render/`](./ui-render/ui-render_v1.md) | v1 | ✅ |
 | Rule Change Proposal + Human Review | [`rule-proposal/`](./rule-proposal/rule-proposal_v1.md) | v1 | ✅ |
+| Assurance Scorecard (4 dimension + 임계값) | [`assurance-scorecard/`](./assurance-scorecard/assurance-scorecard_v1.md) | v1 | ✅ 12/12 PASS |
 | Validation Report (검증보고서) | [`validation-report/`](./validation-report/validation-report_v2.md) | v2 | ✅ 정식 HTML |
 
 ## 워크플로우
 | 워크플로우 | 폴더 | 최신 | 상태 |
 |---|---|---|---|
-| E2E 파이프라인 (Walking Skeleton) | [`workflow-e2e/`](./workflow-e2e/workflow-e2e_v5.md) | v5 | ✅ 전 노드 관통([8] 정식 HTML) |
+| E2E 파이프라인 (Walking Skeleton) | [`workflow-e2e/`](./workflow-e2e/workflow-e2e_v6.md) | v6 | ✅ 전 노드 관통([6] 4dim Assurance) |
 
 ## 규칙 요약 (상세는 `_VERSIONING.md`)
 - 수정 시 **새 버전 파일 생성**(이전 버전 보존, 덮어쓰기·삭제 금지).

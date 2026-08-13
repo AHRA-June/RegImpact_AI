@@ -252,9 +252,15 @@ def _section_assurance(report: ValidationReport) -> str:
         return ""
     tiles = []
     for k, v in a.items():
-        vs = str(v)
-        good = vs.strip().startswith(("100", "0%", "OK")) or vs.strip() == "0%"
-        cls = "good" if good else "warn"
+        vs = str(v).strip()
+        if "FAIL" in vs:
+            cls = "warn"
+        elif "WARN" in vs:
+            cls = "warn"
+        elif "PASS" in vs or vs.startswith(("100", "OK")) or vs == "0%":
+            cls = "good"
+        else:
+            cls = "warn"
         tiles.append(f'<div class="tile"><div class="k">{_esc(k)}</div>'
                      f'<div class="v {cls}">{_esc(v)}</div></div>')
     return (f'<h2>6. Assurance (실측)</h2>'

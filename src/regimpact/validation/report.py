@@ -202,7 +202,7 @@ def format_report_md(report: ValidationReport) -> str:
 
     # 6. Assurance(부분)
     if report.assurance is not None:
-        L.append("## 6. Assurance (부분 측정)")
+        L.append("## 6. Assurance (4 dimension 스코어카드, 확정 임계값)")
         for k, v in report.assurance.items():
             L.append(f"- {k}: {v}")
         L.append("")

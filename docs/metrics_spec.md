@@ -42,6 +42,37 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 ---
 
+## 0-C. ✅ 확정 임계값 (2026-08-13, Strict) + Assurance Scorecard
+
+> **결정(사용자 확정):** 프로파일 **Strict**(Model Risk 보수), 종합 판정 **고위험(★) 지표 FAIL → 전체 FAIL**.
+> 단일 진실: `src/regimpact/assurance/thresholds.py`. 스코어카드: `src/regimpact/assurance/scorecard.py`.
+> 4 dimension을 `build_scorecard()`가 판정, `format_scorecard_md()`가 산출 → `docs/reports/assurance_scorecard.md`.
+> 이로써 §1~3의 임계 `TBD`는 아래 값으로 확정된다(03_OPEN_QUESTIONS Q2 잔여 마감).
+
+| dim | 지표 | 방향 | PASS 임계 | WARN | 고위험 |
+|---|---|---|---|---|---|
+| ① | Citation Correctness | ↑ | ≥95% | ≥90% | |
+| ① | Unsupported Claim Rate | ↓ | ≤5% | ≤10% | ★ |
+| ① | Source Contradiction Rate | ↓ | =0% | — | ★ |
+| ② | Change Completeness | ↑ | ≥90% | ≥80% | ★ |
+| ② | Exception Recall | ↑ | ≥95% | ≥90% | ★ |
+| ② | Grandfathering Recall | ↑ | ≥95% | ≥90% | ★ |
+| ③ | Effective-date Accuracy | ↑ | =100% | — | ★ |
+| ③ | Region Completeness | ↑ | =100% | — | ★ |
+| ③ | Policy-version Consistency | ↑ | =100% | — | ★ |
+| ④ | Rule-regression Pass Rate | ↑ | =100% | — | ★ |
+| ④ | Boundary-case Pass Rate | ↑ | =100% | — | |
+| ④ | Conflict-case Pass Rate | ↑ | =100% | — | ★ |
+
+**6·30 스코어카드 실측 (2026-08-13): 12/12 지표 PASS → 종합 ✅ PASS.**
+- ①: Citation 100% / Unsupported 0% / Contradiction 0%.
+- ②: Change Completeness 100% / Exception Recall 100% / Grandfathering Recall 100%.
+- ③: Effective-date 100% / Region 100% / Policy-version Consistency 100%(효력일 경계 프로브, 오라클 검증).
+- ④: Rule-regression 100%(격자 3,200) / Boundary 100% / Conflict 100%.
+- 가드레일 확인: 서민·실수요 예외 누락 시 Exception Recall FAIL → 전체 FAIL(테스트로 고정).
+
+---
+
 ## 1. RegChange / RAG 계열 (브리프 §13.1) — [DEEP] dimension ②③
 
 | 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk |

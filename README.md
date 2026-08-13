@@ -57,23 +57,24 @@
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④) |
 | `src/regimpact/impact/` | **Impact Matrix(Before/After)** — 룰엔진 시행 전/후 temporal diff로 세그먼트별 LTV 영향 산출 + UI 렌더 |
 | `src/regimpact/proposal/` | **Rule Change Proposal** — ImpactMatrix→구조화 룰변경 초안(AI초안→사람확정) |
-| `src/regimpact/validation/` | **Validation Report(stub)** — 파이프라인 산출을 검증보고서로 조립 |
+| `src/regimpact/assurance/` | **Assurance Scorecard** — 4 dimension 12지표 + 확정 임계값(Strict) 판정 |
+| `src/regimpact/validation/` | **Validation Report** — 파이프라인 산출을 검증보고서(md + 정식 HTML)로 조립 |
 | `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
-| `tests/` | 테스트 하네스 (pytest, 96개) |
-| `examples/` | 6·30 룰엔진 / Extractor / TC 회귀 / **포트폴리오 통계** / Impact Matrix / UI 렌더 / E2E / Assurance 실측 데모 |
+| `tests/` | 테스트 하네스 (pytest, 110개) |
+| `examples/` | 룰엔진 / Extractor / TC 회귀·포트폴리오 / Impact Matrix / UI / E2E / Assurance 실측·스코어카드 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 96개 통과). **6·30 E2E 전 노드 관통(검증보고서 정식 HTML) · Assurance 실측(Citation 100% / Recall 100%) · 룰 평가셋 3계층(30 / 106 / 3,200) 전부 100%**. 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1~2 진행** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Assurance Scorecard + Validation Report(테스트 110개 통과). **6·30 E2E 전 노드 관통 · Assurance 4 dimension 12지표 확정 임계값 12/12 PASS · 룰 평가셋 3계층(30 / 106 / 3,200) 전부 100%**. 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
-python -m pytest                          # 96개
+python -m pytest                          # 110개
 python examples/demo_e2e.py               # E2E 관통 → 검증보고서 md + 정식 HTML
+python examples/assurance_scorecard.py    # 4 dimension 스코어카드(확정 임계값)
 python examples/demo_portfolio.py         # 큐레이션 106 + 조합 격자 3,200 통계
-python examples/measure_assurance_6_30.py # Assurance 실측
 ```
 
 ## 개발 브랜치
