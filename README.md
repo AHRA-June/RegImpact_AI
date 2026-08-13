@@ -55,9 +55,11 @@
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression + 층화 합성 포트폴리오** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④), ~3천 규모 확대 |
 | `src/regimpact/impact/` | **Impact Matrix + E2E Pipeline** — Source→…→Validation Report 관통(Walking Skeleton) |
 | `src/regimpact/goldset/` | **골드 평가셋** — 브리프 §11 스키마·결정적 채점·DEV/LOCKED/CHALLENGE 분리 |
+| `src/regimpact/report/` | **검증보고서 생성기** — 라이브 파이프라인 수치로 Validation Report 조립 |
+| `docs/validation_report_6_30.md` | **생성된 검증보고서** (재현 가능, `gen_validation_report.py`로 갱신) |
 | `docs/eval/` | 골드 정답지 + `goldset/`(115문항) + `VALIDATION_LIMITS.md`(100%의 의미·한계) + run1 실측 |
-| `tests/` | 테스트 하네스 (pytest, 73개, 판별력 테스트 포함) |
-| `examples/` | 룰엔진 / Extractor / TC 회귀 / E2E / 포트폴리오 / 골드셋 / **판별력(negative control)** 데모 |
+| `tests/` | 테스트 하네스 (pytest, 77개, 판별력·보고서 포함) |
+| `examples/` | 룰엔진 / Extractor / TC 회귀 / E2E / 포트폴리오 / 골드셋 / 판별력 / **검증보고서 생성** |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |

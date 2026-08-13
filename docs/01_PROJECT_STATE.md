@@ -22,6 +22,11 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **검증보고서 생성기 — 코어 완성의 정의 종착점(브리프 §18).** `src/regimpact/report/`
+  (validation_report·controls) + `examples/gen_validation_report.py` + `docs/validation_report_6_30.md`(생성물, 208줄).
+  손으로 쓴 정적 문서가 아니라 **run_e2e·포트폴리오 회귀·골드셋·판별력을 실제 호출**해 수치를 채운다
+  → 재현 가능·시스템 변경 시 갱신. 10개 섹션(요약·범위·추출·Impact·Proposal·룰검증·골드셋·판별력·한계·결론)+E2E 부록.
+  정직성 내장(오염·순환·미측정 명시). 테스트 4개(총 77) 통과.
 - **판별력(negative control) + 검증 한계 문서 — "왜 계속 100%인가"에 정직히 답함.**
   `examples/demo_discrimination.py`, `tests/test_discrimination.py`(5), `docs/eval/VALIDATION_LIMITS.md`.
   의도적 오류(환각 인용·항목 누락·시행일/지역 오류·엔진 변조·인용 오염) 주입 시 지표가 실제 하락함을 실측·고정:
@@ -134,6 +139,8 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **검증보고서 생성기(브리프 §18 코어 완성).** `src/regimpact/report/`. run_e2e·포트폴리오·골드셋·판별력
+  실측을 종합해 `docs/validation_report_6_30.md` 라이브 생성(재현 가능). 10 섹션 + 정직한 한계. 테스트 4개(총 77).
 - **2026-08-13** — ✅ **판별력(negative control) + 검증 한계 문서.** 사용자 지적("계속 100점이라 수상")에 대응.
   의도적 오류 주입 시 전 지표 하락 실측(Citation 67·Completeness 50·Exception 0·e2e_ok False·골드셋 73·grounding 92).
   `docs/eval/VALIDATION_LIMITS.md`: 각 100%의 강도 분해(rule-regression만 강함, 골드셋 scenario 거의 순환, run1 오염,
