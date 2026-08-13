@@ -22,6 +22,11 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **정식 검증보고서(15~20쪽 분석 서사)** — `docs/reports/validation_report_6_30_full.md`(약 17쪽/28.8k자).
+  모델검증 보고서 형식: Executive Summary·검증 범위·방법론(차등검증·grounding·임계값·mutation)·데이터/평가셋·
+  Dimension별 발견사항·룰엔진 심층·영향/제안 검토·**고위험 실패 분석(예외 누락 피드백 루프)**·한계·거버넌스·
+  결론/권고·부록. 모든 수치 실측 근거(스코어카드 12/12 PASS·격자 3,200/3,200), 재현 명령 포함. 브리프 §18
+  코어 완성 정의 충족. validation-report **v3**·workflow-e2e **v7** 승격.
 - **PRD v1 작성** — `docs/prd/regchange-ai/regchange-ai_v1.md`(+CHANGELOG). 브리프 §25 필수 항목
   (사용자·Use Case / 데이터·컴포넌트 스키마 / 평가 프로토콜 / 배포)을 구체화하고, **각 컴포넌트·스키마의
   현행 구현 상태(구현됨/부분/계획)를 매트릭스로 명시.** error taxonomy·성공기준·리스크·로드맵 포함.
@@ -138,6 +143,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **정식 검증보고서(15~20쪽 분석 서사) 작성.** `docs/reports/validation_report_6_30_full.md`(약 17쪽/28.8k자, 14개 대섹션). 모델검증 보고서 형식의 authored 분석 문서 — Executive Summary·검증 범위·목적·대상 시스템 개요·방법론(차등검증·오라클·인용 grounding·시점 프로브·임계값·mutation)·데이터/평가셋(3계층·DEV/LOCKED/CHALLENGE 정당성·골드셋 n=1 한계)·Assurance Dimension별 발견사항·룰엔진 심층(우선순위·커버리지·방어력·escalation)·영향 매트릭스/룰 제안 검토·**고위험 실패 분석(서민실수요 예외 누락 → Assurance 포착 → 보완 피드백 루프)**·한계 6종·거버넌스/Human Review/감사추적·결론/권고 5종·부록(스코어카드 전문·임계값·평가셋 통계·error taxonomy·재현 명령). 모든 수치 실측 근거(12/12 PASS·3,200/3,200·106/106). 브리프 §18 코어 완성 정의 충족. validation-report **v3**·workflow-e2e **v7** 승격. (코드 변경 없음, 테스트 110 유지.)
 - **2026-08-13** — ✅ **PRD v1 작성.** `docs/prd/regchange-ai/regchange-ai_v1.md`(+CHANGELOG). 브리프 §25 필수 항목(사용자·Use Case·데이터/컴포넌트 스키마·평가·배포)을 구체화하고 **현행 구현 상태(구현됨/부분/계획)를 매트릭스로 명시**(과대약속 금지). 데이터 스키마 11종·컴포넌트 12종 상태표, 평가 프로토콜(3계층·DEV/LOCKED/CHALLENGE·error taxonomy 4종), Assurance 4 dimension 확정 임계값, Human Review·Audit, 배포·재현성, 성공기준·리스크·로드맵. PRD도 버전 규칙 적용. `docs/prd/README.md`·top README 갱신.
 - **2026-08-13** — ✅ **Assurance 4 dimension 완성 + 임계값 확정(Strict).** `src/regimpact/assurance/`(thresholds·metrics·scorecard). 누락 3지표 추가: ①Source Contradiction Rate(인용 grounded지만 %값 원문 부재=날조 프록시) ②Grandfathering Recall(경과규정 항목 포착, 고위험 분리) ③Policy-version Consistency(효력일 경계 시점질의 정합, 오라클 검증). 12지표 완비. 사용자 확정: 프로파일 **Strict**, 종합 판정 **고위험(★) FAIL→전체 FAIL**. 6·30 스코어카드 **12/12 PASS→종합 PASS**. 가드레일 테스트(서민실수요 누락→Exception Recall FAIL→전체 FAIL, LTV 33% 날조→Contradiction 1.0 포착). `build_scorecard`/`format_scorecard_md`, `examples/assurance_scorecard.py`→`docs/reports/assurance_scorecard.md`. E2E [6]에 `dimension_summary()` 연동. metrics_spec §0-C 임계값 표 확정, DECISION_LOG 2026-08-13, OPEN_QUESTIONS Q2 마감. 신규 기능단위 **assurance-scorecard v1**, workflow-e2e **v6** 승격. 테스트 96→110.
 - **2026-08-13** — ✅ **Validation Report 정식 HTML 보고서.** `src/regimpact/validation/render_html.py`(`render_report_html`) — DESIGN.md 디자인 시스템 기반 self-contained HTML(외부 스크립트 없음), 7개 섹션(파이프라인 관통현황 배지·규제변경 요약·영향 매트릭스·룰 변경 제안+승인상태·룰 회귀·Assurance 타일·정직성 한계) 전부 ValidationReport 실데이터 바인딩(하드코딩 0). 관통 verdict 배지, escalation/초안 미승인/오라클 challenger 한계 노출. demo_e2e가 md+html 동시 산출→`docs/reports/validation_6_30.html`. 정식 15~20쪽 분석 서사는 Phase 3(프레젠테이션 골격 완료). HTML 렌더 테스트 4건. validation-report **v2**·workflow-e2e **v5** 승격. 테스트 92→96.

@@ -68,7 +68,7 @@
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Assurance Scorecard + Validation Report(테스트 110개 통과). **6·30 E2E 전 노드 관통 · Assurance 4 dimension 12지표 확정 임계값 12/12 PASS · 룰 평가셋 3계층(30 / 106 / 3,200) 전부 100%**. 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **코어 완성선 도달** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Assurance Scorecard + Validation Report(테스트 110개 통과). **6·30 E2E 전 노드 관통 · Assurance 4 dimension 12/12 PASS · 룰 평가셋 3계층(30 / 106 / 3,200) 전부 100% · 정식 검증보고서(약 17쪽) 완성**. PRD `docs/prd/`, 정식 보고서 `docs/reports/validation_report_6_30_full.md`. 자세한 내용은 `docs/01_PROJECT_STATE.md`.
 
 ```bash
 python -m pytest                          # 110개

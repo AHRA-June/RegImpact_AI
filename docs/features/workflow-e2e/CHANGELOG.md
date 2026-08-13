@@ -2,6 +2,11 @@
 
 > 최신이 위. 각 항목은 해당 버전 파일(`workflow-e2e_vN.md`)의 변경 요약이다.
 
+## v7 (2026-08-13)
+- [8] Validation Report 정식 HTML(서사 Phase 3) → **정식 15~20쪽 분석 서사 완성**
+  (`docs/reports/validation_report_6_30_full.md`, 약 17쪽). 코어 완성 정의(브리프 §18) 충족.
+- 이전(v6) 대비 상세: `workflow-e2e_v7.md` 상단 "변경 이력" 참고.
+
 ## v6 (2026-08-13)
 - [6] Assurance 부분(실측) → **4 dimension 스코어카드 완성**(누락 3지표 추가 + 확정 임계값 Strict,
   6·30 12/12 PASS). 매핑을 신규 `features/assurance-scorecard`로. 테스트 96→110.
