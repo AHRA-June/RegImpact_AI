@@ -55,9 +55,9 @@
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression + 층화 합성 포트폴리오** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④), ~3천 규모 확대 |
 | `src/regimpact/impact/` | **Impact Matrix + E2E Pipeline** — Source→…→Validation Report 관통(Walking Skeleton) |
 | `src/regimpact/goldset/` | **골드 평가셋** — 브리프 §11 스키마·결정적 채점·DEV/LOCKED/CHALLENGE 분리 |
-| `docs/eval/` | 골드 정답지 + `goldset/`(115문항: DEV40/LOCKED40/CHALLENGE35) + Extractor run1 실측 |
-| `tests/` | 테스트 하네스 (pytest, 68개) |
-| `examples/` | 룰엔진 / Extractor / TC 회귀 / **E2E 관통** / **포트폴리오 회귀** / **골드셋** 데모 |
+| `docs/eval/` | 골드 정답지 + `goldset/`(115문항) + `VALIDATION_LIMITS.md`(100%의 의미·한계) + run1 실측 |
+| `tests/` | 테스트 하네스 (pytest, 73개, 판별력 테스트 포함) |
+| `examples/` | 룰엔진 / Extractor / TC 회귀 / E2E / 포트폴리오 / 골드셋 / **판별력(negative control)** 데모 |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | 정식 PRD (작성 예정) |
@@ -67,8 +67,10 @@
 🟢 **Phase 1 관통 완료 → Phase 2 진행** — 룰엔진 v1 + Extractor(실측 run1) + TC Generator/Rule-Regression + **Impact Matrix E2E** + **층화 합성 포트폴리오(~3천)** + **골드셋 115문항(AI_DRAFT)**(테스트 68개 통과). 6·30 1건 Source→Report 오프라인 관통, 차등검증 수천 규모, 결정적 채점 골드셋 규모 목표 도달(사람 확정 대기). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
-python -m pytest && python examples/demo_e2e_6_30.py && python examples/demo_portfolio_regression.py && python examples/demo_goldset.py
+python -m pytest && python examples/demo_e2e_6_30.py && python examples/demo_discrimination.py
 ```
+
+> **"왜 계속 100%인가?"** → `docs/eval/VALIDATION_LIMITS.md` + `examples/demo_discrimination.py`. 정상 데이터는 100%, **오류 주입 시 지표가 실제로 하락**함을 실측(하니스에 이빨이 있음).
 
 ## 개발 브랜치
 

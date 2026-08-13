@@ -119,3 +119,13 @@ high-risk 후보 (사용자 검수 필요):
 > "The locked test set was frozen before system tuning, but was authored within the project and is not an independent third-party benchmark."
 
 n 규모는 통계적 검정력이 아니라 **실패모드 층화 커버리지**를 목표로 함을 명시.
+
+### "왜 계속 100%인가" — 지표별 강도·한계
+
+각 100%가 증명하는 것과 증명하지 않는 것을 **`docs/eval/VALIDATION_LIMITS.md`** 에 정직히 분해한다.
+요지: rule-regression만 강함(엔진⟷독립 오라클, mutation 실증), 골드셋 scenario는 거의 순환(작성자가
+엔진 기준으로 기입 → QA 게이트), Extractor run1은 오염(세션 모델·gold 사전열람). **독립 성능치는 아직 미측정.**
+
+**판별력(negative control):** 하니스에 이빨이 있음을 `examples/demo_discrimination.py` /
+`tests/test_discrimination.py`로 실증 — 오류 주입 시 지표가 실제 하락(Citation 67·Completeness 50·
+Exception 0·e2e_ok False·골드셋 scenario 73·grounding 92). 정상=100%, 오류=<100% → 동적 범위 있음.

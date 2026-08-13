@@ -22,6 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **판별력(negative control) + 검증 한계 문서 — "왜 계속 100%인가"에 정직히 답함.**
+  `examples/demo_discrimination.py`, `tests/test_discrimination.py`(5), `docs/eval/VALIDATION_LIMITS.md`.
+  의도적 오류(환각 인용·항목 누락·시행일/지역 오류·엔진 변조·인용 오염) 주입 시 지표가 실제 하락함을 실측·고정:
+  Citation 100→67, Change Completeness 100→50, Exception Recall 100→0, Effective/Regions 100→0, e2e_ok True→False,
+  골드셋 scenario 100→73(엔진 변조), grounding 100→92(인용 오염). **하니스에 이빨이 있음 실증.**
+  VALIDATION_LIMITS: 각 100%의 강도 분해 — rule-regression만 강함(mutation 실증), 골드셋 scenario는 거의 순환(QA 게이트),
+  Extractor run1은 오염. **독립 성능치는 미측정**임을 숨기지 않음(브리프 §12). 테스트 총 73.
 - **골드 평가셋 115문항 완성 (AI_DRAFT) — 규모 목표 도달.** `src/regimpact/goldset/`(schema·evaluate·coverage)
   + `docs/eval/goldset/`(dev 40 · locked 40 · challenge 35 · README). 브리프 §11 8필드 + 10 카테고리 전부 커버
   (GRANDFATHERING 20·CONFLICT 18·EXCEPTION 14·EFFECTIVE_DATE 14 등 CHALLENGE 가중). **채점 전부 결정적**
@@ -127,6 +134,10 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **판별력(negative control) + 검증 한계 문서.** 사용자 지적("계속 100점이라 수상")에 대응.
+  의도적 오류 주입 시 전 지표 하락 실측(Citation 67·Completeness 50·Exception 0·e2e_ok False·골드셋 73·grounding 92).
+  `docs/eval/VALIDATION_LIMITS.md`: 각 100%의 강도 분해(rule-regression만 강함, 골드셋 scenario 거의 순환, run1 오염,
+  독립 성능치 미측정). `demo_discrimination.py`, `test_discrimination.py`(5). 총 73 통과.
 - **2026-08-13** — ✅ **골드 평가셋 115문항 완성(AI_DRAFT).** dev 40·locked 40·challenge 35. 10 카테고리 전수 커버,
   CHALLENGE 가중(GRANDFATHERING 20·CONFLICT 18·EXCEPTION 14·EFFECTIVE_DATE 14). 결정적 채점: scenario 86/86,
   Escalation R/P 100%, grounding 34/34. 전 항목 AI_DRAFT. 전체 무결성 회귀 테스트 추가(총 68). 규모 목표 도달 → 남은 것은 사람 확정.
