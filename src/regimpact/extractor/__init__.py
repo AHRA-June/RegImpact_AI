@@ -6,12 +6,22 @@ from .evaluate import (
     check_citation_grounding,
     score_against_gold,
 )
+from .providers import (
+    FREE_PROVIDERS,
+    completion_from_env,
+    extract_json_object,
+    openai_compatible_completion,
+)
 from .schema import Citation, RegChangeExtraction, RegChangeItem
 from .sources import load_sources
 
 __all__ = [
     "extract_regchange",
     "anthropic_completion",
+    "openai_compatible_completion",
+    "completion_from_env",
+    "extract_json_object",
+    "FREE_PROVIDERS",
     "check_citation_grounding",
     "score_against_gold",
     "GroundingReport",

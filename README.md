@@ -77,7 +77,7 @@ flowchart LR
 | `render_impact_ui.py` | 영향 매트릭스 데이터바인딩 HTML | `ui/generated/impact_matrix.html` |
 | `demo_tc_regression.py` | 룰엔진 ⟷ 독립 오라클 차등검증(seed 30) | 콘솔 |
 | `demo_6_30.py` | 룰엔진 단건 판정(8개 케이스) | 콘솔 |
-| `run_extractor.py` | 실제 LLM 추출(API 키 필요) | 콘솔 |
+| `run_extractor.py` | 실제 LLM 추출(**무료** Ollama 로컬 / Groq·Gemini 무료 키) | 콘솔 |
 
 ---
 

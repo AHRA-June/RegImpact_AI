@@ -2,6 +2,12 @@
 
 > 최신이 위. 각 항목은 해당 버전 파일(`extractor-assurance_vN.md`)의 변경 요약이다.
 
+## v4 (2026-08-13)
+- **무료 LLM 제공자 지원.** `providers.py`(OpenAI 호환 범용 어댑터 + env 구성 + Ollama/Groq/OpenRouter/
+  Gemini 프리셋), 견고 JSON 파서. anthropic·외부 SDK 불필요(표준 라이브러리 urllib). run_extractor 재작성.
+  어댑터 테스트 10건(총 120). 제공자 독립(주입식) 설계 근거.
+- 이전(v3) 대비 상세: `extractor-assurance_v4.md` 상단 "변경 이력" 참고.
+
 ## v3 (2026-08-13)
 - **Exception Recall 50%→100%.** FAQ Q2 원문 근거(verbatim)로 서민·실수요 예외 항목 보완
   (추출 9→10건), Citation 10/10·Unsupported 0% 유지. Assurance 피드백 루프(측정→포착→보완) 완결.

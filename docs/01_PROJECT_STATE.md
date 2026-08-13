@@ -94,8 +94,9 @@
 
 ## 다음 액션 (NEXT)
 - ~~**Extractor Assurance 실측 + Recall 보완**~~ — ✅ 완료(2026-08-13). Citation 100%/Exception Recall 50%→100%.
-  - **후속:** ①**자동 claude-opus-5 API 무인 실행 1회**(키 확보 후) — 수동 추출 수치와 비교·재현
-    ②골드셋 100~120 확대로 통계화 ③Assurance 임계값(pass/fail) 도메인 확정.
+  - **후속:** ①**자동 LLM 실행 1회** — 이제 **무료 경로 지원**(로컬 Ollama 권장, 또는 Groq/Gemini 무료 키;
+    `REGIMPACT_LLM_PROVIDER=ollama python examples/run_extractor.py`). 사용자 환경에서 실행해 수동 추출 수치와
+    비교·재현 → provenance 갱신 ②골드셋 다문서 확대(실제 규제이벤트 확보 시) ③Assurance 임계값 도메인 재검토.
 - ~~**TC Generator + 층화 포트폴리오 + 격자**~~ — ✅ 완료(2026-08-13). 3계층: seed 30 / 큐레이션 106 /
   **조합 격자 3,200** 전부 Pass Rate 100%, split 전량 측정, 커버리지 status4/rule_id6/reason_code11. mutation 방어력.
   - **후속(선택):** ①더 큰 격자(원한다면) ②CFL-04(Q8) 도메인 확정 후 반영.
@@ -153,6 +154,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **무료 LLM 제공자 지원(anthropic 불필요).** 사용자 요청: "무료만 쓸 것". Extractor가 완성 함수 주입식이라 제공자 교체가 자연스러움을 활용 → `src/regimpact/extractor/providers.py` 추가: OpenAI 호환 범용 어댑터(`openai_compatible_completion`)로 **Ollama(로컬·완전 무료·가입 불필요)·Groq·OpenRouter·Gemini(무료 티어)** 를 base_url·model·키 환경변수만으로 커버. **외부 SDK 불필요 — 표준 라이브러리 urllib만.** 견고 JSON 파서(`extract_json_object`), env 구성(`completion_from_env`), 무료 프리셋(`FREE_PROVIDERS`). `run_extractor.py`를 제공자-불문으로 재작성(무료 옵션 안내). 어댑터 오프라인 테스트 10건(총 120). extractor-assurance **v4** 승격. 주: 라이브 실행은 사용자 환경에서(로컬 Ollama 권장); 현 검증 환경은 키·egress 정책상 미수행이라 provenance는 세션 수동 grounded 추출 유지.
 - **2026-08-13** — ✅ **README·데모 정리(포트폴리오 첫인상).** README를 재구성: 인계 안내가 맨 위였던 것을 **핵심 결과(E2E 관통·Assurance 12/12·룰 3계층 100%·110 테스트) → 30초 Quickstart → 파이프라인(mermaid) → 데모 카탈로그 → 포트폴리오 산출물 → 저장소 구조** 순으로 임팩트를 앞세우고, 인계 안내·LOCKED 요약·버전 규칙은 보존해 하단 배치. `demo_tc_regression.py`가 `sys.path` 부트스트랩 누락으로 pip 미설치 시 실패하던 것 수정 → **8개 무-API 데모 전부 실행 확인**. `docs/reports/README.md` 산출물 인덱스 추가. (코드 로직 무변경, 테스트 110 유지.)
 - **2026-08-13** — ✅ **AI Risk Register v1 작성.** `docs/risk/regchange-ai/regchange-ai_risk_register_v1.md`(+CHANGELOG·README). Model/System Card 리스크 요약(8종)을 정식 리스크 관리 형식으로 확장 — 19건 5범주(R-AI 5·R-DAT 4·R-RUL 4·R-GOV 3·R-OPS 3). 평가 척도(L×I 1~5, Low/Med/High/Critical), 각 건 고유위험→통제[검증/설계/프로세스/계획]→잔여위험 + 소유자·상태·모니터링/escalation 트리거. 리스크 히트맵(Critical 잔여 없음, 대부분 Low~Medium), Top 잔여위험 6종, 리뷰 주기·수용 리스크(R-DAT-04 단일앵커·R-RUL-04 Q8) 근거. 통제는 실제 구현(grounding·임계값 스코어카드·mutation·escalation·hash·결정론 재현) 근거. 버전 규칙 적용. README·STATE 갱신. (코드 무변경, 테스트 110 유지.)
 - **2026-08-13** — ✅ **Model/System Card v1 작성.** `docs/cards/regchange-ai/regchange-ai_card_v1.md`(+CHANGELOG·README). 하이브리드(LLM 추출+결정론 룰엔진) 특성상 **System Card(A) + LLM 컴포넌트 Model Card(B)** 통합. A: 시스템 요약·컴포넌트 상태표·사용목적·범위외/오용방지·데이터(공개 공문·합성, PII 없음)·정량 결과(Assurance 12/12 PASS·격자 3,200/3,200)·**리스크 레지스터 8종**·공정성/윤리(규제 공개기준만·차별 판정 없음)·거버넌스·한계. B(RegChange Extractor): 모델 상세(claude-opus-5 기본·추출 전용)·입출력 스키마·지표(6·30)·factors·failure modes·caveats. 실측 근거 + provenance(세션 수동 grounded 추출, 자동 무인 API는 키 확보 후) 명시. 버전 규칙 적용. README·STATE 갱신. (코드 무변경, 테스트 110 유지.)
