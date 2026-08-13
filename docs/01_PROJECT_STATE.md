@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix 구현 세션)
 - **개발 브랜치:** `claude/work-in-progress-d2et38`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 86 통과). **6·30 E2E 전 노드 관통 · Assurance 실측(Citation 100%/Recall 100%) · 룰 평가셋 106건 통계화(100%).**
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 92 통과). **6·30 E2E 전 노드 관통 · Assurance 실측(Citation 100%/Recall 100%) · 룰 평가셋 3계층(seed 30/큐레이션 106/격자 3,200) 전부 100%.**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,10 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **룰 평가셋 수천 건 확대(조합 격자 3,200건)** — `generate_grid()` 결정론 cartesian(지역·시점·house_count·
+  처분·생애최초·서민실수요·경과규정 6-way + 스코프). 정답은 오라클 유도(손라벨 없음). **Pass Rate 3,200/3,200
+  100%**, split 전량 측정 각 100%, 생성+회귀 ≈0.05s. `docs/reports/rule_grid_stats.md`. mutation(경과규정
+  무력화) 격자 포착 확인. temporal 축 과표집(균형은 큐레이션 106이 보완). tc-generator **v3** 승격. 테스트 +6(총 92).
 - **룰엔진 평가셋 100~120 확대·통계화** — 층화 합성 포트폴리오 **106건**(`generate_portfolio()`, seed 30→확대).
   정답은 독립 오라클 유도(차등검증, 손라벨 없음). **Pass Rate 106/106 100%**, split(DEV 36/LOCKED 35/
   CHALLENGE 35) **전량 측정** 각 100%, 커버리지 status 4·rule_id 6·reason_code 11. mutation 방어력 확인.
@@ -61,9 +65,9 @@
 - ~~**Extractor Assurance 실측 + Recall 보완**~~ — ✅ 완료(2026-08-13). Citation 100%/Exception Recall 50%→100%.
   - **후속:** ①**자동 claude-opus-5 API 무인 실행 1회**(키 확보 후) — 수동 추출 수치와 비교·재현
     ②골드셋 100~120 확대로 통계화 ③Assurance 임계값(pass/fail) 도메인 확정.
-- ~~**TC Generator + 층화 포트폴리오**~~ — ✅ 완료(2026-08-13). seed 30 + **포트폴리오 106건** Pass Rate 100%,
-  split 전량 측정, 커버리지 status4/rule_id6/reason_code11. mutation 방어력 확인.
-  - **후속(선택):** ①수천 건 확대(원한다면) ②CFL-04(Q8) 도메인 확정 후 반영.
+- ~~**TC Generator + 층화 포트폴리오 + 격자**~~ — ✅ 완료(2026-08-13). 3계층: seed 30 / 큐레이션 106 /
+  **조합 격자 3,200** 전부 Pass Rate 100%, split 전량 측정, 커버리지 status4/rule_id6/reason_code11. mutation 방어력.
+  - **후속(선택):** ①더 큰 격자(원한다면) ②CFL-04(Q8) 도메인 확정 후 반영.
 - **(구분 주의) LLM 추출용 골드셋 100~120** — 룰 평가셋(위)과 별개. 실제 규제문서가 6·30 1건뿐이라
   확대는 **추가 규제이벤트 확보 후**(가짜 규제문서 생성은 LOCKED 원칙 위반). regulatory_facts URL·임계값 병행.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-13). `src/regimpact/impact/` Before/After 매트릭스.
@@ -118,6 +122,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **룰 평가셋 수천 건 확대(조합 격자 3,200건).** `generate_grid()` — 결정론 cartesian(지역4·시점4·house_count4·처분2·생애최초2·서민실수요2·경과규정6 + 스코프 격자). 정답은 독립 오라클 유도(손라벨 없음). **Pass Rate 3,200/3,200 100%**, split 전량 측정(DEV 1200/LOCKED 1088/CHALLENGE 912 각 100%), 생성+회귀 ≈0.05s. 커버리지 status 4·rule_id 6·reason_code 11. mutation(경과규정 무력화)로 격자 방어력 확인(GRANDFATHERING 실패 포착). temporal 축 의도적 과표집 → GRANDFATHERING 다수(카테고리 균형은 큐레이션 106이 보완). `format_portfolio_stats(title=...)`, `demo_portfolio.py`가 106+3,200 동시 산출→`docs/reports/rule_grid_stats.md`. tc-generator **v3** 승격. 테스트 86→92.
 - **2026-08-13** — ✅ **룰엔진 평가셋 100~120 확대·통계화(층화 합성 포트폴리오 106건).** `src/regimpact/tc_generator/portfolio.py` — 입력 차원(지역·시점·house_count·예외·경과규정·스코프)을 중첩 루프로 층화, 결정론(난수 없음)·case_id 안정. 정답은 독립 오라클 유도(차등검증)→손라벨 없이 확장. **Pass Rate 106/106 100%**, split(DEV 36/LOCKED 35/CHALLENGE 35) 전량 측정 각 100%, 커버리지 status 4·rule_id 6·reason_code 11. `GeneratedCase.split` 필드, `pass_rate_by_split()`·`format_portfolio_stats()`·`coverage()` 추가. mutation test 포트폴리오 적용(LTV 상수·유주택 규칙 변조 시 실패 포착). split 전량 측정 정당성: 결정론 엔진(튜닝 루프 없음)→누수 위험 없음(04_PLAN §0-5), LLM 골드셋 봉인과 별개. `examples/demo_portfolio.py`→`docs/reports/rule_portfolio_stats.md`. metrics_spec §3 seed/포트폴리오 비교, tc-generator **v2** 승격. 테스트 75→86.
 - **2026-08-13** — ✅ **Assurance Exception Recall 50%→100% 보완(피드백 루프 완결).** v1 추출이 놓친 서민·실수요 예외를 FAQ Q2 원문 근거(verbatim, line 52 "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨")로 보완(추출 9→10건). Citation Correctness 10/10·Unsupported 0% 유지, Exception Recall 100% 달성. **측정→결함 포착→보완**의 Assurance 검증 루프가 실제로 한 바퀴 돈 사례. `regchange_extracted_6_30.json` `_meta.iteration` 기록, measure 리포트·metrics_spec에 v1/v2 비교·서사 반영. test_assurance_measure 기대값 갱신(75 통과 유지). extractor-assurance **v3**·workflow-e2e **v4**(지표 디커플링) 승격.
 - **2026-08-13** — ✅ **첫 Assurance 실측 확보.** 6·30 원문 3건(FSC/MOLIT 보도참고자료, 관계기관 FAQ)에서 SYSTEM_PROMPT 규칙(verbatim 인용)대로 grounded 추출 → `docs/eval/regchange_extracted_6_30.json`. 결정론 채점 하네스(`extractor/evaluate.py`)로 실측: **Citation Correctness 100%(9/9)·Unsupported 0%·Change Completeness 100%(4/4)·Exception Recall 50%(서민·실수요 누락)·Effective-date/Region OK.** 보수적 저환각 추출이 서민·실수요 예외를 놓쳐 **Assurance가 고위험 예외 miss를 실제 포착**(프롬프트 tradeoff 입증). `examples/measure_assurance_6_30.py`→`docs/reports/assurance_6_30.md`. demo_e2e가 [6] Assurance 실측 수치를 검증보고서에 연결(전 노드 관통). 회귀 고정 `test_assurance_measure`(3). metrics_spec 실측 블록, extractor-assurance **v2**·workflow-e2e **v3** 승격. provenance: 세션 수동 grounded 추출(자동 claude-opus-5 API 무인 실행은 키 확보 후). 테스트 72→75.

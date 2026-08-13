@@ -98,15 +98,22 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 | Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | 100% | 8/8 | **19/19** |
 | Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | 100% | 5/5 | **10/10** |
 
-**층화 포트폴리오 통계 (2026-08-13, `docs/reports/rule_portfolio_stats.md`):**
-- N=106, Pass Rate 100%. split: DEV 36 / LOCKED 35 / CHALLENGE 35(전량 측정, 각 100%).
-- 카테고리: SCOPE 18 / BASELINE 25 / EXCEPTION 21 / BOUNDARY 19 / GRANDFATHERING 13 / CONFLICT 10.
-- 커버리지: status 4종 전부 / rule_id 6 / reason_code 11.
+**3계층 평가셋 통계 (2026-08-13):**
+
+| 평가셋 | N | Pass | split(DEV/LOCKED/CHALLENGE) | 리포트 |
+|---|---:|---|---|---|
+| seed | 30 | 100% | (미분류) | 콘솔 |
+| 큐레이션 포트폴리오 | 106 | 100% | 36/35/35 (각 100%) | `docs/reports/rule_portfolio_stats.md` |
+| 조합 격자 | **3,200** | **100%** | 1200/1088/912 (각 100%) | `docs/reports/rule_grid_stats.md` |
+
+- 큐레이션 106 카테고리: SCOPE 18 / BASELINE 25 / EXCEPTION 21 / BOUNDARY 19 / GRANDFATHERING 13 / CONFLICT 10.
+- 격자 3,200: 결정론 cartesian(temporal 축 과표집 → GRANDFATHERING 다수), 커버리지 status 4·rule_id 6·reason_code 11.
 - **split 전량 측정 정당성:** 룰엔진은 결정론(성능 튜닝 루프 없음)이라 LOCKED/CHALLENGE를 열어도
   누수 위험이 없다(`04_PLAN.md` §0-5 정합). LLM 추출용 골드셋의 LOCKED/CHALLENGE 봉인 원칙과 별개.
 
-> 주: n=106은 통계적 검정력이 아니라 **실패모드 층화 커버리지 + 넓은 입력공간에서의 명세 일치**가 목표.
-> 정답은 독립 오라클이 유도(차등검증) → 손라벨 없이 확장. 추가 확대(수천 건)는 후속.
+> 주: 목표는 통계적 검정력이 아니라 **실패모드 층화 커버리지 + 넓은 입력공간에서의 명세 일치**.
+> 정답은 독립 오라클이 유도(차등검증) → 손라벨 없이 3,200건 확장. 100%는 "엔진=명세(§H)"를 뜻하며
+> 오라클은 challenger(제3자 벤치마크 아님)이므로 명세 자체 정합성은 별도.
 
 ## 4. Human Escalation 계열 (브리프 §13.4) — [ROADMAP]
 

@@ -10,7 +10,7 @@
 """
 from .generator import Category, GeneratedCase, generate_all
 from .oracle import ExpectedOutcome, expected_outcome
-from .portfolio import Split, coverage, generate_portfolio
+from .portfolio import Split, coverage, generate_grid, generate_portfolio
 from .regression import (
     CaseResult,
     RegressionReport,
@@ -25,6 +25,7 @@ __all__ = [
     "GeneratedCase",
     "generate_all",
     "generate_portfolio",
+    "generate_grid",
     "Split",
     "coverage",
     "ExpectedOutcome",

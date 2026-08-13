@@ -119,15 +119,16 @@ def run_regression(cases: Optional[list[GeneratedCase]] = None) -> RegressionRep
     return RegressionReport(results=[run_case(c) for c in cases])
 
 
-def format_portfolio_stats(report: RegressionReport) -> str:
-    """층화 포트폴리오 통계 요약(카테고리·split·커버리지). 데모/리포트용."""
+def format_portfolio_stats(report: RegressionReport,
+                           title: str = "Rule Portfolio Stats (층화 합성 평가셋)") -> str:
+    """층화 포트폴리오/격자 통계 요약(카테고리·split·커버리지). 데모/리포트용."""
     from .portfolio import coverage  # 지연 import(순환 방지)
 
     cases = [r.case for r in report.results]
     cov = coverage(cases)
     lines: list[str] = []
     lines.append("=" * 64)
-    lines.append("RegImpact — Rule Portfolio Stats (층화 합성 평가셋)")
+    lines.append(f"RegImpact — {title}")
     lines.append("=" * 64)
     lines.append(f"N = {report.total}   Pass Rate = {report.passed}/{report.total} "
                  f"= {report.pass_rate:.1%}  (engine ⟷ independent spec oracle)")

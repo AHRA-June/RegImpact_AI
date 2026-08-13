@@ -15,6 +15,7 @@ from regimpact.tc_generator import (  # noqa: E402
     Split,
     coverage,
     format_portfolio_stats,
+    generate_grid,
     generate_portfolio,
     run_regression,
 )
@@ -100,3 +101,50 @@ def test_portfolio_catches_mutated_owner_rule(monkeypatch):
     monkeypatch.setattr(rule_engine, "LTV_OWNER", 0.40)
     rep = run_regression(generate_portfolio())
     assert rep.pass_rate < 1.0
+
+
+# ---------- 대규모 조합 격자 (수천 건) ----------
+def test_grid_size_thousands():
+    n = len(generate_grid())
+    assert n >= 3000, f"격자 규모 {n} 이 수천 건 미만"
+
+
+def test_grid_ids_unique_and_deterministic():
+    a = generate_grid()
+    b = generate_grid()
+    assert len({c.case_id for c in a}) == len(a)
+    ka = [(c.case_id, c.split, c.expected.status.value) for c in a]
+    kb = [(c.case_id, c.split, c.expected.status.value) for c in b]
+    assert ka == kb
+
+
+def test_grid_engine_matches_oracle_100_percent():
+    """수천 건 넓은 입력공간에서 엔진↔독립 오라클 전부 일치."""
+    rep = run_regression(generate_grid())
+    assert rep.pass_rate == 1.0
+    assert rep.failures == []
+
+
+def test_grid_all_splits_measured():
+    rep = run_regression(generate_grid())
+    by = rep.pass_rate_by_split()
+    assert set(by) == {"DEV", "LOCKED", "CHALLENGE"}
+    for _sp, (p, n, rate) in by.items():
+        assert p == n and rate == 1.0
+
+
+def test_grid_coverage_full_status():
+    cov = coverage(generate_grid())
+    assert cov["distinct_status"] == 4
+    assert cov["distinct_reason_code"] >= 10
+
+
+def test_grid_catches_mutated_grandfathering(monkeypatch):
+    """경과규정을 항상 미해당으로 변조하면 격자 회귀가 실패를 잡아야 한다."""
+    from regimpact import grandfathering
+
+    monkeypatch.setattr(grandfathering, "is_grandfathered", lambda app: (False, None))
+    monkeypatch.setattr(rule_engine, "is_grandfathered", lambda app: (False, None))
+    rep = run_regression(generate_grid())
+    assert rep.pass_rate < 1.0
+    assert Category.GRANDFATHERING in {r.case.category for r in rep.failures}

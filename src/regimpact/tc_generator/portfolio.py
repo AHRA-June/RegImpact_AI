@@ -14,6 +14,7 @@
 """
 from __future__ import annotations
 
+import itertools
 from dataclasses import replace
 from datetime import date, timedelta
 from enum import Enum
@@ -249,6 +250,89 @@ def generate_portfolio() -> list[GeneratedCase]:
         seen.add(c.case_id)
 
     return _assign_splits(cases)
+
+
+# ---------------------------------------------------------------------------
+# 대규모 조합 격자 (수천 건) — 결정론적 cartesian, 오라클 라벨
+# ---------------------------------------------------------------------------
+_GRID_REGIONS = (*_REG_REGIONS, _NONREG)
+_GRID_DATES = (_BEFORE, _CUTOFF, _EFFECTIVE, _AFTER)
+_GRID_HC = (0, 1, 2, 3)
+_GRID_GF = (
+    {},
+    {"application_accepted_at": _CUTOFF},
+    {"application_accepted_at": _EFFECTIVE},
+    {"contract_signed_at": date(2026, 6, 29), "downpayment_paid_at": date(2026, 6, 29)},
+    {"contract_signed_at": date(2026, 6, 29)},                       # 계약금 미납
+    {"land_permit_target": True, "land_permit_applied_at": _CUTOFF,
+     "contract_signed_at": date(2026, 7, 10)},
+)
+
+
+def _has_gf(app: MortgageApplication) -> bool:
+    return bool(
+        app.application_accepted_at or app.contract_signed_at
+        or app.downpayment_paid_at or app.land_permit_target or app.land_permit_applied_at
+    )
+
+
+def _categorize(app: MortgageApplication) -> Category:
+    """격자 케이스를 구조적 특징으로 근사 분류(통계 라벨용, 우선순위 순)."""
+    if app.loan_purpose != LoanPurpose.HOME_PURCHASE or app.policy_mortgage_flag:
+        return Category.SCOPE
+    if _has_gf(app):
+        return Category.GRANDFATHERING
+    excs = int(app.first_home_buyer) + int(app.real_demand_flag)
+    owner = app.house_count >= 2 or (app.house_count >= 1 and not app.disposal_condition_flag)
+    if excs >= 2 or (owner and excs >= 1):
+        return Category.CONFLICT
+    if app.evaluation_date in (_CUTOFF, _EFFECTIVE):
+        return Category.BOUNDARY
+    if app.region_code not in _REG_REGIONS or app.evaluation_date < _EFFECTIVE:
+        return Category.BASELINE
+    return Category.EXCEPTION
+
+
+def _grid_split(index: int, category: Category) -> str:
+    """결정론적 split 배분(index 기반). 적대적 카테고리를 CHALLENGE로 가중."""
+    adversarial = category in (Category.GRANDFATHERING, Category.CONFLICT, Category.BOUNDARY)
+    if adversarial and index % 3 == 0:
+        return Split.CHALLENGE.value
+    return Split.DEV.value if index % 2 == 0 else Split.LOCKED.value
+
+
+def _grid_apps() -> list[MortgageApplication]:
+    apps: list[MortgageApplication] = []
+    # 코어 LTV 격자 (주택구입목적·비정책): 실제 판정 로직을 넓게 훑음
+    for region, d, hc, disp, fh, rd, gf in itertools.product(
+        _GRID_REGIONS, _GRID_DATES, _GRID_HC,
+        (False, True), (False, True), (False, True), _GRID_GF,
+    ):
+        kw = dict(region_code=region, evaluation_date=d, house_count=hc,
+                  disposal_condition_flag=disp, first_home_buyer=fh, real_demand_flag=rd)
+        kw.update(gf)
+        apps.append(MortgageApplication(**kw))
+    # 스코프 격자: 비주택구입목적 / 정책대출 short-circuit 분기
+    for region, d, hc in itertools.product(_GRID_REGIONS, _GRID_DATES, _GRID_HC):
+        apps.append(MortgageApplication(region_code=region, evaluation_date=d,
+                                        house_count=hc, loan_purpose=LoanPurpose.OTHER))
+        apps.append(MortgageApplication(region_code=region, evaluation_date=d,
+                                        house_count=hc, policy_mortgage_flag=True))
+    return apps
+
+
+def generate_grid() -> list[GeneratedCase]:
+    """대규모 조합 격자(수천 건)를 결정론적으로 생성한다. 정답은 오라클이 유도.
+
+    코어 LTV 격자(지역·시점·house_count·처분·생애최초·서민실수요·경과규정) + 스코프 격자.
+    case_id는 안정적(G-#####). 손라벨 없이 넓은 입력공간을 차등검증한다.
+    """
+    cases: list[GeneratedCase] = []
+    for i, app in enumerate(_grid_apps()):
+        cat = _categorize(app)
+        case = _case(f"G-{i:05d}", cat, f"grid {cat.value}", app)
+        cases.append(replace(case, split=_grid_split(i, cat)))
+    return cases
 
 
 def coverage(cases: list[GeneratedCase]) -> dict[str, int]:
