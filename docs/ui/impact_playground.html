@@ -224,6 +224,10 @@
   .kpi.k-info{border-left:3px solid var(--info)} .kpi.k-info .kv{color:var(--info)}
 
   /* ---- chart ---- */
+  .segctl{display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-left:auto}
+  .segctl button{border:none; background:var(--surface); color:var(--ink-2); font-family:var(--sans); font-size:12px; padding:6px 13px; cursor:pointer}
+  .segctl button+button{border-left:1px solid var(--border)}
+  .segctl button[aria-pressed="true"]{background:var(--accent-weak); color:var(--accent-ink); font-weight:600}
   .chartcard{background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); margin-bottom:20px}
   .chart-legend{display:flex; gap:16px; align-items:center; padding:14px 16px 0; font-size:12px; color:var(--ink-2)}
   .chart-legend .lg{display:inline-flex; align-items:center; gap:7px}
@@ -426,10 +430,17 @@
     <div class="kpis" id="kpis"></div>
 
     <div class="chartcard">
-      <div class="panel-h"><h2>LTV 분포 변화 · 종전 → 적용</h2><span class="tag">차주 수 가중</span></div>
+      <div class="panel-h">
+        <h2 id="chartTitle">LTV 분포 변화 · 종전 → 적용</h2>
+        <div class="segctl" id="chartToggle" role="group" aria-label="분포 기준">
+          <button data-mode="ltv" aria-pressed="true">LTV 분포</button>
+          <button data-mode="limit" aria-pressed="false">한도 분포</button>
+        </div>
+      </div>
       <div class="chart-legend">
         <span class="lg"><span class="sw before"></span>종전규정 (시행 전)</span>
         <span class="lg"><span class="sw after"></span>적용 (선택 시점)</span>
+        <span class="tag" style="margin-left:auto; align-self:center">차주 수 가중</span>
       </div>
       <div class="plot" id="plot"></div>
       <div class="xlabels" id="xlabels"></div>
@@ -788,6 +799,21 @@
     {k:"70%",d:"기준·생애최초"},{k:"60%",d:"서민·실수요"},{k:"40%",d:"규제 표준"},
     {k:"0%",d:"유주택·다주택"},{k:"판정외",d:"Discovery·검토"}
   ];
+  const LIMIT_BUCKETS=[
+    {k:"0억",d:"0%·유주택"},{k:"0–2억",d:""},{k:"2–4억",d:""},{k:"4–6억",d:""},
+    {k:"6–10억",d:""},{k:"10억+",d:""},{k:"판정외",d:"Discovery·검토"}
+  ];
+  function limitBucket(v){
+    if(v==null) return "판정외";
+    if(v===0) return "0억";
+    if(v<=2) return "0–2억";
+    if(v<=4) return "2–4억";
+    if(v<=6) return "4–6억";
+    if(v<=10) return "6–10억";
+    return "10억+";
+  }
+  let CHART_MODE="ltv";
+  let lastRows=[];
 
   function normApp(t,region,dateStr){
     return {region_code:region, evaluation_date:dateStr,
@@ -867,33 +893,9 @@
         <div class="kt">${k.dot?`<span class="kd" style="background:${k.dot}"></span>`:""}${k.t}</div>
         <div class="kv">${k.v}</div><div class="ks">${k.s}</div></div>`).join("");
 
-    // 분포
-    const dist=BUCKETS.map(b=>{
-      const bef=rows.filter(r=>bucketOf(r.before)===b.k).reduce((s,r)=>s+r.count,0);
-      const aft=rows.filter(r=>bucketOf(r.after)===b.k).reduce((s,r)=>s+r.count,0);
-      return {bucket:b.k, desc:b.d, before:bef, after:aft};
-    });
-    const rawMax=Math.max(1,...dist.map(d=>Math.max(d.before,d.after)));
-    const step=rawMax>2000?500:(rawMax>800?250:100);
-    const maxV=(Math.floor(rawMax/step)+1)*step;   // 항상 최고 막대보다 큰 상한(라벨 여유 보장)
-    // 그리드라인 (0,25,50,75,100%) — 최상단(100%) 라벨은 범례와 겹쳐 생략
-    let grid="";
-    for(let i=0;i<=4;i++){
-      const val=Math.round(maxV*i/4);
-      const bottom=i/4*100;
-      grid+=`<div class="gridline" style="bottom:${bottom}%"></div>`+
-            (i<4?`<div class="gridcap" style="bottom:${bottom}%">${fmt(val)}</div>`:"");
-    }
-    $("plot").innerHTML=grid+dist.map(d=>`
-      <div class="bucket">
-        <div class="bars">
-          <div class="bar before" style="height:${d.before/maxV*100}%" data-b="${d.bucket}" data-series="종전규정" data-v="${d.before}">
-            <span class="vlabel">${d.before?fmt(d.before):""}</span></div>
-          <div class="bar after" style="height:${d.after/maxV*100}%" data-b="${d.bucket}" data-series="적용" data-v="${d.after}">
-            <span class="vlabel">${d.after?fmt(d.after):""}</span></div>
-        </div>
-      </div>`).join("");
-    $("xlabels").innerHTML=dist.map(d=>`<div class="xlab">${d.bucket}<small>${d.desc}</small></div>`).join("");
+    // 분포 차트 (LTV/한도 토글은 renderChart가 처리)
+    lastRows=rows;
+    renderChart();
 
     // 매트릭스 (영향 큰 순)
     const sev=r=>{
@@ -950,12 +952,50 @@
     return `<span class="dlt down">규제 적용</span>`;
   }
 
+  function renderChart(){
+    const isLtv = CHART_MODE==="ltv";
+    const defs = isLtv ? BUCKETS : LIMIT_BUCKETS;
+    const keyBefore = r => isLtv ? bucketOf(r.before) : limitBucket(r.limBefore);
+    const keyAfter  = r => isLtv ? bucketOf(r.after)  : limitBucket(r.limAfter);
+    $("chartTitle").textContent = isLtv ? "LTV 분포 변화 · 종전 → 적용"
+                                        : "여신 한도 분포 변화 · 종전 → 적용 (주택가격 "+PRICE+"억 가정)";
+    const dist=defs.map(b=>{
+      const bef=lastRows.filter(r=>keyBefore(r)===b.k).reduce((s,r)=>s+r.count,0);
+      const aft=lastRows.filter(r=>keyAfter(r)===b.k).reduce((s,r)=>s+r.count,0);
+      return {bucket:b.k, desc:b.d, before:bef, after:aft};
+    });
+    const rawMax=Math.max(1,...dist.map(d=>Math.max(d.before,d.after)));
+    const step=rawMax>2000?500:(rawMax>800?250:100);
+    const maxV=(Math.floor(rawMax/step)+1)*step;   // 항상 최고 막대보다 큰 상한(라벨 여유 보장)
+    let grid="";
+    for(let i=0;i<=4;i++){
+      const val=Math.round(maxV*i/4);
+      const bottom=i/4*100;
+      grid+=`<div class="gridline" style="bottom:${bottom}%"></div>`+
+            (i<4?`<div class="gridcap" style="bottom:${bottom}%">${fmt(val)}</div>`:"");
+    }
+    $("plot").innerHTML=grid+dist.map(d=>`
+      <div class="bucket">
+        <div class="bars">
+          <div class="bar before" style="height:${d.before/maxV*100}%" data-b="${d.bucket}" data-series="종전규정" data-v="${d.before}">
+            <span class="vlabel">${d.before?fmt(d.before):""}</span></div>
+          <div class="bar after" style="height:${d.after/maxV*100}%" data-b="${d.bucket}" data-series="적용" data-v="${d.after}">
+            <span class="vlabel">${d.after?fmt(d.after):""}</span></div>
+        </div>
+      </div>`).join("");
+    $("xlabels").innerHTML=dist.map(d=>`<div class="xlab">${d.bucket}${d.desc?`<small>${d.desc}</small>`:""}</div>`).join("");
+  }
+  document.querySelectorAll("#chartToggle button").forEach(b=>b.addEventListener("click",()=>{
+    document.querySelectorAll("#chartToggle button").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true"); CHART_MODE=b.dataset.mode; renderChart();
+  }));
+
   // 차트 툴팁
   const tip=$("tip");
   $("plot").addEventListener("mousemove",e=>{
     const bar=e.target.closest(".bar");
     if(!bar){ tip.style.opacity=0; return; }
-    tip.innerHTML=`${bar.dataset.series} · LTV ${bar.dataset.b}<br><b>${fmt(bar.dataset.v)}</b> 차주`;
+    tip.innerHTML=`${bar.dataset.series} · ${CHART_MODE==="ltv"?"LTV":"한도"} ${bar.dataset.b}<br><b>${fmt(bar.dataset.v)}</b> 차주`;
     tip.style.opacity=1;
     tip.style.left=Math.min(e.clientX+14, innerWidth-180)+"px";
     tip.style.top=(e.clientY-10)+"px";
