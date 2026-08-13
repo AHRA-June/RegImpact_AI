@@ -8,6 +8,9 @@
 - `regions.py` — 지역 규제상태의 시점 버전 해석 (6·30 3개 지역: 7.1부터 REGULATED)
 - `grandfathering.py` — 경과규정 G1/G2/G3 판정 (컷오프 2026-06-30)
 - `rule_engine.py` — 통합 판정 알고리즘 H (P0~P7 우선순위)
+- `impact/` — Impact Matrix: 룰엔진을 시행 전/후 두 시점으로 차등 실행해 세그먼트별 LTV 변화 산출 (Walking Skeleton Before/After 노드)
+- `extractor/` — RegChange Extractor + Citation Assurance
+- `tc_generator/` — TC Generator + Rule-Regression (독립 명세 오라클 차등 검증)
 
 ## 사용
 ```python
@@ -22,9 +25,22 @@ print(d.max_ltv, d.applicable_rule_id, d.reason_codes)   # 0.7 REG_FIRSTHOME ['E
 ## 실행
 ```bash
 pip install -e ".[dev]"     # 또는: pip install pytest
-python -m pytest            # 테스트 23개
+python -m pytest            # 테스트 53개
 python examples/demo_6_30.py
+python examples/demo_impact_matrix.py
 ```
+
+## Impact Matrix (시행 전/후 영향)
+```python
+from datetime import date
+from regimpact.impact import SIX_THIRTY_SEGMENTS, analyze_impact, format_matrix
+
+m = analyze_impact(SIX_THIRTY_SEGMENTS, "GURI",
+                   before_date=date(2026,6,30), after_date=date(2026,7,2))
+print(format_matrix(m))   # 무주택 70→40%(강화), 생애최초 70→70%(동일), 유주택 → 검토
+```
+룰엔진을 두 시점으로 돌린 temporal diff. 규칙값을 자체 보유하지 않아 LOCKED §4 준수.
+한쪽이라도 판정 불가(escalation)면 델타를 억지로 만들지 않고 `REVIEW`로 표면화(정직성).
 
 ## 판정 요약 (규제지역, 시행 후)
 | 차주 | LTV |
