@@ -12,7 +12,12 @@
 명세(05_RULE_SPEC §H)에서 독립 유도한 '오라클(challenger)'과 대조하여
 룰엔진이 확정 명세와 일치함을 검증 가능한(auditable) 방식으로 보인다.
 """
-from regimpact.tc_generator import format_report, generate_all, run_regression
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from regimpact.tc_generator import format_report, generate_all, run_regression  # noqa: E402
 
 
 def main() -> None:
