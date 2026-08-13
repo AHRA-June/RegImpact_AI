@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>임팩트 매트릭스 — RegImpact AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --surface:#fcf8ff; --surface-container-lowest:#ffffff; --surface-container-low:#f5f2ff;
+  --surface-container:#efecff; --surface-container-high:#e8e5ff; --surface-container-highest:#e2e0fc;
+  --surface-variant:#e2e0fc; --on-surface:#1a1a2e; --on-surface-variant:#43474e;
+  --outline:#74777f; --outline-variant:#c4c6cf;
+  --primary:#022448; --on-primary:#ffffff; --primary-container:#1e3a5f; --on-primary-container:#8aa4cf;
+  --secondary:#0051d5; --on-secondary:#ffffff; --secondary-container:#316bf3; --on-secondary-container:#fefcff;
+  --error:#ba1a1a; --error-container:#ffdad6; --on-error-container:#93000a;
+  --tertiary-fixed:#ffddb2; --on-tertiary-fixed-variant:#60410c; --tertiary-fixed-dim:#edbf7f;
+  --background:#fcf8ff; --on-background:#1a1a2e;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--background);color:var(--on-surface);
+  font-family:"Noto Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:14px;line-height:20px;}
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+.wrap{max-width:1200px;margin:0 auto;padding:32px 24px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;
+  padding-bottom:16px;border-bottom:1px solid var(--outline-variant);}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--primary);font-size:20px;}
+.scenario{display:inline-flex;align-items:center;gap:8px;background:var(--surface-container-low);
+  border:1px solid var(--outline-variant);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;}
+h1{font-size:30px;line-height:38px;letter-spacing:-.02em;font-weight:700;color:var(--on-background);margin:0 0 8px;}
+.sub{color:var(--on-surface-variant);max-width:56rem;margin-bottom:8px;}
+.meta{color:var(--on-surface-variant);font-size:13px;margin-bottom:20px;}
+.summary{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:5px 12px;
+  font-size:12px;font-weight:600;border:1px solid var(--outline-variant);background:var(--surface-container-lowest);}
+.dot{width:8px;height:8px;border-radius:9999px;}
+.panel{background:var(--surface-container-lowest);border:1px solid var(--outline-variant);
+  border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface-container-low);color:var(--on-surface-variant);text-align:left;
+  font-size:12px;font-weight:600;padding:12px 16px;border-bottom:1px solid var(--outline-variant);white-space:nowrap;}
+tbody td{padding:12px 16px;border-bottom:1px solid rgba(196,198,207,.4);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--surface-container-low);}
+.seg{font-weight:600;color:var(--secondary);}
+.ltv{font-family:"JetBrains Mono",monospace;font-size:14px;font-weight:500;}
+.delta-down{color:var(--error);font-weight:600;}
+.delta-flat{color:var(--on-surface-variant);}
+.delta-up{color:var(--secondary);font-weight:600;}
+.na{color:var(--outline);}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:3px 10px;
+  font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:500;white-space:nowrap;}
+.badge-error{background:var(--error-container);color:var(--on-error-container);}
+.badge-warn{background:var(--tertiary-fixed);color:var(--on-tertiary-fixed-variant);}
+.badge-neutral{background:var(--surface-variant);color:var(--on-surface-variant);}
+.badge-info{background:var(--secondary-container);color:var(--on-secondary-container);}
+.reason{font-family:"JetBrains Mono",monospace;font-size:12px;background:var(--surface-variant);
+  color:var(--on-surface-variant);padding:2px 8px;border-radius:4px;}
+.cite{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--on-surface-variant);}
+.review{margin-top:24px;background:var(--surface-container-high);border:1px dashed var(--outline-variant);
+  border-radius:8px;padding:20px;}
+.review h3{margin:0 0 12px;font-size:16px;color:var(--on-surface-variant);}
+.review li{margin-bottom:6px;}
+.footnote{margin-top:24px;color:var(--outline);font-size:12px;}
+</style></head>
+<body><div class="wrap">
+<div class="topbar">
+  <div class="brand">🛡 RegImpact AI</div>
+  <div class="scenario">🎯 2026-06-30 규제지역 추가 지정</div>
+</div>
+<h1>임팩트 매트릭스</h1>
+<div class="sub">규제 변경의 <strong>시행 전/후</strong> 세그먼트별 LTV 영향. 모든 수치는 deterministic 룰엔진
+(<span class="mono">rule_engine.evaluate</span>)을 두 시점으로 차등 실행한 실제 산출이다(하드코딩 없음).</div>
+<div class="meta">지역 <span class="mono">GURI</span> ·
+  시행 전 <span class="mono">2026-06-30</span> →
+  시행 후 <span class="mono">2026-07-02</span> · policy <span class='mono'>FSC_MOLIT_20260630</span></div>
+<div class="summary"><span class="chip"><span class="dot" style="background:var(--error)"></span>강화 <span class="mono">3</span></span><span class="chip"><span class="dot" style="background:var(--secondary)"></span>완화 <span class="mono">0</span></span><span class="chip"><span class="dot" style="background:var(--outline)"></span>동일 <span class="mono">1</span></span><span class="chip"><span class="dot" style="background:var(--tertiary-fixed-dim)"></span>검토 <span class="mono">2</span></span></div>
+<div class="panel"><table>
+<thead><tr>
+  <th>세그먼트</th><th>시행 전 LTV</th><th>시행 후 LTV</th><th>Δ</th>
+  <th>방향</th><th>근거 (reason_code)</th><th>출처</th>
+</tr></thead>
+<tbody><tr><td class="seg">무주택 일반</td><td><span class="ltv">70%</span></td><td><span class="ltv">40%</span></td><td><span class="delta-down">-30pp</span></td><td><span class="badge badge-error"><span class="dot" style="background:currentColor"></span>강화</span></td><td><span class="reason">LTV_REGULATED_40</span></td><td><span class="cite">FSC_20260630, MOLIT_20260630</span></td></tr><tr><td class="seg">생애최초</td><td><span class="ltv">70%</span></td><td><span class="ltv">70%</span></td><td><span class="delta-flat">0pp</span></td><td><span class="badge badge-neutral"><span class="dot" style="background:currentColor"></span>동일</span></td><td><span class="reason">EXCEPTION_FIRST_HOME</span></td><td><span class="cite">FSC_20260630, MOLIT_20260630</span></td></tr><tr><td class="seg">서민·실수요</td><td><span class="ltv">70%</span></td><td><span class="ltv">60%</span></td><td><span class="delta-down">-10pp</span></td><td><span class="badge badge-error"><span class="dot" style="background:currentColor"></span>강화</span></td><td><span class="reason">EXCEPTION_REAL_DEMAND</span></td><td><span class="cite">FSC_20260630, MOLIT_20260630</span></td></tr><tr><td class="seg">비처분 1주택</td><td><span class="na">검토 필요</span></td><td><span class="ltv">0%</span></td><td><span class="na">–</span></td><td><span class="badge badge-warn"><span class="dot" style="background:currentColor"></span>검토 필요</span></td><td><span class="reason">LTV_OWNER_0</span></td><td><span class="cite">FSC_20260630, MOLIT_20260630</span></td></tr><tr><td class="seg">처분조건부 1주택</td><td><span class="ltv">70%</span></td><td><span class="ltv">40%</span></td><td><span class="delta-down">-30pp</span></td><td><span class="badge badge-error"><span class="dot" style="background:currentColor"></span>강화</span></td><td><span class="reason">LTV_REGULATED_40</span></td><td><span class="cite">FSC_20260630, MOLIT_20260630</span></td></tr><tr><td class="seg">다주택</td><td><span class="na">검토 필요</span></td><td><span class="ltv">0%</span></td><td><span class="na">–</span></td><td><span class="badge badge-warn"><span class="dot" style="background:currentColor"></span>검토 필요</span></td><td><span class="reason">LTV_MULTI_HOME_0</span></td><td><span class="cite">FSC_20260630, MOLIT_20260630</span></td></tr></tbody>
+</table></div>
+<div class="review"><h3>⚠ 검토 필요 (사람 확정) — 자동판정 보류</h3><p style='margin:0 0 10px;color:var(--on-surface-variant)'>명세에 기준값이 없어(예: 非규제 유주택) 델타를 자동 산출하지 않고 사람 검토로 escalation한 세그먼트.</p><ul><li><strong>비처분 1주택</strong> — <span class="mono">before=NEEDS_HUMAN_REVIEW(OWNER_BASELINE_UNKNOWN)</span></li><li><strong>다주택</strong> — <span class="mono">before=NEEDS_HUMAN_REVIEW(OWNER_BASELINE_UNKNOWN)</span></li></ul></div>
+<div class="footnote">이 페이지는 <span class="mono">regimpact.impact.render_matrix_html</span>로
+<span class="mono">ImpactMatrix</span> 실제 산출에서 생성됨 — Stitch 목업의 하드코딩·환각값을 대체.
+LOCKED §4: 규칙값은 확정 명세→엔진에서만.</div>
+</div></body></html>

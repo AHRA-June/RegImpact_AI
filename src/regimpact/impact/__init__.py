@@ -17,6 +17,7 @@ from .matrix import (
     analyze_from_extraction,
     analyze_impact,
 )
+from .render_html import render_6_30, render_matrix_html
 from .report import format_matrix
 from .segments import DEFAULT_REGION, SIX_THIRTY_REGIONS, SIX_THIRTY_SEGMENTS
 
@@ -28,6 +29,8 @@ __all__ = [
     "analyze_impact",
     "analyze_from_extraction",
     "format_matrix",
+    "render_matrix_html",
+    "render_6_30",
     "SIX_THIRTY_SEGMENTS",
     "SIX_THIRTY_REGIONS",
     "DEFAULT_REGION",

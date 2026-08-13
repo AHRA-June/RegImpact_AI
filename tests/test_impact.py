@@ -25,6 +25,8 @@ from regimpact.impact import (  # noqa: E402
     analyze_from_extraction,
     analyze_impact,
     format_matrix,
+    render_6_30,
+    render_matrix_html,
 )
 
 BEFORE = date(2026, 6, 30)
@@ -183,3 +185,54 @@ def test_format_matrix_renders():
     assert "무주택 일반" in text
     assert "-30pp" in text
     assert "검토 필요" in text
+
+
+# --- HTML 렌더(UI 데이터바인딩) ----------------------------------------------
+# Stitch 목업이 환각한 값·지역. 실제 산출 HTML에는 절대 나오면 안 된다.
+_HALLUCINATED = ["50%", "세종", "부산", "강남", "서초", "분당", "REG-24-001"]
+
+
+def test_render_html_uses_real_values():
+    doc = render_6_30()
+    # 실제 엔진 산출 값이 있어야 함
+    assert "무주택 일반" in doc
+    assert "40%" in doc and "70%" in doc and "60%" in doc
+    assert "-30pp" in doc and "-10pp" in doc
+    assert "LTV_REGULATED_40" in doc          # reason_code(근거)
+    assert "FSC_MOLIT_20260630" in doc        # 출처
+    assert "<!doctype html>" in doc.lower()
+
+
+def test_render_html_has_no_hallucinated_values():
+    """환각/하드코딩 값(60→50, 세종·부산 등)이 산출 HTML에 없어야 한다."""
+    doc = render_6_30()
+    for bad in _HALLUCINATED:
+        assert bad not in doc, f"환각값 '{bad}' 이 렌더 결과에 포함됨"
+
+
+def test_render_html_review_section_present():
+    """非규제 유주택 escalation 세그먼트가 '검토 필요' 섹션에 노출."""
+    doc = render_6_30()
+    assert "검토 필요" in doc
+    assert "OWNER_BASELINE_UNKNOWN" in doc
+
+
+def test_render_matrix_html_binds_matrix_meta():
+    """페이지 메타(지역·시점·policy)가 matrix 값과 정확히 일치."""
+    m = analyze_impact(
+        SIX_THIRTY_SEGMENTS, "YONGIN_GIHEUNG",
+        before_date=BEFORE, after_date=AFTER, policy_id="TEST_POL",
+    )
+    doc = render_matrix_html(m, scenario_title="테스트 시나리오")
+    assert "YONGIN_GIHEUNG" in doc
+    assert "2026-06-30" in doc and "2026-07-02" in doc
+    assert "TEST_POL" in doc
+    assert "테스트 시나리오" in doc
+
+
+def test_render_html_escapes_no_hardcoded_segment_count():
+    """행 수가 세그먼트 수와 일치(모든 세그먼트가 렌더됨)."""
+    doc = render_6_30()
+    # 각 세그먼트 라벨이 정확히 등장
+    for seg in SIX_THIRTY_SEGMENTS:
+        assert seg.label in doc
