@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-13
+- **갱신자:** Claude (인터랙티브 UI + Extractor 실행 세션)
+- **개발 브랜치:** `claude/workflow-progress-testing-5fow5g` (이전: `claude/start-work-71qh9m`)
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor(실행됨) + TC Generator/Rule-Regression + **인터랙티브 화면(E2E 시각화)**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -31,8 +31,16 @@
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
+## ✅ 방금 완료 (2026-08-13)
+- **인터랙티브 플레이그라운드 화면** — `docs/ui/impact_playground.html` (self-contained, claude.ai 아티팩트로 게시). 3개 탭:
+  ① **단건 판정기** — 룰엔진(§H)을 JS로 1:1 포팅, 차주 입력→Before/After LTV·status·reason_code·판정경로(P0~P7) 실시간. 데모 8케이스가 `demo_6_30.py`와 정확히 일치.
+  ② **포트폴리오 영향 매트릭스** — 층화 합성 포트폴리오(3지역×8유형, ~3,536명), 시행단계(Phase)·지역·주택가격 필터, LTV/한도 분포 차트 토글, 여신 한도 총 감소 KPI. 한도=참고값(min(LTV×가격, 캡 15억↓6/15~25억4/25억↑2)).
+  ③ **규제 변경 추출(E)+Citation Assurance(A)** — 아래 실행 결과 연결.
+- **Extractor 실제 실행 + Assurance 실측** — 세션 모델(claude-opus-4-8)을 `complete` 주입점에 넣어 공문 3건(FSC·MOLIT·FAQ)에서 Before/After 7건 추출 → `evaluate.py`로 결정론 검증. **실측: Citation Correctness 86% / Unsupported 14%(GRANDFATHERING 인용이 원문 줄바꿈 건너뛰어 flag→사람검토), Change Completeness 100% / Exception Recall 100% / 시행일·지역 OK.** 스냅샷 `docs/eval/extraction_run_6_30.json`. (지표가 100%가 아님 = 검증 신뢰성 입증.)
+
 ## 다음 액션 (NEXT)
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- **Extractor 별도 API(claude-opus-5) 1회 실행(선택)** — 이번 실행은 세션 모델을 주입점에 넣은 것(파이프라인·검증 동일, 모델만 상이). 정식 첫 실측을 원하면 API 키로 `run_extractor.py` 실행.
+- **골드셋 100~120 작성 + DEV/LOCKED/CHALLENGE freeze** — 현재 6·30 골드 1건뿐(다음 큰 항목).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
@@ -86,6 +94,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **인터랙티브 화면(E2E 시각화) + Extractor 실제 실행.** `docs/ui/impact_playground.html`(3탭: 단건 판정기/포트폴리오 매트릭스/규제변경 추출 E+A), claude.ai 아티팩트 게시. 룰엔진을 JS로 1:1 포팅(데모 8케이스 일치), 포트폴리오 층화 합성(~3,536명)에 LTV·한도 분포·Phase·가격 필터, Extractor는 세션 모델(claude-opus-4-8)을 `complete` 주입점에 넣어 실행→`evaluate.py` 실측(Citation 86%/Unsupported 14%, Completeness·Recall 100%). 스냅샷 `docs/eval/extraction_run_6_30.json`. Playwright 렌더/인터랙션 검증(콘솔 에러 0). 브랜치 `claude/workflow-progress-testing-5fow5g`.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.
