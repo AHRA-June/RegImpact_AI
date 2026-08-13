@@ -19,6 +19,9 @@
   | CHALLENGE | 35 | 예외·경계·충돌·모호 중심 적대적 평가 |
 - CHALLENGE는 EXCEPTION / GRANDFATHERING / EFFECTIVE_DATE / CONFLICT 가중.
 - 성공 기준: 건수 채우기가 아니라 **실패모드 카테고리 커버리지**.
+- **착수(2026-08-13):** `docs/eval/goldset/`(dev 24·challenge 8, 전 항목 AI_DRAFT, 32/115=28%).
+  구현 `src/regimpact/goldset/`. 채점은 결정적(scenario→룰엔진, 근거→grounding; LLM-judge 금지).
+  실측 seed: scenario 28/28, Escalation R/P 100%, grounding 8/8. **후속:** 도메인 확정→freeze.
 
 ## 0. 공통 원칙
 
