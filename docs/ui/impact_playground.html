@@ -1,0 +1,609 @@
+<title>6·30 임팩트 플레이그라운드</title>
+<style>
+  :root{
+    --ground:#f4f6f9; --surface:#ffffff; --surface-2:#eef2f8; --surface-3:#e6ecf5;
+    --border:#d6deea; --border-strong:#bcc8db;
+    --ink:#0e1a2b; --ink-2:#48576d; --ink-3:#6b7a90;
+    --navy:#022448; --accent:#1d4ed8; --accent-weak:#e9f0fe; --accent-ink:#1746b8;
+    --ok:#15794a; --ok-bg:#e6f5ec; --ok-bd:#b6e0c6;
+    --warn:#8a5a00; --warn-bg:#fbf1d9; --warn-bd:#ecd39a;
+    --risk:#b42318; --risk-bg:#fdecea; --risk-bd:#f2bfba;
+    --info:#1746b8; --info-bg:#e9f0fe; --info-bd:#bcd0f6;
+    --mut:#5a6b82; --mut-bg:#eef2f7; --mut-bd:#d3dbe7;
+    --shadow:0 1px 2px rgba(15,26,43,.04), 0 8px 24px rgba(15,26,43,.06);
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI","Noto Sans KR","Malgun Gothic",sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0a111e; --surface:#111b2b; --surface-2:#17233642; --surface-2:#172336; --surface-3:#1f2e45;
+      --border:#26364f; --border-strong:#33476680;
+      --ink:#e8eefa; --ink-2:#a4b4cd; --ink-3:#7e8fa8;
+      --navy:#adc8f5; --accent:#5b8def; --accent-weak:#15243d; --accent-ink:#9dbcf5;
+      --ok:#5fd598; --ok-bg:#0f2a1e; --ok-bd:#1e4a34;
+      --warn:#e6b45c; --warn-bg:#2c2110; --warn-bd:#54401a;
+      --risk:#f28b82; --risk-bg:#2c1512; --risk-bd:#552420;
+      --info:#8fb4f5; --info-bg:#132540; --info-bd:#274063;
+      --mut:#9fb0c7; --mut-bg:#18232f; --mut-bd:#2a3852;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0a111e; --surface:#111b2b; --surface-2:#172336; --surface-3:#1f2e45;
+    --border:#26364f; --border-strong:#334766;
+    --ink:#e8eefa; --ink-2:#a4b4cd; --ink-3:#7e8fa8;
+    --navy:#adc8f5; --accent:#5b8def; --accent-weak:#15243d; --accent-ink:#9dbcf5;
+    --ok:#5fd598; --ok-bg:#0f2a1e; --ok-bd:#1e4a34;
+    --warn:#e6b45c; --warn-bg:#2c2110; --warn-bd:#54401a;
+    --risk:#f28b82; --risk-bg:#2c1512; --risk-bd:#552420;
+    --info:#8fb4f5; --info-bg:#132540; --info-bd:#274063;
+    --mut:#9fb0c7; --mut-bg:#18232f; --mut-bd:#2a3852;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--sans); font-size:14px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:24px 20px 64px}
+
+  /* ---- header ---- */
+  header.top{display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:20px}
+  .brand{display:flex; flex-direction:column; gap:6px; min-width:0}
+  .kicker{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent-ink); font-weight:600}
+  h1{font-size:23px; line-height:1.2; margin:0; letter-spacing:-.01em; text-wrap:balance}
+  .sub{color:var(--ink-2); font-size:13px; max-width:62ch}
+  .spacer{flex:1 1 auto}
+  .theme-btn{border:1px solid var(--border); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; padding:7px 11px; font-size:12px; cursor:pointer; font-family:var(--mono);
+    display:inline-flex; align-items:center; gap:6px; white-space:nowrap}
+  .theme-btn:hover{border-color:var(--border-strong)}
+
+  /* ---- presets ---- */
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 20px}
+  .preset{border:1px solid var(--border); background:var(--surface); color:var(--ink-2);
+    border-radius:999px; padding:6px 13px; font-size:12.5px; cursor:pointer; transition:.12s}
+  .preset:hover{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-weak)}
+  .preset:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* ---- layout ---- */
+  .grid{display:grid; grid-template-columns:minmax(300px,380px) 1fr; gap:20px; align-items:start}
+  @media (max-width:840px){ .grid{grid-template-columns:1fr} }
+
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow)}
+  .panel-h{display:flex; align-items:center; gap:8px; padding:14px 16px; border-bottom:1px solid var(--border)}
+  .panel-h h2{font-size:13px; margin:0; letter-spacing:.02em; text-transform:uppercase; color:var(--ink-2); font-weight:600}
+  .panel-h .tag{margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
+  .panel-b{padding:16px}
+
+  /* ---- form ---- */
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  label.lbl{display:block; font-size:12px; color:var(--ink-2); margin-bottom:5px; font-weight:600}
+  label.lbl .hint{font-weight:400; color:var(--ink-3); font-family:var(--mono); font-size:10.5px}
+  select,input[type=date]{
+    width:100%; padding:8px 10px; border:1px solid var(--border-strong); border-radius:8px;
+    background:var(--surface); color:var(--ink); font-family:var(--sans); font-size:13px;
+  }
+  input[type=date]{font-family:var(--mono); font-size:12.5px}
+  select:focus,input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak)}
+  .checks{display:flex; flex-direction:column; gap:9px}
+  .chk{display:flex; align-items:flex-start; gap:9px; cursor:pointer; font-size:13px; color:var(--ink)}
+  .chk input{margin-top:2px; width:15px; height:15px; accent-color:var(--accent); cursor:pointer}
+  .chk .cx{display:flex; flex-direction:column; gap:1px}
+  .chk .cx small{color:var(--ink-3); font-family:var(--mono); font-size:10.5px}
+  .sep{height:1px; background:var(--border); margin:16px -16px; }
+  .sub-h{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-3); margin:0 0 10px}
+  .gf-dates{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  @media (max-width:420px){ .gf-dates{grid-template-columns:1fr} }
+
+  /* ---- result: verdict ---- */
+  .verdict{padding:18px 16px}
+  .status-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px}
+  .badge{display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border-radius:999px;
+    font-size:12.5px; font-weight:600; border:1px solid}
+  .badge .dot{width:8px; height:8px; border-radius:50%; background:currentColor; flex:none}
+  .b-ok{color:var(--ok); background:var(--ok-bg); border-color:var(--ok-bd)}
+  .b-warn{color:var(--warn); background:var(--warn-bg); border-color:var(--warn-bd)}
+  .b-risk{color:var(--risk); background:var(--risk-bg); border-color:var(--risk-bd)}
+  .b-info{color:var(--info); background:var(--info-bg); border-color:var(--info-bd)}
+  .b-mut{color:var(--mut); background:var(--mut-bg); border-color:var(--mut-bd)}
+  .gf-flag{font-family:var(--mono); font-size:11px; color:var(--warn); background:var(--warn-bg);
+    border:1px solid var(--warn-bd); border-radius:6px; padding:3px 8px}
+
+  /* before/after */
+  .ba{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:18px 16px}
+  @media (max-width:520px){ .ba{grid-template-columns:1fr; gap:10px; text-align:center} .ba .arrow{transform:rotate(90deg)} }
+  .ba .cell{display:flex; flex-direction:column; gap:4px; align-items:center}
+  .ba .cell .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+  .ba .ltv{font-family:var(--mono); font-size:38px; font-weight:600; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+  .ba .cell .note{font-size:11px; color:var(--ink-2)}
+  .ba .arrow{font-size:22px; color:var(--ink-3); font-family:var(--mono)}
+  .ltv-ok{color:var(--ink)} .ltv-warn{color:var(--warn)} .ltv-risk{color:var(--risk)} .ltv-na{color:var(--ink-3); font-size:22px}
+  .delta{display:inline-block; margin-top:16px; font-family:var(--mono); font-size:12px; padding:4px 10px; border-radius:999px}
+  .delta.down{color:var(--risk); background:var(--risk-bg); border:1px solid var(--risk-bd)}
+  .delta.same{color:var(--mut); background:var(--mut-bg); border:1px solid var(--mut-bd)}
+
+  /* fields grid */
+  .kv{display:grid; grid-template-columns:auto 1fr; gap:8px 14px; margin-top:18px; font-size:12.5px}
+  .kv dt{color:var(--ink-3); font-family:var(--mono); font-size:11px}
+  .kv dd{margin:0}
+  .chips{display:flex; flex-wrap:wrap; gap:6px}
+  .chip{font-family:var(--mono); font-size:11px; padding:3px 8px; border-radius:6px;
+    background:var(--accent-weak); color:var(--accent-ink); border:1px solid var(--accent-weak)}
+  .chip.src{background:var(--surface-3); color:var(--ink-2); border-color:var(--border)}
+  .chip.none{background:var(--surface-2); color:var(--ink-3); border-color:var(--border)}
+  .reason-desc{color:var(--ink-2); font-size:12px; margin-top:4px}
+
+  /* trace */
+  .trace{list-style:none; margin:0; padding:0; position:relative}
+  .trace li{display:flex; gap:12px; padding:0 0 2px; position:relative}
+  .trace .node{display:flex; flex-direction:column; align-items:center; flex:none; width:22px}
+  .trace .ring{width:22px; height:22px; border-radius:50%; border:2px solid var(--border-strong);
+    background:var(--surface); display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:9px; color:var(--ink-3); font-weight:600; z-index:1}
+  .trace .line{width:2px; flex:1; background:var(--border); min-height:12px}
+  .trace li:last-child .line{display:none}
+  .trace .body{padding:0 0 14px; min-width:0}
+  .trace .t-title{font-size:12.5px; color:var(--ink-2); display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .trace .t-code{font-family:var(--mono); font-size:10px; color:var(--ink-3)}
+  .trace .t-note{font-size:11.5px; color:var(--ink-3); margin-top:2px}
+  /* states */
+  .trace .s-pass .ring{border-color:var(--ok-bd); color:var(--ok); background:var(--ok-bg)}
+  .trace .s-fire .ring{border-color:var(--accent); background:var(--accent); color:#fff}
+  .trace .s-fire .t-title{color:var(--ink); font-weight:600}
+  .trace .s-fire .body{background:var(--accent-weak); margin:-2px -10px 10px; padding:8px 10px; border-radius:8px; border:1px solid var(--accent-weak)}
+  .trace .s-skip{opacity:.42}
+  .trace .s-skip .ring{border-style:dashed}
+  .verdict-note{margin-top:14px; font-size:12px; color:var(--ink-2); background:var(--surface-2);
+    border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:10px 12px}
+
+  /* json */
+  details.json{margin-top:16px; border:1px solid var(--border); border-radius:10px; overflow:hidden}
+  details.json>summary{cursor:pointer; padding:10px 14px; font-size:12px; color:var(--ink-2);
+    background:var(--surface-2); list-style:none; font-family:var(--mono)}
+  details.json>summary::-webkit-details-marker{display:none}
+  details.json>summary::before{content:"▸ "; color:var(--ink-3)}
+  details.json[open]>summary::before{content:"▾ "}
+  pre.code{margin:0; padding:14px; font-family:var(--mono); font-size:11.5px; line-height:1.6;
+    color:var(--ink); overflow-x:auto; white-space:pre; background:var(--surface)}
+  pre.code .k{color:var(--accent-ink)} pre.code .s{color:var(--ok)} pre.code .n{color:var(--warn)}
+  pre.code .b{color:var(--risk)}
+
+  .footnote{margin-top:22px; font-size:11.5px; color:var(--ink-3); line-height:1.6; max-width:80ch}
+  .footnote code{font-family:var(--mono); font-size:11px; background:var(--surface-2); padding:1px 5px; border-radius:4px; color:var(--ink-2)}
+  a{color:var(--accent-ink)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="kicker">RegImpact AI · Deterministic Rule Engine</span>
+      <h1>6·30 규제 임팩트 플레이그라운드</h1>
+      <p class="sub">차주 조건을 입력하면 <strong>주택구입목적 주담대 LTV</strong>가 시행 전(종전규정)과 시행 후로 어떻게 달라지는지, 그리고 엔진이 <strong>어떤 판정 경로</strong>를 거쳐 그 결론에 도달했는지 실시간으로 보여줍니다. 로직은 <code style="font-family:var(--mono)">src/regimpact/rule_engine.py</code> 알고리즘 H를 1:1로 반영합니다.</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="테마 전환">◐ 테마</button>
+  </header>
+
+  <div class="presets" id="presets" aria-label="가짜 데이터 시나리오"></div>
+
+  <div class="grid">
+    <!-- INPUT -->
+    <section class="panel" aria-label="입력">
+      <div class="panel-h"><h2>차주 입력</h2><span class="tag">MortgageApplication</span></div>
+      <div class="panel-b">
+        <div class="field">
+          <label class="lbl" for="region">지역 <span class="hint">region_code</span></label>
+          <select id="region">
+            <option value="GURI">구리시 (GURI) · 6·30 신규 규제</option>
+            <option value="YONGIN_GIHEUNG">용인시 기흥구 (YONGIN_GIHEUNG) · 6·30 신규 규제</option>
+            <option value="HWASEONG_DONGTAN">화성시 동탄 (HWASEONG_DONGTAN) · 6·30 신규 규제</option>
+            <option value="OTHER_NONREG">기타 지역 (비규제, 대조군)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="evalDate">평가 시점 <span class="hint">evaluation_date · 시행일 2026-07-01</span></label>
+          <input type="date" id="evalDate" value="2026-07-02" min="2026-01-01" max="2027-12-31">
+        </div>
+        <div class="field">
+          <label class="lbl" for="house">보유 주택 수 <span class="hint">house_count</span></label>
+          <select id="house">
+            <option value="0">0채 (무주택)</option>
+            <option value="1">1주택</option>
+            <option value="2">2주택 이상 (다주택)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="purpose">대출 목적 <span class="hint">loan_purpose</span></label>
+          <select id="purpose">
+            <option value="HOME_PURCHASE">주택구입목적 (코어 판정)</option>
+            <option value="OTHER">그 외 (전세·생활자금 등)</option>
+          </select>
+        </div>
+
+        <div class="sep"></div>
+        <p class="sub-h">차주 유형 플래그</p>
+        <div class="checks">
+          <label class="chk"><input type="checkbox" id="disposal"><span class="cx"><span>처분조건부 1주택</span><small>disposal_condition_flag · 1주택일 때 무주택으로 취급</small></span></label>
+          <label class="chk"><input type="checkbox" id="firsthome"><span class="cx"><span>생애최초 구입자</span><small>first_home_buyer · LTV 70% 예외</small></span></label>
+          <label class="chk"><input type="checkbox" id="realdemand"><span class="cx"><span>서민·실수요자</span><small>real_demand_flag · LTV 60% 예외</small></span></label>
+          <label class="chk"><input type="checkbox" id="policy"><span class="cx"><span>정책대출 (디딤돌·보금자리 등)</span><small>policy_mortgage_flag · Discovery로 분리</small></span></label>
+        </div>
+
+        <div class="sep"></div>
+        <p class="sub-h">경과규정 이벤트 (종전규정 유지 여부)</p>
+        <div class="gf-dates">
+          <div class="field" style="margin:0">
+            <label class="lbl" for="accepted">전산 접수일 <span class="hint">G1</span></label>
+            <input type="date" id="accepted">
+          </div>
+          <div class="field" style="margin:0">
+            <label class="lbl" for="contract">매매계약 체결일 <span class="hint">G2</span></label>
+            <input type="date" id="contract">
+          </div>
+          <div class="field" style="margin:0">
+            <label class="lbl" for="downpay">계약금 납부일 <span class="hint">G2</span></label>
+            <input type="date" id="downpay">
+          </div>
+          <div class="field" style="margin:0">
+            <label class="lbl" for="permitDate">토지거래허가 신청일 <span class="hint">G3</span></label>
+            <input type="date" id="permitDate">
+          </div>
+        </div>
+        <label class="chk" style="margin-top:11px"><input type="checkbox" id="permitTarget"><span class="cx"><span>토지거래허가 대상 물건</span><small>land_permit_target · G3 성립 조건</small></span></label>
+      </div>
+    </section>
+
+    <!-- OUTPUT -->
+    <section style="display:flex; flex-direction:column; gap:20px">
+      <div class="panel">
+        <div class="panel-h"><h2>판정 결과</h2><span class="tag" id="ruleTag">LtvDecision</span></div>
+        <div class="verdict">
+          <div class="status-row" id="statusRow"></div>
+          <div class="ba" id="baBox"></div>
+          <dl class="kv" id="kv"></dl>
+          <div class="verdict-note" id="reasonNote"></div>
+          <details class="json"><summary>입력 스냅샷 (MortgageApplication)</summary><pre class="code" id="jsonOut"></pre></details>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h2>판정 경로 추적</h2><span class="tag">algorithm H · short-circuit</span></div>
+        <div class="panel-b"><ul class="trace" id="trace"></ul></div>
+      </div>
+    </section>
+  </div>
+
+  <p class="footnote">
+    ⚙️ 이 화면의 판정은 파이썬 룰엔진(<code>rule_engine.py</code> · <code>regions.py</code> · <code>grandfathering.py</code>)을 자바스크립트로 그대로 옮긴 것으로, 값·우선순위·경과규정 경계(2026-06-30 자정 포함, <code>&lt;=</code>)가 동일합니다. <strong>Before</strong>는 같은 차주를 시행 전(2026-06-30)에 평가한 결과, <strong>After</strong>는 위 평가 시점의 결과입니다 — 둘의 차이가 곧 규제의 영향(임팩트)입니다. LOCKED §4에 따라 규칙 값은 사람이 확정한 명세에서만 옵니다.
+  </p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const CUTOFF = "2026-06-30";           // 경과규정 컷오프 (<=)
+  const REG_EFFECTIVE = "2026-07-01";    // 규제 효력 발생 (시행일)
+  const SIX_THIRTY = ["GURI","YONGIN_GIHEUNG","HWASEONG_DONGTAN"];
+  const SOURCE = ["FSC_20260630","MOLIT_20260630"];
+
+  const REGION_KO = {
+    GURI:"구리", YONGIN_GIHEUNG:"용인 기흥", HWASEONG_DONGTAN:"화성 동탄", OTHER_NONREG:"기타(비규제)"
+  };
+  const STATUS_KO = {
+    DECIDED:["판정 완료","b-ok"], OUT_OF_SCOPE:["범위 밖","b-mut"],
+    DISCOVERY:["디스커버리 · 수동 검토","b-info"], NEEDS_HUMAN_REVIEW:["사람 검토 필요","b-warn"]
+  };
+  const REASON_KO = {
+    LTV_REGULATED_40:"규제지역 표준 (무주택 일반) — 최대 LTV 40%",
+    EXCEPTION_FIRST_HOME:"생애최초 예외 — 최대 LTV 70% (좌동, 변화 없음)",
+    EXCEPTION_REAL_DEMAND:"서민·실수요자 예외 — 최대 LTV 60%",
+    LTV_OWNER_0:"규제지역 유주택(비처분 1주택 이상) — 최대 LTV 0%",
+    LTV_MULTI_HOME_0:"다주택 — 최대 LTV 0%",
+    LTV_BASELINE_70:"비규제 수도권 무주택 기준선 — 최대 LTV 70%",
+    GRANDFATHERED_ACCEPTED_OR_CONTRACT:"경과규정 해당 (전산접수 또는 계약+계약금) — 종전규정(70%) 유지",
+    GRANDFATHERED_LAND_PERMIT:"경과규정 해당 (토지거래허가 신청) — 종전규정(70%) 유지",
+    OWNER_BASELINE_UNKNOWN:"비규제 유주택 기준값이 명세에 없음 → 사람 검토로 정직하게 에스컬레이션",
+    OUT_OF_SCOPE_PRODUCT:"주택구입목적이 아님 → 코어 판정 범위 밖",
+    DISCOVERY_POLICY_LOAN:"정책대출 → 코어 자동판정에서 분리, 수동 검토(Discovery)"
+  };
+
+  // ---- 룰엔진 포팅 (rule_engine.py §H) ----
+  function isOwner(a){
+    if(a.house_count>=2) return true;
+    if(a.house_count>=1 && !a.disposal_condition_flag) return true;
+    return false;
+  }
+  function isGrandfathered(a){
+    if(a.application_accepted_at && a.application_accepted_at<=CUTOFF)
+      return ["GRANDFATHERED_ACCEPTED_OR_CONTRACT","전산 접수일 "+a.application_accepted_at+" ≤ "+CUTOFF];
+    if(a.contract_signed_at && a.contract_signed_at<=CUTOFF && a.downpayment_paid_at)
+      return ["GRANDFATHERED_ACCEPTED_OR_CONTRACT","계약 "+a.contract_signed_at+" ≤ "+CUTOFF+" + 계약금 납부"];
+    if(a.land_permit_target && a.land_permit_applied_at && a.land_permit_applied_at<=CUTOFF)
+      return ["GRANDFATHERED_LAND_PERMIT","토지거래허가 신청 "+a.land_permit_applied_at+" ≤ "+CUTOFF];
+    return [null,null];
+  }
+  function resolveRegion(code, asOf){
+    if(SIX_THIRTY.includes(code)){
+      if(asOf<=CUTOFF) return {status:"NON_REGULATED", type:"NONE"};
+      if(asOf>=REG_EFFECTIVE) return {status:"REGULATED", type:"SPECULATIVE_OVERHEATED"};
+    }
+    return {status:"NON_REGULATED", type:"NONE"};
+  }
+
+  // 판정 + 경로 추적
+  function evaluate(a){
+    const trace=[]; // {id,label,state,note}  state: pass|fire|skip
+    const push=(id,label,state,note)=>trace.push({id,label,state,note:note||""});
+    let d=null;
+
+    // P0 스코프
+    if(a.loan_purpose!=="HOME_PURCHASE"){
+      push("P0","스코프: 주택구입목적?","fire","목적이 HOME_PURCHASE가 아님 → 범위 밖");
+      d={status:"OUT_OF_SCOPE", reason_codes:["OUT_OF_SCOPE_PRODUCT"]};
+      return finalize(d,trace,"P0");
+    }
+    push("P0","스코프: 주택구입목적?","pass","목적 = 주택구입목적 → 코어 판정 진입");
+
+    // P0b 정책대출
+    if(a.policy_mortgage_flag){
+      push("P0b","정책대출?","fire","정책대출 → Discovery(수동 검토)로 분리");
+      d={status:"DISCOVERY", reason_codes:["DISCOVERY_POLICY_LOAN"]};
+      return finalize(d,trace,"P0b");
+    }
+    push("P0b","정책대출?","pass","정책대출 아님");
+
+    // P1 경과규정
+    const [gfCode,gfNote]=isGrandfathered(a);
+    if(gfCode){
+      if(isOwner(a)){
+        push("P1","경과규정 (최우선)","fire",gfNote+" · 단, 비규제 유주택 기준 부재");
+        d={status:"NEEDS_HUMAN_REVIEW", grandfathering_applied:true,
+           reason_codes:[gfCode,"OWNER_BASELINE_UNKNOWN"], source_policy_ids:SOURCE.slice()};
+        return finalize(d,trace,"P1");
+      }
+      push("P1","경과규정 (최우선)","fire",gfNote+" → 종전규정 70% 유지");
+      d={status:"DECIDED", max_ltv:0.70, applicable_rule_id:"NONREG_STD_70",
+         grandfathering_applied:true, reason_codes:[gfCode], source_policy_ids:SOURCE.slice()};
+      return finalize(d,trace,"P1");
+    }
+    push("P1","경과규정 (최우선)","pass","경과규정 미해당 (컷오프 이후 신청)");
+
+    // P2 지역상태
+    const reg=resolveRegion(a.region_code,a.evaluation_date);
+    if(reg.status==="NON_REGULATED"){
+      push("P2","지역 상태 (시점 해석)","fire","평가시점 기준 비규제 → 기준선 적용");
+      if(isOwner(a)){
+        push("P2b","비규제 기준선","fire","비규제 유주택 기준값 명세 부재 → 사람 검토");
+        d={status:"NEEDS_HUMAN_REVIEW", reason_codes:["OWNER_BASELINE_UNKNOWN"]};
+        return finalize(d,trace,"P2b");
+      }
+      push("P2b","비규제 기준선","fire","무주택 → 기준선 70%");
+      d={status:"DECIDED", max_ltv:0.70, applicable_rule_id:"NONREG_STD_70",
+         reason_codes:["LTV_BASELINE_70"]};
+      return finalize(d,trace,"P2b");
+    }
+    push("P2","지역 상태 (시점 해석)","pass","평가시점 기준 규제지역(투기과열) → 규제 트랙 진입");
+
+    // P3 다주택
+    if(a.house_count>=2){
+      push("P3","다주택 (2주택 이상)?","fire","다주택 → LTV 0%");
+      return finalize(decided(0,"MULTI_0","LTV_MULTI_HOME_0"),trace,"P3");
+    }
+    push("P3","다주택 (2주택 이상)?","pass","해당 없음");
+
+    // P4 유주택
+    if(a.house_count>=1 && !a.disposal_condition_flag){
+      push("P4","유주택 (비처분 1주택)?","fire","비처분 1주택 → LTV 0%");
+      return finalize(decided(0,"REG_OWNER_0","LTV_OWNER_0"),trace,"P4");
+    }
+    push("P4","유주택 (비처분 1주택)?","pass", a.house_count>=1?"처분조건부 → 무주택으로 계속":"무주택");
+
+    // P5 생애최초
+    if(a.first_home_buyer){
+      push("P5","생애최초?","fire","생애최초 예외 → LTV 70%");
+      return finalize(decided(0.70,"REG_FIRSTHOME","EXCEPTION_FIRST_HOME"),trace,"P5");
+    }
+    push("P5","생애최초?","pass","해당 없음");
+
+    // P6 서민·실수요
+    if(a.real_demand_flag){
+      push("P6","서민·실수요자?","fire","서민·실수요 예외 → LTV 60%");
+      return finalize(decided(0.60,"REG_REALDEMAND","EXCEPTION_REAL_DEMAND"),trace,"P6");
+    }
+    push("P6","서민·실수요자?","pass","해당 없음");
+
+    // P7 일반
+    push("P7","무주택 일반 / 처분조건부 1주택","fire","규제지역 표준 → LTV 40%");
+    return finalize(decided(0.40,"REG_STD","LTV_REGULATED_40"),trace,"P7");
+
+    function decided(ltv,rid,reason){
+      return {status:"DECIDED", max_ltv:ltv, applicable_rule_id:rid,
+              reason_codes:[reason], source_policy_ids:SOURCE.slice()};
+    }
+  }
+  function finalize(d,trace,firedAt){
+    // fire 이후 단계는 skip 처리 안 함(이미 return) — trace는 실행된 것만 담김
+    d.grandfathering_applied = d.grandfathering_applied||false;
+    d.reason_codes = d.reason_codes||[];
+    d.source_policy_ids = d.source_policy_ids||[];
+    return {decision:d, trace, firedAt};
+  }
+
+  // 시행 전(before) 판정: 같은 차주를 2026-06-30에 평가
+  function evaluateBefore(a){
+    const b=Object.assign({},a,{evaluation_date:CUTOFF});
+    return evaluate(b).decision;
+  }
+
+  // ---- 폼 읽기 ----
+  const $=id=>document.getElementById(id);
+  function nn(v){ return v && v.length ? v : null; }
+  function readApp(){
+    return {
+      region_code:$("region").value,
+      evaluation_date:$("evalDate").value || "2026-07-02",
+      house_count:parseInt($("house").value,10),
+      disposal_condition_flag:$("disposal").checked,
+      first_home_buyer:$("firsthome").checked,
+      real_demand_flag:$("realdemand").checked,
+      policy_mortgage_flag:$("policy").checked,
+      loan_purpose:$("purpose").value,
+      application_accepted_at:nn($("accepted").value),
+      contract_signed_at:nn($("contract").value),
+      downpayment_paid_at:nn($("downpay").value),
+      land_permit_target:$("permitTarget").checked,
+      land_permit_applied_at:nn($("permitDate").value)
+    };
+  }
+
+  // ---- 렌더 ----
+  function pct(v){ return v==null ? "—" : Math.round(v*100)+"%"; }
+  function ltvClass(v){
+    if(v==null) return "ltv-na";
+    if(v<=0) return "ltv-risk";
+    if(v<0.70) return "ltv-warn";
+    return "ltv-ok";
+  }
+  function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+
+  function render(){
+    const app=readApp();
+    const {decision:after,trace}=evaluate(app);
+    const before=evaluateBefore(app);
+
+    // status
+    const [stKo,stCls]=STATUS_KO[after.status]||["?","b-mut"];
+    let html=`<span class="badge ${stCls}"><span class="dot"></span>${stKo}</span>`;
+    if(after.grandfathering_applied) html+=`<span class="gf-flag">경과규정 적용 · grandfathering</span>`;
+    $("statusRow").innerHTML=html;
+    $("ruleTag").textContent = after.applicable_rule_id ? "rule_id · "+after.applicable_rule_id : "LtvDecision";
+
+    // before / after
+    const bLtv=before.max_ltv, aLtv=after.max_ltv;
+    const bDec=before.status==="DECIDED", aDec=after.status==="DECIDED";
+    let deltaHtml="";
+    if(bDec && aDec && bLtv!=null && aLtv!=null){
+      const dp=Math.round((aLtv-bLtv)*100);
+      if(dp===0) deltaHtml=`<div class="delta same">변화 없음 · 0%p</div>`;
+      else deltaHtml=`<div class="delta down">${dp<0?"▼":"▲"} ${Math.abs(dp)}%p ${dp<0?"하향":"상향"}</div>`;
+    } else if(before.status!==after.status){
+      deltaHtml=`<div class="delta down">상태 전환 · ${STATUS_KO[before.status][0]} → ${STATUS_KO[after.status][0]}</div>`;
+    } else {
+      deltaHtml=`<div class="delta same">변화 없음</div>`;
+    }
+    const cell=(cap,dec,ltv,note)=>{
+      const val = dec ? pct(ltv) : (STATUS_KO[after.status]?"—":"—");
+      const cls = dec ? ltvClass(ltv) : "ltv-na";
+      const shown = dec ? pct(ltv) : "판정 외";
+      return `<div class="cell"><span class="cap">${cap}</span>
+        <span class="ltv ${cls}">${shown}</span>
+        <span class="note">${note}</span></div>`;
+    };
+    $("baBox").innerHTML =
+      cell("Before · 시행 전(6/30)", before.status==="DECIDED", bLtv, before.status==="DECIDED"?"종전규정 기준":STATUS_KO[before.status][0]) +
+      `<div class="arrow">→</div>` +
+      cell("After · "+app.evaluation_date, after.status==="DECIDED", aLtv, after.status==="DECIDED"?"신규 적용":STATUS_KO[after.status][0]) +
+      `<div style="grid-column:1/-1; text-align:center">${deltaHtml}</div>`;
+
+    // kv
+    const region=REGION_KO[app.region_code]||app.region_code;
+    const reg=resolveRegion(app.region_code,app.evaluation_date);
+    const reasonChips = after.reason_codes.map(r=>`<span class="chip">${r}</span>`).join("") || `<span class="chip none">—</span>`;
+    const srcChips = after.source_policy_ids.length
+      ? after.source_policy_ids.map(s=>`<span class="chip src">${s}</span>`).join("")
+      : `<span class="chip none">— (기준선/범위밖은 미부착)</span>`;
+    $("kv").innerHTML=
+      `<dt>지역 상태</dt><dd>${region} · ${reg.status==="REGULATED"?"규제지역(투기과열)":"비규제"}</dd>`+
+      `<dt>max_ltv</dt><dd style="font-family:var(--mono)">${after.max_ltv==null?"null":after.max_ltv.toFixed(2)}</dd>`+
+      `<dt>rule_id</dt><dd style="font-family:var(--mono)">${after.applicable_rule_id||"—"}</dd>`+
+      `<dt>reason_codes</dt><dd><div class="chips">${reasonChips}</div></dd>`+
+      `<dt>source</dt><dd><div class="chips">${srcChips}</div></dd>`;
+
+    // reason note
+    $("reasonNote").innerHTML = after.reason_codes.map(r=>
+      `<div><strong style="font-family:var(--mono);font-size:11px">${r}</strong> — ${REASON_KO[r]||""}</div>`
+    ).join("");
+
+    // json
+    $("jsonOut").innerHTML = jsonPretty(app);
+
+    // trace
+    $("trace").innerHTML = trace.map((t,i)=>{
+      const glyph = t.state==="fire" ? "●" : (t.state==="pass" ? "✓" : "·");
+      return `<li class="s-${t.state}">
+        <div class="node"><div class="ring">${glyph}</div><div class="line"></div></div>
+        <div class="body">
+          <div class="t-title">${esc(t.label)} <span class="t-code">${t.id}</span></div>
+          ${t.note?`<div class="t-note">${esc(t.note)}</div>`:""}
+        </div></li>`;
+    }).join("");
+  }
+
+  function jsonPretty(o){
+    const keys=Object.keys(o);
+    const lines=keys.map(k=>{
+      let v=o[k], vs;
+      if(v===null) vs=`<span class="b">null</span>`;
+      else if(typeof v==="boolean") vs=`<span class="b">${v}</span>`;
+      else if(typeof v==="number") vs=`<span class="n">${v}</span>`;
+      else vs=`<span class="s">"${esc(v)}"</span>`;
+      return `  <span class="k">"${k}"</span>: ${vs}`;
+    });
+    return "{\n"+lines.join(",\n")+"\n}";
+  }
+
+  // ---- presets ----
+  const PRESETS=[
+    {n:"무주택 일반 · 구리", s:{region:"GURI",house:"0"}},
+    {n:"생애최초 · 구리", s:{region:"GURI",house:"0",firsthome:true}},
+    {n:"서민·실수요 · 화성동탄", s:{region:"HWASEONG_DONGTAN",house:"0",realdemand:true}},
+    {n:"비처분 1주택 · 용인기흥", s:{region:"YONGIN_GIHEUNG",house:"1"}},
+    {n:"처분조건부 1주택 · 구리", s:{region:"GURI",house:"1",disposal:true}},
+    {n:"다주택 · 구리", s:{region:"GURI",house:"2"}},
+    {n:"경과규정(계약+계약금) · 구리", s:{region:"GURI",house:"0",contract:"2026-06-29",downpay:"2026-06-29"}},
+    {n:"정책대출 · 구리", s:{region:"GURI",house:"0",policy:true}},
+    {n:"비규제 무주택(시행 전 6/29)", s:{region:"GURI",house:"0",evalDate:"2026-06-29"}},
+    {n:"범위 밖(전세·생활자금)", s:{region:"GURI",house:"0",purpose:"OTHER"}}
+  ];
+  function applyPreset(s){
+    // reset
+    ["disposal","firsthome","realdemand","policy","permitTarget"].forEach(id=>$(id).checked=false);
+    ["accepted","contract","downpay","permitDate"].forEach(id=>$(id).value="");
+    $("evalDate").value="2026-07-02"; $("purpose").value="HOME_PURCHASE"; $("house").value="0"; $("region").value="GURI";
+    for(const k in s){
+      const el=$(k==="firsthome"?"firsthome":k);
+      if(!el) continue;
+      if(el.type==="checkbox") el.checked=!!s[k]; else el.value=s[k];
+    }
+    render();
+  }
+  const pc=$("presets");
+  PRESETS.forEach(p=>{
+    const b=document.createElement("button");
+    b.className="preset"; b.type="button"; b.textContent=p.n;
+    b.addEventListener("click",()=>applyPreset(p.s));
+    pc.appendChild(b);
+  });
+
+  // ---- theme toggle ----
+  $("themeBtn").addEventListener("click",()=>{
+    const cur=document.documentElement.getAttribute("data-theme");
+    const isDark = cur==="dark" || (!cur && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", isDark?"light":"dark");
+  });
+
+  // ---- bind ----
+  document.querySelectorAll("select,input").forEach(el=>{
+    el.addEventListener("input",render); el.addEventListener("change",render);
+  });
+  render();
+})();
+</script>
