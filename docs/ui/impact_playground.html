@@ -230,7 +230,7 @@
   .lg .sw{width:16px; height:12px; border-radius:3px}
   .lg .sw.before{background:transparent; border:2px solid var(--ink-3)}
   .lg .sw.after{background:var(--accent)}
-  .plot{display:flex; align-items:flex-end; gap:10px; height:220px; padding:26px 16px 0; position:relative}
+  .plot{display:flex; align-items:flex-end; gap:10px; height:220px; padding:4px 16px 0; position:relative}
   .plot .gridline{position:absolute; left:16px; right:16px; height:1px; background:var(--border); opacity:.6}
   .plot .gridcap{position:absolute; left:16px; font-family:var(--mono); font-size:9px; color:var(--ink-3); transform:translateY(-50%)}
   .bucket{flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%; min-width:0; z-index:1}
@@ -249,7 +249,9 @@
   .tablecard{background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); overflow:hidden}
   .tablecard .panel-h{padding:14px 16px}
   .tscroll{overflow-x:auto}
-  table.matrix{width:100%; border-collapse:collapse; font-size:12.5px; min-width:720px}
+  table.matrix{width:100%; border-collapse:collapse; font-size:12.5px; min-width:980px}
+  table.matrix td.limit{background:var(--surface-2)}
+  table.matrix th.limit{background:var(--surface-3)}
   table.matrix thead th{position:sticky; top:0; background:var(--surface-2); text-align:left;
     font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-3); font-weight:600;
     padding:9px 12px; border-bottom:1px solid var(--border); white-space:nowrap}
@@ -411,6 +413,16 @@
       <button class="fchip" data-region="HWASEONG_DONGTAN" aria-pressed="false">화성 동탄</button>
     </div>
 
+    <div class="filters" id="priceFilters" role="group" aria-label="주택가격 가정">
+      <span class="flabel">주택가격 가정</span>
+      <button class="fchip" data-price="6" aria-pressed="false">6억</button>
+      <button class="fchip" data-price="10" aria-pressed="true">10억</button>
+      <button class="fchip" data-price="15" aria-pressed="false">15억</button>
+      <button class="fchip" data-price="20" aria-pressed="false">20억</button>
+      <button class="fchip" data-price="30" aria-pressed="false">30억</button>
+      <span class="flabel" style="margin-left:6px">최대한도 캡: 15억↓ 6억 / 15~25억 4억 / 25억↑ 2억</span>
+    </div>
+
     <div class="kpis" id="kpis"></div>
 
     <div class="chartcard">
@@ -429,7 +441,8 @@
         <table class="matrix">
           <thead><tr>
             <th>지역</th><th>차주 유형</th><th class="num">차주 수</th>
-            <th class="num">종전 LTV</th><th class="num">적용 LTV</th><th class="num">Δ</th>
+            <th class="num">종전 LTV</th><th class="num">적용 LTV</th><th class="num">ΔLTV</th>
+            <th class="num limit">종전 한도</th><th class="num limit">적용 한도</th><th class="num limit">Δ한도</th>
             <th>상태 / reason_code</th><th>경과규정</th>
           </tr></thead>
           <tbody id="matrixBody"></tbody>
@@ -438,7 +451,8 @@
     </div>
 
     <p class="footnote">
-      🧬 포트폴리오는 <strong>합성 가짜 데이터</strong>입니다(실제 고객·내부문서 미사용, LOCKED §8). 각 세그먼트의 종전/적용 LTV는 단건 판정기와 동일한 엔진으로 계산되고, 차주 수로 가중해 분포·지표를 냅니다. <strong>시간축(Phase)</strong>은 임팩트 매트릭스의 핵심 축(LOCKED §7)으로, 규제 효력이 2026-07-01에 계단식으로 발생함을 보여줍니다. Δ가 0%p면 아직 영향 없음, ▼면 하향입니다.
+      🧬 포트폴리오는 <strong>합성 가짜 데이터</strong>입니다(실제 고객·내부문서 미사용, LOCKED §8). 각 세그먼트의 종전/적용 LTV는 단건 판정기와 동일한 엔진으로 계산되고, 차주 수로 가중해 분포·지표를 냅니다. <strong>시간축(Phase)</strong>은 임팩트 매트릭스의 핵심 축(LOCKED §7)으로, 규제 효력이 2026-07-01에 계단식으로 발생함을 보여줍니다. ΔLTV가 0%p면 아직 영향 없음, ▼면 하향입니다.<br>
+      💰 <strong>한도는 참고값</strong>입니다(코어 판정=LTV만, <code>05_RULE_SPEC.md</code> §B·<code>regulatory_facts.md</code>). 대출한도 = <code>min(LTV × 주택가격, 최대한도 캡)</code>, 캡 = 15억↓ 6억 / 15~25억 4억 / 25억↑ 2억. <strong>종전규정 유지분(경과규정)·시행 전</strong>에는 캡을 적용하지 않습니다. 그래서 <strong>생애최초</strong>처럼 LTV가 좌동(70%)이어도 고가 주택은 캡 때문에 한도가 줄 수 있습니다. 유주택·다주택은 종전 기준값이 명세에 없어(사람 검토) 한도 감소 합계에서 제외됩니다.
     </p>
   </div><!-- /view-portfolio -->
 
@@ -792,9 +806,21 @@
 
   let PHASE_DATE="2026-07-02";
   let REGION_FILTER="ALL";
+  let PRICE=10;   // 주택가격 가정 (억)
   const fmt=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");
   const isDec=d=>d.status==="DECIDED" && d.max_ltv!=null;
   const bucketOf=d=> isDec(d) ? Math.round(d.max_ltv*100)+"%" : "판정외";
+
+  // 최대한도 캡 (regulatory_facts.md C-추가제약: 15억↓6억/15~25억4억/25억↑2억). 참고값(코어 아님).
+  const capOf=price=> price<=15 ? 6 : (price<=25 ? 4 : 2);
+  // 대출한도(억) = LTV×주택가격, 규제 적용분은 캡 적용. 종전규정 유지분·시행전은 캡 미적용.
+  function limitOf(dec, price, applyCap){
+    if(!isDec(dec)) return null;                 // Discovery/검토 → 한도 판정 외
+    const raw = dec.max_ltv * price;
+    if(applyCap && !dec.grandfathering_applied) return Math.min(raw, capOf(price));
+    return raw;
+  }
+  const won=v=> v==null ? "—" : (Number.isInteger(v)? v : v.toFixed(1))+"억";
 
   function computeRows(){
     const rows=[];
@@ -803,7 +829,9 @@
       const after=evaluate(normApp(s.t,s.region,PHASE_DATE)).decision;
       const before=evaluate(normApp(s.t,s.region,"2026-06-30")).decision;
       const changed = !(before.status===after.status && before.max_ltv===after.max_ltv);
-      rows.push(Object.assign({},s,{before,after,changed}));
+      const limBefore=limitOf(before, PRICE, false);      // 종전 = 캡 미적용
+      const limAfter =limitOf(after,  PRICE, true);       // 적용 = 규제 캡
+      rows.push(Object.assign({},s,{before,after,changed,limBefore,limAfter}));
     }
     return rows;
   }
@@ -817,10 +845,21 @@
     const discovery=rows.filter(r=>r.after.status==="DISCOVERY").reduce((s,r)=>s+r.count,0);
     const pctOf=n=> total? Math.round(n/total*100):0;
 
+    // 여신 한도 총 감소 (억 단위, 종전·적용 모두 산출 가능한 세그먼트만)
+    let cutBil=0, cutRows=0;
+    for(const r of rows){
+      if(r.limBefore!=null && r.limAfter!=null && r.limBefore>r.limAfter){
+        cutBil += (r.limBefore - r.limAfter) * r.count;
+        cutRows += r.count;
+      }
+    }
+    const cutStr = cutBil>=10000 ? (cutBil/10000).toFixed(1)+"조원" : fmt(Math.round(cutBil))+"억원";
+
     // KPI
     $("kpis").innerHTML=[
       {c:"k-ok", dot:"var(--ok)", t:"총 차주", v:fmt(total), s:SEGMENTS.filter(s=>REGION_FILTER==="ALL"||s.region===REGION_FILTER).length+"개 세그먼트"},
       {c:"k-warn", t:"영향 받는 차주", v:fmt(impacted), s:pctOf(impacted)+"% · LTV/상태 변동"},
+      {c:"k-risk", t:"여신 한도 총 감소", v:cutStr, s:"주택가격 "+PRICE+"억 가정"},
       {c:"k-risk", t:"LTV 0% 전락", v:fmt(toZero), s:pctOf(toZero)+"% · 유주택·다주택"},
       {c:"k-info", t:"종전규정 유지", v:fmt(retained), s:"경과규정 grandfathering"},
       {c:"k-info", t:"Discovery 분리", v:fmt(discovery), s:"정책대출 수동 검토"}
@@ -836,14 +875,14 @@
     });
     const rawMax=Math.max(1,...dist.map(d=>Math.max(d.before,d.after)));
     const step=rawMax>2000?500:(rawMax>800?250:100);
-    const maxV=Math.ceil(rawMax/step)*step;   // 눈금 여유 있는 상한
-    // 그리드라인 (0,25,50,75,100%)
+    const maxV=(Math.floor(rawMax/step)+1)*step;   // 항상 최고 막대보다 큰 상한(라벨 여유 보장)
+    // 그리드라인 (0,25,50,75,100%) — 최상단(100%) 라벨은 범례와 겹쳐 생략
     let grid="";
     for(let i=0;i<=4;i++){
       const val=Math.round(maxV*i/4);
       const bottom=i/4*100;
       grid+=`<div class="gridline" style="bottom:${bottom}%"></div>`+
-            `<div class="gridcap" style="bottom:${bottom}%">${fmt(val)}</div>`;
+            (i<4?`<div class="gridcap" style="bottom:${bottom}%">${fmt(val)}</div>`:"");
     }
     $("plot").innerHTML=grid+dist.map(d=>`
       <div class="bucket">
@@ -880,6 +919,9 @@
         <td class="num" style="color:var(--ink-3)">${bL}</td>
         <td class="num"><strong>${aL}</strong></td>
         <td class="num">${deltaCell(r.before,r.after)}</td>
+        <td class="num limit" style="color:var(--ink-3)">${won(r.limBefore)}</td>
+        <td class="num limit"><strong>${won(r.limAfter)}</strong></td>
+        <td class="num limit">${limitDelta(r.limBefore,r.limAfter,r.after)}</td>
         <td><span class="rc">${r.after.reason_codes.join(", ")}</span></td>
         <td class="gfcell ${r.after.grandfathering_applied?"on":""}">${r.after.grandfathering_applied?"적용":"—"}</td>
       </tr>`;
@@ -895,6 +937,17 @@
     if(after.status==="DISCOVERY") return `<span class="dlt info">분리</span>`;
     if(!aD) return `<span class="dlt info">검토</span>`;
     return `<span class="dlt down">규제 적용</span>`;  // before 기준부재 → after 규제판정
+  }
+  function limitDelta(bL, aL, after){
+    if(bL!=null && aL!=null){
+      const d=bL-aL;
+      if(d<=0) return `<span class="dlt same">0억</span>`;
+      const x=Number.isInteger(d)?d:d.toFixed(1);
+      return `<span class="dlt down">▼ ${x}억</span>`;
+    }
+    if(after.status==="DISCOVERY") return `<span class="dlt info">분리</span>`;
+    if(!isDec(after)) return `<span class="dlt info">검토</span>`;
+    return `<span class="dlt down">규제 적용</span>`;
   }
 
   // 차트 툴팁
@@ -917,6 +970,10 @@
   document.querySelectorAll("#regionFilters .fchip").forEach(b=>b.addEventListener("click",()=>{
     document.querySelectorAll("#regionFilters .fchip").forEach(x=>x.setAttribute("aria-pressed","false"));
     b.setAttribute("aria-pressed","true"); REGION_FILTER=b.dataset.region; renderPortfolio();
+  }));
+  document.querySelectorAll("#priceFilters .fchip").forEach(b=>b.addEventListener("click",()=>{
+    document.querySelectorAll("#priceFilters .fchip").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true"); PRICE=parseInt(b.dataset.price,10); renderPortfolio();
   }));
 
   // 탭 전환
