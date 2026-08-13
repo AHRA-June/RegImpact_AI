@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-13
+- **갱신자:** Claude (Impact Matrix E2E 관통 세션)
+- **개발 브랜치:** `claude/work-start-dq1gtz`
+- **전체 단계:** 🟢 Phase 1 Walking Skeleton 관통 완료 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **Impact Matrix E2E 파이프라인** 구현(테스트 51 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -21,7 +21,17 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-10)
+## ✅ 방금 완료 (2026-08-13)
+- **Impact Matrix E2E 관통 (Walking Skeleton)** — `src/regimpact/impact/`
+  (personas·matrix·anchor·proposal·pipeline·report). 04_PLAN의 최대 리스크("E2E 관통 실패")
+  해소: 6·30 1건이 **Source→Before/After→Impact Matrix→Rule Change Proposal→Test/Regression
+  →Assurance→Validation Report** 까지 관통(`run_e2e()`). **오프라인**(API 키 불필요) — 앵커 추출이
+  원문에 grounding됨(Citation Correctness 100%, grounded 6/6). Impact Matrix 18행(무주택 70→40,
+  생애최초 70→70, 서민 70→60, 유주택/다주택은 escalation). Proposal은 LOCKED §4대로 `AI_DRAFT`로
+  태어나고 provenance(LLM 추출 vs 룰엔진) 분리. 환각 인용 주입 시 e2e_ok=False로 잡음. 테스트 12개(총 51) 통과.
+  실행: `python examples/demo_e2e_6_30.py`.
+
+## ✅ 이전 완료 (2026-08-10)
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
   **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
   명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
@@ -32,11 +42,13 @@
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
+- ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-13). `src/regimpact/impact/` 전체 관통, 오프라인, 테스트 51.
+  - **후속(선택):** ①UI 연동 시 Stitch 하드코딩값을 `E2EReport.to_dict()` 실제 출력으로 교체
+    ②`high_impact` 임계(현재 20%p 초안)를 metrics_spec high-risk 확정과 정렬 ③검증보고서 15~20쪽 서식화.
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+  이후 `run_e2e(extraction=실제추출)`로 동일 파이프라인에 주입해 실측 grounding/gold 점수 측정.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
-  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
-    ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
+  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영.
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -86,6 +98,14 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **Impact Matrix E2E 관통(Walking Skeleton) 구현.** `src/regimpact/impact/`
+  (personas·matrix·anchor·proposal·pipeline·report·README). 04_PLAN 최대 리스크("E2E 관통 실패") 해소 —
+  6·30 1건이 Source→Before/After(앵커추출)→Impact Matrix(룰엔진 2시점)→Rule Change Proposal→
+  Test/Regression(독립 오라클)→Assurance(Citation grounding + Gold)→Validation Report 까지 관통.
+  `run_e2e()`/`format_e2e_report()`. **오프라인**(앵커 추출이 원문 grounding, Citation Correctness 100%).
+  값의 출처 분리(Impact Matrix·segment_impacts=룰엔진 deterministic, narrative_changes=LLM 추출+citation),
+  LOCKED §4 코드화(Proposal `AI_DRAFT`→`.confirm()`). 환각 인용 주입 회귀 방어(`test_e2e_detects_ungrounded_injection`).
+  `examples/demo_e2e_6_30.py`. 테스트 12개(총 51) 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.
