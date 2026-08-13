@@ -22,6 +22,10 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **PRD v1 작성** — `docs/prd/regchange-ai/regchange-ai_v1.md`(+CHANGELOG). 브리프 §25 필수 항목
+  (사용자·Use Case / 데이터·컴포넌트 스키마 / 평가 프로토콜 / 배포)을 구체화하고, **각 컴포넌트·스키마의
+  현행 구현 상태(구현됨/부분/계획)를 매트릭스로 명시.** error taxonomy·성공기준·리스크·로드맵 포함.
+  버전 규칙 적용(PRD도 vN + CHANGELOG). `docs/prd/README.md`·top README 문서지도 갱신.
 - **Assurance 4 dimension 완성 + 임계값 확정(Strict)** — `src/regimpact/assurance/`(thresholds·metrics·scorecard).
   누락 3지표 추가(**Source Contradiction Rate**·**Grandfathering Recall**·**Policy-version Consistency**) →
   12지표 완비. 사용자 확정: 프로파일 **Strict**, 종합 판정 **고위험 FAIL→전체 FAIL**. 6·30 스코어카드
@@ -134,6 +138,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **PRD v1 작성.** `docs/prd/regchange-ai/regchange-ai_v1.md`(+CHANGELOG). 브리프 §25 필수 항목(사용자·Use Case·데이터/컴포넌트 스키마·평가·배포)을 구체화하고 **현행 구현 상태(구현됨/부분/계획)를 매트릭스로 명시**(과대약속 금지). 데이터 스키마 11종·컴포넌트 12종 상태표, 평가 프로토콜(3계층·DEV/LOCKED/CHALLENGE·error taxonomy 4종), Assurance 4 dimension 확정 임계값, Human Review·Audit, 배포·재현성, 성공기준·리스크·로드맵. PRD도 버전 규칙 적용. `docs/prd/README.md`·top README 갱신.
 - **2026-08-13** — ✅ **Assurance 4 dimension 완성 + 임계값 확정(Strict).** `src/regimpact/assurance/`(thresholds·metrics·scorecard). 누락 3지표 추가: ①Source Contradiction Rate(인용 grounded지만 %값 원문 부재=날조 프록시) ②Grandfathering Recall(경과규정 항목 포착, 고위험 분리) ③Policy-version Consistency(효력일 경계 시점질의 정합, 오라클 검증). 12지표 완비. 사용자 확정: 프로파일 **Strict**, 종합 판정 **고위험(★) FAIL→전체 FAIL**. 6·30 스코어카드 **12/12 PASS→종합 PASS**. 가드레일 테스트(서민실수요 누락→Exception Recall FAIL→전체 FAIL, LTV 33% 날조→Contradiction 1.0 포착). `build_scorecard`/`format_scorecard_md`, `examples/assurance_scorecard.py`→`docs/reports/assurance_scorecard.md`. E2E [6]에 `dimension_summary()` 연동. metrics_spec §0-C 임계값 표 확정, DECISION_LOG 2026-08-13, OPEN_QUESTIONS Q2 마감. 신규 기능단위 **assurance-scorecard v1**, workflow-e2e **v6** 승격. 테스트 96→110.
 - **2026-08-13** — ✅ **Validation Report 정식 HTML 보고서.** `src/regimpact/validation/render_html.py`(`render_report_html`) — DESIGN.md 디자인 시스템 기반 self-contained HTML(외부 스크립트 없음), 7개 섹션(파이프라인 관통현황 배지·규제변경 요약·영향 매트릭스·룰 변경 제안+승인상태·룰 회귀·Assurance 타일·정직성 한계) 전부 ValidationReport 실데이터 바인딩(하드코딩 0). 관통 verdict 배지, escalation/초안 미승인/오라클 challenger 한계 노출. demo_e2e가 md+html 동시 산출→`docs/reports/validation_6_30.html`. 정식 15~20쪽 분석 서사는 Phase 3(프레젠테이션 골격 완료). HTML 렌더 테스트 4건. validation-report **v2**·workflow-e2e **v5** 승격. 테스트 92→96.
 - **2026-08-13** — ✅ **룰 평가셋 수천 건 확대(조합 격자 3,200건).** `generate_grid()` — 결정론 cartesian(지역4·시점4·house_count4·처분2·생애최초2·서민실수요2·경과규정6 + 스코프 격자). 정답은 독립 오라클 유도(손라벨 없음). **Pass Rate 3,200/3,200 100%**, split 전량 측정(DEV 1200/LOCKED 1088/CHALLENGE 912 각 100%), 생성+회귀 ≈0.05s. 커버리지 status 4·rule_id 6·reason_code 11. mutation(경과규정 무력화)로 격자 방어력 확인(GRANDFATHERING 실패 포착). temporal 축 의도적 과표집 → GRANDFATHERING 다수(카테고리 균형은 큐레이션 106이 보완). `format_portfolio_stats(title=...)`, `demo_portfolio.py`가 106+3,200 동시 산출→`docs/reports/rule_grid_stats.md`. tc-generator **v3** 승격. 테스트 86→92.
