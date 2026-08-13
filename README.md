@@ -30,6 +30,7 @@
 5. `docs/03_OPEN_QUESTIONS.md` ← 사용자 확인이 필요한 대기 항목
 6. `docs/regulatory_facts.md` ← 6·30 규제 사실의 단일 기준점
 7. `docs/metrics_spec.md` ← 평가지표 정의
+8. `docs/features/` ← 기능단위·워크플로우 문서(버전별). 규칙: `docs/features/_VERSIONING.md`
 
 > ⚠️ 이 프로젝트는 개발 도중 Claude 계정이 교체됩니다.
 > **모든 상태는 이 저장소 안에만** 존재합니다. 대화 메모리에 의존하지 마세요.
@@ -48,6 +49,7 @@
 | `docs/03_OPEN_QUESTIONS.md` | 사용자 확인 대기 항목 |
 | `docs/04_PLAN.md` | **현재 유효 실행 계획** — 수직 슬라이스 우선, 총 9~10주 |
 | `docs/05_RULE_SPEC.md` | 룰엔진 규칙 명세 (LOCKED §4 — ✍️ 사용자 작성 / 🔧 스캐폴드 / 🤖 AI초안) |
+| `docs/features/` | **기능단위·워크플로우 문서(버전별 관리)** — 규칙은 `docs/features/_VERSIONING.md` |
 | `docs/sources/` | 공문 원본 스냅샷 + 추출 텍스트 + 해시 (SOURCES.md 레지스트리) |
 | `docs/ui/stitch_prompts.md` | UI 목업용 Google Stitch 프롬프트 모음(5개 화면) |
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |
