@@ -10,6 +10,13 @@
 """
 from .generator import Category, GeneratedCase, generate_all
 from .oracle import ExpectedOutcome, expected_outcome
+from .portfolio import (
+    Stratum,
+    all_strata,
+    format_coverage,
+    generate_portfolio,
+    portfolio_coverage,
+)
 from .regression import (
     CaseResult,
     RegressionReport,
@@ -24,6 +31,11 @@ __all__ = [
     "generate_all",
     "ExpectedOutcome",
     "expected_outcome",
+    "generate_portfolio",
+    "portfolio_coverage",
+    "format_coverage",
+    "all_strata",
+    "Stratum",
     "CaseResult",
     "RegressionReport",
     "run_case",

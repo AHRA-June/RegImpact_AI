@@ -50,6 +50,25 @@ print(report.pass_rate_by_category())           # {카테고리: (통과, 전체
 
 데모: `python examples/demo_tc_regression.py`
 
+## 층화 합성 포트폴리오 (Phase 2 확대)
+
+`portfolio.py` 는 seed 30건을 넘어 **수천 규모 층화 포트폴리오**로 차등검증을 확대한다.
+판정에 영향을 주는 5개 축(scope·region_time·ownership·exception·grandfather)을 곱집합으로 훑어
+**432 strata 를 전수 커버**하고(판정 관련 scope=home 셀에 표본 가중), 세부값(정확한 날짜·주택수)만
+seed 난수로 흔든다. 결정적(같은 target_n·seed → 동일 포트폴리오).
+
+```python
+from regimpact.tc_generator import generate_portfolio, run_regression, format_coverage
+cases = generate_portfolio(target_n=3000)   # ~3,024건, 최대 5,000까지 target_n으로 조정
+print(format_coverage(cases))                # 층화 커버리지·카테고리·결과상태 분포
+print(run_regression(cases).pass_rate)       # 3024/3024 = 100%
+```
+
+데모: `python examples/demo_portfolio_regression.py`
+
+성공 기준은 규모가 아니라 **층화 커버리지**(432/432 strata) — `portfolio_coverage()`로 노출.
+mutation test(`test_portfolio_mutation_power_exceeds_seed_set`)로 scale-up의 결함검출력을 정량 실증한다.
+
 ## fixture에 이빨이 있는가? (mutation test)
 
 `tests/test_tc_generator.py` 는 엔진에 의도적 버그를 심어(LTV 상수 변조, 경과규정 무력화)

@@ -12,9 +12,12 @@ import pytest
 from regimpact import EvaluationStatus, LoanPurpose, MortgageApplication, evaluate
 from regimpact.tc_generator import (
     Category,
+    all_strata,
     expected_outcome,
     format_report,
     generate_all,
+    generate_portfolio,
+    portfolio_coverage,
     run_regression,
 )
 from regimpact.tc_generator import oracle as oracle_mod
@@ -113,6 +116,56 @@ def test_regression_catches_mutated_priority(monkeypatch):
     assert report.pass_rate < 1.0
     failed_cats = {r.case.category for r in report.failures}
     assert Category.GRANDFATHERING in failed_cats
+
+
+# ---------- 층화 합성 포트폴리오 (Phase 2 확대) ----------
+def test_portfolio_is_deterministic():
+    """같은 (target_n, seed) 는 동일 포트폴리오(case_id + 입력)를 만든다."""
+    a = [(c.case_id, c.app) for c in generate_portfolio(target_n=1000, seed=42)]
+    b = [(c.case_id, c.app) for c in generate_portfolio(target_n=1000, seed=42)]
+    assert a == b
+
+
+def test_portfolio_seed_changes_inputs():
+    a = [c.app for c in generate_portfolio(target_n=1000, seed=1)]
+    b = [c.app for c in generate_portfolio(target_n=1000, seed=2)]
+    assert a != b
+
+
+def test_portfolio_covers_all_strata_and_categories():
+    cases = generate_portfolio(target_n=3000)
+    cov = portfolio_coverage(cases)
+    # 432 strata 전수 커버 (커버리지가 성공 기준 — metrics_spec)
+    assert cov["strata_hit"] == len(all_strata()) == 432
+    # 모든 리포트 카테고리 등장
+    assert set(cov["by_category"]) == {c.value for c in Category}
+    # 규모는 target 근처
+    assert 2500 <= cov["total"] <= 3500
+
+
+def test_portfolio_regression_100_percent():
+    """수천 규모 층화 포트폴리오에서도 엔진이 명세 오라클과 100% 일치."""
+    report = run_regression(generate_portfolio(target_n=3000))
+    assert report.pass_rate == 1.0, format_report(report)
+    assert report.total >= 2500
+    # 판정 관련 카테고리가 실제로 존재(자명 SCOPE만이 아님)
+    by = report.pass_rate_by_category()
+    for cat in ("GRANDFATHERING", "CONFLICT", "BOUNDARY", "BASELINE"):
+        assert cat in by and by[cat][1] > 0
+
+
+def test_portfolio_mutation_power_exceeds_seed_set(monkeypatch):
+    """유주택 LTV 상수 변조 시, 포트폴리오가 seed 30건보다 훨씬 많은 실패를 잡는다.
+
+    scale-up의 가치(더 넓은 결함 검출 표면)를 정량 실증한다."""
+    portfolio = generate_portfolio(target_n=3000)   # 변조 전에 케이스 고정(입력 불변)
+    seed_cases = generate_all()
+    monkeypatch.setattr(rule_engine, "LTV_OWNER", 0.10)  # 유주택 0% → 10% 버그 주입
+
+    seed_fail = len(run_regression(seed_cases).failures)
+    port_fail = len(run_regression(portfolio).failures)
+    assert seed_fail >= 1                      # seed 도 잡긴 함
+    assert port_fail > seed_fail * 10          # 포트폴리오는 훨씬 넓게 잡음
 
 
 # ---------- 충돌 케이스가 명세 주석(spec_note)을 보존 ----------

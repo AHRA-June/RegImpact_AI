@@ -67,16 +67,20 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 > ✅ **구현: `src/regimpact/tc_generator/`** — 룰엔진을 **독립 명세 오라클(challenger)** 로 차등 검증.
 > 기대값을 엔진 자신이 아니라 명세(§H)에서 독립 유도 → 회귀가 tautology가 되지 않음.
 > `run_regression()` 이 아래 지표를 카테고리별로 산출(`report.pass_rate_by_category()`).
-> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 30 케이스 전 항목 100%.
+> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패).
+> **확대(2026-08-13):** seed 30건 + **층화 합성 포트폴리오 ~3,024건**(`portfolio.generate_portfolio`,
+> 5축 곱집합 432 strata 전수 커버) 모두 100%. scale-up 결함검출력을 mutation test로 실증
+> (유주택 LTV 변조 시 포트폴리오가 seed보다 10배 이상 실패 검출).
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값 |
+| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값(seed / 포트폴리오) |
 |---|---|---|---|---|---|
-| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) |
-| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 |
-| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 |
-| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 |
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 / **3024/3024** (100%) |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 / 3024/3024 |
+| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 / 348/348 |
+| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 / 912/912 |
 
-> 주: 현재값은 6·30 시나리오 소규모 seed 케이스 기준. 층화 합성 포트폴리오(2,000~5,000, `04_PLAN.md` Phase 2)로 확대 예정.
+> 주: 포트폴리오는 결정적(seed 고정, 재현 가능). 성공 기준은 규모가 아니라 **층화 커버리지**
+> (432/432 strata)임을 `portfolio_coverage()`로 노출. 규모 확대(최대 5,000)는 `target_n` 인자로 조정.
 
 ## 4. Human Escalation 계열 (브리프 §13.4) — [ROADMAP]
 

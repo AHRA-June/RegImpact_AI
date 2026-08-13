@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix E2E 관통 세션)
 - **개발 브랜치:** `claude/work-start-dq1gtz`
-- **전체 단계:** 🟢 Phase 1 Walking Skeleton 관통 완료 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **Impact Matrix E2E 파이프라인** 구현(테스트 51 통과)
+- **전체 단계:** 🟢 Phase 1 관통 완료 → Phase 2 착수 — 룰엔진 v1 + Extractor(실측 run1) + TC Generator/Rule-Regression + Impact Matrix E2E + **층화 합성 포트폴리오(~3천)**(테스트 57 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,14 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **층화 합성 포트폴리오(Phase 2) — 룰엔진 차등검증 seed 30 → ~3,024건 확대.**
+  `src/regimpact/tc_generator/portfolio.py`. 5축(scope·region_time·ownership·exception·grandfather)
+  곱집합 **432 strata 전수 커버**, 판정 관련(scope=home) 셀에 가중. 결정적(seed 고정, 재현 가능).
+  오라클이 기대값 유도 → 기존 `run_regression()`로 그대로 차등검증. **Pass Rate 3024/3024 (100%)**,
+  카테고리별 100%(GRANDFATHERING 1227·CONFLICT 912·BOUNDARY 348·BASELINE 168·EXCEPTION 81·SCOPE 288).
+  `portfolio_coverage()`로 커버리지 노출(성공 기준=규모 아닌 층화 커버리지). scale-up 결함검출력을
+  mutation test로 실증(유주택 LTV 변조 시 포트폴리오가 seed보다 10배↑ 실패 검출).
+  `examples/demo_portfolio_regression.py`. 테스트 5개(총 57) 통과.
 - **Extractor 실제 LLM 1회 실행 (run 1) — 첫 실측 지표 확보.** 이 환경에 `ANTHROPIC_API_KEY`가
   없어 SDK 경로(api.anthropic.com) 대신 **세션 모델(claude-opus-4-8)** 이 `run_extractor`와 동일
   프롬프트+원문 3건으로 구조화 추출을 생성(`docs/eval/regchange_extraction_6_30_run1.json`, 10건).
@@ -59,8 +67,8 @@
 - ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-13, run1 세션 모델 경로). Citation Correctness 100%,
   Change/Exception 100%. **후속:** 사용자 API 키로 `run_extractor.py`(고립 claude-opus-5) 재실행해
   **독립 실측치**(오염 없는 run2) 확보 → run1과 대조.
-- ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
-  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영.
+- ~~**TC Generator**~~ — ✅ 완료(2026-08-10). ~~①합성 포트폴리오 확대~~ ✅ 완료(2026-08-13, ~3,024건 층화, 100%).
+  - **후속(선택):** ②CFL-04(Q8) 도메인 확정 후 반영 ③포트폴리오 규모 5,000까지 확대(target_n 조정).
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -110,6 +118,11 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **층화 합성 포트폴리오(Phase 2) 구현 — 차등검증 ~3,024건 확대.**
+  `tc_generator/portfolio.py`(generate_portfolio·portfolio_coverage·format_coverage). 5축 곱집합 432 strata
+  전수 커버(scope=home 가중), 결정적 seed. 오라클 기대값으로 기존 run_regression 차등검증 → 3024/3024(100%),
+  전 카테고리 100%. mutation test로 scale 결함검출력 실증(seed 대비 10배↑). `examples/demo_portfolio_regression.py`.
+  metrics_spec §3 현재값 갱신. 테스트 5개(총 57) 통과.
 - **2026-08-13** — ✅ **Extractor 실제 LLM 1회 실행(run 1) — 첫 실측 지표.** API 키 부재로 세션 모델
   (claude-opus-4-8)이 run_extractor 동일 프롬프트+원문으로 추출 10건 생성(`docs/eval/regchange_extraction_6_30_run1.json`).
   실제 extractor 코드 경로로 주입해 결정적 Assurance 채점: **Citation Correctness 100%(10/10), Unsupported 0%,
