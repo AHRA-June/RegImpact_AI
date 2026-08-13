@@ -5,8 +5,8 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-13
-- **갱신자:** Claude (Impact Matrix 구현 세션)
-- **개발 브랜치:** `claude/work-in-progress-d2et38`
+- **갱신자:** Claude (E2E 관통→Assurance→포트폴리오 산출물→인프라 심화 세션)
+- **개발 브랜치:** `claude/work-in-progress-d2et38` (모두 커밋·푸시 완료, 워킹트리 clean)
 - **전체 단계:** 🟢 코어 완성 + 인프라 심화 — 룰엔진·Extractor(무료 LLM)·RAG(BM25+recall@k)·TC Generator·Impact Matrix·Rule Proposal·Assurance Scorecard·Validation Report·**Audit Trail(해시 체인)**(테스트 135 통과). **6·30 E2E 전 노드 관통 · Assurance 12/12 PASS · 룰 3계층(30/106/3,200) 100% · 정식 검증보고서·Card·Risk Register·PRD·감사추적 완비.**
 - (해결됨) 원격 푸시 권한 부여됨.
 
@@ -18,6 +18,26 @@
 - [x] 브리프에 대한 분석 피드백 완료 (6개 핵심 지적 — 아래 "피드백 요약" 참고)
 - [x] 문서 구조(handoff scaffold) 생성 및 커밋
   - README, 01_PROJECT_STATE, 02_DECISION_LOG, 03_OPEN_QUESTIONS, regulatory_facts(스켈레톤), metrics_spec(스켈레톤)
+
+---
+
+## 🧭 새 세션 인계 스냅샷 (2026-08-13)
+
+> **먼저 읽을 것:** 이 파일 → `README.md`(포트폴리오 개요) → `docs/features/README.md`(기능단위 최신 vN) →
+> `docs/features/_VERSIONING.md`(문서 버전 규칙).
+
+**지금 상태:** 코어 완성 + 인프라 심화까지 완료. 테스트 **135개 통과**, 워킹트리 clean, 전부 push됨.
+- 코드 8모듈: rule_engine · extractor(+무료 LLM 어댑터) · retrieval(BM25) · impact · proposal · tc_generator · assurance · validation · audit
+- 산출물: 정식 검증보고서(17쪽) · Model/System Card · AI Risk Register(v2) · PRD(v3) · 감사로그 · 각종 stats 리포트
+- 6·30 E2E 전 노드 관통, Assurance 4dim 12/12 PASS, 룰 3계층(30/106/3,200) 100%, 감사추적 변조탐지 실증
+
+**다음 3개 액션 (택1로 시작):**
+1. **본인 PC에서 무료 LLM 실제 실행** — `REGIMPACT_LLM_PROVIDER=ollama python examples/run_extractor.py`
+   → 실제 추출 수치를 `docs/eval/regchange_extracted_6_30.json`에 반영, provenance "자동 실행"으로 갱신(결과 나오면 Claude가 반영 지원).
+2. **라이브 파이어**(브리프 §19) — 새 규제 발표를 파이프라인에 실시간 투입하는 데모 시나리오.
+3. **도메인 확정 항목 해소** — `03_OPEN_QUESTIONS.md` Q5(수기 Impact 앵커)·Q6(규제사실 검수)·Q8(유주택+생애최초).
+
+**대기 중 결정(사용자):** Q5·Q6·Q8 (도메인 판단 필요). **블로커:** 없음.
 
 ---
 
