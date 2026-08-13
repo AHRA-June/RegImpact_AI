@@ -14,6 +14,7 @@
 | Impact Matrix UI 렌더 | [`ui-render/`](./ui-render/ui-render_v1.md) | v1 | ✅ |
 | Rule Change Proposal + Human Review | [`rule-proposal/`](./rule-proposal/rule-proposal_v1.md) | v1 | ✅ |
 | Assurance Scorecard (4 dimension + 임계값) | [`assurance-scorecard/`](./assurance-scorecard/assurance-scorecard_v1.md) | v1 | ✅ 12/12 PASS |
+| Audit Trail (해시 체인) | [`audit-trail/`](./audit-trail/audit-trail_v1.md) | v1 | ✅ 변조 탐지 |
 | Validation Report (검증보고서) | [`validation-report/`](./validation-report/validation-report_v3.md) | v3 | ✅ 정식 서사(17쪽) |
 
 ## 워크플로우

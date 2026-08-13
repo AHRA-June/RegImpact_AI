@@ -3,6 +3,11 @@
 > 최신이 위. 각 항목은 해당 버전 파일(`regchange-ai_risk_register_vN.md`)의 변경 요약이다.
 > 규칙: `docs/features/_VERSIONING.md`.
 
+## v2 (2026-08-13)
+- **R-GOV-01(감사추적 부재) 통제 강화.** 해시 체인 감사로그(`src/regimpact/audit/`, 변조 탐지) 구현으로
+  통제 ⬜계획→✅운영, 잔여위험 6(Medium)→3(Low). 히트맵·Top 잔여위험 갱신.
+- 이전(v1) 대비 상세: `regchange-ai_risk_register_v2.md` 상단 "변경 이력" 참고.
+
 ## v1 (2026-08-13)
 - 최초 작성 (신규). Model/System Card 리스크 요약(8종)을 정식 리스크 관리 형식으로 확장.
 - 19건 5범주(AI/모델·데이터·룰/의사결정·거버넌스·운영). 각 건 고유위험(L×I) → 통제[유형] → 잔여위험,

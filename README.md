@@ -74,6 +74,7 @@ flowchart LR
 | `demo_portfolio.py` | 룰 평가셋 **큐레이션 106 + 격자 3,200** 통계 | `reports/rule_{portfolio,grid}_stats.md` |
 | `measure_assurance_6_30.py` | 추출 Assurance 실측(grounding·골드 대조) | `reports/assurance_6_30.md` |
 | `demo_retrieval.py` | RAG 검색(BM25) + **recall@k** 평가 | `reports/retrieval_stats.md` |
+| `demo_audit.py` | 파이프라인 **해시 체인 감사로그** + 변조 탐지 시연 | `reports/audit_6_30.jsonl` |
 | `demo_impact_matrix.py` | 시행 전/후 세그먼트별 LTV 영향 매트릭스 | 콘솔 |
 | `render_impact_ui.py` | 영향 매트릭스 데이터바인딩 HTML | `ui/generated/impact_matrix.html` |
 | `demo_tc_regression.py` | 룰엔진 ⟷ 독립 오라클 차등검증(seed 30) | 콘솔 |
@@ -106,6 +107,7 @@ src/regimpact/
 ├── tc_generator/  # TC Generator + 3계층 회귀(독립 오라클 차등검증)
 ├── retrieval/     # RAG/Retrieval(BM25 어휘검색 + recall@k, 무료·결정론)
 ├── assurance/     # Assurance Scorecard(4 dimension + 확정 임계값)
+├── audit/         # Audit Trail(해시 체인 감사로그, 변조 탐지)
 └── validation/    # Validation Report(md + 정식 HTML)
 tests/             # pytest 110개
 examples/          # 데모 9종

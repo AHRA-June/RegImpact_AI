@@ -3,6 +3,11 @@
 > 최신이 위. 각 항목은 해당 버전 파일(`regchange-ai_vN.md`)의 변경 요약이다.
 > 규칙: `docs/features/_VERSIONING.md`.
 
+## v3 (2026-08-13)
+- Audit(Logger·event) `⬜ 계획/부분` → `✅ 구현`(해시 체인 감사로그, 변조 탐지) 반영. §5·§6·§10·§13·§15.
+  ✅ 완료 목록에 Audit Trail 추가. Risk Register R-GOV-01 잔여 6→3 연동.
+- 이전(v2) 대비 상세: `regchange-ai_v3.md` 상단 "변경 이력" 참고.
+
 ## v2 (2026-08-13)
 - RAG/retrieval `⬜ 계획` → `✅ 구현`(BM25+recall@k+grounding 보존) 반영. §5·§6·§13·§15 갱신.
   ✅ 완료 목록에 무료 LLM 지원·정식 17쪽 서사·Card·Risk Register 추가.

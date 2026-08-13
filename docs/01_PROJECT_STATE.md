@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix 구현 세션)
 - **개발 브랜치:** `claude/work-in-progress-d2et38`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + **Assurance Scorecard** + Validation Report(테스트 110 통과). **6·30 E2E 전 노드 관통 · Assurance 4 dimension 12지표 확정 임계값 12/12 PASS · 룰 평가셋 3계층(30/106/3,200) 전부 100%.**
+- **전체 단계:** 🟢 코어 완성 + 인프라 심화 — 룰엔진·Extractor(무료 LLM)·RAG(BM25+recall@k)·TC Generator·Impact Matrix·Rule Proposal·Assurance Scorecard·Validation Report·**Audit Trail(해시 체인)**(테스트 135 통과). **6·30 E2E 전 노드 관통 · Assurance 12/12 PASS · 룰 3계층(30/106/3,200) 100% · 정식 검증보고서·Card·Risk Register·PRD·감사추적 완비.**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -154,6 +154,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **정식 audit trail 구현(해시 체인, 변조 탐지).** `src/regimpact/audit/`(log). append-only 감사로그로 각 이벤트 해시가 직전 해시를 포함(SHA-256 hash chain) → 사후 변조 시 체인이 깨져 `verify()`가 포착(tamper-evident). 의존성 0(hashlib·json), 시계 주입으로 결정론(테스트 고정, 실사용 UTC). JSONL 영속(`load_jsonl`/`to_jsonl`). 표준 이벤트 상수(`Action.*`), actor 구분(system vs human:<name>). `examples/demo_audit.py`: 파이프라인 8노드→10 이벤트 기록, verify OK, **승인→반려 위조 시 verify FAIL(seq 지목)·재정렬 탐지** 실증 → `docs/reports/audit_6_30.jsonl`. 테스트 7건(총 135). 신규 기능단위 audit-trail v1. **Risk Register v2**(R-GOV-01 감사추적 부재 통제 ⬜→✅, 잔여 6→3 Low), **PRD v3**(Audit ✅). README·features/README 갱신. 제약: 외부 신뢰 앵커(타임스탬프 서명·외부 원장)는 후속.
 - **2026-08-13** — ✅ **RAG/retrieval층 구현.** `src/regimpact/retrieval/`(chunk·lexical·retriever·evaluate). **BM25 어휘검색(순수 표준 라이브러리·의존성 0·결정론·무료)** 기본 + 임베딩 검색(주입식, 무료 로컬 Ollama 등 embed 함수 주입) + 순수 파이썬 코사인(numpy·벡터DB 불필요). 한국어 대응(어절+한글 bigram). **검색층도 평가**: `recall_at_k`/`recall_curve` — 골드 근거 문단 회수율. 6·30: 문서 3건→청크 62개, **recall@{1,3,5,8}=100%**(근거 전부 회수 → 하류 완전성 안전). **grounding 체인 보존**: `retrieve_context`가 검색 결과를 원본 doc_id로 묶어 반환 → 인용이 원문에 매핑, Assurance 그대로 작동. `examples/demo_retrieval.py`→`docs/reports/retrieval_stats.md`. 테스트 8건(총 128). 신규 기능단위 retrieval v1, metrics_spec §1에 recall@k 지표 추가, PRD **v2**(RAG 계획→구현). 주: 기본 파이프라인은 전량 컨텍스트(완전성 우선), 검색은 스케일 대비 선택 경로+평가 프레임워크.
 - **2026-08-13** — ✅ **무료 LLM 제공자 지원(anthropic 불필요).** 사용자 요청: "무료만 쓸 것". Extractor가 완성 함수 주입식이라 제공자 교체가 자연스러움을 활용 → `src/regimpact/extractor/providers.py` 추가: OpenAI 호환 범용 어댑터(`openai_compatible_completion`)로 **Ollama(로컬·완전 무료·가입 불필요)·Groq·OpenRouter·Gemini(무료 티어)** 를 base_url·model·키 환경변수만으로 커버. **외부 SDK 불필요 — 표준 라이브러리 urllib만.** 견고 JSON 파서(`extract_json_object`), env 구성(`completion_from_env`), 무료 프리셋(`FREE_PROVIDERS`). `run_extractor.py`를 제공자-불문으로 재작성(무료 옵션 안내). 어댑터 오프라인 테스트 10건(총 120). extractor-assurance **v4** 승격. 주: 라이브 실행은 사용자 환경에서(로컬 Ollama 권장); 현 검증 환경은 키·egress 정책상 미수행이라 provenance는 세션 수동 grounded 추출 유지.
 - **2026-08-13** — ✅ **README·데모 정리(포트폴리오 첫인상).** README를 재구성: 인계 안내가 맨 위였던 것을 **핵심 결과(E2E 관통·Assurance 12/12·룰 3계층 100%·110 테스트) → 30초 Quickstart → 파이프라인(mermaid) → 데모 카탈로그 → 포트폴리오 산출물 → 저장소 구조** 순으로 임팩트를 앞세우고, 인계 안내·LOCKED 요약·버전 규칙은 보존해 하단 배치. `demo_tc_regression.py`가 `sys.path` 부트스트랩 누락으로 pip 미설치 시 실패하던 것 수정 → **8개 무-API 데모 전부 실행 확인**. `docs/reports/README.md` 산출물 인덱스 추가. (코드 로직 무변경, 테스트 110 유지.)
