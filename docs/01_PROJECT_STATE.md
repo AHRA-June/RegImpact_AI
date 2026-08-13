@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix 구현 세션)
 - **개발 브랜치:** `claude/work-in-progress-d2et38`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 75 통과). **6·30 E2E 전 노드 관통 + Assurance 실측(Citation 100% / Exception Recall 100%, 피드백 루프 1회 완결).**
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 86 통과). **6·30 E2E 전 노드 관통 · Assurance 실측(Citation 100%/Recall 100%) · 룰 평가셋 106건 통계화(100%).**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,11 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **룰엔진 평가셋 100~120 확대·통계화** — 층화 합성 포트폴리오 **106건**(`generate_portfolio()`, seed 30→확대).
+  정답은 독립 오라클 유도(차등검증, 손라벨 없음). **Pass Rate 106/106 100%**, split(DEV 36/LOCKED 35/
+  CHALLENGE 35) **전량 측정** 각 100%, 커버리지 status 4·rule_id 6·reason_code 11. mutation 방어력 확인.
+  `examples/demo_portfolio.py`→`docs/reports/rule_portfolio_stats.md`. split 전량 측정 정당성: 결정론 엔진
+  (튜닝 루프 없음)→누수 위험 없음(04_PLAN §0-5). tc-generator **v2** 승격. 테스트 +11(총 86).
 - **Assurance 실측 + 피드백 루프 1회 완결** — 6·30 grounded 추출(`docs/eval/regchange_extracted_6_30.json`)을
   결정론 채점 하네스로 측정. 1차: **Citation 100%·Unsupported 0%·Completeness 100%·Exception Recall 50%
   (서민·실수요 누락)** — Assurance가 고위험 예외 miss 포착. 2차 반복: FAQ Q2 원문 근거(verbatim)로 서민·실수요
@@ -56,9 +61,11 @@
 - ~~**Extractor Assurance 실측 + Recall 보완**~~ — ✅ 완료(2026-08-13). Citation 100%/Exception Recall 50%→100%.
   - **후속:** ①**자동 claude-opus-5 API 무인 실행 1회**(키 확보 후) — 수동 추출 수치와 비교·재현
     ②골드셋 100~120 확대로 통계화 ③Assurance 임계값(pass/fail) 도메인 확정.
-- ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
-  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
-    ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
+- ~~**TC Generator + 층화 포트폴리오**~~ — ✅ 완료(2026-08-13). seed 30 + **포트폴리오 106건** Pass Rate 100%,
+  split 전량 측정, 커버리지 status4/rule_id6/reason_code11. mutation 방어력 확인.
+  - **후속(선택):** ①수천 건 확대(원한다면) ②CFL-04(Q8) 도메인 확정 후 반영.
+- **(구분 주의) LLM 추출용 골드셋 100~120** — 룰 평가셋(위)과 별개. 실제 규제문서가 6·30 1건뿐이라
+  확대는 **추가 규제이벤트 확보 후**(가짜 규제문서 생성은 LOCKED 원칙 위반). regulatory_facts URL·임계값 병행.
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-13). `src/regimpact/impact/` Before/After 매트릭스.
   - **후속:** ①UI(Stitch) 연동 시 하드코딩값을 `format_matrix`/`ImpactMatrix` 실제 산출로 교체
     ②고객영향 행(가격구간·대출한도) 추가 ③Report stub → 검증보고서 골격 연결(파이프라인 완주).
@@ -111,6 +118,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **룰엔진 평가셋 100~120 확대·통계화(층화 합성 포트폴리오 106건).** `src/regimpact/tc_generator/portfolio.py` — 입력 차원(지역·시점·house_count·예외·경과규정·스코프)을 중첩 루프로 층화, 결정론(난수 없음)·case_id 안정. 정답은 독립 오라클 유도(차등검증)→손라벨 없이 확장. **Pass Rate 106/106 100%**, split(DEV 36/LOCKED 35/CHALLENGE 35) 전량 측정 각 100%, 커버리지 status 4·rule_id 6·reason_code 11. `GeneratedCase.split` 필드, `pass_rate_by_split()`·`format_portfolio_stats()`·`coverage()` 추가. mutation test 포트폴리오 적용(LTV 상수·유주택 규칙 변조 시 실패 포착). split 전량 측정 정당성: 결정론 엔진(튜닝 루프 없음)→누수 위험 없음(04_PLAN §0-5), LLM 골드셋 봉인과 별개. `examples/demo_portfolio.py`→`docs/reports/rule_portfolio_stats.md`. metrics_spec §3 seed/포트폴리오 비교, tc-generator **v2** 승격. 테스트 75→86.
 - **2026-08-13** — ✅ **Assurance Exception Recall 50%→100% 보완(피드백 루프 완결).** v1 추출이 놓친 서민·실수요 예외를 FAQ Q2 원문 근거(verbatim, line 52 "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨")로 보완(추출 9→10건). Citation Correctness 10/10·Unsupported 0% 유지, Exception Recall 100% 달성. **측정→결함 포착→보완**의 Assurance 검증 루프가 실제로 한 바퀴 돈 사례. `regchange_extracted_6_30.json` `_meta.iteration` 기록, measure 리포트·metrics_spec에 v1/v2 비교·서사 반영. test_assurance_measure 기대값 갱신(75 통과 유지). extractor-assurance **v3**·workflow-e2e **v4**(지표 디커플링) 승격.
 - **2026-08-13** — ✅ **첫 Assurance 실측 확보.** 6·30 원문 3건(FSC/MOLIT 보도참고자료, 관계기관 FAQ)에서 SYSTEM_PROMPT 규칙(verbatim 인용)대로 grounded 추출 → `docs/eval/regchange_extracted_6_30.json`. 결정론 채점 하네스(`extractor/evaluate.py`)로 실측: **Citation Correctness 100%(9/9)·Unsupported 0%·Change Completeness 100%(4/4)·Exception Recall 50%(서민·실수요 누락)·Effective-date/Region OK.** 보수적 저환각 추출이 서민·실수요 예외를 놓쳐 **Assurance가 고위험 예외 miss를 실제 포착**(프롬프트 tradeoff 입증). `examples/measure_assurance_6_30.py`→`docs/reports/assurance_6_30.md`. demo_e2e가 [6] Assurance 실측 수치를 검증보고서에 연결(전 노드 관통). 회귀 고정 `test_assurance_measure`(3). metrics_spec 실측 블록, extractor-assurance **v2**·workflow-e2e **v3** 승격. provenance: 세션 수동 grounded 추출(자동 claude-opus-5 API 무인 실행은 키 확보 후). 테스트 72→75.
 - **2026-08-13** — ✅ **E2E 파이프라인 완주(핵심 관통).** [4] Rule Change Proposal(`src/regimpact/proposal/`: build_proposal + record_decision) + [7] Human Review(approval envelope, LOCKED §4 AI초안→사람확정) + [8] Validation Report(`src/regimpact/validation/`: build_report + format_report_md, stub) 구현. 6·30 1건이 [2]Extractor→[3]Impact Matrix→[R]룰엔진→[4]Proposal→[7]Review→[5]Rule-Regression→[8]Report 관통(`is_pipeline_complete=True`). 제안·보고서 값은 ImpactMatrix 실제 산출에서만 유도(하드코딩 0), 회귀 30/30 100% 포함. `examples/demo_e2e.py`→`docs/reports/validation_6_30.md`. 기능단위 문서 rule-proposal·validation-report v1 신규, **workflow-e2e v2 승격**(v1 보존, 변경이력 기록), features/README·README·STATE 갱신. 테스트 +14(총 72).

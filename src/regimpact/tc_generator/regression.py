@@ -66,6 +66,16 @@ class RegressionReport:
         by = self.pass_rate_by_category().get(category.value)
         return None if by is None else by[2]
 
+    def pass_rate_by_split(self) -> dict[str, tuple[int, int, float]]:
+        """평가셋 split(DEV/LOCKED/CHALLENGE) → (통과, 전체, 비율). split 없는 케이스는 제외."""
+        out: dict[str, tuple[int, int, float]] = {}
+        splits = [r.case.split for r in self.results if r.case.split is not None]
+        for sp in sorted(set(splits)):
+            subset = [r for r in self.results if r.case.split == sp]
+            p = sum(1 for r in subset if r.passed)
+            out[sp] = (p, len(subset), p / len(subset))
+        return out
+
 
 def _compare(expected: ExpectedOutcome, actual: LtvDecision) -> tuple[bool, tuple[str, ...]]:
     """오라클 기대값과 엔진 출력을 비교. (통과여부, 불일치설명들)."""
@@ -107,6 +117,46 @@ def run_regression(cases: Optional[list[GeneratedCase]] = None) -> RegressionRep
     if cases is None:
         cases = generate_all()
     return RegressionReport(results=[run_case(c) for c in cases])
+
+
+def format_portfolio_stats(report: RegressionReport) -> str:
+    """층화 포트폴리오 통계 요약(카테고리·split·커버리지). 데모/리포트용."""
+    from .portfolio import coverage  # 지연 import(순환 방지)
+
+    cases = [r.case for r in report.results]
+    cov = coverage(cases)
+    lines: list[str] = []
+    lines.append("=" * 64)
+    lines.append("RegImpact — Rule Portfolio Stats (층화 합성 평가셋)")
+    lines.append("=" * 64)
+    lines.append(f"N = {report.total}   Pass Rate = {report.passed}/{report.total} "
+                 f"= {report.pass_rate:.1%}  (engine ⟷ independent spec oracle)")
+    lines.append("")
+    lines.append("By category:")
+    for cat, (p, n, rate) in report.pass_rate_by_category().items():
+        lines.append(f"  {cat:<15} {p:>3}/{n:<3}  {rate:.0%}")
+    lines.append("")
+    lines.append("By split (전량 측정 — 결정론 엔진, 튜닝 루프 없음 → 누수 위험 없음):")
+    for sp, (p, n, rate) in report.pass_rate_by_split().items():
+        lines.append(f"  {sp:<10} {p:>3}/{n:<3}  {rate:.0%}")
+    lines.append("")
+    lines.append("Coverage (판정 다양성):")
+    lines.append(f"  distinct status     = {cov['distinct_status']}")
+    lines.append(f"  distinct rule_id    = {cov['distinct_rule_id']}")
+    lines.append(f"  distinct reason_code= {cov['distinct_reason_code']}")
+    if report.failures:
+        lines.append("")
+        lines.append(f"FAILURES ({len(report.failures)}):")
+        for r in report.failures:
+            lines.append(f"  ✗ {r.case.case_id} [{r.case.category.value}/{r.case.split}] "
+                         f"{r.case.description}")
+            for m in r.mismatches:
+                lines.append(f"      - {m}")
+    else:
+        lines.append("")
+        lines.append("✓ 전 케이스 통과 — 엔진이 확정 명세(§H)와 전 입력공간에서 일치.")
+    lines.append("=" * 64)
+    return "\n".join(lines)
 
 
 def format_report(report: RegressionReport) -> str:

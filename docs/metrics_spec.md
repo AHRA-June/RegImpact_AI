@@ -87,17 +87,26 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 > ✅ **구현: `src/regimpact/tc_generator/`** — 룰엔진을 **독립 명세 오라클(challenger)** 로 차등 검증.
 > 기대값을 엔진 자신이 아니라 명세(§H)에서 독립 유도 → 회귀가 tautology가 되지 않음.
-> `run_regression()` 이 아래 지표를 카테고리별로 산출(`report.pass_rate_by_category()`).
-> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 30 케이스 전 항목 100%.
+> `run_regression()` 이 아래 지표를 카테고리별로 산출. **층화 합성 포트폴리오 106건**(seed 30 → 확대,
+> `generate_portfolio()`)로 통계화 — split(DEV/LOCKED/CHALLENGE) 전량 측정, `format_portfolio_stats()`.
+> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패, seed·포트폴리오 양쪽).
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값 |
-|---|---|---|---|---|---|
-| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) |
-| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 |
-| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 |
-| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 |
+| 지표 | 정의(초안) | 분모 | 분자 | 임계 | seed(30) | 포트폴리오(106) |
+|---|---|---|---|---|---|---|
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) | **106/106 (100%)** |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | 100% | 30/30 | **106/106** |
+| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | 100% | 8/8 | **19/19** |
+| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | 100% | 5/5 | **10/10** |
 
-> 주: 현재값은 6·30 시나리오 소규모 seed 케이스 기준. 층화 합성 포트폴리오(2,000~5,000, `04_PLAN.md` Phase 2)로 확대 예정.
+**층화 포트폴리오 통계 (2026-08-13, `docs/reports/rule_portfolio_stats.md`):**
+- N=106, Pass Rate 100%. split: DEV 36 / LOCKED 35 / CHALLENGE 35(전량 측정, 각 100%).
+- 카테고리: SCOPE 18 / BASELINE 25 / EXCEPTION 21 / BOUNDARY 19 / GRANDFATHERING 13 / CONFLICT 10.
+- 커버리지: status 4종 전부 / rule_id 6 / reason_code 11.
+- **split 전량 측정 정당성:** 룰엔진은 결정론(성능 튜닝 루프 없음)이라 LOCKED/CHALLENGE를 열어도
+  누수 위험이 없다(`04_PLAN.md` §0-5 정합). LLM 추출용 골드셋의 LOCKED/CHALLENGE 봉인 원칙과 별개.
+
+> 주: n=106은 통계적 검정력이 아니라 **실패모드 층화 커버리지 + 넓은 입력공간에서의 명세 일치**가 목표.
+> 정답은 독립 오라클이 유도(차등검증) → 손라벨 없이 확장. 추가 확대(수천 건)는 후속.
 
 ## 4. Human Escalation 계열 (브리프 §13.4) — [ROADMAP]
 
