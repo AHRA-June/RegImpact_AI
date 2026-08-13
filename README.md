@@ -65,6 +65,7 @@
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
 | `docs/prd/` | **정식 PRD (버전별)** — `regchange-ai/regchange-ai_v1.md` |
+| `docs/cards/` | **Model/System Card (버전별)** — AI 거버넌스 투명성 산출물 |
 
 ## 현재 상태
 
