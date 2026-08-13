@@ -4,21 +4,24 @@
 출력: 콘솔에 검증보고서(마크다운) + docs/reports/validation_6_30.md 저장.
 
 노드: [2] Extractor → [3] Impact Matrix → [4] Rule Proposal → [7] Human Review
-      → [5] Rule-Regression → [8] Validation Report.
-LLM 없이 동작하도록 [2]는 골드 기반 확정 추출(RegChangeExtraction)을 수동 구성한다
-(실제 LLM 추출은 examples/run_extractor.py, NEXT).
+      → [5] Rule-Regression → [6] Assurance → [8] Validation Report.
+[2]는 실제 grounded 추출 산출(docs/eval/regchange_extracted_6_30.json)을 로드한다
+(Claude Code 세션 수동 추출; 자동 claude-opus-5 API는 키 확보 후 run_extractor.py).
+[6] Assurance는 결정론 채점 하네스로 실측한 수치를 보고서에 싣는다.
 """
+import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from regimpact.extractor.schema import (  # noqa: E402
-    Citation,
-    RegChangeExtraction,
-    RegChangeItem,
+from regimpact.extractor import (  # noqa: E402
+    check_citation_grounding,
+    load_sources,
+    score_against_gold,
 )
+from regimpact.extractor.schema import RegChangeExtraction  # noqa: E402
 from regimpact.impact import (  # noqa: E402
     DEFAULT_REGION,
     SIX_THIRTY_SEGMENTS,
@@ -32,26 +35,29 @@ from regimpact.proposal import (  # noqa: E402
 from regimpact.tc_generator import run_regression  # noqa: E402
 from regimpact.validation import build_report, format_report_md  # noqa: E402
 
+GOLD = json.loads((ROOT / "docs/eval/regchange_gold_6_30.json").read_text(encoding="utf-8"))
+EXTRACTED = json.loads((ROOT / "docs/eval/regchange_extracted_6_30.json").read_text(encoding="utf-8"))
 
-def build_gold_extraction() -> RegChangeExtraction:
-    """[2] 대체: 골드(regchange_gold_6_30.json) 기반 확정 추출. LLM 없이 관통용."""
-    cite = Citation(source_doc_id="FSC_20260630", quote="규제지역 LTV 70%→40%")
-    return RegChangeExtraction(
-        policy_id="FSC_20260630",
-        effective_from="2026-07-01",
-        target_regions=["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"],
-        changes=[
-            RegChangeItem("LTV", "규제지역 표준 LTV 70%→40%", cite, before="70%", after="40%"),
-            RegChangeItem("EXCEPTION", "생애최초 70% 유지·서민실수요 60%", cite),
-            RegChangeItem("GRANDFATHERING", "2026-06-30까지 접수/계약+계약금 종전규정", cite),
-            RegChangeItem("EFFECTIVE_DATE", "시행일 2026-07-01", cite, after="2026-07-01"),
-        ],
-    )
+
+def measure_assurance(ext: RegChangeExtraction) -> dict:
+    """[6] Assurance — 결정론 채점 하네스로 실측 지표를 만든다."""
+    sources = load_sources()
+    g = check_citation_grounding(ext, sources)
+    s = score_against_gold(ext, GOLD)
+    return {
+        "Citation Correctness": f"{g.citation_correctness:.0%}",
+        "Unsupported Claim Rate": f"{g.unsupported_claim_rate:.0%}",
+        "Change Completeness": f"{s.change_completeness:.0%}",
+        "Exception Recall": f"{s.exception_recall:.0%}"
+        + (f" (놓침 {s.missed_exceptions})" if s.missed_exceptions else ""),
+        "Effective-date": "OK" if s.effective_date_correct else "MISS",
+        "Region": "OK" if s.regions_correct else "MISS",
+    }
 
 
 def main() -> None:
-    # [2] Extractor (골드 기반 확정 추출)
-    extraction = build_gold_extraction()
+    # [2] Extractor (실제 grounded 추출 로드)
+    extraction = RegChangeExtraction.from_dict(EXTRACTED)
 
     # [3] Impact Matrix (Extractor 시점 유도 → 룰엔진 temporal diff)
     matrix = analyze_from_extraction(extraction, SIX_THIRTY_SEGMENTS, DEFAULT_REGION)
@@ -67,6 +73,9 @@ def main() -> None:
     # [5] Rule-Regression (엔진 ⟷ 독립 오라클)
     regression = run_regression()
 
+    # [6] Assurance (결정론 채점 실측)
+    assurance = measure_assurance(extraction)
+
     # [8] Validation Report
     report = build_report(
         scenario_title="2026-06-30 규제지역 추가 지정",
@@ -74,6 +83,7 @@ def main() -> None:
         matrix=matrix,
         proposal=proposal,
         regression=regression,
+        assurance=assurance,
     )
     md = format_report_md(report)
     print(md)

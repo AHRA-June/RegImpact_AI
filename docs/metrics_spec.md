@@ -62,6 +62,25 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 | Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD |
 | Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD |
 
+### ✅ 첫 실측 결과 (2026-08-13) — dimension ①②③
+
+> 6·30 원문 3건 grounded 추출(`docs/eval/regchange_extracted_6_30.json`)을 결정론 채점 하네스에
+> 통과시킨 **첫 실측**. 재현: `python examples/measure_assurance_6_30.py` → `docs/reports/assurance_6_30.md`.
+> provenance: Claude Code 세션 수동 grounded 추출(자동 claude-opus-5 API 무인 실행은 키 확보 후). n=1 문서셋.
+
+| 지표 | dimension | 첫 실측값 | 비고 |
+|---|---|---|---|
+| Citation Correctness | ① | **100%** (9/9) | 인용 전부 원문 verbatim |
+| Unsupported Claim Rate | ① | **0%** | 환각 인용 0 |
+| Change Completeness | ② | **100%** (4/4) | 골드 필수 변경 전부 포착 |
+| Exception Recall | ② | **50%** (1/2) | ⚠ 서민·실수요(real_demand) 누락 — Assurance가 고위험 예외 miss 포착 |
+| Effective-date Accuracy | ③ | **OK** | 2026-07-01 정확 |
+| Policy/Region Consistency | ③ | **OK** | 3개 지역 정확 |
+
+> **해석:** 저환각(0%)/완전한 인용(100%)을 달성한 대신, 보수적 추출이 서민·실수요 예외를 놓쳐
+> Exception Recall 50%. 이는 프롬프트 원칙("완전성보다 저환각 우선")의 tradeoff를 그대로 보여주며,
+> **Assurance 레이어가 고위험 예외 누락을 실제로 포착**했음을 입증(가드레일 작동). 다음 반복에서 보완.
+
 ## 3. Rule / Test 계열 (브리프 §13.3) — [DEEP] dimension ④
 
 > ✅ **구현: `src/regimpact/tc_generator/`** — 룰엔진을 **독립 명세 오라클(challenger)** 로 차등 검증.

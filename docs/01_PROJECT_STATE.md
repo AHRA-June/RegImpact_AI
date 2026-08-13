@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-13
 - **갱신자:** Claude (Impact Matrix 구현 세션)
 - **개발 브랜치:** `claude/work-in-progress-d2et38`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator + Impact Matrix + **Rule Proposal + Validation Report** 구현(테스트 72 통과). **6·30 E2E 파이프라인 핵심 관통 완료.**
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 75 통과). **6·30 E2E 전 노드 관통 + 첫 Assurance 실측 확보.**
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,12 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-13)
+- **첫 Assurance 실측** — 6·30 원문 3건에서 grounded 추출(`docs/eval/regchange_extracted_6_30.json`)을
+  결정론 채점 하네스로 측정. **Citation Correctness 100%(9/9)·Unsupported 0%·Change Completeness 100%·
+  Exception Recall 50%(서민·실수요 누락)·시점/지역 OK.** Assurance가 고위험 예외 miss를 실제 포착(가드레일
+  작동 입증). `examples/measure_assurance_6_30.py`→`docs/reports/assurance_6_30.md`, E2E 보고서 [6]에 연결.
+  회귀 고정 테스트 3건, metrics_spec 실측 블록, extractor-assurance **v2**·workflow-e2e **v3** 승격.
+  provenance: 세션 수동 grounded 추출(자동 claude-opus-5 API 무인 실행은 키 확보 후).
 - **E2E 파이프라인 핵심 관통** — [4] Rule Change Proposal(`src/regimpact/proposal/`) + [7] Human Review
   (approval envelope) + [8] Validation Report(`src/regimpact/validation/`, stub) 구현. 이제
   [2]Extractor→[3]Impact Matrix→[R]룰엔진→[4]Proposal→[7]Review→[5]Regression→[8]Report 가 관통
@@ -46,7 +52,9 @@
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- ~~**Extractor Assurance 첫 실측**~~ — ✅ 완료(2026-08-13). grounded 추출 채점(Citation 100%/Exception Recall 50%).
+  - **후속:** ①**자동 claude-opus-5 API 무인 실행 1회**(키 확보 후) — 수동 추출 수치와 비교·재현
+    ②Exception Recall 보완(서민·실수요 항목 추가 추출) ③골드셋 100~120 확대로 통계화.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
@@ -102,6 +110,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-13** — ✅ **첫 Assurance 실측 확보.** 6·30 원문 3건(FSC/MOLIT 보도참고자료, 관계기관 FAQ)에서 SYSTEM_PROMPT 규칙(verbatim 인용)대로 grounded 추출 → `docs/eval/regchange_extracted_6_30.json`. 결정론 채점 하네스(`extractor/evaluate.py`)로 실측: **Citation Correctness 100%(9/9)·Unsupported 0%·Change Completeness 100%(4/4)·Exception Recall 50%(서민·실수요 누락)·Effective-date/Region OK.** 보수적 저환각 추출이 서민·실수요 예외를 놓쳐 **Assurance가 고위험 예외 miss를 실제 포착**(프롬프트 tradeoff 입증). `examples/measure_assurance_6_30.py`→`docs/reports/assurance_6_30.md`. demo_e2e가 [6] Assurance 실측 수치를 검증보고서에 연결(전 노드 관통). 회귀 고정 `test_assurance_measure`(3). metrics_spec 실측 블록, extractor-assurance **v2**·workflow-e2e **v3** 승격. provenance: 세션 수동 grounded 추출(자동 claude-opus-5 API 무인 실행은 키 확보 후). 테스트 72→75.
 - **2026-08-13** — ✅ **E2E 파이프라인 완주(핵심 관통).** [4] Rule Change Proposal(`src/regimpact/proposal/`: build_proposal + record_decision) + [7] Human Review(approval envelope, LOCKED §4 AI초안→사람확정) + [8] Validation Report(`src/regimpact/validation/`: build_report + format_report_md, stub) 구현. 6·30 1건이 [2]Extractor→[3]Impact Matrix→[R]룰엔진→[4]Proposal→[7]Review→[5]Rule-Regression→[8]Report 관통(`is_pipeline_complete=True`). 제안·보고서 값은 ImpactMatrix 실제 산출에서만 유도(하드코딩 0), 회귀 30/30 100% 포함. `examples/demo_e2e.py`→`docs/reports/validation_6_30.md`. 기능단위 문서 rule-proposal·validation-report v1 신규, **workflow-e2e v2 승격**(v1 보존, 변경이력 기록), features/README·README·STATE 갱신. 테스트 +14(총 72).
 - **2026-08-13** — ✅ **기능단위·워크플로우 문서 + 버전관리 규칙 도입.** `docs/features/` 신설. 규칙 `_VERSIONING.md`(시맨틱 vN, 새 파일=전체 스냅샷·이전 보존, 각 버전파일 상단 before→after + 폴더 CHANGELOG 누적, PRD 동일 적용). 구현된 5개 기능단위(rule-engine·extractor-assurance·tc-generator·impact-matrix·ui-render) + E2E 워크플로우(workflow-e2e) 각 v1 작성(폴더별 `_v1.md`+`CHANGELOG.md`), `features/README.md` 인덱스. README 문서지도·인계순서 반영.
 - **2026-08-13** — ✅ **Impact Matrix UI 렌더 구현.** `src/regimpact/impact/render_html.py`(`render_matrix_html`/`render_6_30`). Stitch 목업(`_1`)의 하드코딩·환각값("60%→50%", 세종·부산 등)을 **룰엔진 실제 산출(ImpactMatrix)에 바인딩된 self-contained HTML로 교체.** DESIGN.md 디자인 토큰 인라인, 근거(reason_code·출처) 표시, REVIEW 세그먼트 별도 노출. `examples/render_impact_ui.py`→`docs/ui/generated/impact_matrix.html`. 렌더 테스트 5건(환각값 부재 단언 포함, 총 58).

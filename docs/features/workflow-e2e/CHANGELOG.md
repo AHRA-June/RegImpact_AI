@@ -2,6 +2,11 @@
 
 > 최신이 위. 각 항목은 해당 버전 파일(`workflow-e2e_vN.md`)의 변경 요약이다.
 
+## v3 (2026-08-13)
+- **[6] Assurance 첫 실측치 E2E 연결.** demo_e2e가 저장 추출을 로드해 채점 하네스로 실측한 수치를
+  검증보고서 [6]에 표기 → 전 노드([2]~[8]) 관통 표기. 테스트 72→75.
+- 이전(v2) 대비 상세: `workflow-e2e_v3.md` 상단 "변경 이력" 참고.
+
 ## v2 (2026-08-13)
 - **핵심 관통 완료.** [4] Rule Change Proposal(⬜→✅, `proposal/`), [7] Human Review(→✅ approval envelope),
   [8] Validation Report(⬜→✅ stub, `validation/`) 구현으로 [2]→[3]→[R]→[4]→[7]→[5]→[8] 관통.

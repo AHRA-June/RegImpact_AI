@@ -9,16 +9,21 @@
 - ✅ [3] Impact Matrix
 - ✅ [4] Rule Change Proposal
 - ✅ [5] TC / Rule-Regression
-- ⬜ [6] Assurance
+- ✅ [6] Assurance
 
 **판정: 관통(핵심 노드 완결).**
 
 ## 2. 규제 변경 요약 (원문 추출)
-- 추출 변경 항목: 4건
-  - `LTV` 규제지역 표준 LTV 70%→40%
-  - `EXCEPTION` 생애최초 70% 유지·서민실수요 60%
-  - `GRANDFATHERING` 2026-06-30까지 접수/계약+계약금 종전규정
-  - `EFFECTIVE_DATE` 시행일 2026-07-01
+- 추출 변경 항목: 9건
+  - `LTV` 규제지역 내 주담대 LTV 70%→40% 강화
+  - `LTV` 유주택자 규제지역 LTV 0%, 무주택(처분조건부 1주택 포함) 40%
+  - `EXCEPTION` 생애최초·정책모기지 등은 완화된 LTV(60~70%) 적용
+  - `EXCEPTION` 다주택자는 수도권 내 주택구입시 규제지역 여부 무관 LTV 0%
+  - `GRANDFATHERING` 6.30까지 접수완료 또는 계약체결+계약금 증명시 종전규정 적용
+  - `GRANDFATHERING` 토지거래허가 대상 주택은 6.30까지 허가 신청 접수시 이후 계약해도 종전규정
+  - `EFFECTIVE_DATE` 규제지역 지정효력 2026-07-01 발생
+  - `REGION` 화성 동탄·용인 기흥·구리 3곳 투기과열지구·조정대상지역 신규 지정
+  - `SCOPE_LIMIT` 1억원 초과 신용대출 보유 차주 1년간 규제지역 주택구입 제한
 
 ## 3. 시행 전/후 영향 매트릭스
 - 지역 `GURI` · 전 `2026-06-30` → 후 `2026-07-03`
@@ -58,7 +63,14 @@
   - GRANDFATHERING: 6/6 (100%)
   - CONFLICT: 5/5 (100%)
 
+## 6. Assurance (부분 측정)
+- Citation Correctness: 100%
+- Unsupported Claim Rate: 0%
+- Change Completeness: 100%
+- Exception Recall: 50% (놓침 ['real_demand'])
+- Effective-date: OK
+- Region: OK
+
 ## 7. 한계 (정직성)
 - 이 보고서는 6·30 단일 앵커 기준 stub 이다(정식 15~20쪽 아님).
 - 사람 검토 필요 세그먼트 2건 — 자동 확정 보류(escalation).
-- Assurance 정량 지표는 부분(Citation grounding 위주). 4 dimension 정량화는 Phase 3.

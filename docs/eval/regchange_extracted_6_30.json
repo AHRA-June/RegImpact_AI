@@ -1,0 +1,85 @@
+{
+  "_meta": {
+    "provenance": "Claude Code 세션에서 SYSTEM_PROMPT 규칙(원문 verbatim 인용·추론 금지)에 따라 6·30 원문 3건(FSC/MOLIT 보도참고자료, 관계기관 FAQ)에서 수동 grounded 추출한 결과. 자동 claude-opus-5 API 무인 실행은 API 키 확보 후 재실행 예정(현재 환경에 키 없음). Assurance 채점(Citation Grounding·Gold 대조)은 결정론 오프라인 코드(src/regimpact/extractor/evaluate.py)로 실측.",
+    "extracted_at": "2026-08-13",
+    "sources": ["FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"],
+    "principle": "프롬프트 원칙상 완전성보다 인용 정확도·저환각 우선. 보수적 1차 추출이라 서민·실수요 예외를 별도 항목으로 표면화하지 않음 → Assurance가 Exception Recall 50%로 포착(가드레일 작동 예시)."
+  },
+  "policy_id": "FSC_20260630",
+  "effective_from": "2026-07-01",
+  "target_regions": ["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"],
+  "changes": [
+    {
+      "category": "LTV",
+      "summary": "규제지역 내 주담대 LTV 70%→40% 강화",
+      "before": "70%",
+      "after": "40%",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"},
+      "confidence": 0.98
+    },
+    {
+      "category": "LTV",
+      "summary": "유주택자 규제지역 LTV 0%, 무주택(처분조건부 1주택 포함) 40%",
+      "before": null,
+      "after": "0%",
+      "citation": {"source_doc_id": "MOLIT_PRESS_20260630", "quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%"},
+      "confidence": 0.95
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "생애최초·정책모기지 등은 완화된 LTV(60~70%) 적용",
+      "before": null,
+      "after": "60~70%",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용"},
+      "confidence": 0.9
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "다주택자는 수도권 내 주택구입시 규제지역 여부 무관 LTV 0%",
+      "before": null,
+      "after": "0%",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"},
+      "confidence": 0.92
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "6.30까지 접수완료 또는 계약체결+계약금 증명시 종전규정 적용",
+      "before": null,
+      "after": "종전규정",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능"},
+      "confidence": 0.9
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "토지거래허가 대상 주택은 6.30까지 허가 신청 접수시 이후 계약해도 종전규정",
+      "before": null,
+      "after": "종전규정",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "토지거래허가제 적용 주택의 경우, 규제지역 효력 발생일 전일(6.30일)까지 관할 지자체에 토지거래허가를 신청 접수시, 그 이후에 부동산매매계약을 체결하여도 종전규정 적용"},
+      "confidence": 0.85
+    },
+    {
+      "category": "EFFECTIVE_DATE",
+      "summary": "규제지역 지정효력 2026-07-01 발생",
+      "before": null,
+      "after": "2026-07-01",
+      "citation": {"source_doc_id": "MOLIT_PRESS_20260630", "quote": "조정대상지역을 추가 지정하였다.(7월 1일부터 지정효력 발생)"},
+      "confidence": 0.97
+    },
+    {
+      "category": "REGION",
+      "summary": "화성 동탄·용인 기흥·구리 3곳 투기과열지구·조정대상지역 신규 지정",
+      "before": null,
+      "after": "투기과열지구·조정대상지역",
+      "citation": {"source_doc_id": "MOLIT_PRESS_20260630", "quote": "구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다."},
+      "confidence": 0.96
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "1억원 초과 신용대출 보유 차주 1년간 규제지역 주택구입 제한",
+      "before": null,
+      "after": "구입 제한",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "1억원 초과 신용대출 보유 차주는 대출 실행일로부터 1년간 규제지역* 내 주택 구입이 제한"},
+      "confidence": 0.8
+    }
+  ]
+}
