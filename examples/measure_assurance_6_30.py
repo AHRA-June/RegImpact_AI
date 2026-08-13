@@ -65,10 +65,15 @@ def format_md(m: dict, ext: RegChangeExtraction) -> str:
     L.append("## 해석 (정직성)")
     L.append("- Citation grounding 100% / Unsupported 0% — 인용은 전부 원문 verbatim(환각 없음).")
     if m["missed_exceptions"]:
-        L.append(f"- **Exception Recall {m['exception_recall']:.0%}** — 보수적 1차 추출이 "
+        L.append(f"- **Exception Recall {m['exception_recall']:.0%}** — 보수적 추출이 "
                  f"{m['missed_exceptions']} 예외를 별도 항목으로 표면화하지 못함. **Assurance가 이 고위험 "
-                 "누락을 포착**(가드레일 작동). 원문(FAQ)에 존재하므로 다음 추출 반복에서 보완 대상.")
-    L.append("- 이 수치는 6·30 단일 앵커 기준 첫 실측이다(n=1 문서셋). 골드셋 100~120 확대 시 통계화.")
+                 "누락을 포착**(가드레일 작동). 원문(FAQ)에 존재하므로 추출 반복에서 보완 대상.")
+    else:
+        L.append(f"- **Exception Recall {m['exception_recall']:.0%}** — 골드 예외 전부 포착.")
+        it = EXTRACTED.get("_meta", {}).get("iteration")
+        if it:
+            L.append(f"  - 반복 이력: {it} — Assurance 피드백 루프로 완전성 개선.")
+    L.append("- 이 수치는 6·30 단일 앵커 기준 실측이다(n=1 문서셋). 골드셋 100~120 확대 시 통계화.")
     return "\n".join(L)
 
 

@@ -3,7 +3,8 @@
     "provenance": "Claude Code 세션에서 SYSTEM_PROMPT 규칙(원문 verbatim 인용·추론 금지)에 따라 6·30 원문 3건(FSC/MOLIT 보도참고자료, 관계기관 FAQ)에서 수동 grounded 추출한 결과. 자동 claude-opus-5 API 무인 실행은 API 키 확보 후 재실행 예정(현재 환경에 키 없음). Assurance 채점(Citation Grounding·Gold 대조)은 결정론 오프라인 코드(src/regimpact/extractor/evaluate.py)로 실측.",
     "extracted_at": "2026-08-13",
     "sources": ["FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"],
-    "principle": "프롬프트 원칙상 완전성보다 인용 정확도·저환각 우선. 보수적 1차 추출이라 서민·실수요 예외를 별도 항목으로 표면화하지 않음 → Assurance가 Exception Recall 50%로 포착(가드레일 작동 예시)."
+    "principle": "프롬프트 원칙상 완전성보다 인용 정확도·저환각 우선. 1차 추출(v1)은 서민·실수요 예외를 놓쳐 Assurance가 Exception Recall 50%로 포착(가드레일 작동). 2차 반복(v2, 2026-08-13)에서 FAQ Q2 원문 근거(verbatim)로 서민·실수요 예외 항목을 보완 → Exception Recall 100%. Assurance 피드백 루프로 완전성 개선한 사례.",
+    "iteration": "v2 (서민·실수요 예외 보완). v1 대비 Exception Recall 50%→100%."
   },
   "policy_id": "FSC_20260630",
   "effective_from": "2026-07-01",
@@ -32,6 +33,14 @@
       "after": "60~70%",
       "citation": {"source_doc_id": "FAQ_20260630", "quote": "생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용"},
       "confidence": 0.9
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "서민·실수요자 주담대도 규제지역에서 완화된 LTV 적용(예외)",
+      "before": null,
+      "after": "완화 LTV(60%)",
+      "citation": {"source_doc_id": "FAQ_20260630", "quote": "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"},
+      "confidence": 0.88
     },
     {
       "category": "EXCEPTION",

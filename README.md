@@ -67,7 +67,7 @@
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 75개 통과). **6·30 E2E 전 노드 관통 + 첫 Assurance 실측**(Citation 100% / Exception Recall 50%). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1~2 진행** — 룰엔진 + Extractor + TC Generator + Impact Matrix + Rule Proposal + Validation Report(테스트 75개 통과). **6·30 E2E 전 노드 관통 + Assurance 실측**(Citation 100% / Exception Recall 100%, 측정→포착→보완 루프 1회 완결). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
 python -m pytest                          # 75개

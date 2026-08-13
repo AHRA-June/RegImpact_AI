@@ -2,6 +2,12 @@
 
 > 최신이 위. 각 항목은 해당 버전 파일(`extractor-assurance_vN.md`)의 변경 요약이다.
 
+## v3 (2026-08-13)
+- **Exception Recall 50%→100%.** FAQ Q2 원문 근거(verbatim)로 서민·실수요 예외 항목 보완
+  (추출 9→10건), Citation 10/10·Unsupported 0% 유지. Assurance 피드백 루프(측정→포착→보완) 완결.
+- test_assurance_measure 기대값 갱신(total 10, recall 1.0). 전체 75 통과.
+- 이전(v2) 대비 상세: `extractor-assurance_v3.md` 상단 "변경 이력" 참고.
+
 ## v2 (2026-08-13)
 - **첫 Assurance 실측 확보.** 6·30 grounded 추출을 결정론 채점 하네스로 측정:
   Citation Correctness 100%(9/9)·Unsupported 0%·Change Completeness 100%·Exception Recall 50%

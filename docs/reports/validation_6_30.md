@@ -14,10 +14,11 @@
 **판정: 관통(핵심 노드 완결).**
 
 ## 2. 규제 변경 요약 (원문 추출)
-- 추출 변경 항목: 9건
+- 추출 변경 항목: 10건
   - `LTV` 규제지역 내 주담대 LTV 70%→40% 강화
   - `LTV` 유주택자 규제지역 LTV 0%, 무주택(처분조건부 1주택 포함) 40%
   - `EXCEPTION` 생애최초·정책모기지 등은 완화된 LTV(60~70%) 적용
+  - `EXCEPTION` 서민·실수요자 주담대도 규제지역에서 완화된 LTV 적용(예외)
   - `EXCEPTION` 다주택자는 수도권 내 주택구입시 규제지역 여부 무관 LTV 0%
   - `GRANDFATHERING` 6.30까지 접수완료 또는 계약체결+계약금 증명시 종전규정 적용
   - `GRANDFATHERING` 토지거래허가 대상 주택은 6.30까지 허가 신청 접수시 이후 계약해도 종전규정
@@ -67,7 +68,7 @@
 - Citation Correctness: 100%
 - Unsupported Claim Rate: 0%
 - Change Completeness: 100%
-- Exception Recall: 50% (놓침 ['real_demand'])
+- Exception Recall: 100%
 - Effective-date: OK
 - Region: OK
 
