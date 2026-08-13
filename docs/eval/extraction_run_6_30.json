@@ -1,0 +1,115 @@
+{
+  "model": "claude-opus-4-8",
+  "ran_at": "2026-08-13",
+  "sources_loaded": [
+    "FSC_PRESS_20260630",
+    "MOLIT_PRESS_20260630",
+    "FAQ_20260630"
+  ],
+  "extraction": {
+    "policy_id": "FSC_20260630",
+    "effective_from": "2026-07-01",
+    "target_regions": [
+      "GURI",
+      "YONGIN_GIHEUNG",
+      "HWASEONG_DONGTAN"
+    ],
+    "changes": [
+      {
+        "category": "LTV",
+        "summary": "규제지역 내 주택구입목적 주담대 LTV 강화(무주택 기준)",
+        "before": "70%",
+        "after": "40%",
+        "confidence": 0.98,
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"
+        }
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "규제지역 지정효력 발생(시행일) 7월 1일부터",
+        "before": null,
+        "after": "2026-07-01 (7월 1일)",
+        "confidence": 0.97,
+        "citation": {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "7월 1일부터 지정효력 발생"
+        }
+      },
+      {
+        "category": "REGION",
+        "summary": "규제지역(투기과열지구·조정대상지역) 신규 지정 3곳",
+        "before": "비규제(수도권)",
+        "after": "규제지역(투기과열지구·조정대상지역)",
+        "confidence": 0.98,
+        "citation": {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "화성시 동탄구, 용인시 기흥구, 구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다"
+        }
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "경과규정 — 6.30일까지 전산접수 또는 계약+계약금 증명 시 종전규정 유지",
+        "before": null,
+        "after": "종전규정(70%) 유지",
+        "confidence": 0.95,
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "주택매매계약을 체결하고 계약금 납부 사실을 증명한 차주* 등에 대해서는 종전 규정이 그대로 적용된다"
+        }
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "생애최초 주담대 예외 — 규제지역에서도 완화 LTV 유지",
+        "before": "70%",
+        "after": "70% (좌동)",
+        "confidence": 0.9,
+        "citation": {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+        }
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "서민·실수요자 주담대 예외 — 완화 LTV 적용",
+        "before": "70%",
+        "after": "60%",
+        "confidence": 0.86,
+        "citation": {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+        }
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "신용대출 보유 차주의 규제지역 주택구입 제한(코어 밖·Discovery)",
+        "before": null,
+        "after": "1억원 초과 신용대출 보유 시 1년간 구입 제한",
+        "confidence": 0.88,
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터 1년간 규제지역 내 주택 구입 제한"
+        }
+      }
+    ]
+  },
+  "assurance": {
+    "citation_correctness": 0.8571,
+    "unsupported_claim_rate": 0.1429,
+    "grounded": 6,
+    "total": 7,
+    "ungrounded": [
+      {
+        "category": "GRANDFATHERING",
+        "summary": "경과규정 — 6.30일까지 전산접수 또는 계약+계약금 증명 시 종전규정 유지"
+      }
+    ],
+    "change_completeness": 1.0,
+    "exception_recall": 1.0,
+    "effective_date_correct": true,
+    "regions_correct": true,
+    "missed_changes": [],
+    "missed_exceptions": []
+  }
+}

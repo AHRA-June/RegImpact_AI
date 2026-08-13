@@ -280,6 +280,50 @@
     font-family:var(--sans); max-width:220px}
   :root[data-theme="dark"] .tip, :root:not([data-theme="light"]) .tip{color:var(--ground)}
   .tip b{font-family:var(--mono)}
+
+  /* ---- extraction (E+A) ---- */
+  .prov{display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface-2);
+    border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:0 10px 10px 0;
+    padding:11px 14px; margin-bottom:18px; font-size:12.5px; color:var(--ink-2)}
+  .prov .pv{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
+  .prov b{color:var(--ink)}
+  .a-tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px}
+  .a-tile{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow)}
+  .a-tile .at{font-size:11.5px; color:var(--ink-2); margin-bottom:8px; display:flex; align-items:center; gap:6px}
+  .a-tile .av{font-family:var(--mono); font-size:24px; font-weight:600; letter-spacing:-.02em; line-height:1}
+  .a-tile .meter{height:6px; border-radius:3px; background:var(--surface-3); margin-top:9px; overflow:hidden}
+  .a-tile .meter i{display:block; height:100%; border-radius:3px}
+  .a-tile .as{font-family:var(--mono); font-size:10.5px; color:var(--ink-3); margin-top:6px}
+  .a-ok .av{color:var(--ok)} .a-ok .meter i{background:var(--ok)}
+  .a-warn .av{color:var(--warn)} .a-warn .meter i{background:var(--warn)}
+  .a-risk .av{color:var(--risk)} .a-risk .meter i{background:var(--risk)}
+  .a-flag{border-left:3px solid var(--risk)}
+  .a-tile .okbadge{display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:600; margin-top:2px}
+  .a-tile.a-ok .okbadge{color:var(--ok)}
+
+  .changes{display:flex; flex-direction:column; gap:12px}
+  .ch{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow); border-left:3px solid var(--border-strong)}
+  .ch.g-ok{border-left-color:var(--ok)}
+  .ch.g-bad{border-left-color:var(--warn)}
+  .ch-top{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+  .cat{font-family:var(--mono); font-size:10.5px; padding:3px 8px; border-radius:6px; background:var(--accent-weak); color:var(--accent-ink); font-weight:600}
+  .gbadge{margin-left:auto; font-family:var(--mono); font-size:10.5px; padding:3px 8px; border-radius:999px; display:inline-flex; align-items:center; gap:5px}
+  .gbadge.ok{color:var(--ok); background:var(--ok-bg); border:1px solid var(--ok-bd)}
+  .gbadge.bad{color:var(--warn); background:var(--warn-bg); border:1px solid var(--warn-bd)}
+  .ch-sum{font-size:14px; color:var(--ink); margin-bottom:8px; font-weight:500}
+  .ch-ba{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12.5px; margin-bottom:10px}
+  .ch-ba .bf{color:var(--ink-3)} .ch-ba .af{color:var(--ink); font-weight:600} .ch-ba .ar{color:var(--ink-3)}
+  .conf{display:flex; align-items:center; gap:8px; margin-bottom:10px}
+  .conf .cl{font-family:var(--mono); font-size:10px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.06em}
+  .conf .cbar{flex:0 0 120px; height:5px; border-radius:3px; background:var(--surface-3); overflow:hidden}
+  .conf .cbar i{display:block; height:100%; background:var(--accent); border-radius:3px}
+  .conf .cv{font-family:var(--mono); font-size:11px; color:var(--ink-2)}
+  .cite{background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-size:12px}
+  .cite .src{font-family:var(--mono); font-size:10px; color:var(--accent-ink); margin-bottom:4px}
+  .cite .q{color:var(--ink-2); line-height:1.55; font-style:italic}
+  .cite.bad{border-color:var(--warn-bd); background:var(--warn-bg)}
+  .cite.bad .q{color:var(--warn)}
+  .cite .cflag{display:block; margin-top:6px; font-size:11px; color:var(--warn); font-style:normal}
 </style>
 
 <div class="wrap">
@@ -296,6 +340,7 @@
   <div class="tabs" role="tablist">
     <button class="tab" id="tab-single" role="tab" aria-selected="true" aria-controls="view-single">단건 판정기</button>
     <button class="tab" id="tab-portfolio" role="tab" aria-selected="false" aria-controls="view-portfolio">포트폴리오 영향 매트릭스</button>
+    <button class="tab" id="tab-extract" role="tab" aria-selected="false" aria-controls="view-extract">규제 변경 추출 · E+A</button>
   </div>
 
   <!-- ===== VIEW: 단건 ===== -->
@@ -466,6 +511,21 @@
       💰 <strong>한도는 참고값</strong>입니다(코어 판정=LTV만, <code>05_RULE_SPEC.md</code> §B·<code>regulatory_facts.md</code>). 대출한도 = <code>min(LTV × 주택가격, 최대한도 캡)</code>, 캡 = 15억↓ 6억 / 15~25억 4억 / 25억↑ 2억. <strong>종전규정 유지분(경과규정)·시행 전</strong>에는 캡을 적용하지 않습니다. 그래서 <strong>생애최초</strong>처럼 LTV가 좌동(70%)이어도 고가 주택은 캡 때문에 한도가 줄 수 있습니다. 유주택·다주택은 종전 기준값이 명세에 없어(사람 검토) 한도 감소 합계에서 제외됩니다.
     </p>
   </div><!-- /view-portfolio -->
+
+  <!-- ===== VIEW: 규제 변경 추출 (E+A) ===== -->
+  <div class="view" id="view-extract" role="tabpanel" aria-labelledby="tab-extract" hidden>
+    <p class="sub" style="margin:0 0 14px; max-width:76ch">공식 공문 원문에서 AI가 <strong>Before/After 규제 변경</strong>을 구조화 추출(E)하고, 각 인용이 원문에 실제 존재하는지 + 골드 정답지와 얼마나 일치하는지 <strong>검증(A)</strong>한 결과입니다. 추출값은 하드코딩이 아니라 <strong>실제 LLM이 원문을 읽고 생성</strong>했고, 지표는 <code style="font-family:var(--mono)">src/regimpact/extractor/evaluate.py</code>가 결정론적으로 계산합니다.</p>
+
+    <div class="prov" id="extProv"></div>
+    <div class="a-tiles" id="aTiles"></div>
+
+    <div class="panel-h" style="border:none; padding:4px 0 12px"><h2>추출된 Before/After 변경 · Citation</h2><span class="tag" id="extTag"></span></div>
+    <div class="changes" id="changes"></div>
+
+    <p class="footnote">
+      🔎 <strong>Citation Grounding</strong>은 각 인용문이 원문에 <em>verbatim</em>으로 존재하는지 deterministic하게 대조합니다(LLM이 LLM을 채점하지 않음). 이번 실행에서는 GRANDFATHERING 항목의 인용이 원문 줄바꿈을 건너뛰어 <strong>원문 미확인</strong>으로 flag됐습니다 — 내용은 맞지만 인용이 부정확한 사례로, 정확히 이런 것을 잡아 <strong>사람 검토</strong>로 보내는 것이 Assurance의 역할입니다. <strong>Gold 대조</strong>는 사람이 확정한 정답지(<code>docs/eval/regchange_gold_6_30.json</code>)와 비교해 완전성·예외 재현율을 냅니다. LOCKED §9: LLM은 초안을 제안할 뿐, 실행 판정은 결정론적 룰엔진과 사람이 합니다.
+    </p>
+  </div><!-- /view-extract -->
 
   <div class="tip" id="tip" role="status" aria-live="off"></div>
 </div>
@@ -1016,18 +1076,66 @@
     b.setAttribute("aria-pressed","true"); PRICE=parseInt(b.dataset.price,10); renderPortfolio();
   }));
 
-  // 탭 전환
-  let portfolioRendered=false;
-  function switchTab(which){
-    const single=which==="single";
-    $("tab-single").setAttribute("aria-selected", single?"true":"false");
-    $("tab-portfolio").setAttribute("aria-selected", single?"false":"true");
-    $("view-single").hidden=!single;
-    $("view-portfolio").hidden=single;
-    if(!single && !portfolioRendered){ renderPortfolio(); portfolioRendered=true; }
+  // ========== 규제 변경 추출 (E+A) — 실제 LLM 실행 스냅샷 ==========
+  const EXTRACT_RUN = {"model":"claude-opus-4-8","ran_at":"2026-08-13","sources_loaded":["FSC_PRESS_20260630","MOLIT_PRESS_20260630","FAQ_20260630"],"extraction":{"policy_id":"FSC_20260630","effective_from":"2026-07-01","target_regions":["GURI","YONGIN_GIHEUNG","HWASEONG_DONGTAN"],"changes":[{"category":"LTV","summary":"규제지역 내 주택구입목적 주담대 LTV 강화(무주택 기준)","before":"70%","after":"40%","confidence":0.98,"citation":{"source_doc_id":"FSC_PRESS_20260630","quote":"규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"}},{"category":"EFFECTIVE_DATE","summary":"규제지역 지정효력 발생(시행일) 7월 1일부터","before":null,"after":"2026-07-01 (7월 1일)","confidence":0.97,"citation":{"source_doc_id":"MOLIT_PRESS_20260630","quote":"7월 1일부터 지정효력 발생"}},{"category":"REGION","summary":"규제지역(투기과열지구·조정대상지역) 신규 지정 3곳","before":"비규제(수도권)","after":"규제지역(투기과열지구·조정대상지역)","confidence":0.98,"citation":{"source_doc_id":"MOLIT_PRESS_20260630","quote":"화성시 동탄구, 용인시 기흥구, 구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다"}},{"category":"GRANDFATHERING","summary":"경과규정 — 6.30일까지 전산접수 또는 계약+계약금 증명 시 종전규정 유지","before":null,"after":"종전규정(70%) 유지","confidence":0.95,"citation":{"source_doc_id":"FSC_PRESS_20260630","quote":"주택매매계약을 체결하고 계약금 납부 사실을 증명한 차주* 등에 대해서는 종전 규정이 그대로 적용된다"}},{"category":"EXCEPTION","summary":"생애최초 주담대 예외 — 규제지역에서도 완화 LTV 유지","before":"70%","after":"70% (좌동)","confidence":0.9,"citation":{"source_doc_id":"FAQ_20260630","quote":"규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"}},{"category":"EXCEPTION","summary":"서민·실수요자 주담대 예외 — 완화 LTV 적용","before":"70%","after":"60%","confidence":0.86,"citation":{"source_doc_id":"FAQ_20260630","quote":"금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"}},{"category":"SCOPE_LIMIT","summary":"신용대출 보유 차주의 규제지역 주택구입 제한(코어 밖·Discovery)","before":null,"after":"1억원 초과 신용대출 보유 시 1년간 구입 제한","confidence":0.88,"citation":{"source_doc_id":"FSC_PRESS_20260630","quote":"1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터 1년간 규제지역 내 주택 구입 제한"}}]},"assurance":{"citation_correctness":0.8571,"unsupported_claim_rate":0.1429,"grounded":6,"total":7,"ungrounded":[{"category":"GRANDFATHERING","summary":"경과규정 — 6.30일까지 전산접수 또는 계약+계약금 증명 시 종전규정 유지"}],"change_completeness":1.0,"exception_recall":1.0,"effective_date_correct":true,"regions_correct":true,"missed_changes":[],"missed_exceptions":[]}};
+  const SRC_KO={FSC_PRESS_20260630:"금융위 보도참고자료",MOLIT_PRESS_20260630:"국토부 보도참고자료",FAQ_20260630:"관계기관 합동 FAQ"};
+
+  function renderExtract(){
+    const R=EXTRACT_RUN, A=R.assurance, X=R.extraction;
+    $("extProv").innerHTML=
+      `🤖 <b>실제 LLM 추출</b> · <span class="pv">${R.model}</span> · <span class="pv">${R.ran_at}</span> · 원문 ${R.sources_loaded.length}건(FSC·MOLIT·FAQ) → 지표는 <span class="pv">evaluate.py</span>가 결정론적 계산`;
+    const pct=v=>Math.round(v*100)+"%";
+    const tiles=[
+      {c:A.citation_correctness>=1?"a-ok":"a-warn", t:"Citation Correctness", v:pct(A.citation_correctness), m:A.citation_correctness, s:`인용 ${A.grounded}/${A.total} 원문 확인`},
+      {c:A.unsupported_claim_rate>0?"a-risk":"a-ok", t:"Unsupported Claim Rate", v:pct(A.unsupported_claim_rate), m:A.unsupported_claim_rate, s:`${A.ungrounded.length}건 원문 미확인 → 사람 검토`},
+      {c:A.change_completeness>=1?"a-ok":"a-warn", t:"Change Completeness", v:pct(A.change_completeness), m:A.change_completeness, s:"골드 필수변경 포착"},
+      {c:A.exception_recall>=1?"a-ok":"a-warn", t:"Exception Recall", v:pct(A.exception_recall), m:A.exception_recall, s:"골드 예외 재현"},
+      {c:A.effective_date_correct?"a-ok":"a-risk", t:"시행일 정확", badge:A.effective_date_correct, s:X.effective_from},
+      {c:A.regions_correct?"a-ok":"a-risk", t:"지역 정확", badge:A.regions_correct, s:X.target_regions.join(", ")}
+    ];
+    $("aTiles").innerHTML=tiles.map(k=>`<div class="a-tile ${k.c}${k.c==='a-risk'?' a-flag':''}">
+      <div class="at">${k.t}</div>
+      ${k.badge!==undefined
+        ? `<div class="okbadge">${k.badge?"✓ OK":"✗ MISS"}</div>`
+        : `<div class="av">${k.v}</div><div class="meter"><i style="width:${Math.round(k.m*100)}%"></i></div>`}
+      <div class="as">${k.s}</div></div>`).join("");
+
+    const isUngrounded=c=>A.ungrounded.some(u=>u.category===c.category && u.summary===c.summary);
+    $("extTag").textContent=`${X.changes.length}건 추출 · policy_id ${X.policy_id}`;
+    $("changes").innerHTML=X.changes.map(c=>{
+      const bad=isUngrounded(c);
+      const ba = c.before==null
+        ? `<span class="af">${esc(c.after)}</span> <span class="ar">신규</span>`
+        : `<span class="bf">${esc(c.before)}</span> <span class="ar">→</span> <span class="af">${esc(c.after)}</span>`;
+      return `<div class="ch ${bad?'g-bad':'g-ok'}">
+        <div class="ch-top">
+          <span class="cat">${c.category}</span>
+          <span class="gbadge ${bad?'bad':'ok'}">${bad?'⚠ 원문 미확인':'✓ 원문 확인'}</span>
+        </div>
+        <div class="ch-sum">${esc(c.summary)}</div>
+        <div class="ch-ba">${ba}</div>
+        <div class="conf"><span class="cl">confidence</span><span class="cbar"><i style="width:${Math.round(c.confidence*100)}%"></i></span><span class="cv">${c.confidence.toFixed(2)}</span></div>
+        <div class="cite ${bad?'bad':''}">
+          <div class="src">${c.citation.source_doc_id} · ${SRC_KO[c.citation.source_doc_id]||''}</div>
+          <div class="q">"${esc(c.citation.quote)}"</div>
+          ${bad?`<span class="cflag">⚠ 이 인용문이 원문에 verbatim으로 없음(줄바꿈 건너뜀) → grounding flag</span>`:''}
+        </div>
+      </div>`;
+    }).join("");
   }
-  $("tab-single").addEventListener("click",()=>switchTab("single"));
-  $("tab-portfolio").addEventListener("click",()=>switchTab("portfolio"));
+
+  // 탭 전환 (3탭)
+  const VIEWS=["single","portfolio","extract"];
+  const rendered={portfolio:false, extract:false};
+  function switchTab(which){
+    VIEWS.forEach(v=>{
+      $("tab-"+v).setAttribute("aria-selected", v===which?"true":"false");
+      $("view-"+v).hidden = v!==which;
+    });
+    if(which==="portfolio" && !rendered.portfolio){ renderPortfolio(); rendered.portfolio=true; }
+    if(which==="extract" && !rendered.extract){ renderExtract(); rendered.extract=true; }
+  }
+  VIEWS.forEach(v=>$("tab-"+v).addEventListener("click",()=>switchTab(v)));
 
   // ---- theme toggle ----
   $("themeBtn").addEventListener("click",()=>{
