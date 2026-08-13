@@ -8,6 +8,7 @@
 |---|---|---|---|
 | Deterministic LTV 룰엔진 | [`rule-engine/`](./rule-engine/rule-engine_v1.md) | v1 | ✅ |
 | RegChange Extractor(E) + Citation Assurance(A) | [`extractor-assurance/`](./extractor-assurance/extractor-assurance_v4.md) | v4 | ✅ 무료 LLM 지원 |
+| RAG / Retrieval 층 | [`retrieval/`](./retrieval/retrieval_v1.md) | v1 | ✅ BM25 + recall@k |
 | TC Generator + Rule-Regression | [`tc-generator/`](./tc-generator/tc-generator_v3.md) | v3 | ✅ 격자 3,200건 통계 |
 | Impact Matrix (시행 전/후) | [`impact-matrix/`](./impact-matrix/impact-matrix_v1.md) | v1 | ✅ |
 | Impact Matrix UI 렌더 | [`ui-render/`](./ui-render/ui-render_v1.md) | v1 | ✅ |

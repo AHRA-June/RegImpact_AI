@@ -84,6 +84,18 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 | Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 |
 | Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 |
 
+### 검색(RAG) recall@k — 구현 `src/regimpact/retrieval/`
+
+> 검색이 정답 근거 문단을 놓치면 하류 완전성(Change Completeness·Exception Recall)이 함께 떨어진다.
+> 따라서 검색층도 평가한다. "근거를 놓치지 않는 k"를 고르는 근거 지표.
+
+| 지표 | 정의 | 분모 | 분자 | 6·30 실측 | high-risk |
+|---|---|---|---|---|---|
+| Passage Recall@k | 골드 항목의 지지 근거를 top-k가 회수한 비율 | 골드 항목(변경+예외) | 근거 회수 항목 | recall@{1,3,5,8}=**100%** | 놓침=상류 완전성 위험 |
+
+- BM25 어휘검색(순수 stdlib·결정론·무료). 문서 3건→청크 62개. `recall_curve`로 k별 곡선 산출.
+- 소규모·강한 키워드 특성상 recall@1=100%; 대형 코퍼스 degradation을 이 지표가 포착. `demo_retrieval.py`.
+
 ## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2) — [DEEP] dimension ①
 
 > `hallucination rate` 단일 지표로 뭉뚱그리지 않는다.
