@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-14
-- **갱신자:** Claude (검증보고서 산출 세션)
+- **갱신자:** Claude (골드셋 최종 개봉 세션)
 - **개발 브랜치:** `claude/proceed-4ujipo`
-- **전체 단계:** 🟢 **코어 완성 — 검증보고서(≈16쪽) 산출.** Walking Skeleton E2E + Assurance 4 DEEP 실측 + 골드셋 v1 freeze(115) + **검증보고서 `docs/VALIDATION_REPORT.md`(실측 종합, 코드 생성)**. UI 6화면(오프라인). (테스트 112 통과)
+- **전체 단계:** 🟢 **코어 완성 + 최종 평가 개봉.** Walking Skeleton E2E + Assurance 4 DEEP 실측 + 골드셋 v1(115) + 검증보고서 + **LOCKED/CHALLENGE 최초·최종 개봉(전체 115/115 100%, FINAL_EVAL 기록, 재튜닝 금지)**. UI 6화면(오프라인). (테스트 115 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,12 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-14)
+- **골드셋 LOCKED/CHALLENGE 최초·최종 개봉 (Phase 3, 일회성 거버넌스 이벤트).** `eval.run_final_evaluation()` +
+  `examples/run_final_evaluation.py` → `docs/eval/gold_set/FINAL_EVAL.json`(개봉일·버전·엔진·split별·카테고리별·overall).
+  **결과: DEV 40/40 · LOCKED 40/40 · CHALLENGE 35/35 = 전체 115/115 (100%)** — CHALLENGE의 CONFLICT 13·AMBIGUOUS 10
+  포함 전 카테고리 통과, AMBIGUOUS escalation 최종 확인. **규율(§12):** 이 결과가 공식 최종 성능이며 이후 동일 세트로
+  재튜닝·재보고 금지(재개발 시 v2 필요). report.gold_set·ui/assurance·ui/report·report_doc이 FINAL_EVAL 있으면 sealed→
+  개봉 결과 표시(lock_open 아이콘, 에셋 재빌드). DECISION_LOG 개봉 기록. 테스트 3개 → **총 115 통과.**
 - **검증보고서 15~20쪽 산출 (브리프 §18 코어 완성).** `src/regimpact/report_doc.py`(`build_validation_document`)가
   지금까지의 **실측 산출물**(ValidationReport·MeasuredAssurance·골드셋 manifest·Impact Matrix·합성 포트폴리오)을
   하나의 Model-Validation-Report 급 마크다운으로 종합 → `docs/VALIDATION_REPORT.md`(≈16쪽, 44 헤딩·19 표).
@@ -83,7 +89,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(112), `python examples/build_report_doc.py`(검증보고서), `python examples/demo_report.py`, `python examples/demo_gold_set.py`, `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/render_ui.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`. 재생성(네트워크): `python tools/build_ui_assets.py`, `python tools/build_gold_set.py`.
+- 실행: `python -m pytest`(115), `python examples/build_report_doc.py`(검증보고서), `python examples/run_final_evaluation.py`(최종 개봉·이미 완료), `python examples/demo_report.py`, `python examples/demo_gold_set.py`, `python examples/render_ui.py`, `python examples/run_extractor.py`. 재생성(네트워크): `python tools/build_ui_assets.py`, `python tools/build_gold_set.py`.
 
 ## 다음 액션 (NEXT)
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-14). `src/regimpact/impact/`. Before/After 관통, Discovery 분리, 경과규정 counterfactual.
@@ -94,8 +100,9 @@
 - ~~**Extractor 실제 LLM 1회 실행 → 첫 실측**~~ — ✅ 완료(2026-08-14). ①②③ 100% 실측, 4 DEEP 전 dimension 실측.
 - ~~**골드셋 100~120 + DEV/LOCKED/CHALLENGE freeze**~~ — ✅ 완료(2026-08-14). v1 115문항, DEV 회귀 100%, sealed 규율.
 - ~~**검증보고서 15~20쪽**~~ — ✅ 완료(2026-08-14). `docs/VALIDATION_REPORT.md`(코드 생성, 실측 종합). **→ 브리프 §18 코어 완성선 충족.**
-  - **후속(선택/스트레치, 브리프 §18 W9~10):** ①LOCKED/CHALLENGE 최종 개봉·보고 ②골드셋 도메인 검수 v2 ③API 키로 다중 모델
-    추출 비교 ④Model/System Card·AI Risk Register ⑤정책 버전 타임라인·대시보드 ⑥배포·README·데모·공개글.
+- ~~**LOCKED/CHALLENGE 최종 개봉·보고**~~ — ✅ 완료(2026-08-14). 전체 115/115, FINAL_EVAL 기록, 재튜닝 금지.
+  - **후속(선택/스트레치, 브리프 §18 W9~10):** ①골드셋 도메인 검수 v2 ②API 키로 다중 모델 추출 비교 ③Model/System Card·
+    AI Risk Register ④정책 버전 타임라인·대시보드 ⑤배포·README·데모·공개글.
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
@@ -149,6 +156,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-14** — ✅ **골드셋 LOCKED/CHALLENGE 최초·최종 개봉 (Phase 3, 일회성).** `eval.run_final_evaluation(opened_date)`가 3개 split을 실행(sealed는 unlock)해 `docs/eval/gold_set/FINAL_EVAL.json`에 기록(개봉일 2026-08-14·gold v1·엔진 §H·split별·카테고리별·overall·규율 note). **DEV 40/40·LOCKED 40/40·CHALLENGE 35/35 = 전체 115/115(100%)**; CONFLICT 13·AMBIGUOUS 10 포함 전 카테고리 통과, AMBIGUOUS는 escalation 기대로 '지어내지 않음' 최종 확인. §12 규율: 공식 최종 성능, 이후 동일 세트 재튜닝·재보고 금지(v2 필요). report.gold_set에 opened/locked/challenge/overall/opened_date 추가, ui/assurance·ui/report·report_doc이 FINAL_EVAL 있으면 sealed→개봉 결과로 전환(lock_open, 42 아이콘 재빌드). DECISION_LOG 개봉 이벤트 기록(되돌릴 수 없음). `examples/run_final_evaluation.py`. 테스트 3개(기록·결정론·report 반영) → **총 115 통과.**
 - **2026-08-14** — ✅ **검증보고서 15~20쪽 산출 (브리프 §18 코어 완성선).** `src/regimpact/report_doc.py`가 실측 산출물을 종합해 `docs/VALIDATION_REPORT.md`(≈16쪽, 44 헤딩·19 표) 생성. 12섹션(경영요약+Model Risk 시사점·범위·아키텍처+판정알고리즘 P0~P7+LTV규칙표·데이터 무결성·방법론+지표공식·컴포넌트별 결과·대표사례 심층 6건(엔진 실행)·Assurance 4 DEEP 정의·평가셋+카테고리 근거·한계 6종·거버넌스+감사추적 아티팩트·결론+권고) + 부록 A~E(추출 9건 전체·Impact 전체행·골드셋 분포·reason_code 사전·재현 명령). 값은 손으로 적지 않고 전부 실측에서 유도(build_validation_document); 테스트로 실측 정합·목업 환각 부재 검증. `examples/build_report_doc.py`. 테스트 4개 → **총 112 통과.**
 - **2026-08-14** — ✅ **골드셋 v1 빌드·freeze (115문항, DEV40/LOCKED40/CHALLENGE35).** `src/regimpact/eval/gold_set.py`(GoldItem 스키마·load_split·엔진 회귀 러너·누수 규율) + `tools/build_gold_set.py`(결정론적) → `docs/eval/gold_set/{dev,locked,challenge}.json`+`MANIFEST.json`(split별 sha256·v1·freeze)+`README.md`. 정답(expected)은 **독립 명세 오라클**(`tc_generator.oracle`)에서 유도 → 엔진과 독립 코드 경로이므로 회귀가 tautology 아님(LOCKED §4). 브리프 §11 스키마(입력/정답/근거 문서·인용/카테고리/escalation 기대/정책버전/rule_id). 카테고리 10종(NORMAL·EXCEPTION·GRANDFATHERING·EFFECTIVE_DATE·REGION·BORROWER_TYPE·LOAN_PURPOSE·CONFLICT·AMBIGUOUS·NO_CHANGE). **누수 방지(§12):** `load_split('locked'/'challenge')`는 unlock 없이 RuntimeError, split 간 입력 disjoint(테스트로 강제), 개발 상시 회귀는 DEV만. DEV 회귀 100%(40/40); LOCKED/CHALLENGE도 최종 검증 시 100%(엔진이 충돌·모호·경계 명세대로, AMBIGUOUS는 escalation 기대로 '지어내지 않음' 검증). report에 `gold_set` 필드+파이프라인 step 반영, ui/assurance·ui/report에 Gold Set 패널/카드(DEV pass rate + sealed 배지, dataset 아이콘 재빌드). DECISION_LOG freeze 기록. `examples/demo_gold_set.py`. 테스트 8개 → **총 108 통과.**
 - **2026-08-14** — ✅ **RegChange Extractor 1회 실제 LLM 실행 → Assurance ①②③ 첫 실측.** 환경에 Anthropic API 키가 없고 프록시가 인증을 주입하지 않아 직접 API 호출은 불가. 대신 **실행 모델(claude-opus-4-8)이 6·30 공문 3건(FSC·MOLIT·FAQ) 원문만 읽고**(gold 미참조) RegChange 9건을 추출 — 인용은 전부 원문 verbatim. 산출물 `docs/eval/regchange_extraction_6_30.json`(_meta: model·run_date·sources). extractor에 `load_recorded_extraction()`+`measured_assurance()` 추가(결정론적 재계산, 저장값 아님): Citation Correctness 100%/환각 0%, Change Completeness 100%, Exception Recall 100%, 시행일·지역 OK. report `_assurance_dimensions`가 measured 반영(없으면 폴백), ui/assurance·ui/regchange에 실측 카드/배너 추가(psychology 아이콘). `run_extractor.py`가 키 없을 때 기록 산출물로 동일 채점 시연. metrics_spec §1에 1회 실측 주석. gold 로더·SOURCE_REGISTRY extractor 중립화. 아이콘 40개 재빌드. 테스트 recorded 3개(+ assurance/report 갱신) → **총 100 통과.**

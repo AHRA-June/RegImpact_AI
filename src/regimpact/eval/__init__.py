@@ -6,14 +6,17 @@
 정답은 rule_engine 이 아니라 **독립 명세 오라클**(tc_generator.oracle)에서 유도 → 순환 아님.
 """
 from .gold_set import (
+    FINAL_EVAL_PATH,
     GOLD_DIR,
     SEALED_SPLITS,
     SPLITS,
     GoldEvalReport,
     GoldItem,
     evaluate_items,
+    load_final_eval,
     load_manifest,
     load_split,
+    run_final_evaluation,
     run_gold_regression,
 )
 
@@ -24,6 +27,9 @@ __all__ = [
     "load_manifest",
     "evaluate_items",
     "run_gold_regression",
+    "run_final_evaluation",
+    "load_final_eval",
+    "FINAL_EVAL_PATH",
     "SPLITS",
     "SEALED_SPLITS",
     "GOLD_DIR",

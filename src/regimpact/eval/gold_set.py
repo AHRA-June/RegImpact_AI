@@ -169,3 +169,61 @@ def format_report(report: GoldEvalReport) -> str:
     for f in report.failures():
         L.append(f"  ✗ {f.item.id}: {', '.join(f.mismatches)}")
     return "\n".join(L)
+
+
+# ---------------------------------------------------------------------------
+# 최종 평가 (Phase 3) — LOCKED/CHALLENGE 최초·최종 개봉
+# ---------------------------------------------------------------------------
+FINAL_EVAL_PATH = GOLD_DIR / "FINAL_EVAL.json"
+
+_FINAL_NOTE = (
+    "LOCKED/CHALLENGE 최초·최종 개봉(브리프 §12 Phase 3). 이 결과가 공식 최종 성능이다. "
+    "이후 엔진/명세를 바꿔도 동일 세트로 재튜닝·재보고하지 않는다 — 재개발 시 새 평가셋 버전이 필요하다."
+)
+
+
+def _split_result(split: str, unlock: bool) -> dict:
+    r = run_gold_regression(split, unlock=unlock)
+    return {
+        "passed": r.passed, "total": r.total, "pass_rate": r.pass_rate,
+        "by_category": {c: list(v) for c, v in r.pass_rate_by_category().items()},
+        "failures": [{"id": f.item.id, "mismatches": list(f.mismatches)} for f in r.failures()],
+    }
+
+
+def run_final_evaluation(opened_date: str, save: bool = True) -> dict:
+    """3개 split(DEV·LOCKED·CHALLENGE) 최종 실행. sealed는 여기서 unlock한다(공식 개봉).
+
+    opened_date 는 개봉 일자(예: '2026-08-14') — 결정론 보장 위해 호출자가 명시한다.
+    """
+    splits = {
+        "dev": _split_result("dev", unlock=False),
+        "locked": _split_result("locked", unlock=True),
+        "challenge": _split_result("challenge", unlock=True),
+    }
+    passed = sum(s["passed"] for s in splits.values())
+    total = sum(s["total"] for s in splits.values())
+    manifest = load_manifest()
+    record = {
+        "_meta": {
+            "note": _FINAL_NOTE,
+            "opened_date": opened_date,
+            "gold_version": manifest["version"],
+            "engine": "rule_engine (deterministic §H)",
+            "expected_source": manifest["expected_source"],
+        },
+        "splits": splits,
+        "overall": {"passed": passed, "total": total,
+                    "pass_rate": (passed / total if total else 1.0)},
+    }
+    if save:
+        FINAL_EVAL_PATH.write_text(
+            json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    return record
+
+
+def load_final_eval() -> dict | None:
+    """최종 평가 기록을 로드한다. 없으면 None(아직 미개봉 → sealed로 표시)."""
+    if not FINAL_EVAL_PATH.exists():
+        return None
+    return json.loads(FINAL_EVAL_PATH.read_text(encoding="utf-8"))

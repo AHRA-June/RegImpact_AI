@@ -104,9 +104,14 @@ def _exec_summary(r: ValidationReport, m, port) -> list[str]:
         "",
         "본 검증에서 확인된 핵심 결과는 다음과 같다.",
         "",
-        f"- **결정론적 룰엔진**은 독립 명세 오라클과의 차등 검증에서 {r.regression['passed']}/{r.regression['total']} "
-        f"({_pct(r.regression['pass_rate'])}), 골드셋 DEV split에서 {dev['passed']}/{dev['total']} "
-        f"({_pct(dev['pass_rate'])}) 통과했다.",
+        (f"- **결정론적 룰엔진**은 독립 명세 오라클 차등 검증 {r.regression['passed']}/{r.regression['total']} "
+         f"({_pct(r.regression['pass_rate'])}) 및 **골드셋 최종 평가(DEV·LOCKED·CHALLENGE 전 {r.gold_set['overall']['total']}문항 "
+         f"개봉) {r.gold_set['overall']['passed']}/{r.gold_set['overall']['total']} "
+         f"({_pct(r.gold_set['overall']['pass_rate'])})** 를 기록했다."
+         if r.gold_set.get("opened") else
+         f"- **결정론적 룰엔진**은 독립 명세 오라클과의 차등 검증에서 {r.regression['passed']}/{r.regression['total']} "
+         f"({_pct(r.regression['pass_rate'])}), 골드셋 DEV split에서 {dev['passed']}/{dev['total']} "
+         f"({_pct(dev['pass_rate'])}) 통과했다."),
         f"- **RegChange 추출**(모델 `{m.model}`, {m.n_changes}건)은 인용 grounding {_pct(m.citation_correctness)}"
         f"(환각 {_pct(m.unsupported_claim_rate)}), 변경 완전성 {_pct(m.change_completeness)}, 예외 재현율 "
         f"{_pct(m.exception_recall)}로, 4개 DEEP Assurance dimension이 전부 실측되었다.",
@@ -579,11 +584,32 @@ def _goldset(r: ValidationReport, manifest) -> list[str]:
         "freeze했다. 각 문항은 입력·골드 정답·근거 문서·카테고리·escalation 기대·정책 버전·rule_id를 포함한다. "
         "정답은 독립 명세 오라클에서 유도한다.",
         "",
-        "| split | 규모 | 용도 | 상태 |",
-        "|---|---:|---|---|",
-        f"| DEV | {manifest['splits']['dev']['count']} | 상시 회귀·튜닝 | 개방 |",
-        f"| LOCKED TEST | {manifest['splits']['locked']['count']} | 최종 성능평가 | **sealed** |",
-        f"| CHALLENGE | {manifest['splits']['challenge']['count']} | 예외·경계·충돌·모호 적대 | **sealed** |",
+        "| split | 규모 | 용도 | 상태 | 최종 결과 |",
+        "|---|---:|---|---|---|",
+    ]
+    gs = r.gold_set
+    if gs.get("opened"):
+        L += [
+            f"| DEV | {manifest['splits']['dev']['count']} | 상시 회귀·튜닝 | 개방 | "
+            f"{_pct(gs['dev']['pass_rate'])} ({gs['dev']['passed']}/{gs['dev']['total']}) |",
+            f"| LOCKED TEST | {manifest['splits']['locked']['count']} | 최종 성능평가 | **개봉** | "
+            f"{_pct(gs['locked']['pass_rate'])} ({gs['locked']['passed']}/{gs['locked']['total']}) |",
+            f"| CHALLENGE | {manifest['splits']['challenge']['count']} | 예외·경계·충돌·모호 적대 | **개봉** | "
+            f"{_pct(gs['challenge']['pass_rate'])} ({gs['challenge']['passed']}/{gs['challenge']['total']}) |",
+            "",
+            f"**최종 평가(개봉일 {gs['opened_date']}): 전체 {gs['overall']['passed']}/{gs['overall']['total']} "
+            f"({_pct(gs['overall']['pass_rate'])}).** LOCKED·CHALLENGE는 이번이 최초·최종 개봉이며, 이후 엔진/명세를 "
+            "바꿔도 동일 세트로 재튜닝·재보고하지 않는다(§12). CHALLENGE의 충돌·모호 사례까지 전부 통과해, 엔진이 "
+            "명세 우선순위를 정확히 따르고 기준 부재 시 escalate함을 확인했다.",
+        ]
+    else:
+        L += [
+            f"| DEV | {manifest['splits']['dev']['count']} | 상시 회귀·튜닝 | 개방 | "
+            f"{_pct(gs['dev']['pass_rate'])} |",
+            f"| LOCKED TEST | {manifest['splits']['locked']['count']} | 최종 성능평가 | **sealed** | — |",
+            f"| CHALLENGE | {manifest['splits']['challenge']['count']} | 예외·경계·충돌·모호 적대 | **sealed** | — |",
+        ]
+    L += [
         "",
         "DEV split 카테고리 분포 및 회귀 결과:",
         "",
@@ -686,14 +712,19 @@ def _conclusion(r: ValidationReport, m) -> list[str]:
         _h(2, "11. 결론 및 권고"),
         "",
         "6·30 규제 변경 시나리오 1건이 Source Snapshot부터 Validation Report까지 End-to-End로 완결되었고, "
-        "각 단계의 정확성이 독립적·재현 가능한 방식으로 측정되었다. 결정론적 룰엔진은 오라클·골드셋 양 경로에서 "
-        f"100% 통과({r.regression['passed']}/{r.regression['total']}, DEV {dev['passed']}/{dev['total']}), "
-        f"RegChange 추출은 4개 DEEP dimension 전부 실측(인용 {_pct(m.citation_correctness)})되었다. "
+        "각 단계의 정확성이 독립적·재현 가능한 방식으로 측정되었다. 결정론적 룰엔진은 오라클 차등 검증"
+        f"({r.regression['passed']}/{r.regression['total']})과 "
+        + (f"**골드셋 최종 평가 {r.gold_set['overall']['passed']}/{r.gold_set['overall']['total']} 개봉**"
+           if r.gold_set.get("opened") else f"골드셋 DEV {dev['passed']}/{dev['total']}")
+        + f"에서 100% 통과했고, RegChange 추출은 4개 DEEP dimension 전부 실측(인용 {_pct(m.citation_correctness)})되었다. "
         "시스템은 모르는 값을 지어내지 않고 사람 검토로 넘기는 통제를 일관되게 보였다.",
         "",
         _h(3, "권고 (다음 단계)"),
         "",
-        "1. **LOCKED / CHALLENGE 최종 실행.** 코어 완성 시점에 sealed split을 1회 개봉해 최종 성능을 보고한다.",
+        ("1. ~~LOCKED / CHALLENGE 최종 실행~~ — **완료(" + r.gold_set["opened_date"] + " 개봉, 전체 "
+         f"{r.gold_set['overall']['passed']}/{r.gold_set['overall']['total']}).** 이후 재튜닝·재보고 금지."
+         if r.gold_set.get("opened") else
+         "1. **LOCKED / CHALLENGE 최종 실행.** 코어 완성 시점에 sealed split을 1회 개봉해 최종 성능을 보고한다."),
         "2. **골드셋 도메인 검수(v2).** 오라클 유도 정답을 도메인 전문가가 최종 확정한다.",
         "3. **다중 모델·challenge grounding.** API 키 확보 시 여러 모델로 추출을 비교하고, CHALLENGE 원문으로 "
         "grounding 실패를 유도·측정한다.",

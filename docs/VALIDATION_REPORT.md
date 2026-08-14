@@ -40,7 +40,7 @@ RegImpact AI는 정부의 가계대출 규제 변경(**2026-06-30 규제지역 �
 
 본 검증에서 확인된 핵심 결과는 다음과 같다.
 
-- **결정론적 룰엔진**은 독립 명세 오라클과의 차등 검증에서 30/30 (100%), 골드셋 DEV split에서 40/40 (100%) 통과했다.
+- **결정론적 룰엔진**은 독립 명세 오라클 차등 검증 30/30 (100%) 및 **골드셋 최종 평가(DEV·LOCKED·CHALLENGE 전 115문항 개봉) 115/115 (100%)** 를 기록했다.
 - **RegChange 추출**(모델 `claude-opus-4-8`, 9건)은 인용 grounding 100%(환각 0%), 변경 완전성 100%, 예외 재현율 100%로, 4개 DEEP Assurance dimension이 전부 실측되었다.
 - **영향분석**은 9개 세그먼트(Core 7)에서 하향 3·신규제한 2·Discovery 2를 산출했고, 합성 포트폴리오 2,000명 기준 영향 차주 1,340명·고위험(LTV 0%) 360명으로 규모를 정량화했다.
 - **평가셋**은 115문항(DEV 40 / LOCKED 40 / CHALLENGE 35)으로 freeze되었으며, 누수 방지를 위해 LOCKED·CHALLENGE는 sealed다.
@@ -82,7 +82,7 @@ RegImpact AI는 정부의 가계대출 규제 변경(**2026-06-30 규제지역 �
 | 3 | RegChange (Before/After) | OK | 필수 변경 4항 · 예외 2종 (gold 확정) |
 | 4 | Impact Matrix | OK | 세그먼트 9 (Core 7) · 하향 3 · 신규제한 2 · Discovery 2 |
 | 5 | Rule Change Proposal | REVIEW | MORTGAGE_LTV_REGULATED_REGION · 파라미터 변경 4건 · 승인상태 REVIEW_REQUIRED |
-| 6 | Test Cases / Rule Regression | MEASURED | 오라클 회귀 30/30 · Gold Set DEV 40/40 (LOCKED 40·CHALLENGE 35 sealed) |
+| 6 | Test Cases / Rule Regression | MEASURED | 오라클 회귀 30/30 · Gold Set 최종 115/115 (DEV·LOCKED·CHALLENGE 개봉 2026-08-14) |
 | 7 | Assurance | MEASURED | 4 DEEP dimension 실측 4/4 · 전 dimension 실측 완료 |
 | 8 | Human Review | REVIEW | escalation 1건 → 사람 검토 필요 |
 
@@ -364,11 +364,13 @@ Assurance는 폭이 아니라 깊이로 4개 dimension을 정량 측정한다. �
 
 평가셋은 개발보다 먼저 설계하고 v1 총 115문항으로 freeze했다. 각 문항은 입력·골드 정답·근거 문서·카테고리·escalation 기대·정책 버전·rule_id를 포함한다. 정답은 독립 명세 오라클에서 유도한다.
 
-| split | 규모 | 용도 | 상태 |
-|---|---:|---|---|
-| DEV | 40 | 상시 회귀·튜닝 | 개방 |
-| LOCKED TEST | 40 | 최종 성능평가 | **sealed** |
-| CHALLENGE | 35 | 예외·경계·충돌·모호 적대 | **sealed** |
+| split | 규모 | 용도 | 상태 | 최종 결과 |
+|---|---:|---|---|---|
+| DEV | 40 | 상시 회귀·튜닝 | 개방 | 100% (40/40) |
+| LOCKED TEST | 40 | 최종 성능평가 | **개봉** | 100% (40/40) |
+| CHALLENGE | 35 | 예외·경계·충돌·모호 적대 | **개봉** | 100% (35/35) |
+
+**최종 평가(개봉일 2026-08-14): 전체 115/115 (100%).** LOCKED·CHALLENGE는 이번이 최초·최종 개봉이며, 이후 엔진/명세를 바꿔도 동일 세트로 재튜닝·재보고하지 않는다(§12). CHALLENGE의 충돌·모호 사례까지 전부 통과해, 엔진이 명세 우선순위를 정확히 따르고 기준 부재 시 escalate함을 확인했다.
 
 DEV split 카테고리 분포 및 회귀 결과:
 
@@ -437,11 +439,11 @@ DEV split 카테고리 분포 및 회귀 결과:
 
 ## 11. 결론 및 권고
 
-6·30 규제 변경 시나리오 1건이 Source Snapshot부터 Validation Report까지 End-to-End로 완결되었고, 각 단계의 정확성이 독립적·재현 가능한 방식으로 측정되었다. 결정론적 룰엔진은 오라클·골드셋 양 경로에서 100% 통과(30/30, DEV 40/40), RegChange 추출은 4개 DEEP dimension 전부 실측(인용 100%)되었다. 시스템은 모르는 값을 지어내지 않고 사람 검토로 넘기는 통제를 일관되게 보였다.
+6·30 규제 변경 시나리오 1건이 Source Snapshot부터 Validation Report까지 End-to-End로 완결되었고, 각 단계의 정확성이 독립적·재현 가능한 방식으로 측정되었다. 결정론적 룰엔진은 오라클 차등 검증(30/30)과 **골드셋 최종 평가 115/115 개봉**에서 100% 통과했고, RegChange 추출은 4개 DEEP dimension 전부 실측(인용 100%)되었다. 시스템은 모르는 값을 지어내지 않고 사람 검토로 넘기는 통제를 일관되게 보였다.
 
 ### 권고 (다음 단계)
 
-1. **LOCKED / CHALLENGE 최종 실행.** 코어 완성 시점에 sealed split을 1회 개봉해 최종 성능을 보고한다.
+1. ~~LOCKED / CHALLENGE 최종 실행~~ — **완료(2026-08-14 개봉, 전체 115/115).** 이후 재튜닝·재보고 금지.
 2. **골드셋 도메인 검수(v2).** 오라클 유도 정답을 도메인 전문가가 최종 확정한다.
 3. **다중 모델·challenge grounding.** API 키 확보 시 여러 모델로 추출을 비교하고, CHALLENGE 원문으로 grounding 실패를 유도·측정한다.
 4. **정책 일반화.** 지역 버전·골드셋을 확장해 6·30 외 시나리오로 넓힌다.

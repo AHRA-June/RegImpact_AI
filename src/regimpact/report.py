@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 
-from .eval import load_manifest, run_gold_regression
+from .eval import load_final_eval, load_manifest, run_gold_regression
 from .extractor import SOURCE_REGISTRY, load_gold, measured_assurance
 from .impact import ImpactMatrix, build_impact_matrix
 from .impact.segments import REGION_LABELS
@@ -124,9 +124,10 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
     }
     assurance = _assurance_dimensions(regression)
 
-    # Gold Set — DEV 회귀만(상시). LOCKED/CHALLENGE는 sealed(§12) → count만 표기.
+    # Gold Set — DEV 회귀는 상시. LOCKED/CHALLENGE는 최종 개봉(FINAL_EVAL) 있으면 결과, 없으면 sealed.
     manifest = load_manifest()
     dev = run_gold_regression("dev")
+    final = load_final_eval()
     gold_set = {
         "version": manifest["version"],
         "total": manifest["total"],
@@ -136,7 +137,14 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
         },
         "locked_sealed": manifest["splits"]["locked"]["count"],
         "challenge_sealed": manifest["splits"]["challenge"]["count"],
+        "opened": final is not None,
     }
+    if final is not None:
+        gold_set["opened_date"] = final["_meta"]["opened_date"]
+        gold_set["overall"] = final["overall"]
+        for s in ("locked", "challenge"):
+            fs = final["splits"][s]
+            gold_set[s] = {"passed": fs["passed"], "total": fs["total"], "pass_rate": fs["pass_rate"]}
 
     s = matrix.summary
     steps = [
@@ -155,8 +163,11 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
                      f"승인상태 {proposal.approval_status.value}"),
         PipelineStep(6, "Test Cases / Rule Regression", "MEASURED",
                      f"오라클 회귀 {regression['passed']}/{regression['total']} · "
-                     f"Gold Set DEV {gold_set['dev']['passed']}/{gold_set['dev']['total']} "
-                     f"(LOCKED {gold_set['locked_sealed']}·CHALLENGE {gold_set['challenge_sealed']} sealed)"),
+                     + (f"Gold Set 최종 {gold_set['overall']['passed']}/{gold_set['overall']['total']} "
+                        f"(DEV·LOCKED·CHALLENGE 개봉 {gold_set['opened_date']})"
+                        if gold_set["opened"] else
+                        f"Gold Set DEV {gold_set['dev']['passed']}/{gold_set['dev']['total']} "
+                        f"(LOCKED {gold_set['locked_sealed']}·CHALLENGE {gold_set['challenge_sealed']} sealed)")),
         PipelineStep(7, "Assurance", "PENDING" if any(not d.measured for d in assurance) else "MEASURED",
                      f"4 DEEP dimension 실측 {sum(d.measured for d in assurance)}/{len(assurance)} · "
                      + ("전 dimension 실측 완료" if all(d.measured for d in assurance)
@@ -237,7 +248,13 @@ def format_report(report: ValidationReport) -> str:
     gs = report.gold_set
     L.append(f"  - version {gs['version']} · 총 {gs['total']}문항")
     L.append(f"  - DEV(상시): {gs['dev']['pass_rate']:.0%} ({gs['dev']['passed']}/{gs['dev']['total']})")
-    L.append(f"  - LOCKED {gs['locked_sealed']} · CHALLENGE {gs['challenge_sealed']} : sealed (Phase 3 최종 1회)")
+    if gs.get("opened"):
+        L.append(f"  - LOCKED(개봉): {gs['locked']['pass_rate']:.0%} ({gs['locked']['passed']}/{gs['locked']['total']})")
+        L.append(f"  - CHALLENGE(개봉): {gs['challenge']['pass_rate']:.0%} ({gs['challenge']['passed']}/{gs['challenge']['total']})")
+        L.append(f"  - 전체 최종({gs['overall']['total']}): {gs['overall']['pass_rate']:.0%} "
+                 f"({gs['overall']['passed']}/{gs['overall']['total']}) · 개봉일 {gs['opened_date']} (재튜닝·재보고 금지)")
+    else:
+        L.append(f"  - LOCKED {gs['locked_sealed']} · CHALLENGE {gs['challenge_sealed']} : sealed (Phase 3 최종 1회)")
     L.append("")
 
     L.append("## 7. Assurance (4 DEEP dimension)")

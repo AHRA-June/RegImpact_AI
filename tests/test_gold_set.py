@@ -78,3 +78,38 @@ def test_items_have_required_metadata():
             assert it.split == name
             # escalation 플래그와 기대 status 일치
             assert it.expected_escalation == (it.expected["status"] == "NEEDS_HUMAN_REVIEW")
+
+
+# ---------- 최종 평가 (Phase 3 개봉) ----------
+def test_final_evaluation_record_and_100_percent():
+    """최종 평가 기록이 존재하고 3개 split 전부 통과(개봉 결과)."""
+    from regimpact.eval import load_final_eval
+
+    rec = load_final_eval()
+    assert rec is not None, "docs/eval/gold_set/FINAL_EVAL.json 필요 — run_final_evaluation로 개봉"
+    assert rec["overall"]["total"] == 115
+    assert rec["overall"]["pass_rate"] == 1.0
+    for s in ("dev", "locked", "challenge"):
+        assert rec["splits"][s]["pass_rate"] == 1.0
+        assert not rec["splits"][s]["failures"]
+    # 규율 note(재튜닝 금지)와 provenance
+    assert "재튜닝" in rec["_meta"]["note"]
+    assert rec["_meta"]["gold_version"] and rec["_meta"]["opened_date"]
+
+
+def test_run_final_evaluation_is_deterministic():
+    from regimpact.eval import run_final_evaluation
+
+    a = run_final_evaluation("2026-08-14", save=False)
+    b = run_final_evaluation("2026-08-14", save=False)
+    assert a["overall"] == b["overall"]
+    assert a["splits"]["locked"]["by_category"] == b["splits"]["locked"]["by_category"]
+
+
+def test_report_reflects_opened_gold_set():
+    from regimpact.report import build_validation_report
+
+    gs = build_validation_report().gold_set
+    assert gs["opened"] is True
+    assert gs["overall"]["passed"] == gs["overall"]["total"] == 115
+    assert gs["locked"]["total"] == 40 and gs["challenge"]["total"] == 35

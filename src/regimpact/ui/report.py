@@ -115,21 +115,44 @@ def _gold_set_card(report: ValidationReport) -> str:
         f'<span>{esc(cat)}</span><span class="font-mono-data text-mono-data">{p}/{t}</span></div>'
         for cat, (p, t, _r) in sorted(dev["by_category"].items())
     )
+    if gs.get("opened"):
+        headline = (
+            f'<div class="font-h2 text-h2 text-secondary mb-1">최종 {gs["overall"]["pass_rate"]:.0%}</div>'
+            f'<div class="font-mono-label text-mono-label text-on-surface-variant mb-2">'
+            f'{gs["overall"]["passed"]}/{gs["overall"]["total"]} · 개봉 {esc(gs["opened_date"])}</div>'
+        )
+        badges = (
+            '<div class="flex items-center gap-2">'
+            f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container '
+            f'text-on-secondary font-mono-label text-mono-label">'
+            f'<span class="material-symbols-outlined text-[14px]">lock_open</span>'
+            f'LOCKED {gs["locked"]["passed"]}/{gs["locked"]["total"]}</span>'
+            f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container '
+            f'text-on-secondary font-mono-label text-mono-label">'
+            f'<span class="material-symbols-outlined text-[14px]">lock_open</span>'
+            f'CHALLENGE {gs["challenge"]["passed"]}/{gs["challenge"]["total"]}</span></div>'
+        )
+        note = '<div class="font-body-sm text-body-sm text-on-surface-variant mt-2">최초·최종 개봉(§12). 재튜닝·재보고 금지.</div>'
+    else:
+        headline = (
+            f'<div class="font-h2 text-h2 text-secondary mb-1">DEV {dev["pass_rate"]:.0%}</div>'
+            f'<div class="font-mono-label text-mono-label text-on-surface-variant mb-2">{dev["passed"]}/{dev["total"]} · 상시 회귀</div>'
+        )
+        badges = (
+            '<div class="flex items-center gap-2">'
+            f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed '
+            f'text-on-tertiary-fixed-variant font-mono-label text-mono-label">'
+            f'<span class="material-symbols-outlined text-[14px]">lock</span>LOCKED {gs["locked_sealed"]} sealed</span>'
+            f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed '
+            f'text-on-tertiary-fixed-variant font-mono-label text-mono-label">'
+            f'<span class="material-symbols-outlined text-[14px]">lock</span>CHALLENGE {gs["challenge_sealed"]} sealed</span></div>'
+        )
+        note = '<div class="font-body-sm text-body-sm text-on-surface-variant mt-2">누수 방지(§12): sealed는 Phase 3 최종 1회.</div>'
     return (
         '<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-6">'
         '<div class="flex items-center gap-2 mb-3"><span class="material-symbols-outlined text-secondary">dataset</span>'
         f'<h4 class="font-h3 text-h3">6b. Gold Set ({esc(gs["version"])} · {gs["total"]}문항)</h4></div>'
-        f'<div class="font-h2 text-h2 text-secondary mb-1">DEV {dev["pass_rate"]:.0%}</div>'
-        f'<div class="font-mono-label text-mono-label text-on-surface-variant mb-2">{dev["passed"]}/{dev["total"]} · 상시 회귀</div>'
-        f'<div class="flex flex-col gap-1 mb-3">{rows}</div>'
-        '<div class="flex items-center gap-2">'
-        f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed '
-        f'text-on-tertiary-fixed-variant font-mono-label text-mono-label">'
-        f'<span class="material-symbols-outlined text-[14px]">lock</span>LOCKED {gs["locked_sealed"]} sealed</span>'
-        f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed '
-        f'text-on-tertiary-fixed-variant font-mono-label text-mono-label">'
-        f'<span class="material-symbols-outlined text-[14px]">lock</span>CHALLENGE {gs["challenge_sealed"]} sealed</span></div>'
-        '<div class="font-body-sm text-body-sm text-on-surface-variant mt-2">누수 방지(§12): sealed는 Phase 3 최종 1회.</div></div>'
+        f'{headline}<div class="flex flex-col gap-1 mb-3">{rows}</div>{badges}{note}</div>'
     )
 
 

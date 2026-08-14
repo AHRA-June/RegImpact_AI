@@ -1,0 +1,135 @@
+{
+  "_meta": {
+    "note": "LOCKED/CHALLENGE 최초·최종 개봉(브리프 §12 Phase 3). 이 결과가 공식 최종 성능이다. 이후 엔진/명세를 바꿔도 동일 세트로 재튜닝·재보고하지 않는다 — 재개발 시 새 평가셋 버전이 필요하다.",
+    "opened_date": "2026-08-14",
+    "gold_version": "v1",
+    "engine": "rule_engine (deterministic §H)",
+    "expected_source": "tc_generator.oracle (독립 명세 재구현) — 엔진과 독립 코드 경로"
+  },
+  "splits": {
+    "dev": {
+      "passed": 40,
+      "total": 40,
+      "pass_rate": 1.0,
+      "by_category": {
+        "NORMAL": [
+          8,
+          8,
+          1.0
+        ],
+        "EXCEPTION": [
+          8,
+          8,
+          1.0
+        ],
+        "GRANDFATHERING": [
+          6,
+          6,
+          1.0
+        ],
+        "EFFECTIVE_DATE": [
+          3,
+          3,
+          1.0
+        ],
+        "REGION": [
+          3,
+          3,
+          1.0
+        ],
+        "BORROWER_TYPE": [
+          5,
+          5,
+          1.0
+        ],
+        "LOAN_PURPOSE": [
+          7,
+          7,
+          1.0
+        ]
+      },
+      "failures": []
+    },
+    "locked": {
+      "passed": 40,
+      "total": 40,
+      "pass_rate": 1.0,
+      "by_category": {
+        "NORMAL": [
+          8,
+          8,
+          1.0
+        ],
+        "EXCEPTION": [
+          7,
+          7,
+          1.0
+        ],
+        "GRANDFATHERING": [
+          5,
+          5,
+          1.0
+        ],
+        "EFFECTIVE_DATE": [
+          3,
+          3,
+          1.0
+        ],
+        "REGION": [
+          3,
+          3,
+          1.0
+        ],
+        "BORROWER_TYPE": [
+          4,
+          4,
+          1.0
+        ],
+        "LOAN_PURPOSE": [
+          7,
+          7,
+          1.0
+        ],
+        "NO_CHANGE": [
+          3,
+          3,
+          1.0
+        ]
+      },
+      "failures": []
+    },
+    "challenge": {
+      "passed": 35,
+      "total": 35,
+      "pass_rate": 1.0,
+      "by_category": {
+        "GRANDFATHERING": [
+          6,
+          6,
+          1.0
+        ],
+        "EFFECTIVE_DATE": [
+          6,
+          6,
+          1.0
+        ],
+        "CONFLICT": [
+          13,
+          13,
+          1.0
+        ],
+        "AMBIGUOUS": [
+          10,
+          10,
+          1.0
+        ]
+      },
+      "failures": []
+    }
+  },
+  "overall": {
+    "passed": 115,
+    "total": 115,
+    "pass_rate": 1.0
+  }
+}

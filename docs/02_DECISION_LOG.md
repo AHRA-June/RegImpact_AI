@@ -72,6 +72,12 @@
 - **참고:** 사용자가 "18주"로 언급했으나 이는 브리프 §18(섹션 번호)를 지칭한 것으로 이해, 목표 기간은 9~10주로 확정. 이견 시 조정.
 - **관련 파일:** `docs/04_PLAN.md`(신규), `docs/03_OPEN_QUESTIONS.md` Q3 해결.
 
+### 2026-08-14 · 골드셋 LOCKED/CHALLENGE 최초·최종 개봉 (Phase 3) · ✅ 완료 · 🔒 일회성
+- **이벤트:** sealed 평가셋(LOCKED 40·CHALLENGE 35)을 **처음이자 마지막으로 개봉**해 공식 최종 성능을 기록. `examples/run_final_evaluation.py` → `docs/eval/gold_set/FINAL_EVAL.json`(개봉일 2026-08-14, gold v1, 엔진=rule_engine §H).
+- **결과:** DEV 40/40 · LOCKED 40/40 · CHALLENGE 35/35 = **전체 115/115 (100%)**. CHALLENGE의 CONFLICT 13·AMBIGUOUS 10 포함 전 카테고리 통과. AMBIGUOUS는 escalation 기대로, 엔진이 기준 부재 시 값을 지어내지 않고 사람 검토로 넘김을 최종 확인.
+- **규율(§12, 되돌릴 수 없음):** 이 결과가 공식 최종 성능이다. **이후 엔진/명세를 바꿔도 동일 세트로 재튜닝·재보고하지 않는다.** 재개발이 필요하면 새 평가셋 버전(v2)을 만들고 실험 버전을 명시한다. Assurance·Report·검증보고서 화면은 이제 sealed 대신 개봉 결과를 표시.
+- **LOCKED 정합성:** §0-5·§12 준수 — 개봉은 개발 튜닝이 끝난 뒤(코어 완성 후) 1회만 수행. 개발 중 상시 회귀는 DEV만 사용했다.
+
 ### 2026-08-14 · 골드셋 v1 빌드·freeze (115문항, DEV40/LOCKED40/CHALLENGE35) · ✅ 완료
 - **결정:** 2026-08-10 확정 split대로 골드셋을 실제 생성·freeze. `docs/eval/gold_set/{dev,locked,challenge}.json` + `MANIFEST.json`(split별 sha256·버전 v1·freeze 날짜) + `README.md`.
 - **정답 유도:** expected 정답은 rule_engine이 아니라 **독립 명세 오라클**(`tc_generator.oracle`)에서 유도. 엔진과 독립 코드 경로 → 엔진 회귀가 tautology 아님(LOCKED §4 정합). "AI초안(오라클, 결정론적)→사람확정" 모델.
