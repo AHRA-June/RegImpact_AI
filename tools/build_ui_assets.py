@@ -168,7 +168,11 @@ def main() -> None:
     (TPL / "icon_codepoints.json").write_text(json.dumps(codepoints), encoding="utf-8")
     print(f"app.css {len(app_css)} bytes → {TPL/'app.css'}")
     print(f"icon_codepoints.json {len(codepoints)}개 → {TPL/'icon_codepoints.json'}")
-    # 3) 새 에셋으로 화면 최종 렌더(iconify on)
+    # 3) 새 에셋으로 화면 최종 렌더(iconify on).
+    #    chrome의 lru_cache가 앞선 render_all에서 옛 에셋을 캐시했으므로 비운다.
+    from regimpact.ui import chrome  # noqa: E402
+    chrome._styles.cache_clear()
+    chrome._icon_codepoints.cache_clear()
     render_all()
     print("완료 — docs/ui/generated/ 재생성됨.")
 

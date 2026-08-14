@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-14
-- **갱신자:** Claude (UI 오프라인 자립화 세션)
+- **갱신자:** Claude (Rule Change Proposal + Report E2E 세션)
 - **개발 브랜치:** `claude/proceed-4ujipo`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator + Impact Matrix E2E + **UI 5화면 엔진 렌더(오프라인 자립)** (테스트 82 통과)
+- **전체 단계:** 🟢 **Walking Skeleton E2E 완결** — Source→…→Validation Report 관통. 룰엔진+Extractor+TC Generator+Impact Matrix+**Rule Change Proposal(구조화)**+**Validation Report**+UI 6화면(오프라인) (테스트 97 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,17 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-14)
+- **Rule Change Proposal 구조화 + Validation Report E2E 관통 (Walking Skeleton 완결).**
+  - `src/regimpact/proposal.py` — `RuleChangeProposal` dataclass(파라미터 변경·대상지역·경과규정·reason_codes·
+    source·impact·escalation·승인상태) + `build_rule_change_proposal()`(엔진 상수·regions·Impact Matrix 유도) +
+    `render_rule_dsl()`. 유주택/다주택 before=명세부재(None) 정직 표기, escalation=OWNER_BASELINE_UNKNOWN.
+  - `src/regimpact/report.py` — `ValidationReport`가 8단계 파이프라인(Source→Policy→RegChange→Impact→Proposal→
+    TC/Regression→Assurance→HumanReview)을 실제 관통·집계. `build_validation_report()` + `format_report()`.
+    브리프 §18 '코어 완성의 정의' 충족. Assurance는 ④만 실측, ①②③은 '실측 대기'(지어내지 않음).
+  - UI: `ui/rule_proposal.py`를 구조화 제안 소비로 리팩터, `ui/report.py` 신규(audit-trail nav) → 6번째 화면
+    `validation_report.html`. gold 로더·SOURCE_REGISTRY를 extractor로 이전(중립화). `examples/demo_report.py`.
+  - 테스트: proposal 5 + report 5 + UI(report 화면) → **총 97 통과.** 아이콘 서브셋 40개로 재빌드(빌드 스크립트
+    lru_cache 캐시 무효화 버그 수정).
 - **Impact Matrix E2E** — `src/regimpact/impact/` (segments·matrix). 룰엔진을 **Before(2026-06-30)/After(2026-07-02)**
   두 시점에 관통시켜 세그먼트별 `기존 LTV → 변경 LTV / 방향 / 경과규정 / 근거코드`를 산출. 제품 핵심 출력
   (RegChange Impact Analysis)이며 UI 임팩트매트릭스 하드코딩값을 이 실제 엔진 출력으로 대체 가능.
@@ -51,15 +62,16 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(82), `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/render_ui.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요). UI 에셋 재생성(네트워크): `python tools/build_ui_assets.py`.
+- 실행: `python -m pytest`(97), `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/demo_report.py`, `python examples/render_ui.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요). UI 에셋 재생성(네트워크): `python tools/build_ui_assets.py`.
 
 ## 다음 액션 (NEXT)
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-14). `src/regimpact/impact/`. Before/After 관통, Discovery 분리, 경과규정 counterfactual.
 - ~~**UI 임팩트매트릭스 → 엔진 출력 교체**~~ — ✅ 완료(2026-08-14).
 - ~~**나머지 화면도 엔진 출력으로 렌더**~~ — ✅ 완료(2026-08-14). 5화면 전부 `regimpact.ui` → `docs/ui/generated/`.
-- ~~**CDN 의존 제거(오프라인 스타일)**~~ — ✅ 완료(2026-08-14). Tailwind 빌드 인라인 + 서브셋 아이콘 폰트 임베드.
-  - **후속(선택):** ①Rule Change Proposal을 구조화 스키마(dataclass)로 정식화 + Report stub 연결 → Walking Skeleton
-    완전 관통(Source→…→Report) ②Extractor 실제 LLM 1회 실행 후 Assurance 화면의 '실측 대기' 지표 채우기.
+- ~~**CDN 의존 제거(오프라인 스타일)**~~ — ✅ 완료(2026-08-14).
+- ~~**Rule Change Proposal 구조화 + Report 관통**~~ — ✅ 완료(2026-08-14). `proposal.py`·`report.py`. Walking Skeleton E2E 완결.
+  - **후속(선택):** ①**Extractor 실제 LLM 1회 실행** → Assurance/RegChange 첫 실측값으로 '실측 대기' 채우기(가장 임팩트 큼)
+    ②골드셋 100~120 작성 + DEV/LOCKED/CHALLENGE freeze(Phase 2) ③합성 포트폴리오 층화 확대(2,000~5,000)와 리포트 연결.
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
@@ -113,6 +125,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-14** — ✅ **Rule Change Proposal 구조화 + Validation Report E2E 관통 (Walking Skeleton 완결).** `proposal.py`: `RuleChangeProposal` dataclass(파라미터 변경·대상지역·경과규정·근거·영향·escalation·승인상태)를 엔진 상수·regions·Impact Matrix에서 유도(`build_rule_change_proposal`), DSL은 구조의 렌더링(`render_rule_dsl`). 유주택/다주택 before=명세부재(None) 정직 표기, escalation=OWNER_BASELINE_UNKNOWN. `report.py`: `ValidationReport`가 8단계 파이프라인(Source Snapshot→Policy Version→RegChange→Impact Matrix→Rule Change Proposal→Test/Regression→Assurance→Human Review)을 실제 관통·집계(`build_validation_report`) + `format_report` 텍스트 → 브리프 §18 코어 완성의 정의 충족. Assurance ④만 실측(30/30), ①②③은 '실측 대기'(가짜 수치 없음). UI: `ui/rule_proposal.py`를 구조화 제안 소비로 리팩터, `ui/report.py` 신규(audit-trail nav)로 6번째 화면 `validation_report.html`(파이프라인 스테퍼+섹션 카드, 오프라인). gold 로더+SOURCE_REGISTRY를 extractor로 이전(중립화, ui 의존 제거). `examples/demo_report.py`. 아이콘 서브셋 40개 재빌드(build 스크립트 lru_cache 캐시 무효화 버그 수정). 테스트 proposal 5 + report 5 + report UI → **총 97 통과.**
 - **2026-08-14** — ✅ **UI 오프라인 자립화(CDN 의존 제거).** Stitch export가 쓰던 외부 Tailwind Play CDN·Google Fonts·Material Symbols 링크를 전부 제거하고 자기완결 HTML로. (1) Tailwind v3.4.17 실제 빌드(디자인 토큰은 보존된 `stitch_export/_1`의 config에서 추출, 생성 화면을 스캔해 사용 유틸리티만 JIT) → `ui/templates/app.css` 인라인. (2) Material Symbols Outlined를 화면에서 쓰는 36개 아이콘 코드포인트로만 서브셋(10.6MB→2.9KB woff2) → data URI 임베드, 아이콘 스팬은 `chrome._iconify`가 이름→코드포인트 엔티티로 치환(서브셋은 리가처 없음). (3) 본문 폰트는 시스템 스택 폴백. **전체 네트워크 차단 상태 스크린샷으로 완전 스타일링 검증**(사이드바 아이콘·색 배지·monospace 칩 모두 렌더). 재현 가능한 빌드 스크립트 `tools/build_ui_assets.py`(pytailwindcss+fonttools, 빌드 타임 네트워크 필요, 산출물은 커밋). head 템플릿에서 외부 링크 제거+`{{STYLES}}` 주입. 오프라인 자립성 테스트 15개(외부 의존 부재·인라인 CSS·임베드 폰트·아이콘 코드포인트) → **총 82 통과.**
 - **2026-08-14** — ✅ **UI 5개 화면 전부 엔진/평가 산출물로 렌더.** 신규 프레젠테이션 패키지 `src/regimpact/ui/`(chrome=nav-aware 공용 셸, regchange/impact_matrix/rule_proposal/assurance/portfolio, render_all) → `docs/ui/generated/`(5화면+index). Stitch 목업의 화면별 환각을 각각의 실제 소스로 대체: 규제분석=RegChange gold(`regchange_gold_6_30.json`)+SOURCES+엔진상수(지역 세종/부산/수지구 오류 제거), Rule변경안=rule_engine 상수 diff(경과규정 부등호 `<=`로 교정, 대상지역 실제 3곳, 가짜 "1,240건" 제거, escalation=OWNER_BASELINE_UNKNOWN 실사유), 검증=tc 회귀 실측(30/30 카테고리별)+LLM 의존 지표는 '실측 대기'(가짜 98%/92% 제거), 포트폴리오=합성 포트폴리오(결정론적, 실데이터아님 명시)×엔진 Before/After 집계. 디자인 시스템은 export에서 추출한 `ui/templates/*.html`로 보존, 활성 nav만 화면별 전환. `impact/render.py`→`ui/impact_matrix.py` 이전, 합성 포트폴리오 `impact/portfolio.py`(결정론적, 난수 없음) 추가. `examples/render_ui.py`. 각 화면 상단 provenance 스트립으로 '실제 산출물' 명시. UI 테스트 8 + 포트폴리오 1 = **총 67 통과.**
 - **2026-08-14** — ✅ **UI 임팩트매트릭스 = 엔진 산출물로 대체.** `src/regimpact/impact/render.py`(+ `templates/chrome_*.html`, `examples/render_impact_ui.py`) → `docs/ui/generated/impact_matrix.html`. Stitch 목업(`_1`)이 환각한 하드코딩 값("LTV 60%→50% 하향", 가상 담당자/기한)을 `build_impact_matrix()` 실제 판정으로 대체. 디자인 시스템(head·사이드바·헤더)은 기존 export에서 추출해 보존하고 표·요약카드·Discovery 섹션만 엔진 출력으로 생성 → **값을 손으로 적지 않아 환각 재발 불가**(엔진=단일 진실). 엔진 산출 근거 스트립(rule_engine v1·before/after 날짜·rows)으로 '실제 출력'임을 명시. 정직성 신호(명세부재·종전유지 counterfactual) 화면 노출. `stitch_review.md`에 supersede 주석, `docs/ui/generated/README.md` 신규. 렌더 테스트 2개(총 53 통과).

@@ -7,10 +7,19 @@
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 from .schema import RegChangeExtraction, RegChangeItem
+
+GOLD_PATH = Path(__file__).resolve().parents[3] / "docs" / "eval" / "regchange_gold_6_30.json"
+
+
+def load_gold(path: str | Path | None = None) -> dict:
+    """RegChange 골드 정답지(사람 확정, LOCKED §4)를 로드한다."""
+    return json.loads(Path(path or GOLD_PATH).read_text(encoding="utf-8"))
 
 
 def _norm(s: str) -> str:

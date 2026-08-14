@@ -11,7 +11,8 @@ Stitch 목업(`../stitch_export/`)은 **디자인 참고**로 보존하고, 데�
 | `rule_amendment.html` | Rule 변경안 | `stitch_export/rule` | rule_engine 상수 + regions + 경과규정 cutoff + Impact Matrix |
 | `assurance.html` | 검증 (Assurance) | `stitch_export/assurance` | tc_generator 회귀(실측) + LLM 지표 '실측 대기' |
 | `portfolio_impact.html` | 고객·포트폴리오 영향 | `stitch_export/_3` | 합성 포트폴리오 × 룰엔진 집계 |
-| `index.html` | 화면 인덱스 | — | 위 5개 링크 허브 |
+| `validation_report.html` | 검증 보고서 (감사추적) | — (신규) | `ValidationReport` E2E 파이프라인 집계 |
+| `index.html` | 화면 인덱스 | — | 위 6개 링크 허브 |
 
 ## 왜 생성하나 (하드코딩 금지)
 

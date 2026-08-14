@@ -12,6 +12,7 @@ Stitch 목업(`docs/ui/stitch_export/`)이 화면마다 환각한 도메인 데�
 | `rule_proposal.render()` | rule-amendments | Rule 변경안 | rule_engine 상수·regions·경과규정·Impact Matrix |
 | `assurance.render()` | verification-assurance | 검증 | tc_generator 회귀(실측) + LLM 지표 '실측 대기' |
 | `portfolio.render()` | portfolio-impact | 고객·포트폴리오 영향 | 합성 포트폴리오 × rule_engine |
+| `report.render()` | audit-trail | 검증 보고서 | `ValidationReport` E2E 파이프라인 집계 |
 
 ## 구조
 

@@ -7,7 +7,7 @@ import re
 
 import pytest
 
-from regimpact.ui import assurance, impact_matrix, portfolio, regchange, rule_proposal
+from regimpact.ui import assurance, impact_matrix, portfolio, regchange, report, rule_proposal
 from regimpact.ui.render_all import SCREENS, render_all
 
 # 어떤 화면에도 나오면 안 되는 환각/오류 문자열 (Stitch 목업 리뷰에서 식별)
@@ -22,6 +22,7 @@ RENDERERS = [
     ("rule-amendments", rule_proposal.render),
     ("verification-assurance", assurance.render),
     ("portfolio-impact", portfolio.render),
+    ("audit-trail", report.render),
 ]
 
 

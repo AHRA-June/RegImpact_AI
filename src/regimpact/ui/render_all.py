@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import assurance, impact_matrix, portfolio, regchange, rule_proposal
+from . import assurance, impact_matrix, portfolio, regchange, report, rule_proposal
 
 _ROOT = Path(__file__).resolve().parents[3]
 GENERATED_DIR = _ROOT / "docs" / "ui" / "generated"
@@ -19,6 +19,7 @@ SCREENS: list[tuple[str, object, str]] = [
     ("rule_amendment.html", rule_proposal.render, "Rule 변경안"),
     ("assurance.html", assurance.render, "검증 (Assurance)"),
     ("portfolio_impact.html", portfolio.render, "고객·포트폴리오 영향"),
+    ("validation_report.html", report.render, "검증 보고서 (Report)"),
 ]
 
 

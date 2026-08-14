@@ -11,7 +11,7 @@
 - assurance.render()   verification-assurance (검증)
 - portfolio.render()   portfolio-impact       (고객·포트폴리오 영향)
 """
-from . import assurance, impact_matrix, portfolio, regchange, rule_proposal
+from . import assurance, impact_matrix, portfolio, regchange, report, rule_proposal
 from .chrome import page
 from .render_all import GENERATED_DIR, SCREENS, render_all
 
@@ -25,4 +25,5 @@ __all__ = [
     "rule_proposal",
     "assurance",
     "portfolio",
+    "report",
 ]
