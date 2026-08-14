@@ -1,10 +1,19 @@
 # Stitch 1차 산출물 리뷰 + 데이터 정정 프롬프트 (2026-08-10)
 
-> **✅ 2026-08-14 업데이트 — 임팩트 매트릭스(`_1`) 화면은 이제 엔진 산출물로 대체됨.**
-> 아래 "임팩트 매트릭스 정정"은 더 이상 손으로 고칠 필요가 없다. `docs/ui/generated/impact_matrix.html`
-> 이 Stitch 목업(`_1`)을 대체한다. 값은 `regimpact.impact.build_impact_matrix()`(룰엔진 Before/After
-> 실제 판정)에서 생성되며, `python examples/render_impact_ui.py`로 재생성한다. Stitch export는 디자인
-> 참고로 보존. (나머지 화면 rule/_3 등은 여전히 목업.)
+> **✅ 2026-08-14 업데이트 — 5개 화면 전부 엔진/평가 산출물로 대체됨.**
+> 아래 화면별 데이터 정정은 더 이상 손으로 고칠 필요가 없다. `docs/ui/generated/`의 생성 HTML이
+> Stitch 목업(`_1`·`_2`·`rule`·`assurance`·`_3`)을 대체한다. `python examples/render_ui.py`로 재생성.
+> Stitch export는 **디자인 참고**로 보존.
+>
+> | 목업 | 생성 화면 | 데이터 소스 |
+> |---|---|---|
+> | `_2` | `regulatory_analysis.html` | RegChange gold + SOURCES + 엔진 상수 |
+> | `_1` | `impact_matrix.html` | `build_impact_matrix()` |
+> | `rule` | `rule_amendment.html` | rule_engine 상수·regions·경과규정·Impact Matrix |
+> | `assurance` | `assurance.html` | tc 회귀(실측) + LLM 지표 '실측 대기' |
+> | `_3` | `portfolio_impact.html` | 합성 포트폴리오 × rule_engine |
+>
+> 렌더 레이어: `src/regimpact/ui/`. 자세한 내용은 `docs/ui/generated/README.md`.
 
 > Stitch에서 5개 화면 생성 완료. 디자인 시스템(DESIGN.md)은 마스터 컨텍스트를 잘 반영(Institutional Navy, Noto Sans, JetBrains Mono, 상태색, 고밀도).
 > **문제: Stitch가 도메인 데이터를 화면마다 다르게 환각.** 아래 정정 프롬프트로 재생성하거나 HTML 직접 수정.

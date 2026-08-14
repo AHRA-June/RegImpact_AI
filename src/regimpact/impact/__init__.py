@@ -15,16 +15,21 @@ from .matrix import (
     ImpactMatrix,
     ImpactRow,
     build_impact_matrix,
+    classify_direction,
     format_matrix,
 )
-from .render import render_impact_matrix_html, write_impact_matrix_html
+from .portfolio import (
+    Applicant,
+    PortfolioImpact,
+    analyze_portfolio,
+    build_synthetic_portfolio,
+)
 from .segments import SIX_THIRTY_SEGMENTS, Segment
 
 __all__ = [
     "build_impact_matrix",
     "format_matrix",
-    "render_impact_matrix_html",
-    "write_impact_matrix_html",
+    "classify_direction",
     "ImpactMatrix",
     "ImpactRow",
     "ImpactDirection",
@@ -32,4 +37,9 @@ __all__ = [
     "SIX_THIRTY_SEGMENTS",
     "BEFORE_DATE",
     "AFTER_DATE",
+    # 포트폴리오(합성) 집계
+    "analyze_portfolio",
+    "build_synthetic_portfolio",
+    "PortfolioImpact",
+    "Applicant",
 ]

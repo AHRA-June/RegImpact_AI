@@ -50,17 +50,24 @@ for r in matrix.core_rows:
 
 데모(텍스트 표): `python examples/demo_impact_matrix.py`
 
+### 합성 포트폴리오 집계 (`portfolio.py`)
+
+`build_synthetic_portfolio(n)` + `analyze_portfolio()` 로 층화 합성 차주를 엔진에 Before/After로
+관통시켜 차주유형·LTV 분포·영향/경과규정/고위험 카운트를 낸다. **합성 데이터**(LOCKED §8)이되
+각 차주의 LTV는 엔진 실제 판정이며 난수를 쓰지 않아 결정론적이다.
+
 ### UI 렌더 (화면 = 엔진 산출물)
 
+HTML 화면 렌더는 프레젠테이션 레이어인 **`regimpact.ui`** 패키지가 담당한다(엔진/분석과 분리).
+
 ```python
-from regimpact.impact import render_impact_matrix_html, write_impact_matrix_html
-write_impact_matrix_html("docs/ui/generated/impact_matrix.html")   # 인자 없으면 6·30 기본
+from regimpact.ui import render_all
+render_all()   # 5개 화면 + index → docs/ui/generated/
 ```
 
-`render.py`는 Stitch 임팩트매트릭스 화면의 하드코딩(일부 환각) 값을 이 모듈 출력으로
-대체한다. 디자인 시스템(head·사이드바·헤더)은 `templates/chrome_*.html`(기존 export에서
-추출)로 보존하고, 표·요약·Discovery만 `ImpactMatrix`에서 생성 → 값을 손으로 적지 않으므로
-환각이 재발할 수 없다. 렌더 명령: `python examples/render_impact_ui.py`.
+`ui`는 Stitch 목업의 하드코딩(환각) 값을 이 모듈들의 실제 출력으로 대체한다. 디자인 시스템은
+`ui/templates/*.html`(기존 export에서 추출)로 보존하고, 표·요약·차트만 엔진/평가에서 생성 →
+값을 손으로 적지 않으므로 환각이 재발할 수 없다. 렌더 명령: `python examples/render_ui.py`.
 자세한 내용은 `docs/ui/generated/README.md`.
 
 ## 출력 모델

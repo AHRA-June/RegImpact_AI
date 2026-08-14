@@ -112,22 +112,31 @@ class ImpactMatrix:
         return counts
 
 
-def _build_application(segment: Segment, as_of: date) -> MortgageApplication:
-    """세그먼트 프로파일 + 시점 → MortgageApplication. 문자열 날짜는 date로 정규화."""
-    kwargs: dict[str, Any] = dict(segment.profile)
+def _build_application_from_profile(
+    profile: dict[str, Any], region_code: str, as_of: date, customer_id: str | None = None
+) -> MortgageApplication:
+    """프로파일 dict + 지역 + 시점 → MortgageApplication. 문자열 날짜는 date로 정규화."""
+    kwargs: dict[str, Any] = dict(profile)
     for f in _DATE_FIELDS:
         v = kwargs.get(f)
         if isinstance(v, str):
             kwargs[f] = date.fromisoformat(v)
     return MortgageApplication(
-        region_code=segment.region_code,
+        region_code=region_code,
         evaluation_date=as_of,
-        customer_id=segment.key,
+        customer_id=customer_id,
         **kwargs,
     )
 
 
-def _classify(before: LtvDecision, after: LtvDecision) -> ImpactDirection:
+def _build_application(segment: Segment, as_of: date) -> MortgageApplication:
+    """세그먼트 프로파일 + 시점 → MortgageApplication."""
+    return _build_application_from_profile(
+        segment.profile, segment.region_code, as_of, customer_id=segment.key
+    )
+
+
+def classify_direction(before: LtvDecision, after: LtvDecision) -> ImpactDirection:
     """Before/After 판정 → 변경 방향."""
     if after.status in (EvaluationStatus.DISCOVERY, EvaluationStatus.OUT_OF_SCOPE):
         return ImpactDirection.DISCOVERY
@@ -172,7 +181,7 @@ def build_impact_matrix(
     for seg in segments:
         before = evaluate(_build_application(seg, before_date))
         after = evaluate(_build_application(seg, after_date))
-        direction = _classify(before, after)
+        direction = classify_direction(before, after)
 
         counterfactual = None
         if after.grandfathering_applied:

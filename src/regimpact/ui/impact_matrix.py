@@ -1,30 +1,15 @@
-"""Impact Matrix → HTML 렌더러 (UI를 엔진 출력의 '빌드 산출물'로 만든다).
+"""임팩트 매트릭스 화면 (data-path=impact-matrix) — Impact Matrix 엔진 출력 렌더.
 
-목적: 임팩트 매트릭스 화면의 하드코딩(일부 환각) 값을 rule_engine 실제 출력으로 대체.
-디자인 시스템(Stitch DESIGN.md)은 `templates/chrome_*.html`(기존 export에서 추출)로 그대로
-보존하고, 표 본문·요약·Discovery 섹션만 `ImpactMatrix`에서 생성한다.
-
-→ 값을 손으로 적지 않으므로 환각이 재발할 수 없다. 엔진이 단일 진실(single source of truth).
+Stitch 목업(_1)의 하드코딩(환각 "60%→50%")을 build_impact_matrix() 실제 판정으로 대체.
+표·요약·Discovery는 ImpactMatrix에서 생성 → 값을 손으로 적지 않아 환각 재발 불가.
 """
 from __future__ import annotations
 
-import html
-from datetime import date
-from pathlib import Path
-
+from ..impact import ImpactDirection, ImpactMatrix, ImpactRow, build_impact_matrix
 from ..models import EvaluationStatus
-from .matrix import ImpactDirection, ImpactMatrix, ImpactRow, build_impact_matrix
+from .chrome import esc, page, provenance_strip, title_block
 
-_TPL_DIR = Path(__file__).resolve().parent / "templates"
-
-
-def _chrome() -> tuple[str, str]:
-    head = (_TPL_DIR / "chrome_head.html").read_text(encoding="utf-8")
-    foot = (_TPL_DIR / "chrome_foot.html").read_text(encoding="utf-8")
-    return head, foot
-
-
-# 방향 → (라벨, badge Tailwind 클래스, dot 클래스). 디자인 상태색 팔레트 사용.
+# 방향 → (라벨, badge 클래스, dot 클래스)
 _DIRECTION_BADGE: dict[ImpactDirection, tuple[str, str, str]] = {
     ImpactDirection.DOWNGRADE: ("하향", "bg-error-container text-on-error-container", "bg-on-error-container"),
     ImpactDirection.NEW_RESTRICTION: ("신규 제한", "bg-error text-on-error", "bg-on-error"),
@@ -35,23 +20,18 @@ _DIRECTION_BADGE: dict[ImpactDirection, tuple[str, str, str]] = {
 }
 
 
-def _esc(s: object) -> str:
-    return html.escape(str(s))
-
-
 def _direction_badge(direction: ImpactDirection) -> str:
     label, cls, dot = _DIRECTION_BADGE[direction]
     return (
         f'<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full '
         f'{cls} font-mono-label text-mono-label">'
-        f'<span class="w-1.5 h-1.5 rounded-full {dot}"></span>{_esc(label)}</span>'
+        f'<span class="w-1.5 h-1.5 rounded-full {dot}"></span>{esc(label)}</span>'
     )
 
 
 def _ltv_before(row: ImpactRow) -> str:
     if row.before_ltv is not None:
         return f'<span class="font-mono-data text-mono-data">{row.before_ltv:.0%}</span>'
-    # 명세부재(정직 처리) — 지어내지 않음
     return (
         '<span class="font-body-sm text-body-sm italic text-outline" '
         'title="원문에 기준선 없음 → 사람 검토">명세부재</span>'
@@ -65,16 +45,13 @@ def _ltv_after(row: ImpactRow) -> str:
             EvaluationStatus.OUT_OF_SCOPE: "범위외",
             EvaluationStatus.NEEDS_HUMAN_REVIEW: "검토",
         }.get(row.after.status, "—")
-        return f'<span class="font-body-sm text-body-sm text-on-surface-variant">{_esc(word)}</span>'
-
+        return f'<span class="font-body-sm text-body-sm text-on-surface-variant">{esc(word)}</span>'
     main = f'<span class="font-mono-data text-mono-data font-semibold">{row.after_ltv:.0%}</span>'
     if row.counterfactual_ltv is not None:
-        # 경과규정으로 종전규정 유지 — 보호가 없었다면 적용됐을 값을 함께 노출(거버넌스)
         main += (
             ' <span class="font-mono-label text-mono-label px-1.5 py-0.5 rounded '
             'bg-tertiary-fixed/40 text-on-tertiary-fixed-variant">종전유지</span>'
-            f'<div class="font-body-sm text-body-sm text-outline mt-0.5">'
-            f'미보호 시 {row.counterfactual_ltv:.0%}</div>'
+            f'<div class="font-body-sm text-body-sm text-outline mt-0.5">미보호 시 {row.counterfactual_ltv:.0%}</div>'
         )
     return main
 
@@ -84,7 +61,7 @@ def _reason_chips(row: ImpactRow) -> str:
         return '<span class="text-outline">-</span>'
     chips = [
         f'<span class="font-mono-data text-mono-data bg-surface-variant '
-        f'text-on-surface-variant px-2 py-1 rounded">{_esc(rc)}</span>'
+        f'text-on-surface-variant px-2 py-1 rounded">{esc(rc)}</span>'
         for rc in row.reason_codes
     ]
     return '<div class="flex flex-wrap gap-1.5">' + "".join(chips) + "</div>"
@@ -104,8 +81,8 @@ def _core_row_html(row: ImpactRow) -> str:
     highlight = " bg-error/5" if row.direction == ImpactDirection.NEW_RESTRICTION else ""
     return (
         f'<tr class="hover:bg-surface-container-low/50 transition-colors{highlight}">'
-        f'<td class="p-4 font-semibold text-secondary whitespace-nowrap">{_esc(row.region_label)}</td>'
-        f'<td class="p-4 whitespace-nowrap">{_esc(row.borrower_type)}</td>'
+        f'<td class="p-4 font-semibold text-secondary whitespace-nowrap">{esc(row.region_label)}</td>'
+        f'<td class="p-4 whitespace-nowrap">{esc(row.borrower_type)}</td>'
         f'<td class="p-4 text-right">{_ltv_before(row)}</td>'
         f'<td class="p-4 text-right">{_ltv_after(row)}</td>'
         f'<td class="p-4 text-center">{_direction_badge(row.direction)}</td>'
@@ -130,28 +107,11 @@ def _summary_cards(matrix: ImpactMatrix) -> str:
             '<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30">'
             f'<div class="flex items-center gap-2 text-on-surface-variant mb-2">'
             f'<span class="material-symbols-outlined text-[18px]">{icon}</span>'
-            f'<span class="font-body-sm text-body-sm">{_esc(label)}</span></div>'
+            f'<span class="font-body-sm text-body-sm">{esc(label)}</span></div>'
             f'<div class="font-h2 text-h2 {color}">{value}</div></div>'
         )
     out.append("</div>")
     return "".join(out)
-
-
-def _provenance(matrix: ImpactMatrix) -> str:
-    """엔진 산출 근거 스트립 — '실제 엔진 출력'임을 시각적으로 못박는다."""
-    return (
-        '<div class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono-label text-mono-label '
-        'text-on-surface-variant bg-surface-container-low px-4 py-2 rounded-lg '
-        'border border-outline-variant/30">'
-        '<span class="flex items-center gap-1.5 text-secondary">'
-        '<span class="material-symbols-outlined text-[16px]">bolt</span>'
-        'rule_engine v1 (deterministic)</span>'
-        f'<span>before={matrix.before_date.isoformat()}</span>'
-        f'<span>after={matrix.after_date.isoformat()}</span>'
-        f'<span>rows={len(matrix.rows)}</span>'
-        '<span class="text-outline">· 값은 손으로 적지 않고 엔진이 생성 (LOCKED §4)</span>'
-        "</div>"
-    )
 
 
 def _discovery_section(matrix: ImpactMatrix) -> str:
@@ -163,10 +123,10 @@ def _discovery_section(matrix: ImpactMatrix) -> str:
         cards.append(
             '<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm">'
             '<div class="flex justify-between items-start mb-2 gap-2">'
-            f'<div class="font-body-lg text-body-lg font-semibold text-on-surface">{_esc(r.borrower_type)}</div>'
+            f'<div class="font-body-lg text-body-lg font-semibold text-on-surface">{esc(r.borrower_type)}</div>'
             f'{_reason_chips(r)}</div>'
             f'<div class="font-body-sm text-body-sm text-on-surface-variant">'
-            f'{_esc(r.region_label)} · {_esc(r.note or "자동판정 제외 — 수동 정책검토 대상")}</div>'
+            f'{esc(r.region_label)} · {esc(r.note or "자동판정 제외 — 수동 정책검토 대상")}</div>'
             "</div>"
         )
     return (
@@ -182,7 +142,7 @@ def _discovery_section(matrix: ImpactMatrix) -> str:
     )
 
 
-def _main_content(matrix: ImpactMatrix) -> str:
+def _main(matrix: ImpactMatrix) -> str:
     core_rows = "".join(_core_row_html(r) for r in matrix.core_rows)
     table = (
         '<div class="w-full overflow-x-auto bg-surface-container-lowest rounded-xl shadow-sm">'
@@ -200,13 +160,10 @@ def _main_content(matrix: ImpactMatrix) -> str:
         f'<tbody class="font-body-md text-body-md text-on-surface divide-y divide-outline-variant/30">{core_rows}</tbody>'
         "</table></div>"
     )
-    title = (
-        '<div class="flex flex-col gap-3">'
-        '<div class="font-h1 text-h1 text-on-background">임팩트 매트릭스</div>'
-        '<div class="font-body-md text-body-md text-on-surface-variant max-w-3xl">'
-        f'<b>{_esc(matrix.policy_event)}</b>에 따른 주택구입목적 주담대 LTV의 세그먼트별 '
+    subtitle = (
+        f'<b>{esc(matrix.policy_event)}</b>에 따른 주택구입목적 주담대 LTV의 세그먼트별 '
         'Before/After 영향. 아래 표는 deterministic 룰엔진을 시행 전·후 두 시점에 실행해 산출한 '
-        '실제 판정이며, 화면에 값을 하드코딩하지 않는다.</div></div>'
+        '실제 판정이며, 화면에 값을 하드코딩하지 않는다.'
     )
     footer = (
         '<div class="font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low '
@@ -216,26 +173,21 @@ def _main_content(matrix: ImpactMatrix) -> str:
         '② 정책대출·전세는 Discovery로 분리 · '
         '③ 경과규정은 종전규정 유지 + 미보호 시 값(counterfactual) 병기.</div>'
     )
+    prov = provenance_strip([
+        f"before={matrix.before_date.isoformat()}",
+        f"after={matrix.after_date.isoformat()}",
+        f"rows={len(matrix.rows)}",
+    ], engine_label="rule_engine v1 (deterministic)")
     return (
-        f'<div class="flex flex-col gap-3 mb-2">{title}</div>'
-        f"{_provenance(matrix)}"
-        f"{_summary_cards(matrix)}"
-        f"{table}"
-        f"{_discovery_section(matrix)}"
-        f"{footer}"
+        title_block("임팩트 매트릭스", subtitle)
+        + prov
+        + _summary_cards(matrix)
+        + table
+        + _discovery_section(matrix)
+        + footer
     )
 
 
-def render_impact_matrix_html(matrix: ImpactMatrix | None = None) -> str:
-    """ImpactMatrix → 자기완결(self-contained) HTML 페이지 문자열."""
+def render(matrix: ImpactMatrix | None = None) -> str:
     matrix = matrix if matrix is not None else build_impact_matrix()
-    head, foot = _chrome()
-    return head + _main_content(matrix) + foot
-
-
-def write_impact_matrix_html(path: str | Path, matrix: ImpactMatrix | None = None) -> Path:
-    """렌더 결과를 파일로 저장하고 경로 반환."""
-    out = Path(path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render_impact_matrix_html(matrix), encoding="utf-8")
-    return out
+    return page("impact-matrix", _main(matrix))
