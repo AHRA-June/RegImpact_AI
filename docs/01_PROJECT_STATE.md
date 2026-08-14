@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-14
-- **갱신자:** Claude (골드셋 최종 개봉 세션)
+- **갱신자:** Claude (골드셋 도메인 검수 v2 세션)
 - **개발 브랜치:** `claude/proceed-4ujipo`
-- **전체 단계:** 🟢 **코어 완성 + 최종 평가 개봉.** Walking Skeleton E2E + Assurance 4 DEEP 실측 + 골드셋 v1(115) + 검증보고서 + **LOCKED/CHALLENGE 최초·최종 개봉(전체 115/115 100%, FINAL_EVAL 기록, 재튜닝 금지)**. UI 6화면(오프라인). (테스트 115 통과)
+- **전체 단계:** 🟢 **코어 완성 + 평가셋 개봉·검수 완료.** Walking Skeleton E2E + Assurance 4 DEEP 실측 + 골드셋 v1(115) + 검증보고서 + 최종 개봉(115/115) + **도메인 검수 v2(115문항 원문 grounding·사람 확정)**. UI 6화면(오프라인). (테스트 120 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-14)
+- **골드셋 도메인 검수 v2 (사람 확정).** `src/regimpact/eval/review.py` + `tools/review_gold_set.py` →
+  `docs/eval/gold_set/REVIEW_v2.json`·`REVIEW_REPORT.md` + MANIFEST review 블록. v1 정답(오라클 §H 유도, AI초안)을
+  **원문 규제사실 실제 인용에 grounding + 수치 일관성 결정론 검증**(불일치 시 예외) 후 사람 권한으로 확정.
+  **115문항 전부 확정:** CONFIRMED(직접 grounding) 92 · CONFIRMED_ESCALATION(기준부재→escalation 정답) 10 ·
+  CONFIRMED_PRECEDENCE(§H 충돌 해소) 13, 미해결 0. 입력·정답 불변(annotation 층만 추가). report.gold_set·ui/assurance·
+  ui/report·report_doc §8.1에 v2 검수 요약 노출(verified 배지). Q1 완전 종료. `examples/demo_gold_review.py`.
+  테스트 5개 → **총 120 통과.**
 - **골드셋 LOCKED/CHALLENGE 최초·최종 개봉 (Phase 3, 일회성 거버넌스 이벤트).** `eval.run_final_evaluation()` +
   `examples/run_final_evaluation.py` → `docs/eval/gold_set/FINAL_EVAL.json`(개봉일·버전·엔진·split별·카테고리별·overall).
   **결과: DEV 40/40 · LOCKED 40/40 · CHALLENGE 35/35 = 전체 115/115 (100%)** — CHALLENGE의 CONFLICT 13·AMBIGUOUS 10
@@ -101,8 +108,9 @@
 - ~~**골드셋 100~120 + DEV/LOCKED/CHALLENGE freeze**~~ — ✅ 완료(2026-08-14). v1 115문항, DEV 회귀 100%, sealed 규율.
 - ~~**검증보고서 15~20쪽**~~ — ✅ 완료(2026-08-14). `docs/VALIDATION_REPORT.md`(코드 생성, 실측 종합). **→ 브리프 §18 코어 완성선 충족.**
 - ~~**LOCKED/CHALLENGE 최종 개봉·보고**~~ — ✅ 완료(2026-08-14). 전체 115/115, FINAL_EVAL 기록, 재튜닝 금지.
-  - **후속(선택/스트레치, 브리프 §18 W9~10):** ①골드셋 도메인 검수 v2 ②API 키로 다중 모델 추출 비교 ③Model/System Card·
-    AI Risk Register ④정책 버전 타임라인·대시보드 ⑤배포·README·데모·공개글.
+- ~~**골드셋 도메인 검수 v2(사람 확정)**~~ — ✅ 완료(2026-08-14). 115문항 원문 grounding·확정, REVIEW_v2.
+  - **후속(선택/스트레치, 브리프 §18 W9~10):** ①API 키로 다중 모델 추출 비교(grounding 실패 유도) ②Model/System Card·
+    AI Risk Register ③정책 버전 타임라인·대시보드 ④배포·README·데모·공개글.
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영

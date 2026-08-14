@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 
-from .eval import load_final_eval, load_manifest, run_gold_regression
+from .eval import load_final_eval, load_manifest, load_review, run_gold_regression
 from .extractor import SOURCE_REGISTRY, load_gold, measured_assurance
 from .impact import ImpactMatrix, build_impact_matrix
 from .impact.segments import REGION_LABELS
@@ -145,6 +145,13 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
         for s in ("locked", "challenge"):
             fs = final["splits"][s]
             gold_set[s] = {"passed": fs["passed"], "total": fs["total"], "pass_rate": fs["pass_rate"]}
+    review = load_review()
+    if review is not None:
+        gold_set["review"] = {
+            "version": review["_meta"]["version"],
+            "review_date": review["_meta"]["review_date"],
+            "summary": review["summary"],
+        }
 
     s = matrix.summary
     steps = [
@@ -255,6 +262,12 @@ def format_report(report: ValidationReport) -> str:
                  f"({gs['overall']['passed']}/{gs['overall']['total']}) · 개봉일 {gs['opened_date']} (재튜닝·재보고 금지)")
     else:
         L.append(f"  - LOCKED {gs['locked_sealed']} · CHALLENGE {gs['challenge_sealed']} : sealed (Phase 3 최종 1회)")
+    if gs.get("review"):
+        rv = gs["review"]
+        rs = rv["summary"]
+        L.append(f"  - 도메인 검수 {rv['version']}({rv['review_date']}): {rs['total']}문항 확정 "
+                 f"— 직접 {rs['CONFIRMED']}·escalation {rs['CONFIRMED_ESCALATION']}·precedence {rs['CONFIRMED_PRECEDENCE']} "
+                 f"(원문 grounding·수치 일관성 검증, 최종 권한=사람)")
     L.append("")
 
     L.append("## 7. Assurance (4 DEEP dimension)")

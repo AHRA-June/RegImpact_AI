@@ -44,5 +44,17 @@
         "AMBIGUOUS": 10
       }
     }
+  },
+  "review": {
+    "version": "v2",
+    "review_date": "2026-08-14",
+    "reviewer": "도메인 검수 — 사람 확정(authority: 사용자, LOCKED §4 'AI초안→사람확정')",
+    "summary": {
+      "total": 115,
+      "CONFIRMED": 92,
+      "CONFIRMED_ESCALATION": 10,
+      "CONFIRMED_PRECEDENCE": 13
+    },
+    "sha256": "207be0cff6a0fb4531c29d8b600670ef12124a87c54d0544bd7dbd3ac320c891"
   }
 }

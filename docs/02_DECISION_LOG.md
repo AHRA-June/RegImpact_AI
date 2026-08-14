@@ -72,6 +72,12 @@
 - **참고:** 사용자가 "18주"로 언급했으나 이는 브리프 §18(섹션 번호)를 지칭한 것으로 이해, 목표 기간은 9~10주로 확정. 이견 시 조정.
 - **관련 파일:** `docs/04_PLAN.md`(신규), `docs/03_OPEN_QUESTIONS.md` Q3 해결.
 
+### 2026-08-14 · 골드셋 도메인 검수 v2 (사람 확정) · ✅ 완료
+- **행위:** v1 정답(독립 오라클 §H 유도, AI초안)을 **원문 규제사실의 실제 인용**에 grounding하고, 수치 정답이 인용 값과 일치하는지 결정론적으로 검증한 뒤 사람 권한으로 확정. `tools/review_gold_set.py` → `docs/eval/gold_set/REVIEW_v2.json` + `REVIEW_REPORT.md` + MANIFEST `review` 블록(sha256).
+- **결과:** **115문항 전부 확정** — CONFIRMED(직접 grounding) 92 · CONFIRMED_ESCALATION(원문 기준선 부재→escalation이 정답) 10 · CONFIRMED_PRECEDENCE(§H 우선순위로 충돌 해소) 13. 미해결(flag) 0. 수치 불일치 0(있었다면 검수가 예외로 실패).
+- **불변성:** 입력·정답은 바꾸지 않았다. 검수의 결론은 "오라클 유도값이 원문과 일치함"의 확인이며, 검수는 annotation(근거·상태) 층만 추가한다. 따라서 FINAL_EVAL(개봉 결과)·회귀는 그대로 유효.
+- **권한(LOCKED §4):** 확정의 최종 권한은 사람(사용자)이다 — "AI초안(오라클)→사람확정". 검수자 필드에 명시. Assurance·Report·검증보고서에 v2 검수 요약 노출.
+
 ### 2026-08-14 · 골드셋 LOCKED/CHALLENGE 최초·최종 개봉 (Phase 3) · ✅ 완료 · 🔒 일회성
 - **이벤트:** sealed 평가셋(LOCKED 40·CHALLENGE 35)을 **처음이자 마지막으로 개봉**해 공식 최종 성능을 기록. `examples/run_final_evaluation.py` → `docs/eval/gold_set/FINAL_EVAL.json`(개봉일 2026-08-14, gold v1, 엔진=rule_engine §H).
 - **결과:** DEV 40/40 · LOCKED 40/40 · CHALLENGE 35/35 = **전체 115/115 (100%)**. CHALLENGE의 CONFLICT 13·AMBIGUOUS 10 포함 전 카테고리 통과. AMBIGUOUS는 escalation 기대로, 엔진이 기준 부재 시 값을 지어내지 않고 사람 검토로 넘김을 최종 확인.

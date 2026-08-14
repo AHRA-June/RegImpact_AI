@@ -1,0 +1,950 @@
+{
+  "_meta": {
+    "version": "v2",
+    "base": "v1",
+    "review_date": "2026-08-14",
+    "reviewer": "도메인 검수 — 사람 확정(authority: 사용자, LOCKED §4 'AI초안→사람확정')",
+    "note": "각 정답을 원문 규제사실(citation)에 grounding하고 수치 일관성을 검증한 뒤 확정. 입력·정답은 변경하지 않음(오라클 유도값이 원문과 일치 확인). 최종 권한=사람."
+  },
+  "summary": {
+    "total": 115,
+    "CONFIRMED": 92,
+    "CONFIRMED_ESCALATION": 10,
+    "CONFIRMED_PRECEDENCE": 13
+  },
+  "by_split": {
+    "dev": {
+      "CONFIRMED": 40
+    },
+    "locked": {
+      "CONFIRMED": 40
+    },
+    "challenge": {
+      "CONFIRMED": 12,
+      "CONFIRMED_PRECEDENCE": 13,
+      "CONFIRMED_ESCALATION": 10
+    }
+  },
+  "reviews": {
+    "DEV-NORMAL-001": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-002": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-003": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-004": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-005": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-006": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-007": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-NORMAL-008": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "NORMAL"
+    },
+    "DEV-EXCEPTION-009": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-010": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-011": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "정답(60%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_REAL_DEMAND).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-012": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-013": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "정답(60%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_REAL_DEMAND).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-014": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-015": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-EXCEPTION-016": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "정답(60%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_REAL_DEMAND).",
+      "split": "dev",
+      "category": "EXCEPTION"
+    },
+    "DEV-GRANDFATHERING-017": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "dev",
+      "category": "GRANDFATHERING"
+    },
+    "DEV-GRANDFATHERING-018": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "dev",
+      "category": "GRANDFATHERING"
+    },
+    "DEV-GRANDFATHERING-019": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "dev",
+      "category": "GRANDFATHERING"
+    },
+    "DEV-GRANDFATHERING-020": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "dev",
+      "category": "GRANDFATHERING"
+    },
+    "DEV-GRANDFATHERING-021": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "dev",
+      "category": "GRANDFATHERING"
+    },
+    "DEV-GRANDFATHERING-022": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "토지거래허가 신청 접수(≤6.30) → 이후 계약해도 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_LAND_PERMIT).",
+      "split": "dev",
+      "category": "GRANDFATHERING"
+    },
+    "DEV-EFFECTIVE_DATE-023": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "dev",
+      "category": "EFFECTIVE_DATE"
+    },
+    "DEV-EFFECTIVE_DATE-024": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "dev",
+      "category": "EFFECTIVE_DATE"
+    },
+    "DEV-EFFECTIVE_DATE-025": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "dev",
+      "category": "EFFECTIVE_DATE"
+    },
+    "DEV-REGION-026": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "dev",
+      "category": "REGION"
+    },
+    "DEV-REGION-027": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "dev",
+      "category": "REGION"
+    },
+    "DEV-REGION-028": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "dev",
+      "category": "REGION"
+    },
+    "DEV-BORROWER_TYPE-029": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_OWNER_0).",
+      "split": "dev",
+      "category": "BORROWER_TYPE"
+    },
+    "DEV-BORROWER_TYPE-030": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_OWNER_0).",
+      "split": "dev",
+      "category": "BORROWER_TYPE"
+    },
+    "DEV-BORROWER_TYPE-031": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_OWNER_0).",
+      "split": "dev",
+      "category": "BORROWER_TYPE"
+    },
+    "DEV-BORROWER_TYPE-032": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_MULTI_HOME_0).",
+      "split": "dev",
+      "category": "BORROWER_TYPE"
+    },
+    "DEV-BORROWER_TYPE-033": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "dev",
+      "category": "BORROWER_TYPE"
+    },
+    "DEV-LOAN_PURPOSE-034": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "DEV-LOAN_PURPOSE-035": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "DEV-LOAN_PURPOSE-036": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "DEV-LOAN_PURPOSE-037": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "DEV-LOAN_PURPOSE-038": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "DEV-LOAN_PURPOSE-039": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "DEV-LOAN_PURPOSE-040": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "dev",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-NORMAL-001": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-002": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-003": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-004": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-005": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-006": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-007": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-NORMAL-008": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "locked",
+      "category": "NORMAL"
+    },
+    "LOCKED-EXCEPTION-009": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-EXCEPTION-010": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "정답(60%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_REAL_DEMAND).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-EXCEPTION-011": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-EXCEPTION-012": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-EXCEPTION-013": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "정답(60%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_REAL_DEMAND).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-EXCEPTION-014": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_FIRST_HOME).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-EXCEPTION-015": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "정답(60%)이 원문 인용과 직접 일치한다(근거코드 EXCEPTION_REAL_DEMAND).",
+      "split": "locked",
+      "category": "EXCEPTION"
+    },
+    "LOCKED-GRANDFATHERING-016": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "locked",
+      "category": "GRANDFATHERING"
+    },
+    "LOCKED-GRANDFATHERING-017": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "locked",
+      "category": "GRANDFATHERING"
+    },
+    "LOCKED-GRANDFATHERING-018": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "locked",
+      "category": "GRANDFATHERING"
+    },
+    "LOCKED-GRANDFATHERING-019": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "locked",
+      "category": "GRANDFATHERING"
+    },
+    "LOCKED-GRANDFATHERING-020": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "토지거래허가 신청 접수(≤6.30) → 이후 계약해도 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_LAND_PERMIT).",
+      "split": "locked",
+      "category": "GRANDFATHERING"
+    },
+    "LOCKED-EFFECTIVE_DATE-021": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "EFFECTIVE_DATE"
+    },
+    "LOCKED-EFFECTIVE_DATE-022": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "EFFECTIVE_DATE"
+    },
+    "LOCKED-EFFECTIVE_DATE-023": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "EFFECTIVE_DATE"
+    },
+    "LOCKED-REGION-024": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "REGION"
+    },
+    "LOCKED-REGION-025": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "REGION"
+    },
+    "LOCKED-REGION-026": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "REGION"
+    },
+    "LOCKED-BORROWER_TYPE-027": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_MULTI_HOME_0).",
+      "split": "locked",
+      "category": "BORROWER_TYPE"
+    },
+    "LOCKED-BORROWER_TYPE-028": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_MULTI_HOME_0).",
+      "split": "locked",
+      "category": "BORROWER_TYPE"
+    },
+    "LOCKED-BORROWER_TYPE-029": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_MULTI_HOME_0).",
+      "split": "locked",
+      "category": "BORROWER_TYPE"
+    },
+    "LOCKED-BORROWER_TYPE-030": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "정답(0%)이 원문 인용과 직접 일치한다(근거코드 LTV_MULTI_HOME_0).",
+      "split": "locked",
+      "category": "BORROWER_TYPE"
+    },
+    "LOCKED-LOAN_PURPOSE-031": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-LOAN_PURPOSE-032": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-LOAN_PURPOSE-033": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "정답(OUT_OF_SCOPE)이 원문 인용과 직접 일치한다(근거코드 OUT_OF_SCOPE_PRODUCT).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-LOAN_PURPOSE-034": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-LOAN_PURPOSE-035": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-LOAN_PURPOSE-036": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-LOAN_PURPOSE-037": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "정답(DISCOVERY)이 원문 인용과 직접 일치한다(근거코드 DISCOVERY_POLICY_LOAN).",
+      "split": "locked",
+      "category": "LOAN_PURPOSE"
+    },
+    "LOCKED-NO_CHANGE-038": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "NO_CHANGE"
+    },
+    "LOCKED-NO_CHANGE-039": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "NO_CHANGE"
+    },
+    "LOCKED-NO_CHANGE-040": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "locked",
+      "category": "NO_CHANGE"
+    },
+    "CHALLENGE-GRANDFATHERING-001": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "challenge",
+      "category": "GRANDFATHERING"
+    },
+    "CHALLENGE-EFFECTIVE_DATE-002": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "challenge",
+      "category": "EFFECTIVE_DATE"
+    },
+    "CHALLENGE-CONFLICT-003": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.0)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-004": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-GRANDFATHERING-005": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "challenge",
+      "category": "GRANDFATHERING"
+    },
+    "CHALLENGE-EFFECTIVE_DATE-006": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "challenge",
+      "category": "EFFECTIVE_DATE"
+    },
+    "CHALLENGE-CONFLICT-007": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.0)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-008": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-GRANDFATHERING-009": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "challenge",
+      "category": "GRANDFATHERING"
+    },
+    "CHALLENGE-EFFECTIVE_DATE-010": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "challenge",
+      "category": "EFFECTIVE_DATE"
+    },
+    "CHALLENGE-CONFLICT-011": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.0)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-012": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-GRANDFATHERING-013": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 GRANDFATHERED_ACCEPTED_OR_CONTRACT).",
+      "split": "challenge",
+      "category": "GRANDFATHERING"
+    },
+    "CHALLENGE-EFFECTIVE_DATE-014": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "challenge",
+      "category": "EFFECTIVE_DATE"
+    },
+    "CHALLENGE-CONFLICT-015": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.7)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-016": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-GRANDFATHERING-017": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "challenge",
+      "category": "GRANDFATHERING"
+    },
+    "CHALLENGE-EFFECTIVE_DATE-018": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "challenge",
+      "category": "EFFECTIVE_DATE"
+    },
+    "CHALLENGE-CONFLICT-019": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "생애최초 LTV 70% + 전입의무(6개월 이내)",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.7)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-020": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-GRANDFATHERING-021": {
+      "status": "CONFIRMED",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용",
+      "rationale": "정답(40%)이 원문 인용과 직접 일치한다(근거코드 LTV_REGULATED_40).",
+      "split": "challenge",
+      "category": "GRANDFATHERING"
+    },
+    "CHALLENGE-EFFECTIVE_DATE-022": {
+      "status": "CONFIRMED",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%",
+      "rationale": "정답(70%)이 원문 인용과 직접 일치한다(근거코드 LTV_BASELINE_70).",
+      "split": "challenge",
+      "category": "EFFECTIVE_DATE"
+    },
+    "CHALLENGE-CONFLICT-023": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(None)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-024": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-CONFLICT-025": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "주택구입목적 주담대에 한해 자동판정(그 외는 Discovery)",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(None)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-026": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-CONFLICT-027": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.7)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-028": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-CONFLICT-029": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨(60%)",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.6)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-030": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-CONFLICT-031": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "MOLIT_PRESS_20260630",
+      "grounding_quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.0)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-AMBIGUOUS-032": {
+      "status": "CONFIRMED_ESCALATION",
+      "grounding_doc": "regulatory_facts.md",
+      "grounding_quote": "非규제지역 유주택 LTV 기준선은 6·30 원문에 명시되지 않음",
+      "rationale": "원문에 해당 기준선이 없어 값을 지어내지 않고 사람 검토(escalation)로 넘기는 것이 올바른 정답이다. escalation 자체를 확정한다.",
+      "split": "challenge",
+      "category": "AMBIGUOUS"
+    },
+    "CHALLENGE-CONFLICT-033": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FSC_PRESS_20260630",
+      "grounding_quote": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.0)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-CONFLICT-034": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(0.7)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    },
+    "CHALLENGE-CONFLICT-035": {
+      "status": "CONFIRMED_PRECEDENCE",
+      "grounding_doc": "FAQ_20260630",
+      "grounding_quote": "생애최초·정책모기지 등 정책성 대출은 별도(디딤돌·보금자리) → Discovery 분리",
+      "rationale": "복수 조건이 충돌하나 §H 우선순위(DECISION_LOG 2026-08-10 확정)로 해소된다. 해소 결과(None)가 원문 값과 일치함을 확인했다.",
+      "split": "challenge",
+      "category": "CONFLICT"
+    }
+  }
+}

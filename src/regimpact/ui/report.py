@@ -133,6 +133,19 @@ def _gold_set_card(report: ValidationReport) -> str:
             f'CHALLENGE {gs["challenge"]["passed"]}/{gs["challenge"]["total"]}</span></div>'
         )
         note = '<div class="font-body-sm text-body-sm text-on-surface-variant mt-2">최초·최종 개봉(§12). 재튜닝·재보고 금지.</div>'
+        rv = gs.get("review")
+        if rv:
+            rs = rv["summary"]
+            note += (
+                '<div class="mt-2 flex items-center gap-1 flex-wrap">'
+                f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container '
+                f'text-on-secondary font-mono-label text-mono-label">'
+                f'<span class="material-symbols-outlined text-[14px]">verified</span>'
+                f'도메인 검수 {esc(rv["version"])} · {rs["total"]}문항 확정</span>'
+                '<span class="font-mono-label text-mono-label text-on-surface-variant">'
+                f'직접 {rs["CONFIRMED"]}·escalation {rs["CONFIRMED_ESCALATION"]}·precedence {rs["CONFIRMED_PRECEDENCE"]} '
+                '(사람 확정)</span></div>'
+            )
     else:
         headline = (
             f'<div class="font-h2 text-h2 text-secondary mb-1">DEV {dev["pass_rate"]:.0%}</div>'

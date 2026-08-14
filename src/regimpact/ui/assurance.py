@@ -139,12 +139,13 @@ def _gold_set_tile(label: str, value: str, sub: str, opened: bool) -> str:
 
 
 def _gold_set_panel() -> str:
-    """평가셋 freeze 상태 + 회귀(누수 방지 §12 / 최종 개봉)."""
-    from ..eval import load_final_eval, load_manifest, run_gold_regression
+    """평가셋 freeze 상태 + 회귀(누수 방지 §12 / 최종 개봉) + 도메인 검수(v2)."""
+    from ..eval import load_final_eval, load_manifest, load_review, run_gold_regression
 
     m = load_manifest()
     dev = run_gold_regression("dev")
     final = load_final_eval()
+    review = load_review()
     cats = "".join(
         '<div class="flex items-center justify-between font-body-sm text-body-sm py-0.5">'
         f'<span>{esc(cat)}</span><span class="font-mono-data text-mono-data">{p}/{t} ({r:.0%})</span></div>'
@@ -163,13 +164,26 @@ def _gold_set_panel() -> str:
         chal_tile = _gold_set_tile("CHALLENGE", str(m["splits"]["challenge"]["count"]), "sealed", False)
         footer = ('누수 방지(§12): LOCKED·CHALLENGE는 개발 중 열지 않는다(코어 완성 후 최종 1회). '
                   '정답은 독립 명세 오라클에서 유도.')
+    review_html = ""
+    if review is not None:
+        rs = review["summary"]
+        review_html = (
+            '<div class="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-outline-variant/20">'
+            f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container '
+            f'text-on-secondary font-mono-label text-mono-label">'
+            f'<span class="material-symbols-outlined text-[14px]">verified</span>'
+            f'도메인 검수 {esc(review["_meta"]["version"])} · {rs["total"]}문항 확정</span>'
+            '<span class="font-body-sm text-body-sm text-on-surface-variant">직접 grounding '
+            f'{rs["CONFIRMED"]} · escalation {rs["CONFIRMED_ESCALATION"]} · precedence {rs["CONFIRMED_PRECEDENCE"]} '
+            '— 원문 인용·수치 일관성 검증, 최종 권한=사람(LOCKED §4)</span></div>'
+        )
     return (
         '<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-6 mt-2">'
         '<div class="flex items-center gap-2 mb-3"><span class="material-symbols-outlined text-secondary">dataset</span>'
         f'<h3 class="font-h3 text-h3">Gold Set 평가셋 (freeze {esc(m["version"])} · 총 {m["total"]}문항)</h3></div>'
         f'<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">{dev_tile}{locked_tile}{chal_tile}</div>'
         f'<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">{cats}</div>'
-        f'<div class="font-body-sm text-body-sm text-on-surface-variant mt-3">{footer}</div></div>'
+        f'<div class="font-body-sm text-body-sm text-on-surface-variant mt-3">{footer}</div>{review_html}</div>'
     )
 
 

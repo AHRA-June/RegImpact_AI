@@ -623,7 +623,29 @@ def _goldset(r: ValidationReport, manifest) -> list[str]:
         "누수 방지 규율(§12): `load_split('locked'/'challenge')`는 명시적 unlock 없이는 열리지 않으며, split 간 "
         "입력이 disjoint임을 테스트로 강제한다. LOCKED·CHALLENGE는 코어 완성 후 최종 1회만 실행한다.",
         "",
-        _h(3, "8.1 카테고리 설계 근거"),
+    ]
+    rv = gs.get("review")
+    if rv:
+        rs = rv["summary"]
+        L += [
+            _h(3, "8.1 도메인 검수 (v2 · 사람 확정)"),
+            "",
+            f"v1 정답(오라클 유도, AI초안)을 원문 규제사실의 실제 인용에 grounding하고 수치 일관성을 검증한 뒤 "
+            f"확정했다({rv['version']}, {rv['review_date']}). 입력·정답은 바꾸지 않았다 — 오라클 유도값이 원문과 "
+            "일치함을 확인하는 것이 검수의 결론이며, 불일치가 있었다면 검수가 예외로 실패한다. 최종 권한은 사람이다.",
+            "",
+            "| 확정 상태 | 의미 | 건수 |",
+            "|---|---|---:|",
+            f"| CONFIRMED | 원문 인용 직접 grounding·수치 일치 | {rs['CONFIRMED']} |",
+            f"| CONFIRMED_ESCALATION | 원문 기준선 부재 → escalation이 정답 | {rs['CONFIRMED_ESCALATION']} |",
+            f"| CONFIRMED_PRECEDENCE | §H 우선순위로 충돌 해소 | {rs['CONFIRMED_PRECEDENCE']} |",
+            f"| **합계** | | **{rs['total']}** |",
+            "",
+            "미해결(flag)로 남은 항목은 없다. 상세는 `docs/eval/gold_set/REVIEW_REPORT.md`·`REVIEW_v2.json`.",
+            "",
+        ]
+    L += [
+        _h(3, "8.2 카테고리 설계 근거"),
         "",
         "금융규제에서 가장 무서운 오류는 원칙을 틀리는 것뿐 아니라 **예외·경과규정·시행일을 놓치는 것**이다. "
         "따라서 CHALLENGE split은 EXCEPTION·GRANDFATHERING·EFFECTIVE_DATE·CONFLICT·AMBIGUOUS를 가중한다. "

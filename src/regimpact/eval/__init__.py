@@ -19,6 +19,7 @@ from .gold_set import (
     run_final_evaluation,
     run_gold_regression,
 )
+from .review import REVIEW_PATH, load_review, review_all, review_item, review_summary
 
 __all__ = [
     "GoldItem",
@@ -29,7 +30,12 @@ __all__ = [
     "run_gold_regression",
     "run_final_evaluation",
     "load_final_eval",
+    "load_review",
+    "review_summary",
+    "review_all",
+    "review_item",
     "FINAL_EVAL_PATH",
+    "REVIEW_PATH",
     "SPLITS",
     "SEALED_SPLITS",
     "GOLD_DIR",
