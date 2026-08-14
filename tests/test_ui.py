@@ -80,6 +80,43 @@ def test_portfolio_synthetic_labeled_and_counts_present():
     assert "Before" in h and "After" in h
 
 
+# ---------- 오프라인 자립성 (외부 CDN·웹폰트 의존 없음) ----------
+EXTERNAL_DEPS = [
+    "cdn.tailwindcss.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    'src="http',       # 외부 스크립트
+    'href="http',      # 외부 링크(스타일시트 등)
+]
+
+
+@pytest.mark.parametrize("_active,render_fn", RENDERERS)
+def test_no_external_dependencies(_active, render_fn):
+    h = render_fn()
+    for dep in EXTERNAL_DEPS:
+        assert dep not in h, f"외부 의존 발견: {dep}"
+
+
+@pytest.mark.parametrize("_active,render_fn", RENDERERS)
+def test_styles_and_icon_font_inlined(_active, render_fn):
+    h = render_fn()
+    # Tailwind 빌드 CSS 인라인
+    assert "<style>" in h and "tailwindcss v3" in h
+    # Material Symbols 서브셋 폰트가 data URI로 임베드
+    assert "data:font/woff2;base64," in h
+    assert ".material-symbols-outlined{" in h
+
+
+@pytest.mark.parametrize("_active,render_fn", RENDERERS)
+def test_icons_are_codepoints_not_names(_active, render_fn):
+    h = render_fn()
+    # 서브셋 폰트는 코드포인트 기반 → 아이콘 스팬은 &#x엔티티여야(이름 잔존 금지)
+    assert "material-symbols-outlined" in h
+    leftover = re.findall(r'material-symbols-outlined[^>]*>([a-z_]{3,})<', h)
+    assert not leftover, f"코드포인트로 변환되지 않은 아이콘 이름: {leftover}"
+    assert re.search(r'material-symbols-outlined[^>]*>&#x[0-9a-f]+;', h)
+
+
 def test_render_all_writes_all_screens(tmp_path):
     written = render_all(out_dir=tmp_path)
     names = {p.name for p in written}

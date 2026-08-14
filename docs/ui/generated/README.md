@@ -41,8 +41,23 @@ from regimpact.ui import render_all
 render_all()   # docs/ui/generated/ 에 기록
 ```
 
-## 보는 방법
+## 보는 방법 (오프라인 자립)
 
-`index.html`을 브라우저로 연다. 스타일은 Tailwind CDN·Google Fonts를 로드하므로(기존 Stitch
-export와 동일) **네트워크 연결이 있는 브라우저**에서 열어야 디자인이 보인다. 오프라인/샌드박스
-에서는 데이터·막대 폭(인라인)은 정확하나 색·폰트가 적용되지 않는다.
+`index.html`을 브라우저로 열면 된다. **외부 CDN·웹폰트 의존이 없어** 네트워크 없이도 완전히
+스타일링된다:
+- Tailwind는 CDN 대신 **실제 빌드한 CSS**(`ui/templates/app.css`)를 인라인.
+- Material Symbols 아이콘은 화면에서 쓰는 36개 글리프만 **서브셋한 폰트를 data URI로 임베드**
+  (아이콘은 코드포인트로 참조).
+- 본문 폰트는 시스템 스택(sans/mono)으로 폴백.
+
+### 스타일 에셋 재생성 (빌드 타임, 네트워크 필요)
+
+`app.css`·`icon_codepoints.json`은 커밋된 산출물이다. 디자인 토큰/아이콘이 바뀌면 재생성:
+
+```bash
+pip install pytailwindcss fonttools brotli
+python tools/build_ui_assets.py     # Tailwind 빌드 + 아이콘 폰트 서브셋 → templates/
+python examples/render_ui.py        # 화면 재생성
+```
+
+디자인 토큰의 단일 진실은 보존된 Stitch export(`../stitch_export/_1/code.html`의 tailwind config).

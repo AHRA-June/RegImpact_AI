@@ -7,9 +7,46 @@
 from __future__ import annotations
 
 import html
+import json
+import re
+from functools import lru_cache
 from pathlib import Path
 
 _TPL = Path(__file__).resolve().parent / "templates"
+
+
+@lru_cache(maxsize=1)
+def _styles() -> str:
+    """자립 CSS(오프라인) — Tailwind 빌드 + 서브셋 Material Symbols(data URI 임베드)."""
+    return (_TPL / "app.css").read_text(encoding="utf-8")
+
+
+@lru_cache(maxsize=1)
+def _icon_codepoints() -> dict[str, str]:
+    return json.loads((_TPL / "icon_codepoints.json").read_text(encoding="utf-8"))
+
+
+_ICON_SPAN = re.compile(
+    r'(<span class="[^"]*material-symbols-outlined[^"]*"[^>]*>)([a-z0-9_]+)(</span>)'
+)
+
+
+def _iconify(page_html: str) -> str:
+    """material-symbols 스팬의 아이콘 '이름'을 코드포인트 엔티티로 치환.
+
+    서브셋 폰트는 리가처 없이 코드포인트로만 글리프를 가지므로, 오프라인에서 이름 대신
+    &#xNNNN; 로 참조해야 아이콘이 렌더된다(미등록 이름은 그대로 둠).
+    """
+    cp = _icon_codepoints()
+
+    def repl(m: re.Match) -> str:
+        name = m.group(2)
+        code = cp.get(name)
+        if not code:
+            return m.group(0)
+        return f"{m.group(1)}&#x{code};{m.group(3)}"
+
+    return _ICON_SPAN.sub(repl, page_html)
 
 # (data-path, material-icon, label) — 원본 export의 사이드바 순서 그대로.
 NAV_ITEMS: list[tuple[str, str, str]] = [
@@ -55,11 +92,18 @@ def _nav(active_path: str) -> str:
 
 
 def page(active_path: str, main_html: str) -> str:
-    """활성 nav 경로 + main 콘텐츠 → 자기완결 HTML 페이지."""
+    """활성 nav 경로 + main 콘텐츠 → 자기완결(오프라인) HTML 페이지.
+
+    외부 CDN·웹폰트 의존 없음: 스타일은 app.css를 인라인하고, Material Symbols는 서브셋
+    폰트를 data URI로 임베드하며 아이콘은 코드포인트로 치환한다.
+    """
     head_open = (_TPL / "head_open.html").read_text(encoding="utf-8")
     head_after_nav = (_TPL / "head_after_nav.html").read_text(encoding="utf-8")
     foot = (_TPL / "foot.html").read_text(encoding="utf-8")
-    return head_open + _nav(active_path) + head_after_nav + main_html + foot
+    styles = f"<style>{_styles()}</style>"
+    head_open = head_open.replace("{{STYLES}}", styles)
+    raw = head_open + _nav(active_path) + head_after_nav + main_html + foot
+    return _iconify(raw)
 
 
 # ---- 공용 프레젠테이션 헬퍼 (여러 화면에서 재사용) ----

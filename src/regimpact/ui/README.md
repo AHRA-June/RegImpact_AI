@@ -19,6 +19,10 @@ Stitch 목업(`docs/ui/stitch_export/`)이 화면마다 환각한 도메인 데�
   활성 nav만 화면별로 바꾼다. 디자인 시스템은 `templates/head_open.html`·`head_after_nav.html`·
   `foot.html`(기존 Stitch export에서 추출)로 보존. 공용 헬퍼(`provenance_strip`·`title_block`·
   `mono_chip`·`card`)도 여기에.
+- **오프라인 자립** — `page()`는 `templates/app.css`(실제 Tailwind v3 빌드 + 서브셋 Material
+  Symbols 폰트 data URI)를 인라인하고, 아이콘 스팬 이름을 코드포인트 엔티티로 치환(`_iconify`).
+  외부 CDN·웹폰트 의존이 없어 네트워크 없이 완전히 스타일링된다. 에셋 재생성:
+  `python tools/build_ui_assets.py`(빌드 타임, 네트워크 필요).
 - **각 화면 모듈** — `_main(...)`으로 콘텐츠 HTML을 만들고 `page(...)`로 감싼다.
 - **`render_all.py`** — 5개 화면 + `index.html`을 `docs/ui/generated/`에 기록.
 

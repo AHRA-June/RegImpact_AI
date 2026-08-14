@@ -13,7 +13,8 @@
 > | `assurance` | `assurance.html` | tc 회귀(실측) + LLM 지표 '실측 대기' |
 > | `_3` | `portfolio_impact.html` | 합성 포트폴리오 × rule_engine |
 >
-> 렌더 레이어: `src/regimpact/ui/`. 자세한 내용은 `docs/ui/generated/README.md`.
+> 렌더 레이어: `src/regimpact/ui/`. 생성 화면은 **외부 CDN·웹폰트 의존 없이 오프라인 자립**
+> (Tailwind 빌드 인라인 + 서브셋 아이콘 폰트 임베드). 자세한 내용은 `docs/ui/generated/README.md`.
 
 > Stitch에서 5개 화면 생성 완료. 디자인 시스템(DESIGN.md)은 마스터 컨텍스트를 잘 반영(Institutional Navy, Noto Sans, JetBrains Mono, 상태색, 고밀도).
 > **문제: Stitch가 도메인 데이터를 화면마다 다르게 환각.** 아래 정정 프롬프트로 재생성하거나 HTML 직접 수정.
