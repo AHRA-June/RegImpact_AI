@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-14
-- **갱신자:** Claude (Extractor 1회 실측 세션)
+- **갱신자:** Claude (골드셋 v1 freeze 세션)
 - **개발 브랜치:** `claude/proceed-4ujipo`
-- **전체 단계:** 🟢 **Walking Skeleton E2E 완결 + Assurance 4 DEEP 전 dimension 실측** — Source→…→Validation Report 관통, RegChange Extractor 1회 실제 LLM 실행으로 ①②③ 실측(100%), ④ 회귀 실측(30/30). UI 6화면(오프라인). (테스트 100 통과)
+- **전체 단계:** 🟢 **Walking Skeleton E2E + Assurance 4 DEEP 실측 + 골드셋 v1 freeze(115)** — Source→…→Report 관통, RegChange 1회 실측(①②③ 100%), 오라클 회귀 30/30, **골드셋 DEV40/LOCKED40/CHALLENGE35 freeze(DEV 회귀 100%, LOCKED/CHALLENGE sealed)**. UI 6화면(오프라인). (테스트 108 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -22,6 +22,13 @@
 ---
 
 ## ✅ 방금 완료 (2026-08-14)
+- **골드셋 v1 빌드·freeze (115문항, DEV40/LOCKED40/CHALLENGE35).** `src/regimpact/eval/`(gold_set: 스키마·로더·
+  엔진 회귀·누수 규율) + `tools/build_gold_set.py`(결정론적 생성) → `docs/eval/gold_set/{dev,locked,challenge}.json`
+  + `MANIFEST.json`(sha256·버전·freeze) + `README.md`. **정답은 독립 명세 오라클(tc_generator)에서 유도**(엔진 미참조
+  → 회귀 tautology 아님). 브리프 §11 스키마(입력·정답·근거·카테고리·escalation·정책버전·rule_id). **누수 방지(§12):**
+  `load_split('locked'/'challenge')`는 unlock 없이 RuntimeError, split 간 입력 disjoint(테스트 강제). DEV 회귀 100%(40/40),
+  LOCKED/CHALLENGE도 최종 검증 시 100%(엔진이 충돌·모호·경계 명세대로 처리, AMBIGUOUS는 escalation 검증). DEV pass rate를
+  Assurance·Report 화면에 노출(sealed는 count·잠금 배지). `examples/demo_gold_set.py`. 테스트 8개 → **총 108 통과.**
 - **RegChange Extractor 1회 실제 LLM 실행 → Assurance ①②③ 첫 실측.** 환경에 API 키가 없어 프록시 직접
   호출은 불가했으나, **실행 모델(claude-opus-4-8)이 6·30 공문 원문 3건만 읽고**(gold 미참조) RegChange를 9건
   추출(인용은 원문 verbatim). 산출물 `docs/eval/regchange_extraction_6_30.json`(provenance 포함). 결정론적
@@ -69,7 +76,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(100), `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/demo_report.py`, `python examples/render_ui.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(키 없으면 기록 산출물로 실측 시연). UI 에셋 재생성(네트워크): `python tools/build_ui_assets.py`.
+- 실행: `python -m pytest`(108), `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/demo_report.py`, `python examples/demo_gold_set.py`, `python examples/render_ui.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(키 없으면 기록 산출물로 실측 시연). 재생성(네트워크): `python tools/build_ui_assets.py`, `python tools/build_gold_set.py`.
 
 ## 다음 액션 (NEXT)
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-14). `src/regimpact/impact/`. Before/After 관통, Discovery 분리, 경과규정 counterfactual.
@@ -78,8 +85,9 @@
 - ~~**CDN 의존 제거(오프라인 스타일)**~~ — ✅ 완료(2026-08-14).
 - ~~**Rule Change Proposal 구조화 + Report 관통**~~ — ✅ 완료(2026-08-14). `proposal.py`·`report.py`. Walking Skeleton E2E 완결.
 - ~~**Extractor 실제 LLM 1회 실행 → 첫 실측**~~ — ✅ 완료(2026-08-14). ①②③ 100% 실측, 4 DEEP 전 dimension 실측.
-  - **후속(선택):** ①**골드셋 100~120 작성 + DEV/LOCKED/CHALLENGE freeze**(Phase 2, 이제 실측 파이프라인 있으니 규모 확대)
-    ②API 키 확보 시 여러 모델(sonnet-5 등) 추출 비교 → challenge 케이스로 grounding 실패 유도·측정 ③합성 포트폴리오 층화 확대.
+- ~~**골드셋 100~120 + DEV/LOCKED/CHALLENGE freeze**~~ — ✅ 완료(2026-08-14). v1 115문항, DEV 회귀 100%, sealed 규율.
+  - **후속(선택):** ①검증보고서 15~20쪽(브리프 §18 W7~8) 산출 — 지금까지 실측을 문서로 종합 ②API 키 확보 시 여러 모델
+    추출 비교 → challenge grounding 실패 유도·측정 ③골드셋 도메인 검수(사람 확정) 후 v2 ④Model/System Card·AI Risk Register(스트레치).
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
@@ -133,6 +141,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-14** — ✅ **골드셋 v1 빌드·freeze (115문항, DEV40/LOCKED40/CHALLENGE35).** `src/regimpact/eval/gold_set.py`(GoldItem 스키마·load_split·엔진 회귀 러너·누수 규율) + `tools/build_gold_set.py`(결정론적) → `docs/eval/gold_set/{dev,locked,challenge}.json`+`MANIFEST.json`(split별 sha256·v1·freeze)+`README.md`. 정답(expected)은 **독립 명세 오라클**(`tc_generator.oracle`)에서 유도 → 엔진과 독립 코드 경로이므로 회귀가 tautology 아님(LOCKED §4). 브리프 §11 스키마(입력/정답/근거 문서·인용/카테고리/escalation 기대/정책버전/rule_id). 카테고리 10종(NORMAL·EXCEPTION·GRANDFATHERING·EFFECTIVE_DATE·REGION·BORROWER_TYPE·LOAN_PURPOSE·CONFLICT·AMBIGUOUS·NO_CHANGE). **누수 방지(§12):** `load_split('locked'/'challenge')`는 unlock 없이 RuntimeError, split 간 입력 disjoint(테스트로 강제), 개발 상시 회귀는 DEV만. DEV 회귀 100%(40/40); LOCKED/CHALLENGE도 최종 검증 시 100%(엔진이 충돌·모호·경계 명세대로, AMBIGUOUS는 escalation 기대로 '지어내지 않음' 검증). report에 `gold_set` 필드+파이프라인 step 반영, ui/assurance·ui/report에 Gold Set 패널/카드(DEV pass rate + sealed 배지, dataset 아이콘 재빌드). DECISION_LOG freeze 기록. `examples/demo_gold_set.py`. 테스트 8개 → **총 108 통과.**
 - **2026-08-14** — ✅ **RegChange Extractor 1회 실제 LLM 실행 → Assurance ①②③ 첫 실측.** 환경에 Anthropic API 키가 없고 프록시가 인증을 주입하지 않아 직접 API 호출은 불가. 대신 **실행 모델(claude-opus-4-8)이 6·30 공문 3건(FSC·MOLIT·FAQ) 원문만 읽고**(gold 미참조) RegChange 9건을 추출 — 인용은 전부 원문 verbatim. 산출물 `docs/eval/regchange_extraction_6_30.json`(_meta: model·run_date·sources). extractor에 `load_recorded_extraction()`+`measured_assurance()` 추가(결정론적 재계산, 저장값 아님): Citation Correctness 100%/환각 0%, Change Completeness 100%, Exception Recall 100%, 시행일·지역 OK. report `_assurance_dimensions`가 measured 반영(없으면 폴백), ui/assurance·ui/regchange에 실측 카드/배너 추가(psychology 아이콘). `run_extractor.py`가 키 없을 때 기록 산출물로 동일 채점 시연. metrics_spec §1에 1회 실측 주석. gold 로더·SOURCE_REGISTRY extractor 중립화. 아이콘 40개 재빌드. 테스트 recorded 3개(+ assurance/report 갱신) → **총 100 통과.**
 - **2026-08-14** — ✅ **Rule Change Proposal 구조화 + Validation Report E2E 관통 (Walking Skeleton 완결).** `proposal.py`: `RuleChangeProposal` dataclass(파라미터 변경·대상지역·경과규정·근거·영향·escalation·승인상태)를 엔진 상수·regions·Impact Matrix에서 유도(`build_rule_change_proposal`), DSL은 구조의 렌더링(`render_rule_dsl`). 유주택/다주택 before=명세부재(None) 정직 표기, escalation=OWNER_BASELINE_UNKNOWN. `report.py`: `ValidationReport`가 8단계 파이프라인(Source Snapshot→Policy Version→RegChange→Impact Matrix→Rule Change Proposal→Test/Regression→Assurance→Human Review)을 실제 관통·집계(`build_validation_report`) + `format_report` 텍스트 → 브리프 §18 코어 완성의 정의 충족. Assurance ④만 실측(30/30), ①②③은 '실측 대기'(가짜 수치 없음). UI: `ui/rule_proposal.py`를 구조화 제안 소비로 리팩터, `ui/report.py` 신규(audit-trail nav)로 6번째 화면 `validation_report.html`(파이프라인 스테퍼+섹션 카드, 오프라인). gold 로더+SOURCE_REGISTRY를 extractor로 이전(중립화, ui 의존 제거). `examples/demo_report.py`. 아이콘 서브셋 40개 재빌드(build 스크립트 lru_cache 캐시 무효화 버그 수정). 테스트 proposal 5 + report 5 + report UI → **총 97 통과.**
 - **2026-08-14** — ✅ **UI 오프라인 자립화(CDN 의존 제거).** Stitch export가 쓰던 외부 Tailwind Play CDN·Google Fonts·Material Symbols 링크를 전부 제거하고 자기완결 HTML로. (1) Tailwind v3.4.17 실제 빌드(디자인 토큰은 보존된 `stitch_export/_1`의 config에서 추출, 생성 화면을 스캔해 사용 유틸리티만 JIT) → `ui/templates/app.css` 인라인. (2) Material Symbols Outlined를 화면에서 쓰는 36개 아이콘 코드포인트로만 서브셋(10.6MB→2.9KB woff2) → data URI 임베드, 아이콘 스팬은 `chrome._iconify`가 이름→코드포인트 엔티티로 치환(서브셋은 리가처 없음). (3) 본문 폰트는 시스템 스택 폴백. **전체 네트워크 차단 상태 스크린샷으로 완전 스타일링 검증**(사이드바 아이콘·색 배지·monospace 칩 모두 렌더). 재현 가능한 빌드 스크립트 `tools/build_ui_assets.py`(pytailwindcss+fonttools, 빌드 타임 네트워크 필요, 산출물은 커밋). head 템플릿에서 외부 링크 제거+`{{STYLES}}` 주입. 오프라인 자립성 테스트 15개(외부 의존 부재·인라인 CSS·임베드 폰트·아이콘 코드포인트) → **총 82 통과.**

@@ -107,6 +107,32 @@ def _regression_card(report: ValidationReport) -> str:
     )
 
 
+def _gold_set_card(report: ValidationReport) -> str:
+    gs = report.gold_set
+    dev = gs["dev"]
+    rows = "".join(
+        '<div class="flex items-center justify-between font-body-sm text-body-sm">'
+        f'<span>{esc(cat)}</span><span class="font-mono-data text-mono-data">{p}/{t}</span></div>'
+        for cat, (p, t, _r) in sorted(dev["by_category"].items())
+    )
+    return (
+        '<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-6">'
+        '<div class="flex items-center gap-2 mb-3"><span class="material-symbols-outlined text-secondary">dataset</span>'
+        f'<h4 class="font-h3 text-h3">6b. Gold Set ({esc(gs["version"])} · {gs["total"]}문항)</h4></div>'
+        f'<div class="font-h2 text-h2 text-secondary mb-1">DEV {dev["pass_rate"]:.0%}</div>'
+        f'<div class="font-mono-label text-mono-label text-on-surface-variant mb-2">{dev["passed"]}/{dev["total"]} · 상시 회귀</div>'
+        f'<div class="flex flex-col gap-1 mb-3">{rows}</div>'
+        '<div class="flex items-center gap-2">'
+        f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed '
+        f'text-on-tertiary-fixed-variant font-mono-label text-mono-label">'
+        f'<span class="material-symbols-outlined text-[14px]">lock</span>LOCKED {gs["locked_sealed"]} sealed</span>'
+        f'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed '
+        f'text-on-tertiary-fixed-variant font-mono-label text-mono-label">'
+        f'<span class="material-symbols-outlined text-[14px]">lock</span>CHALLENGE {gs["challenge_sealed"]} sealed</span></div>'
+        '<div class="font-body-sm text-body-sm text-on-surface-variant mt-2">누수 방지(§12): sealed는 Phase 3 최종 1회.</div></div>'
+    )
+
+
 def _assurance_card(report: ValidationReport) -> str:
     items = []
     for d in report.assurance_dimensions:
@@ -164,7 +190,8 @@ def _main(report: ValidationReport) -> str:
     grid = (
         '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">'
         + _sources(report) + _proposal_card(report)
-        + _regression_card(report) + _assurance_card(report)
+        + _regression_card(report) + _gold_set_card(report)
+        + _assurance_card(report)
         + "</div>"
     )
     return (

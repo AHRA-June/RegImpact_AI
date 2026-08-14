@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 
+from .eval import load_manifest, run_gold_regression
 from .extractor import SOURCE_REGISTRY, load_gold, measured_assurance
 from .impact import ImpactMatrix, build_impact_matrix
 from .impact.segments import REGION_LABELS
@@ -59,6 +60,7 @@ class ValidationReport:
     proposal: RuleChangeProposal
     # 6. Test Cases / Rule Regression
     regression: dict           # {pass_rate, passed, total, by_category}
+    gold_set: dict             # {version, total, dev:{...}, locked_sealed, challenge_sealed}
     # 7. Assurance
     assurance_dimensions: list[AssuranceDimension]
     # 8. Human Review
@@ -122,6 +124,20 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
     }
     assurance = _assurance_dimensions(regression)
 
+    # Gold Set — DEV 회귀만(상시). LOCKED/CHALLENGE는 sealed(§12) → count만 표기.
+    manifest = load_manifest()
+    dev = run_gold_regression("dev")
+    gold_set = {
+        "version": manifest["version"],
+        "total": manifest["total"],
+        "dev": {
+            "passed": dev.passed, "total": dev.total, "pass_rate": dev.pass_rate,
+            "by_category": dev.pass_rate_by_category(),
+        },
+        "locked_sealed": manifest["splits"]["locked"]["count"],
+        "challenge_sealed": manifest["splits"]["challenge"]["count"],
+    }
+
     s = matrix.summary
     steps = [
         PipelineStep(1, "Source Snapshot", "OK",
@@ -138,8 +154,9 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
                      f"{proposal.rule_id} · 파라미터 변경 {sum(1 for p in proposal.parameter_changes if p.changed)}건 · "
                      f"승인상태 {proposal.approval_status.value}"),
         PipelineStep(6, "Test Cases / Rule Regression", "MEASURED",
-                     f"Pass Rate {regression['pass_rate']:.0%} ({regression['passed']}/{regression['total']}) · "
-                     f"카테고리 {len(regression['by_category'])}"),
+                     f"오라클 회귀 {regression['passed']}/{regression['total']} · "
+                     f"Gold Set DEV {gold_set['dev']['passed']}/{gold_set['dev']['total']} "
+                     f"(LOCKED {gold_set['locked_sealed']}·CHALLENGE {gold_set['challenge_sealed']} sealed)"),
         PipelineStep(7, "Assurance", "PENDING" if any(not d.measured for d in assurance) else "MEASURED",
                      f"4 DEEP dimension 실측 {sum(d.measured for d in assurance)}/{len(assurance)} · "
                      + ("전 dimension 실측 완료" if all(d.measured for d in assurance)
@@ -160,6 +177,7 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
         impact_matrix=matrix,
         proposal=proposal,
         regression=regression,
+        gold_set=gold_set,
         assurance_dimensions=assurance,
         approval_status=proposal.approval_status,
         escalations=proposal.escalations,
@@ -213,6 +231,13 @@ def format_report(report: ValidationReport) -> str:
     L.append(f"  - Pass Rate: {reg['pass_rate']:.0%} ({reg['passed']}/{reg['total']})")
     for cat, (passed, total, rate) in reg["by_category"].items():
         L.append(f"    · {cat}: {passed}/{total} ({rate:.0%})")
+    L.append("")
+
+    L.append("## 6b. Gold Set (평가셋 freeze · 누수 방지)")
+    gs = report.gold_set
+    L.append(f"  - version {gs['version']} · 총 {gs['total']}문항")
+    L.append(f"  - DEV(상시): {gs['dev']['pass_rate']:.0%} ({gs['dev']['passed']}/{gs['dev']['total']})")
+    L.append(f"  - LOCKED {gs['locked_sealed']} · CHALLENGE {gs['challenge_sealed']} : sealed (Phase 3 최종 1회)")
     L.append("")
 
     L.append("## 7. Assurance (4 DEEP dimension)")

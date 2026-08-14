@@ -121,6 +121,43 @@ def _main() -> str:
         + _honesty_note()
         + _dimension_cards()
         + _regression_table(by_cat)
+        + _gold_set_panel()
+    )
+
+
+def _gold_set_panel() -> str:
+    """평가셋 freeze 상태 + DEV 회귀(누수 방지 §12)."""
+    from ..eval import load_manifest, run_gold_regression
+
+    m = load_manifest()
+    dev = run_gold_regression("dev")
+    cats = "".join(
+        '<div class="flex items-center justify-between font-body-sm text-body-sm py-0.5">'
+        f'<span>{esc(cat)}</span><span class="font-mono-data text-mono-data">{p}/{t} ({r:.0%})</span></div>'
+        for cat, (p, t, r) in sorted(dev.pass_rate_by_category().items())
+    )
+    return (
+        '<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-6 mt-2">'
+        '<div class="flex items-center gap-2 mb-3"><span class="material-symbols-outlined text-secondary">dataset</span>'
+        f'<h3 class="font-h3 text-h3">Gold Set 평가셋 (freeze {esc(m["version"])} · 총 {m["total"]}문항)</h3></div>'
+        '<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">'
+        '<div class="bg-surface-container-low rounded-lg p-4 border border-secondary/40">'
+        '<div class="font-body-sm text-body-sm text-on-surface-variant mb-1">DEV (상시 회귀)</div>'
+        f'<div class="font-h2 text-h2 text-secondary">{dev.pass_rate:.0%}</div>'
+        f'<div class="font-mono-label text-mono-label text-on-surface-variant">{dev.passed}/{dev.total}</div></div>'
+        '<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant/30">'
+        '<div class="font-body-sm text-body-sm text-on-surface-variant mb-1">LOCKED TEST</div>'
+        f'<div class="font-h2 text-h2 text-on-surface-variant">{m["splits"]["locked"]["count"]}</div>'
+        '<div class="inline-flex items-center gap-1 font-mono-label text-mono-label text-on-tertiary-fixed-variant">'
+        '<span class="material-symbols-outlined text-[14px]">lock</span>sealed</div></div>'
+        '<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant/30">'
+        '<div class="font-body-sm text-body-sm text-on-surface-variant mb-1">CHALLENGE</div>'
+        f'<div class="font-h2 text-h2 text-on-surface-variant">{m["splits"]["challenge"]["count"]}</div>'
+        '<div class="inline-flex items-center gap-1 font-mono-label text-mono-label text-on-tertiary-fixed-variant">'
+        '<span class="material-symbols-outlined text-[14px]">lock</span>sealed</div></div></div>'
+        f'<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">{cats}</div>'
+        '<div class="font-body-sm text-body-sm text-on-surface-variant mt-3">'
+        '누수 방지(§12): LOCKED·CHALLENGE는 개발 중 열지 않는다(코어 완성 후 최종 1회). 정답은 독립 명세 오라클에서 유도.</div></div>'
     )
 
 

@@ -1,0 +1,48 @@
+{
+  "name": "RegImpact 6·30 Gold Set",
+  "version": "v1",
+  "freeze_date": "2026-08-14",
+  "policy_version": "FSC_20260630",
+  "total": 115,
+  "expected_source": "tc_generator.oracle (독립 명세 재구현) — 엔진과 독립 코드 경로",
+  "discipline": "DEV=상시 튜닝/회귀. LOCKED·CHALLENGE=sealed, 코어 완성 후 1회 실행(브리프 §12).",
+  "splits": {
+    "dev": {
+      "count": 40,
+      "sha256": "565bc912fc6c902693fd4b5f85eb9d1e5d17eec2d7cd8aef3d7a8a4c6c971c8c",
+      "by_category": {
+        "NORMAL": 8,
+        "EXCEPTION": 8,
+        "GRANDFATHERING": 6,
+        "EFFECTIVE_DATE": 3,
+        "REGION": 3,
+        "BORROWER_TYPE": 5,
+        "LOAN_PURPOSE": 7
+      }
+    },
+    "locked": {
+      "count": 40,
+      "sha256": "461f43ce370e4e19c9154591f7c5011002115f3e0ad03deb715b49438a2800c1",
+      "by_category": {
+        "NORMAL": 8,
+        "EXCEPTION": 7,
+        "GRANDFATHERING": 5,
+        "EFFECTIVE_DATE": 3,
+        "REGION": 3,
+        "BORROWER_TYPE": 4,
+        "LOAN_PURPOSE": 7,
+        "NO_CHANGE": 3
+      }
+    },
+    "challenge": {
+      "count": 35,
+      "sha256": "e76e74d553e13edb18f1da87e0cd64d4a3c8692ded313a1bc2c84fce6316a57c",
+      "by_category": {
+        "GRANDFATHERING": 6,
+        "EFFECTIVE_DATE": 6,
+        "CONFLICT": 13,
+        "AMBIGUOUS": 10
+      }
+    }
+  }
+}

@@ -1,0 +1,998 @@
+{
+  "_meta": {
+    "split": "dev",
+    "version": "v1",
+    "freeze_date": "2026-08-14",
+    "count": 40,
+    "note": "정답(expected)은 독립 명세 오라클(tc_generator.oracle)에서 유도. rule_engine 은 채점 대상. 누수 방지: LOCKED/CHALLENGE는 sealed(브리프 §12)."
+  },
+  "items": [
+    {
+      "id": "DEV-NORMAL-001",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-01",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-002",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-08-15",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-003",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-12-01",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-004",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1,
+        "disposal_condition_flag": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-005",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-006",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-09-30",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-007",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-NORMAL-008",
+      "category": "NORMAL",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-07-01",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-EXCEPTION-009",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "first_home_buyer": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "생애최초 LTV 70% + 전입의무(6개월 이내)"
+    },
+    {
+      "id": "DEV-EXCEPTION-010",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-12-01",
+        "house_count": 0,
+        "first_home_buyer": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "생애최초 LTV 70% + 전입의무(6개월 이내)"
+    },
+    {
+      "id": "DEV-EXCEPTION-011",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-09-30",
+        "house_count": 0,
+        "real_demand_flag": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.6,
+        "applicable_rule_id": "REG_REALDEMAND",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_REAL_DEMAND"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨"
+    },
+    {
+      "id": "DEV-EXCEPTION-012",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-08-15",
+        "house_count": 0,
+        "first_home_buyer": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "생애최초 LTV 70% + 전입의무(6개월 이내)"
+    },
+    {
+      "id": "DEV-EXCEPTION-013",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "real_demand_flag": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.6,
+        "applicable_rule_id": "REG_REALDEMAND",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_REAL_DEMAND"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨"
+    },
+    {
+      "id": "DEV-EXCEPTION-014",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "first_home_buyer": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "생애최초 LTV 70% + 전입의무(6개월 이내)"
+    },
+    {
+      "id": "DEV-EXCEPTION-015",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-12-01",
+        "house_count": 0,
+        "first_home_buyer": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "생애최초 LTV 70% + 전입의무(6개월 이내)"
+    },
+    {
+      "id": "DEV-EXCEPTION-016",
+      "category": "EXCEPTION",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-09-30",
+        "house_count": 0,
+        "real_demand_flag": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.6,
+        "applicable_rule_id": "REG_REALDEMAND",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_REAL_DEMAND"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "금융권 서민·실수요자 주담대 … 완화된 LTV가 적용됨"
+    },
+    {
+      "id": "DEV-GRANDFATHERING-017",
+      "category": "GRANDFATHERING",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "application_accepted_at": "2026-06-10"
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용"
+    },
+    {
+      "id": "DEV-GRANDFATHERING-018",
+      "category": "GRANDFATHERING",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-08-15",
+        "house_count": 0,
+        "contract_signed_at": "2026-06-20",
+        "downpayment_paid_at": "2026-06-20"
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용"
+    },
+    {
+      "id": "DEV-GRANDFATHERING-019",
+      "category": "GRANDFATHERING",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "application_accepted_at": "2026-06-15"
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용"
+    },
+    {
+      "id": "DEV-GRANDFATHERING-020",
+      "category": "GRANDFATHERING",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "application_accepted_at": "2026-06-10"
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용"
+    },
+    {
+      "id": "DEV-GRANDFATHERING-021",
+      "category": "GRANDFATHERING",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-08-15",
+        "house_count": 0,
+        "contract_signed_at": "2026-06-20",
+        "downpayment_paid_at": "2026-06-20"
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용"
+    },
+    {
+      "id": "DEV-GRANDFATHERING-022",
+      "category": "GRANDFATHERING",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "land_permit_target": true,
+        "land_permit_applied_at": "2026-06-28"
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_LAND_PERMIT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "6.30일까지 전산 접수 완료 또는 계약+계약금 → 종전규정 적용"
+    },
+    {
+      "id": "DEV-EFFECTIVE_DATE-023",
+      "category": "EFFECTIVE_DATE",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-05-01",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%"
+    },
+    {
+      "id": "DEV-EFFECTIVE_DATE-024",
+      "category": "EFFECTIVE_DATE",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-05-01",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%"
+    },
+    {
+      "id": "DEV-EFFECTIVE_DATE-025",
+      "category": "EFFECTIVE_DATE",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-05-01",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%"
+    },
+    {
+      "id": "DEV-REGION-026",
+      "category": "REGION",
+      "split": "dev",
+      "input": {
+        "region_code": "SUWON_GWONSEON",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%"
+    },
+    {
+      "id": "DEV-REGION-027",
+      "category": "REGION",
+      "split": "dev",
+      "input": {
+        "region_code": "SEOUL_JUNGGU",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%"
+    },
+    {
+      "id": "DEV-REGION-028",
+      "category": "REGION",
+      "split": "dev",
+      "input": {
+        "region_code": "BUCHEON_WONMI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70%"
+    },
+    {
+      "id": "DEV-BORROWER_TYPE-029",
+      "category": "BORROWER_TYPE",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_OWNER_0"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+    },
+    {
+      "id": "DEV-BORROWER_TYPE-030",
+      "category": "BORROWER_TYPE",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_OWNER_0"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+    },
+    {
+      "id": "DEV-BORROWER_TYPE-031",
+      "category": "BORROWER_TYPE",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_OWNER_0"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "MOLIT_PRESS_20260630",
+      "source_note": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+    },
+    {
+      "id": "DEV-BORROWER_TYPE-032",
+      "category": "BORROWER_TYPE",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 3
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "MULTI_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_MULTI_HOME_0"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FSC_PRESS_20260630",
+      "source_note": "다주택자는 수도권 內 주택구입시 … LTV 0% 적용"
+    },
+    {
+      "id": "DEV-BORROWER_TYPE-033",
+      "category": "BORROWER_TYPE",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-09-30",
+        "house_count": 1,
+        "disposal_condition_flag": true
+      },
+      "expected": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-034",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "loan_purpose": "OTHER"
+      },
+      "expected": {
+        "status": "OUT_OF_SCOPE",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "OUT_OF_SCOPE_PRODUCT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FSC_PRESS_20260630",
+      "source_note": "주택구입목적 아님 → 자동판정 밖(Discovery)"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-035",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "loan_purpose": "OTHER"
+      },
+      "expected": {
+        "status": "OUT_OF_SCOPE",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "OUT_OF_SCOPE_PRODUCT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FSC_PRESS_20260630",
+      "source_note": "주택구입목적 아님 → 자동판정 밖(Discovery)"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-036",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "loan_purpose": "OTHER"
+      },
+      "expected": {
+        "status": "OUT_OF_SCOPE",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "OUT_OF_SCOPE_PRODUCT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FSC_PRESS_20260630",
+      "source_note": "주택구입목적 아님 → 자동판정 밖(Discovery)"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-037",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-06-15",
+        "house_count": 0,
+        "loan_purpose": "OTHER"
+      },
+      "expected": {
+        "status": "OUT_OF_SCOPE",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "OUT_OF_SCOPE_PRODUCT"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FSC_PRESS_20260630",
+      "source_note": "주택구입목적 아님 → 자동판정 밖(Discovery)"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-038",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1,
+        "policy_mortgage_flag": true
+      },
+      "expected": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "DISCOVERY_POLICY_LOAN"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "생애최초·정책모기지 등 정책대출 → Discovery"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-039",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "YONGIN_GIHEUNG",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1,
+        "policy_mortgage_flag": true
+      },
+      "expected": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "DISCOVERY_POLICY_LOAN"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "생애최초·정책모기지 등 정책대출 → Discovery"
+    },
+    {
+      "id": "DEV-LOAN_PURPOSE-040",
+      "category": "LOAN_PURPOSE",
+      "split": "dev",
+      "input": {
+        "region_code": "HWASEONG_DONGTAN",
+        "evaluation_date": "2026-08-15",
+        "house_count": 1,
+        "policy_mortgage_flag": true
+      },
+      "expected": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "DISCOVERY_POLICY_LOAN"
+        ]
+      },
+      "expected_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "MORTGAGE_LTV_REGULATED_REGION",
+      "source_doc_id": "FAQ_20260630",
+      "source_note": "생애최초·정책모기지 등 정책대출 → Discovery"
+    }
+  ]
+}

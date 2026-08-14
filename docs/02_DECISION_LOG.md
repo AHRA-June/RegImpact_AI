@@ -72,6 +72,16 @@
 - **참고:** 사용자가 "18주"로 언급했으나 이는 브리프 §18(섹션 번호)를 지칭한 것으로 이해, 목표 기간은 9~10주로 확정. 이견 시 조정.
 - **관련 파일:** `docs/04_PLAN.md`(신규), `docs/03_OPEN_QUESTIONS.md` Q3 해결.
 
+### 2026-08-14 · 골드셋 v1 빌드·freeze (115문항, DEV40/LOCKED40/CHALLENGE35) · ✅ 완료
+- **결정:** 2026-08-10 확정 split대로 골드셋을 실제 생성·freeze. `docs/eval/gold_set/{dev,locked,challenge}.json` + `MANIFEST.json`(split별 sha256·버전 v1·freeze 날짜) + `README.md`.
+- **정답 유도:** expected 정답은 rule_engine이 아니라 **독립 명세 오라클**(`tc_generator.oracle`)에서 유도. 엔진과 독립 코드 경로 → 엔진 회귀가 tautology 아님(LOCKED §4 정합). "AI초안(오라클, 결정론적)→사람확정" 모델.
+- **스키마(브리프 §11):** 각 문항 = 입력 / 골드 정답(status·max_ltv·rule_id·gf·reason) / 근거 문서·인용 / 카테고리 / human escalation 기대 / 정책 버전 / rule_id.
+- **카테고리:** NORMAL·EXCEPTION·GRANDFATHERING·EFFECTIVE_DATE·REGION·BORROWER_TYPE·LOAN_PURPOSE·CONFLICT·AMBIGUOUS·NO_CHANGE. CHALLENGE는 CONFLICT(13)·AMBIGUOUS(10)·GF경계(6)·EFFECTIVE경계(6) 가중.
+- **누수 방지(§12):** `eval.load_split('locked'/'challenge')`는 `unlock=True` 없이는 RuntimeError. 개발 상시 회귀는 DEV만. split 간 입력 disjoint(테스트로 강제). LOCKED/CHALLENGE는 코어 완성 후 1회.
+- **검증:** DEV/LOCKED/CHALLENGE 전부 엔진 회귀 100%(엔진이 명세를 정확 구현, 충돌·모호·경계 포함). AMBIGUOUS는 escalation 기대로 '지어내지 않고 사람검토' 검증. Assurance/Report에 DEV pass rate 노출(sealed는 count만).
+- **재현:** `python tools/build_gold_set.py`(결정론적). `python examples/demo_gold_set.py`(DEV 회귀).
+- **LOCKED 정합성:** §0-5 준수(평가셋 개발보다 먼저·3-way 분리·누수 방지). §4 준수(정답=독립 오라클, 엔진 미참조).
+
 ### 2026-08-10 · 골드 평가셋 규모 100~120으로 축소 (Q1) · ✅ 승인됨
 - **결정:** 골드셋 총 규모를 원안 150~200에서 **100~120**으로 축소. CHALLENGE 비중을 상대적으로 강화.
 - **확정 split (권장 수치, 총 ~115):**

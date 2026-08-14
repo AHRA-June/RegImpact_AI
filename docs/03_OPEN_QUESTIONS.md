@@ -5,10 +5,10 @@
 
 ---
 
-## Q1. 골드 평가셋 규모 — `[✅ 해결 2026-08-10]`
-- **결정: 100~120으로 확정.** split = DEV 40 / LOCKED 40 / CHALLENGE 35 (총 ~115), CHALLENGE 카테고리 가중.
-- 상세는 `02_DECISION_LOG.md` 2026-08-10 항목, `metrics_spec.md` "평가셋 규모·split" 섹션.
-- **잔여:** CHALLENGE 내 카테고리별 세부 건수는 골드셋 설계 단계에서 도메인 검수로 확정.
+## Q1. 골드 평가셋 규모 — `[✅ 해결 2026-08-10 · 빌드·freeze 2026-08-14]`
+- **결정: 100~120으로 확정.** split = DEV 40 / LOCKED 40 / CHALLENGE 35 (총 115), CHALLENGE 카테고리 가중.
+- **✅ 빌드 완료(2026-08-14):** `docs/eval/gold_set/`(dev/locked/challenge.json + MANIFEST + README), 정답=독립 오라클 유도, 누수 방지 규율, DEV 회귀 100%. `tools/build_gold_set.py`로 재현. 상세 `02_DECISION_LOG.md` 2026-08-14.
+- **잔여(선택):** 도메인 전문가의 정답 검수(사람 최종 확정) 후 v2 — 현재는 오라클(명세) 유도값.
 
 ## Q2. Assurance 11개 체크 중 "깊게 구현할 4개" — `[✅ 해결 2026-08-10]`
 - **결정: 수를 줄임.** 깊게 정량 측정하는 4개 dimension + 나머지 로드맵/인프라. 상세는 `02_DECISION_LOG.md` 2026-08-10 항목.
