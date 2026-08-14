@@ -64,14 +64,17 @@ def test_rule_amendment_diff_from_engine_constants():
     assert "OWNER_BASELINE_UNKNOWN" in h
 
 
-def test_assurance_regression_measured_others_pending():
+def test_assurance_all_dimensions_measured():
     h = assurance.render()
-    # Rule-regression 실측
+    # ④ Rule-regression 실측
     assert "30/30" in h or "30 /30" in h
     assert "Rule-regression" in h
-    # LLM 의존 지표는 정직하게 대기 표기(가짜 수치 없음)
-    assert "실측 대기" in h
-    assert "98" not in h.split("Rule-regression")[0] or True  # 가짜 98% 없음(HALLUCINATIONS로도 커버)
+    # ①②③도 실측(기록된 추출 산출물 기반) — 실제 모델·값 노출
+    assert "claude-opus-4-8" in h
+    assert "Citation" in h and "Change Completeness" in h
+    # 실측값이 실제로 표시됨(모두 100%). 목업의 가짜 Citation 98%는 표시되지 않음.
+    assert "100% (환각 0%)" in h
+    assert "Citation Correctness: 98" not in h
 
 
 def test_portfolio_synthetic_labeled_and_counts_present():

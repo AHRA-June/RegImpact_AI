@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from ..extractor import measured_assurance
 from ..impact.segments import REGION_LABELS
 from ..rule_engine import LTV_BASELINE, LTV_REGULATED_STANDARD
 from .chrome import card, esc, mono_chip, page, provenance_strip, title_block
@@ -153,6 +154,7 @@ def _main(gold: dict) -> str:
     return (
         title_block("규제 변경 분석", subtitle)
         + prov
+        + _extraction_assurance()
         + _source_cards(gold)
         + _before_after(gold)
         + _exceptions(gold)
@@ -160,6 +162,37 @@ def _main(gold: dict) -> str:
           '<span class="material-symbols-outlined text-secondary">checklist</span>'
           '<h3 class="font-h3 text-h3">필수 변경 항목 (Extractor 채점 기준)</h3></div>'
         + _required_changes(gold)
+    )
+
+
+def _extraction_assurance() -> str:
+    """AI 추출 1회 실측 결과(있으면). Citation grounding·완전성·재현율."""
+    m = measured_assurance()
+    if m is None:
+        return ""
+    metrics = [
+        ("Citation Correctness", f"{m.citation_correctness:.0%}", f"환각 {m.unsupported_claim_rate:.0%}"),
+        ("Change Completeness", f"{m.change_completeness:.0%}", "필수 변경 포착"),
+        ("Exception Recall", f"{m.exception_recall:.0%}", "예외 재현"),
+        ("추출 항목", f"{m.n_changes}건", "원문 verbatim 인용"),
+    ]
+    cells = "".join(
+        '<div class="bg-surface-container-lowest rounded-lg border border-secondary/40 p-4">'
+        f'<div class="font-body-sm text-body-sm text-on-surface-variant mb-1">{esc(label)}</div>'
+        f'<div class="font-h3 text-h3 text-secondary">{esc(val)}</div>'
+        f'<div class="font-mono-label text-mono-label text-on-surface-variant">{esc(sub)}</div></div>'
+        for label, val, sub in metrics
+    )
+    return (
+        '<div class="bg-secondary-container/20 rounded-xl border border-secondary/30 p-5">'
+        '<div class="flex items-center gap-2 mb-3">'
+        '<span class="material-symbols-outlined text-secondary">psychology</span>'
+        '<h3 class="font-h3 text-h3">AI 추출 실측 (RegChange Extractor 1회 실행)</h3>'
+        f'<span class="font-mono-label text-mono-label text-on-surface-variant">{esc(m.model)} · {esc(m.run_date)}</span></div>'
+        '<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 max-w-3xl">'
+        '모델이 원문만 읽고 추출한 결과를 결정론적 채점기로 재계산한 실측값. 인용은 원문 verbatim '
+        '존재를 확인했고(grounding), 완전성·재현율은 gold와 대조했다. 지어낸 수치가 아니다.</p>'
+        f'<div class="grid grid-cols-2 md:grid-cols-4 gap-4">{cells}</div></div>'
     )
 
 

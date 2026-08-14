@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 
-from .extractor import SOURCE_REGISTRY, load_gold
+from .extractor import SOURCE_REGISTRY, load_gold, measured_assurance
 from .impact import ImpactMatrix, build_impact_matrix
 from .impact.segments import REGION_LABELS
 from .proposal import ApprovalStatus, Escalation, RuleChangeProposal, build_rule_change_proposal
@@ -80,15 +80,31 @@ class ValidationReport:
 
 
 def _assurance_dimensions(regression: dict) -> list[AssuranceDimension]:
-    """4 DEEP dimension 상태. ④만 지금 실측, ①②③은 LLM 실행 대기(지어내지 않음)."""
+    """4 DEEP dimension 상태.
+
+    ④ Rule-regression은 항상 실측. ①②③(RegChange 계열)은 실측 추출 산출물이 있으면
+    결정론적 재계산으로 실측, 없으면 '실측 대기'(지어내지 않음).
+    """
     pr = regression["pass_rate"]
-    return [
-        AssuranceDimension("citation", "① Citation/Source grounding", False, None, "≥ 임계(초안)"),
-        AssuranceDimension("completeness", "② Change Completeness", False, None, "≥ 임계(초안)"),
-        AssuranceDimension("recall", "③ Exception · GF Recall", False, None, "≥ 95%(초안)"),
-        AssuranceDimension("regression", "④ Rule-regression", True,
-                           f"{pr:.0%} ({regression['passed']}/{regression['total']})", "100%"),
-    ]
+    m = measured_assurance()   # 기록된 추출이 없으면 None
+    if m is not None:
+        citation = AssuranceDimension(
+            "citation", "① Citation/Source grounding", True,
+            f"{m.citation_correctness:.0%} (환각 {m.unsupported_claim_rate:.0%})", "≥ 95%(초안)")
+        completeness = AssuranceDimension(
+            "completeness", "② Change Completeness", True,
+            f"{m.change_completeness:.0%}", "≥ 95%(초안)")
+        recall = AssuranceDimension(
+            "recall", "③ Exception · GF Recall", True,
+            f"{m.exception_recall:.0%}", "≥ 95%(초안)")
+    else:
+        citation = AssuranceDimension("citation", "① Citation/Source grounding", False, None, "≥ 95%(초안)")
+        completeness = AssuranceDimension("completeness", "② Change Completeness", False, None, "≥ 95%(초안)")
+        recall = AssuranceDimension("recall", "③ Exception · GF Recall", False, None, "≥ 95%(초안)")
+    regression_dim = AssuranceDimension(
+        "regression", "④ Rule-regression", True,
+        f"{pr:.0%} ({regression['passed']}/{regression['total']})", "100%")
+    return [citation, completeness, recall, regression_dim]
 
 
 def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> ValidationReport:
@@ -125,7 +141,9 @@ def build_validation_report(matrix: Optional[ImpactMatrix] = None) -> Validation
                      f"Pass Rate {regression['pass_rate']:.0%} ({regression['passed']}/{regression['total']}) · "
                      f"카테고리 {len(regression['by_category'])}"),
         PipelineStep(7, "Assurance", "PENDING" if any(not d.measured for d in assurance) else "MEASURED",
-                     "④ Rule-regression 실측 · ①②③ LLM 실행 대기(미측정 표기)"),
+                     f"4 DEEP dimension 실측 {sum(d.measured for d in assurance)}/{len(assurance)} · "
+                     + ("전 dimension 실측 완료" if all(d.measured for d in assurance)
+                        else "일부 LLM 실행 대기(미측정 표기)")),
         PipelineStep(8, "Human Review", "REVIEW",
                      f"escalation {len(proposal.escalations)}건 → 사람 검토 필요"),
     ]

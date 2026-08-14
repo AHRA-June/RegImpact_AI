@@ -14,12 +14,25 @@ from pathlib import Path
 
 from .schema import RegChangeExtraction, RegChangeItem
 
-GOLD_PATH = Path(__file__).resolve().parents[3] / "docs" / "eval" / "regchange_gold_6_30.json"
+_EVAL_DIR = Path(__file__).resolve().parents[3] / "docs" / "eval"
+GOLD_PATH = _EVAL_DIR / "regchange_gold_6_30.json"
+# RegChange Extractor 1회 실제 LLM 실행 산출물 (claude-opus-4-8이 원문만 읽고 생성).
+RECORDED_EXTRACTION_PATH = _EVAL_DIR / "regchange_extraction_6_30.json"
 
 
 def load_gold(path: str | Path | None = None) -> dict:
     """RegChange 골드 정답지(사람 확정, LOCKED §4)를 로드한다."""
     return json.loads(Path(path or GOLD_PATH).read_text(encoding="utf-8"))
+
+
+def load_recorded_extraction(path: str | Path | None = None):
+    """실측 추출 산출물을 로드한다. 없으면 None(→ Assurance '실측 대기')."""
+    from .schema import RegChangeExtraction
+
+    p = Path(path or RECORDED_EXTRACTION_PATH)
+    if not p.exists():
+        return None
+    return RegChangeExtraction.from_dict(json.loads(p.read_text(encoding="utf-8")))
 
 
 def _norm(s: str) -> str:
@@ -119,4 +132,59 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
         regions_correct=regions_correct,
         missed_changes=missed_changes,
         missed_exceptions=missed_exc,
+    )
+
+
+@dataclass
+class MeasuredAssurance:
+    """실측 추출 1회에 대한 Assurance 지표(결정론적 재계산). RegChange DEEP dimension ①②③."""
+    n_changes: int
+    citation_correctness: float       # ① grounding
+    unsupported_claim_rate: float
+    change_completeness: float        # ② 완전성
+    exception_recall: float           # ③ 예외 재현율
+    grandfathering_captured: bool     # ③ 경과규정 포착
+    effective_date_correct: bool
+    regions_correct: bool
+    model: str = "unknown"
+    run_date: str = "unknown"
+
+
+def measured_assurance(
+    extraction=None, sources: dict[str, str] | None = None, gold: dict | None = None,
+    meta: dict | None = None,
+) -> "MeasuredAssurance | None":
+    """기록된(또는 주어진) 추출을 결정론적 채점기로 재계산해 실측 지표를 낸다.
+
+    추출 산출물이 없으면 None → Assurance 화면/리포트는 '실측 대기'로 표시.
+    지표는 저장값이 아니라 항상 (추출 + 원문 + gold)에서 재계산 → 재현 가능·신뢰.
+    """
+    from .sources import load_sources
+
+    if extraction is None:
+        extraction = load_recorded_extraction()
+        if extraction is None:
+            return None
+        if meta is None:
+            import json as _json
+            raw = _json.loads(RECORDED_EXTRACTION_PATH.read_text(encoding="utf-8"))
+            meta = raw.get("_meta", {})
+    sources = sources if sources is not None else load_sources()
+    gold = gold if gold is not None else load_gold()
+    meta = meta or {}
+
+    g = check_citation_grounding(extraction, sources)
+    s = score_against_gold(extraction, gold)
+    gf_captured = any(c.category == "GRANDFATHERING" for c in extraction.changes)
+    return MeasuredAssurance(
+        n_changes=len(extraction.changes),
+        citation_correctness=g.citation_correctness,
+        unsupported_claim_rate=g.unsupported_claim_rate,
+        change_completeness=s.change_completeness,
+        exception_recall=s.exception_recall,
+        grandfathering_captured=gf_captured,
+        effective_date_correct=s.effective_date_correct,
+        regions_correct=s.regions_correct,
+        model=meta.get("model", "unknown"),
+        run_date=meta.get("run_date", "unknown"),
     )

@@ -121,3 +121,37 @@ def test_score_detects_missing_exception():
     g = score_against_gold(ext, GOLD)
     assert g.exception_recall == 0.0
     assert "first_home_buyer" in g.missed_exceptions
+
+
+# ---------- 실측 추출 산출물 (1회 실제 LLM 실행 기록) ----------
+def test_recorded_extraction_grounding_and_gold():
+    """기록된 실측 추출이 원문 grounding·gold 대조에서 실제로 통과하는지 회귀 고정.
+
+    이 산출물은 claude-opus-4-8이 원문만 읽고 생성. 인용은 원문 verbatim이어야 하고
+    (grounding), 필수 변경/예외를 빠짐없이 포착해야 한다(완전성·재현율).
+    """
+    from regimpact.extractor import load_recorded_extraction, measured_assurance
+
+    ext = load_recorded_extraction()
+    assert ext is not None, "docs/eval/regchange_extraction_6_30.json 필요"
+    assert ext.policy_id == "FSC_20260630"
+    assert set(ext.target_regions) >= {"GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"}
+
+    m = measured_assurance()
+    assert m is not None
+    # 모든 인용이 원문 verbatim (환각 0%)
+    assert m.citation_correctness == 1.0
+    assert m.unsupported_claim_rate == 0.0
+    # gold 필수 변경/예외 전부 포착
+    assert m.change_completeness == 1.0
+    assert m.exception_recall == 1.0
+    assert m.grandfathering_captured is True
+    assert m.effective_date_correct and m.regions_correct
+    assert m.model == "claude-opus-4-8"
+
+
+def test_measured_assurance_none_when_missing(tmp_path):
+    """추출 산출물이 없으면 None 반환(→ Assurance '실측 대기' 폴백)."""
+    from regimpact.extractor import load_recorded_extraction
+
+    assert load_recorded_extraction(tmp_path / "nope.json") is None

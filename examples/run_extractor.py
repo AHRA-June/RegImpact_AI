@@ -3,7 +3,8 @@
 실행(실제 LLM 호출, ANTHROPIC_API_KEY 필요):
     python examples/run_extractor.py
 
-키가 없으면 방법을 안내하고 종료. 오프라인 로직 검증은 `python -m pytest -k extractor`.
+키가 없으면 **기록된 1회 실측 추출 산출물**(docs/eval/regchange_extraction_6_30.json)을
+로드해 동일한 결정론적 Assurance 채점을 보여준다. 오프라인 로직 검증은 `python -m pytest -k extractor`.
 """
 import json
 import sys
@@ -15,6 +16,7 @@ from regimpact.extractor import (  # noqa: E402
     anthropic_completion,
     check_citation_grounding,
     extract_regchange,
+    load_recorded_extraction,
     load_sources,
     score_against_gold,
 )
@@ -30,16 +32,20 @@ def main() -> None:
         return
     print(f"원문 {len(sources)}건 로드: {', '.join(sources)}")
 
+    extraction = None
     try:
         complete = anthropic_completion(model="claude-opus-5")
         extraction = extract_regchange(sources, complete=complete)
-    except ImportError:
-        print("\n[안내] anthropic SDK 미설치. 실제 실행하려면: pip install anthropic")
-        return
-    except Exception as e:  # 인증/네트워크 등
-        print(f"\n[안내] LLM 호출 실패: {type(e).__name__}: {e}")
-        print("ANTHROPIC_API_KEY 설정(또는 `ant auth login`) 후 재시도하세요.")
-        return
+        print("\n[모드] 실제 LLM 호출 성공.")
+    except (ImportError, Exception) as e:  # SDK 미설치/인증/네트워크
+        recorded = load_recorded_extraction()
+        if recorded is None:
+            print(f"\n[안내] LLM 호출 불가({type(e).__name__}) + 기록된 추출도 없음.")
+            print("실제 실행: pip install anthropic + ANTHROPIC_API_KEY. 로직 검증: pytest -k extractor.")
+            return
+        extraction = recorded
+        print(f"\n[모드] LLM 호출 불가 → 기록된 1회 실측 추출 산출물 로드 "
+              f"(docs/eval/regchange_extraction_6_30.json).")
 
     print(f"\n=== 추출 결과 ({len(extraction.changes)}건) ===")
     for c in extraction.changes:

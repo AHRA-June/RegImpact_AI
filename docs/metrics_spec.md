@@ -44,6 +44,12 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 ## 1. RegChange / RAG 계열 (브리프 §13.1) — [DEEP] dimension ②③
 
+> ✅ **1회 실측(2026-08-14, claude-opus-4-8):** RegChange Extractor를 6·30 공문 3건에 실행한 산출물
+> (`docs/eval/regchange_extraction_6_30.json`, 9건 추출)을 결정론적 채점기로 재계산.
+> **Citation Correctness 100%(환각 0%) · Change Completeness 100% · Exception Recall 100% ·
+> Effective-date OK · Regions OK.** 지표는 저장값이 아니라 (추출+원문+gold)에서 항상 재계산.
+> `regimpact.extractor.measured_assurance()` · `examples/run_extractor.py`.
+
 | 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk |
 |---|---|---|---|---|---|
 | Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | TBD | 놓침=위험 |

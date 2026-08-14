@@ -2,10 +2,14 @@
 from .extractor import anthropic_completion, extract_regchange
 from .evaluate import (
     GOLD_PATH,
+    RECORDED_EXTRACTION_PATH,
     GoldReport,
     GroundingReport,
+    MeasuredAssurance,
     check_citation_grounding,
     load_gold,
+    load_recorded_extraction,
+    measured_assurance,
     score_against_gold,
 )
 from .schema import Citation, RegChangeExtraction, RegChangeItem
@@ -17,7 +21,11 @@ __all__ = [
     "check_citation_grounding",
     "score_against_gold",
     "load_gold",
+    "load_recorded_extraction",
+    "measured_assurance",
+    "MeasuredAssurance",
     "GOLD_PATH",
+    "RECORDED_EXTRACTION_PATH",
     "GroundingReport",
     "GoldReport",
     "RegChangeExtraction",

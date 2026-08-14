@@ -1,0 +1,121 @@
+{
+  "_meta": {
+    "note": "RegChange Extractor 1회 실제 LLM 실행 산출물. 모델이 docs/sources/raw/*.txt 원문만 읽고 생성(gold 미참조). 인용은 원문 verbatim. Assurance 지표는 이 추출을 결정론적 채점기(check_citation_grounding·score_against_gold)로 재계산해 산출 — 저장하지 않고 항상 재계산(재현 가능).",
+    "model": "claude-opus-4-8",
+    "run_date": "2026-08-14",
+    "sources": [
+      "FSC_PRESS_20260630",
+      "MOLIT_PRESS_20260630",
+      "FAQ_20260630"
+    ],
+    "prompt": "src/regimpact/extractor/prompt.py (SYSTEM_PROMPT)"
+  },
+  "policy_id": "FSC_20260630",
+  "effective_from": "2026-07-01",
+  "target_regions": [
+    "GURI",
+    "YONGIN_GIHEUNG",
+    "HWASEONG_DONGTAN"
+  ],
+  "changes": [
+    {
+      "category": "LTV",
+      "summary": "규제지역 내 주택구입목적 주담대 LTV를 무주택 기준 70%에서 40%로 강화",
+      "before": "70%",
+      "after": "40%",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용"
+      },
+      "confidence": 0.98
+    },
+    {
+      "category": "REGION",
+      "summary": "화성시 동탄구·용인시 기흥구·구리시 3곳을 투기과열지구 및 조정대상지역으로 신규 지정",
+      "before": null,
+      "after": "투기과열지구 및 조정대상지역",
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다"
+      },
+      "confidence": 0.97
+    },
+    {
+      "category": "EFFECTIVE_DATE",
+      "summary": "강화된 대출규제 시행일 7.1일(2026-07-01)",
+      "before": null,
+      "after": "2026-07-01",
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "강화된 대출규제가 7.1일부터 즉시 적용된다"
+      },
+      "confidence": 0.98
+    },
+    {
+      "category": "GRANDFATHERING",
+      "summary": "6.30일까지 전산 접수 완료 또는 매매계약+계약금 증명 시 종전규정 적용",
+      "before": null,
+      "after": "종전규정 적용",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능"
+      },
+      "confidence": 0.95
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "생애최초 주택구입은 완화된 LTV 70% 유지",
+      "before": "70%",
+      "after": "70%",
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "생애최초 LTV 70% + 전입의무(6개월 이내)"
+      },
+      "confidence": 0.9
+    },
+    {
+      "category": "EXCEPTION",
+      "summary": "금융권 서민·실수요자 주담대는 완화된 LTV 적용(60%)",
+      "before": null,
+      "after": "60%",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+      },
+      "confidence": 0.88
+    },
+    {
+      "category": "LTV",
+      "summary": "다주택자는 수도권 내 주택구입시 LTV 0% 적용",
+      "before": null,
+      "after": "0%",
+      "citation": {
+        "source_doc_id": "FSC_PRESS_20260630",
+        "quote": "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+      },
+      "confidence": 0.95
+    },
+    {
+      "category": "LTV",
+      "summary": "규제지역 유주택자 주택구입목적 주담대 LTV 0%",
+      "before": null,
+      "after": "0%",
+      "citation": {
+        "source_doc_id": "MOLIT_PRESS_20260630",
+        "quote": "무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+      },
+      "confidence": 0.93
+    },
+    {
+      "category": "SCOPE_LIMIT",
+      "summary": "전세대출 보유자의 규제지역 내 3억원 초과 APT 취득시 전세대출 회수",
+      "before": null,
+      "after": "전세대출 회수",
+      "citation": {
+        "source_doc_id": "FAQ_20260630",
+        "quote": "전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득*시 전세대출 회수"
+      },
+      "confidence": 0.85
+    }
+  ]
+}
