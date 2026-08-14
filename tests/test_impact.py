@@ -12,6 +12,7 @@ from regimpact.impact import (
     Segment,
     build_impact_matrix,
     format_matrix,
+    render_impact_matrix_html,
 )
 
 
@@ -134,3 +135,30 @@ def test_format_matrix_renders():
     assert "Impact Matrix" in out
     assert "Discovery Scope" in out
     assert "요약:" in out
+
+
+# ---------- HTML 렌더 (UI = 엔진 산출물) ----------
+def test_html_render_is_engine_backed_not_hardcoded():
+    h = render_impact_matrix_html(build_impact_matrix())
+    # 자기완결 페이지
+    assert h.startswith("<html") and h.rstrip().endswith("</html>")
+    # 실제 엔진 값/근거코드가 표에 존재
+    assert "LTV_REGULATED_40" in h
+    assert "LTV_MULTI_HOME_0" in h
+    assert "DISCOVERY_POLICY_LOAN" in h
+    # 정직성 신호: 명세부재·종전유지(counterfactual) 노출
+    assert "명세부재" in h
+    assert "종전유지" in h
+    # 엔진 산출 근거 스트립
+    assert "rule_engine v1" in h
+    # 과거 환각 값은 없어야 한다 (Stitch 목업의 "60% → 50%")
+    assert "60% → 50%" not in h
+    assert "50% 하향" not in h
+
+
+def test_html_render_reflects_row_count():
+    m = build_impact_matrix()
+    h = render_impact_matrix_html(m)
+    # 각 세그먼트의 차주유형이 화면에 렌더된다
+    for r in m.rows:
+        assert r.borrower_type in h

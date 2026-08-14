@@ -48,7 +48,20 @@ for r in matrix.core_rows:
     r.before_ltv, r.after_ltv, r.delta, r.direction, r.grandfathering_applied, r.counterfactual_ltv
 ```
 
-데모: `python examples/demo_impact_matrix.py`
+데모(텍스트 표): `python examples/demo_impact_matrix.py`
+
+### UI 렌더 (화면 = 엔진 산출물)
+
+```python
+from regimpact.impact import render_impact_matrix_html, write_impact_matrix_html
+write_impact_matrix_html("docs/ui/generated/impact_matrix.html")   # 인자 없으면 6·30 기본
+```
+
+`render.py`는 Stitch 임팩트매트릭스 화면의 하드코딩(일부 환각) 값을 이 모듈 출력으로
+대체한다. 디자인 시스템(head·사이드바·헤더)은 `templates/chrome_*.html`(기존 export에서
+추출)로 보존하고, 표·요약·Discovery만 `ImpactMatrix`에서 생성 → 값을 손으로 적지 않으므로
+환각이 재발할 수 없다. 렌더 명령: `python examples/render_impact_ui.py`.
+자세한 내용은 `docs/ui/generated/README.md`.
 
 ## 출력 모델
 

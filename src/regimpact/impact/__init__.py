@@ -17,11 +17,14 @@ from .matrix import (
     build_impact_matrix,
     format_matrix,
 )
+from .render import render_impact_matrix_html, write_impact_matrix_html
 from .segments import SIX_THIRTY_SEGMENTS, Segment
 
 __all__ = [
     "build_impact_matrix",
     "format_matrix",
+    "render_impact_matrix_html",
+    "write_impact_matrix_html",
     "ImpactMatrix",
     "ImpactRow",
     "ImpactDirection",

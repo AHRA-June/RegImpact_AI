@@ -1,5 +1,11 @@
 # Stitch 1차 산출물 리뷰 + 데이터 정정 프롬프트 (2026-08-10)
 
+> **✅ 2026-08-14 업데이트 — 임팩트 매트릭스(`_1`) 화면은 이제 엔진 산출물로 대체됨.**
+> 아래 "임팩트 매트릭스 정정"은 더 이상 손으로 고칠 필요가 없다. `docs/ui/generated/impact_matrix.html`
+> 이 Stitch 목업(`_1`)을 대체한다. 값은 `regimpact.impact.build_impact_matrix()`(룰엔진 Before/After
+> 실제 판정)에서 생성되며, `python examples/render_impact_ui.py`로 재생성한다. Stitch export는 디자인
+> 참고로 보존. (나머지 화면 rule/_3 등은 여전히 목업.)
+
 > Stitch에서 5개 화면 생성 완료. 디자인 시스템(DESIGN.md)은 마스터 컨텍스트를 잘 반영(Institutional Navy, Noto Sans, JetBrains Mono, 상태색, 고밀도).
 > **문제: Stitch가 도메인 데이터를 화면마다 다르게 환각.** 아래 정정 프롬프트로 재생성하거나 HTML 직접 수정.
 

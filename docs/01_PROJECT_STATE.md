@@ -27,7 +27,11 @@
   (RegChange Impact Analysis)이며 UI 임팩트매트릭스 하드코딩값을 이 실제 엔진 출력으로 대체 가능.
   **정직성 3원칙:** ①非규제 유주택 기준선 명세부재 → `NEW_RESTRICTION`(70→0 fabricate 금지) ②정책대출·전세 등
   → Discovery Scope 분리 ③경과규정 → 종전규정 유지 + **counterfactual**(보호 없었다면 적용됐을 LTV) 병기.
-  9개 세그먼트, `format_matrix` 리포트 stub, `examples/demo_impact_matrix.py`. 테스트 12개(총 51) 통과.
+  9개 세그먼트, `format_matrix` 리포트 stub, `examples/demo_impact_matrix.py`.
+- **UI 임팩트매트릭스 = 엔진 산출물로 대체** — `src/regimpact/impact/render.py` + `examples/render_impact_ui.py`
+  → `docs/ui/generated/impact_matrix.html`. Stitch 목업(`_1`)의 하드코딩(환각 "60%→50%") 값을 `build_impact_matrix()`
+  실제 판정으로 대체. 디자인 시스템은 `templates/chrome_*.html`(기존 export 추출)로 보존, 표·요약·Discovery만 생성
+  → 값을 손으로 적지 않아 환각 재발 불가. 렌더 테스트 2개 포함. **총 53 통과.**
 
 ## ✅ 이전 완료 (2026-08-10)
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
@@ -37,12 +41,13 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(51), `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
+- 실행: `python -m pytest`(53), `python examples/demo_6_30.py`, `python examples/demo_impact_matrix.py`, `python examples/render_impact_ui.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
 - ~~**최소 Impact Matrix E2E**~~ — ✅ 완료(2026-08-14). `src/regimpact/impact/`. Before/After 관통, Discovery 분리, 경과규정 counterfactual.
+- ~~**UI 임팩트매트릭스 → 엔진 출력 교체**~~ — ✅ 완료(2026-08-14). `render.py` → `docs/ui/generated/impact_matrix.html`.
   - **후속(선택):** ①Rule Change Proposal(구조화 스키마) + Report stub와 연결해 Walking Skeleton 완전 관통(Source→…→Report)
-    ②UI 임팩트매트릭스 화면을 이 실제 출력으로 교체(Streamlit 또는 정적 export) ③합성 포트폴리오 집계행(포트폴리오 영향).
+    ②나머지 화면(rule/_3 고객영향)도 엔진 출력으로 렌더 ③합성 포트폴리오 집계행(포트폴리오 영향).
 - **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
@@ -96,6 +101,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-14** — ✅ **UI 임팩트매트릭스 = 엔진 산출물로 대체.** `src/regimpact/impact/render.py`(+ `templates/chrome_*.html`, `examples/render_impact_ui.py`) → `docs/ui/generated/impact_matrix.html`. Stitch 목업(`_1`)이 환각한 하드코딩 값("LTV 60%→50% 하향", 가상 담당자/기한)을 `build_impact_matrix()` 실제 판정으로 대체. 디자인 시스템(head·사이드바·헤더)은 기존 export에서 추출해 보존하고 표·요약카드·Discovery 섹션만 엔진 출력으로 생성 → **값을 손으로 적지 않아 환각 재발 불가**(엔진=단일 진실). 엔진 산출 근거 스트립(rule_engine v1·before/after 날짜·rows)으로 '실제 출력'임을 명시. 정직성 신호(명세부재·종전유지 counterfactual) 화면 노출. `stitch_review.md`에 supersede 주석, `docs/ui/generated/README.md` 신규. 렌더 테스트 2개(총 53 통과).
 - **2026-08-14** — ✅ **Impact Matrix E2E 구현.** `src/regimpact/impact/`(segments·matrix·README). 룰엔진을 Before(6·30)/After(7·2) 두 시점에 관통시켜 세그먼트별 델타(기존→변경 LTV / 방향 / 경과규정 / 근거코드)를 산출 — 제품 핵심 출력(RegChange Impact Analysis). **규칙을 새로 만들지 않고** 동일 프로파일을 두 `evaluation_date`에 넣어 `evaluate()` 2회 호출 후 차이를 구조화(지역 시점버전·경과규정은 엔진이 날짜로 해석). 정직성 3원칙: ①非규제 유주택 기준선 명세부재 → `NEW_RESTRICTION`(70→0 fabricate 금지) ②정책대출·전세 → Discovery Scope 분리 ③경과규정 → 종전규정 유지 + counterfactual(보호 없었다면 적용됐을 LTV) 병기. 9 세그먼트, `format_matrix`, `examples/demo_impact_matrix.py`. 테스트 12개(총 51) 통과. → 다음: Rule Change Proposal + Report stub와 연결해 Walking Skeleton 완전 관통, UI 하드코딩값 교체.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
