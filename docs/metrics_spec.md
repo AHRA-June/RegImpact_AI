@@ -20,6 +20,21 @@
 - CHALLENGE는 EXCEPTION / GRANDFATHERING / EFFECTIVE_DATE / CONFLICT 가중.
 - 성공 기준: 건수 채우기가 아니라 **실패모드 카테고리 커버리지**.
 
+### ✅ 작성 완료 (2026-08-18) — `docs/eval/gold/`
+
+| split | 규모 | high-risk | 상태 |
+|---|---:|---:|---|
+| DEV | 40 | 52% | 🤖 ai_draft — 튜닝 사용 가능 |
+| LOCKED | 40 | 52% | 🤖 ai_draft — 🔒 봉인 |
+| CHALLENGE | 35 | 80% | 🤖 ai_draft — 🔒 봉인 |
+
+- 10개 카테고리 전부 커버(전체 기준). DEV/LOCKED는 **카테고리 분포 동일**(난이도 교란 방지).
+- **튜닝 시작 전에 세 셋을 모두 작성**했다(브리프 §12-1·2 순서 준수).
+- 봉인은 문서가 아니라 코드가 강제한다 — `load_split()`이 사유 없이 열지 않고,
+  해제는 `SEAL_ACCESS_LOG.md`에 append-only 기록. `split_stats()`는 정답 없이 구성만 반환.
+- 무결성: 모든 인용이 원문에 verbatim 존재함을 `validate_items()`가 매번 검사(`pytest -k goldset`).
+- ✍️ **잔여:** 전 문항 도메인 검수 후 `authored_by`를 `human_confirmed`로 전환.
+
 ## 0. 공통 원칙
 
 - 모든 지표는 **골드셋(DEV/LOCKED/CHALLENGE)** 또는 **룰엔진 회귀 fixture** 위에서 계산.

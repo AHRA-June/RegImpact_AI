@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (P0c 확정 세션)
+- **갱신자:** Claude (골드셋 작성 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 129 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 158 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,20 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 5차)
+## ✅ 방금 완료 (2026-08-18 · 6차)
+- **★ 골드 평가셋 115문항 작성** — `docs/eval/gold/` (DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35).
+  10개 카테고리 전부 커버, high-risk 비중 DEV·LOCKED 52% / CHALLENGE 80%.
+  **튜닝 시작 전에 세 셋을 모두 작성**(브리프 §12-1·2 순서 준수).
+- **봉인을 코드로 강제** — `load_split(LOCKED)`는 사유 없이 `SealedSplitError`. 해제는
+  `SEAL_ACCESS_LOG.md`에 append-only 기록. `split_stats()`는 정답 없이 구성만 반환해
+  일상 점검이 봉인을 소모하지 않게 했다. `src/`·`examples/`의 봉인 셋 참조를 테스트가 금지.
+- **정답지 자신에게 Citation Assurance** — 115문항의 모든 인용이 원문에 verbatim 존재함을
+  매 테스트마다 대조. 인용문은 손으로 옮기지 않고 `q()`가 원문에서 잘라 온다.
+- **DEV/LOCKED 카테고리 분포 동일** 고정(테스트) — 최종 성능 차이가 난이도 차이로 오염되지 않게.
+- 한계 명시: 작성자=개발자이므로 독립 벤치마크 아님(브리프 §12 문구 기록). 전 문항 🤖 초안.
+- 테스트 129 → **158** (`tests/test_goldset.py` 29개).
+
+## ✅ 이전 완료 (2026-08-18 · 5차)
 - **★ Q10 확정(사용자 결정)** — **유주택자를 코어 스코프에 유지**하고, 기준값 없는 구간은
   추정하지 않고 escalation 유지. 모집단에 존재하는 고객군을 범위 밖으로 선언해 지표를 좋아 보이게
   하는 회피를 하지 않는다. → `03_OPEN_QUESTIONS` Q10 ✅ 해결.
@@ -98,7 +111,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(129), `python examples/demo_impact_e2e.py`(**E2E 관통**),
+- 실행: `python -m pytest`(158), `python examples/validate_goldset.py`(골드셋 무결성), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
   `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
@@ -108,7 +121,11 @@
 - ~~**최소 Impact Matrix E2E**~~ — ✅ **완료(2026-08-18 2차). Phase 1 Walking Skeleton 관통.**
 - ~~**Q10**~~ — ✅ **확정(2026-08-18): 유주택자 스코프 유지 + 공백은 escalation 유지.**
 - ~~**P0c 도메인 검수**~~ — ✅ **확정(2026-08-18): 시행 전에도 0%.** 🤖 초안 → ✅ 전환 완료.
-- **골드셋 100~120 작성 + metrics_spec 임계값 확정** — Phase 2 진입 조건. **현재 최우선.**
+- ~~**골드셋 100~120 작성**~~ — ✅ **완료(2026-08-18): 115문항, 봉인 완료.**
+- **✍️ 골드셋 도메인 검수(사용자)** — 전 문항 🤖 `ai_draft`. 확정분은 `authored_by`를
+  `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
+- **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
+- **Extractor 튜닝(DEV 40 기준)** — Q9/D-02(서민·실수요자 누락) 해소. Phase 2 본체.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
 - ~~**Stitch UI를 엔진 실제 출력으로 교체**~~ — ✅ **완료(2026-08-18 3차).**
 - **골드셋 100~120 작성 착수 + metrics_spec 임계값 확정** (Phase 2 진입 조건).
@@ -162,6 +179,13 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (7차)** — ✅ **골드 평가셋 115문항 작성.** `src/regimpact/eval/`(schema·goldset·validate),
+  `docs/eval/gold/`(dev 40 / locked 40 / challenge 35 + README + SEAL_ACCESS_LOG),
+  `tools/gold_*.py`(작성 도구), `examples/validate_goldset.py`. 튜닝 전에 세 셋을 모두 작성해
+  브리프 §12 순서를 지켰고, **봉인을 코드로 강제**(사유 없는 LOCKED/CHALLENGE 로드 거부 +
+  append-only 접근 기록 + 정답 없이 구성만 보는 `split_stats()`). 인용은 `q()`가 원문에서 잘라 와
+  verbatim을 보장하고, 검증기가 115문항 전체를 매번 원문 대조한다. DEV/LOCKED 분포 동일 고정.
+  작성 직후 커버리지 집계로 봉인을 한 번 열었고 그 기록을 지우지 않은 채 API를 고쳤다. 테스트 129→158.
 - **2026-08-18 (6차)** — ✅ **P0c 확정.** 사용자 도메인 검수 완료("시행 전에도 0% 맞다") →
   수도권 다주택 0%가 지역상태·시점·경과규정 무관임을 확정. `05_RULE_SPEC §C-2 보강`·§E P0c,
   `regulatory_facts` C06·C14 모두 🤖/🔺 → **✅확정** 전환. 코드는 이미 해당 규칙으로 동작 중이라
