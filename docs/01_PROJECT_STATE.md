@@ -86,6 +86,8 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18(2)** — 📄 **사업계획서 v1 전면 재작성** (`docs/business/BUSINESS_PLAN_v1.md`, v0 보존). 명칭 **RegImpact AI**로 통일(Regulation+Impact, 사용자 확정 — "RegChange"는 컴포넌트명으로 강등). 6·30 사건 서사 도입부, 가치 제안을 구매자 언어("사고 예방+증빙")로, 쐐기 상품 "규제 1건 대응 패키지" 정의, 수익모델 단일 경로(건당 패키지→연간 약정→상시 구독) 커밋(3안 비교는 부록 C), Live Fire를 증거 전략으로 승격, 재무는 근거 병기 보수 추정, 창업자 1차 데이터 기입란(✍️) 신설. **후속 TODO:** ①✍️ 공수 수치 본인 기입 ②경쟁사 실명 데스크리서치 ③README·브리프의 영문 부제 RegImpact 통일 여부는 사용자 결정 대기.
+
 - **2026-08-18** — 📄 **사업계획서 초안 v0 작성** (`docs/business/BUSINESS_PLAN_v0.md`). 사업화 멘토링용. PSST(정부지원사업) 형식, 수익모델 3안(B2B SaaS / 컨설팅+솔루션 / AI Assurance 검증) 병렬 제시, 전업 창업 전제. 미검증 가정은 `[가정]`/`[검증필요]` 명시, 멘토 질문 10개 포함. 기존 포트폴리오 트랙(브리프·LOCKED 원칙·구현 실적)은 변경 없이 승계.
 
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
