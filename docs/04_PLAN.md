@@ -76,3 +76,24 @@ Source Snapshot(1건, 수동)
 
 ## 코어 완성의 정의 (LOCKED, 브리프 §18)
 6·30 시나리오 1건이 Source Snapshot → Policy Version Resolution → Before/After → Impact Matrix → Customer Impact → Structured Rule Proposal → Test Cases → Deterministic Rule Regression → Assurance Evaluation → Human Review → Validation Report 로 End-to-End 완결.
+
+### 현황 (2026-08-18) — 10/11 단계 실제 실행
+
+`python examples/demo_impact_e2e.py` 로 재현. 구현: `src/regimpact/impact/pipeline.py`.
+
+| # | 단계 | 상태 | 구현 |
+|---|---|---|---|
+| 1 | Source Snapshot | ✅ | 공문 3건 로드 + SHA-256 |
+| 2 | Policy Version Resolution | ✅ | 규제지역 37곳(6.30) → 40곳(7.1) diff |
+| 3 | Before/After Change Extraction | ⛔ | **LLM 미실행** — API 키 필요. 키 넣으면 즉시 채워짐 |
+| 4 | Impact Matrix | ✅ | 업무 15행(11 + Discovery 4), Phase 3구간 |
+| 5 | Customer Impact | ✅ | 합성 포트폴리오 2,016건 Before/After 2회 판정 |
+| 6 | Structured Rule Proposal | ✅ | 관측된 rule_id 전이 2건, 전부 사람 승인 대기 |
+| 7 | Test Cases | ✅ | 52건 (6개 분류) |
+| 8 | Deterministic Rule Regression | ✅ | 엔진 ⟷ 독립 오라클 Pass Rate 100% |
+| 9 | Assurance Evaluation | ⚠️ | Rule-regression 만 측정. Citation/Completeness 는 3단계 대기 |
+| 10 | Human Review | ✅ | 검토 필요 13행 · 자동판정 거부 168건 큐 |
+| 11 | Validation Report | ✅ | `render_report()` → 마크다운 |
+
+**남은 것은 3단계(LLM 추출) 하나뿐이고, 그건 API 키를 넣고 한 번 돌리면 된다.**
+9단계의 Citation Correctness·Change Completeness 도 그때 함께 채워진다.

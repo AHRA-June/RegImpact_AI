@@ -2,9 +2,10 @@
 
 이 프로젝트는 **직접 만져볼 수 있는 온라인 표면 2개**를 갖는다. 성격이 다르니 둘 다 유지한다.
 
-| | Artifact 샌드박스 | Streamlit 검증 콘솔 |
-|---|---|---|
-| 파일 | `web/sandbox.html` (자체완결 1파일) | `app/streamlit_app.py` |
+| | Artifact 샌드박스 | 검증보고서 페이지 | Streamlit 검증 콘솔 |
+|---|---|---|---|
+| 파일 | `web/sandbox.html` | `web/impact.html` | `app/streamlit_app.py` |
+| 성격 | 만져보는 **도구** | 읽는 **산출물** | 실물 데모 |
 | 엔진 | Python 엔진을 **JS로 포팅** | 저장소의 **Python 엔진 그대로** |
 | 서버 | 불필요 (정적) | 필요 (Streamlit) |
 | LLM(Extractor) | 불가 | 가능 (API 키 필요) |
@@ -17,9 +18,14 @@
 빌드는 2단계다. **골든 기대값을 사람이 손으로 적지 않는 것**이 핵심이다.
 
 ```bash
+# 샌드박스 (엔진 JS 포팅본)
 python tools/export_fixtures.py     # Python 엔진 실행 → web/fixtures.json
 python tools/build_sandbox.py       # 템플릿 + 픽스처 인라인 → web/sandbox.html
 node tools/verify_js_port.mjs       # JS 포팅본 ↔ Python 엔진 전 케이스 대조
+
+# 검증보고서 (E2E 결과 — 페이지는 계산하지 않고 싣기만 한다)
+python tools/export_impact.py       # E2E 파이프라인 실행 → web/impact.json
+python tools/build_impact.py        # 템플릿 + 결과 인라인 → web/impact.html
 ```
 
 `web/sandbox.html`은 외부 요청이 없는 자체완결 파일이라(웹폰트 제외) Artifact·GitHub Pages·
@@ -79,8 +85,9 @@ Hugging Face Spaces(SDK: streamlit)도 동일하게 동작한다. `requirements.
 ## 검증
 
 ```bash
-python -m pytest          # 44개 — 엔진 23 · Extractor 5 · TC 11 · Streamlit 스모크 5
+python -m pytest          # 108개 — 엔진 · 지역 레지스트리 · Extractor · TC · Impact · Streamlit
 node tools/verify_js_port.mjs
+python examples/demo_impact_e2e.py    # 6·30 E2E 10/11 단계 (LLM 없이)
 ```
 
 Streamlit 스모크 테스트(`tests/test_streamlit_app.py`)는 AppTest로 앱을 실제 실행해

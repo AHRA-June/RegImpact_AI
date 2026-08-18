@@ -31,10 +31,19 @@ def _status(at: AppTest) -> str:
     return next(m.value for m in at.metric if m.label == "판정 상태")
 
 
-def test_app_runs_and_renders_three_tabs():
+def test_app_runs_and_renders_four_tabs():
     at = _run()
     assert at.title[0].value.startswith("⚖️")
-    assert len(at.tabs) == 3
+    assert len(at.tabs) == 4
+
+
+def test_impact_tab_reports_e2e_headline():
+    """E2E 탭이 파이프라인을 실제로 돌려 헤드라인 지표를 낸다."""
+    at = _run()
+    labels = [m.label for m in at.metric]
+    assert "영향률 (경과규정 미해당 층)" in labels
+    assert "자동판정 거부" in labels
+    assert any("한도 변화" in lb for lb in labels)
 
 
 def test_default_is_regulated_standard_40():

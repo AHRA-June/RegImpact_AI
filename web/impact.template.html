@@ -1,0 +1,442 @@
+<title>6·30 규제 변경 검증보고서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Song+Myung&display=swap">
+<style>
+:root{
+  --paper:#E9ECEF; --surface:#FBFCFD; --surface-2:#F1F4F6; --line:#CBD3DA; --line-soft:#DFE5EA;
+  --ink:#141A22; --ink-2:#3D4854; --muted:#69757F;
+  --seal:#A8322B; --seal-soft:#F3E3E1;
+  --ok:#1E6B58; --ok-soft:#DFEDE8;
+  --warn:#9A6B12; --warn-soft:#F5EBD6;
+  --info:#2C5578; --info-soft:#E1E9F1;
+  /* 순차 램프 — LTV 강화 폭(단일 색상, 밝음→어두움). 0%p는 중립 표면. */
+  --r0:#F1F4F6; --r1:#F3E0DD; --r2:#E8BDB7; --r3:#D89189; --r4:#C4635B; --r5:#A8322B;
+  --on-ramp-hi:#FBFCFD;
+  --shadow:0 1px 2px rgba(20,26,34,.06),0 8px 24px -16px rgba(20,26,34,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101418; --surface:#171C22; --surface-2:#1E242B; --line:#2C343D; --line-soft:#242B33;
+    --ink:#E6EBEF; --ink-2:#B7C1CA; --muted:#8894A0;
+    --seal:#E0736A; --seal-soft:#2E1E1D;
+    --ok:#6BC3A8; --ok-soft:#16261F;
+    --warn:#DBAE5A; --warn-soft:#2A2113;
+    --info:#7FAAD1; --info-soft:#16212B;
+    --r0:#1E242B; --r1:#3A2523; --r2:#59322E; --r3:#7B443E; --r4:#A05A52; --r5:#C97C73;
+    --on-ramp-hi:#12161A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101418; --surface:#171C22; --surface-2:#1E242B; --line:#2C343D; --line-soft:#242B33;
+  --ink:#E6EBEF; --ink-2:#B7C1CA; --muted:#8894A0;
+  --seal:#E0736A; --seal-soft:#2E1E1D;
+  --ok:#6BC3A8; --ok-soft:#16261F;
+  --warn:#DBAE5A; --warn-soft:#2A2113;
+  --info:#7FAAD1; --info-soft:#16212B;
+  --r0:#1E242B; --r1:#3A2523; --r2:#59322E; --r3:#7B443E; --r4:#A05A52; --r5:#C97C73;
+  --on-ramp-hi:#12161A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:28px 20px 80px; display:flex; flex-direction:column; gap:26px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+
+/* masthead */
+.masthead{border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow)}
+.mh-top{display:flex; flex-wrap:wrap; gap:14px 22px; align-items:baseline; padding:22px 24px 16px;
+        border-bottom:1px dashed var(--line)}
+h1{font-family:"Song Myung","Apple SD Gothic Neo",serif; font-weight:400; margin:0;
+   font-size:clamp(25px,3.6vw,36px); letter-spacing:-.01em; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:13.5px}
+.docref{margin-left:auto; text-align:right; font-size:11.5px; color:var(--muted); letter-spacing:.08em;
+        text-transform:uppercase}
+.mh-bd{display:flex; flex-wrap:wrap; gap:8px; padding:13px 24px 16px}
+.badge{display:inline-flex; align-items:center; gap:7px; font-size:12px; padding:5px 10px;
+       border:1px solid var(--line); background:var(--surface-2); color:var(--ink-2)}
+.badge b{font-family:"IBM Plex Mono",monospace; font-weight:600; font-variant-numeric:tabular-nums}
+.badge.warn{border-color:var(--warn); background:var(--warn-soft); color:var(--warn)}
+.badge.ok{border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
+
+h2{font-family:"Song Myung",serif; font-weight:400; font-size:21px; margin:0; letter-spacing:-.005em}
+.sec{border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow)}
+.sec-hd{display:flex; align-items:baseline; gap:12px; padding:16px 22px 12px; border-bottom:1px solid var(--line)}
+.sec-hd .no{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); letter-spacing:.1em}
+.sec-hd .note{margin-left:auto; font-size:12px; color:var(--muted)}
+.sec-bd{padding:18px 22px}
+.lede{margin:0 0 16px; color:var(--ink-2); font-size:13.5px; max-width:70ch}
+.lede b{color:var(--ink); font-weight:600}
+
+/* 파이프라인 레일 */
+.rail{display:flex; flex-direction:column}
+.step{display:grid; grid-template-columns:30px 26px minmax(0,1fr) auto; gap:12px; align-items:center;
+      padding:10px 22px; border-bottom:1px solid var(--line-soft); cursor:pointer; text-align:left;
+      background:none; border-left:0; border-right:0; border-top:0; width:100%; font:inherit; color:inherit}
+.step:last-of-type{border-bottom:0}
+.step:hover{background:var(--surface-2)}
+.step .n{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted)}
+.step .mk{font-size:14px; text-align:center}
+.step .nm{font-weight:500; font-size:14px}
+.step .dt{font-size:12px; color:var(--muted); text-align:right; max-width:44ch}
+.step.missing{background:var(--warn-soft)}
+.step.missing .nm{color:var(--warn); font-weight:600}
+.step-detail{padding:2px 22px 14px 90px; display:none; font-size:12.5px; color:var(--muted)}
+.step-detail.open{display:block}
+.step-detail dl{display:grid; grid-template-columns:auto 1fr; gap:3px 14px; margin:0}
+.step-detail dt{color:var(--ink-2)}
+.step-detail dd{margin:0; font-family:"IBM Plex Mono",monospace; font-size:11.5px}
+
+/* stat tiles */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px;
+       background:var(--line); border:1px solid var(--line)}
+.tile{background:var(--surface); padding:16px 18px; display:flex; flex-direction:column; gap:4px}
+.tile .lab{font-size:11.5px; letter-spacing:.05em; color:var(--muted); text-transform:uppercase}
+.tile .val{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:30px; line-height:1.05;
+           letter-spacing:-.02em}
+.tile .sub2{font-size:11.5px; color:var(--muted)}
+.tile.attn .val{color:var(--warn)}
+.tile.tight .val{color:var(--seal)}
+
+/* tables */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:13px}
+th{text-align:left; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+   font-weight:600; padding:9px 12px; border-bottom:1px solid var(--line); background:var(--surface-2);
+   white-space:nowrap}
+td{padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top}
+td.num,th.num{text-align:right; font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+              white-space:nowrap}
+
+/* 세그먼트 그리드 */
+.grid-legend{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin:0 0 12px;
+             font-size:11.5px; color:var(--muted)}
+.swatches{display:flex; align-items:center; gap:2px}
+.sw{width:26px; height:12px; border:1px solid var(--line-soft)}
+.seg-grid th.rot{font-size:10.5px; white-space:normal; max-width:88px; vertical-align:bottom}
+.cell{padding:0; border-bottom:1px solid var(--surface)}
+.cell .box{display:flex; flex-direction:column; gap:1px; padding:9px 10px; min-width:88px;
+           border-right:2px solid var(--surface)}
+.cell .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13px}
+.cell .t{font-family:"IBM Plex Mono",monospace; font-size:10.5px; opacity:.8}
+.cell.esc .box{background:var(--warn-soft); color:var(--warn)}
+.cell.zero .box{background:var(--r0); color:var(--muted)}
+
+/* 매트릭스 */
+.band{display:flex; align-items:baseline; gap:12px; padding:12px 22px; background:var(--surface-2);
+      border-top:1px solid var(--line); border-bottom:1px solid var(--line)}
+.band h3{margin:0; font-size:13px; font-weight:600; letter-spacing:.06em}
+.band .cnt{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted)}
+.band .hint{margin-left:auto; font-size:11.5px; color:var(--muted)}
+.band.after{border-left:3px solid var(--info)}
+.band.before{border-left:3px solid var(--seal)}
+.band.trigger{border-left:3px solid var(--warn)}
+.mrow{border-bottom:1px solid var(--line-soft)}
+.mrow > summary{display:grid; grid-template-columns:minmax(140px,200px) minmax(0,1fr) auto auto;
+  gap:12px; align-items:baseline; padding:11px 22px; cursor:pointer; list-style:none}
+.mrow > summary::-webkit-details-marker{display:none}
+.mrow > summary:hover{background:var(--surface-2)}
+.mrow .area{font-weight:500; font-size:13.5px}
+.mrow .chg{font-size:12.5px; color:var(--ink-2)}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:10.5px; padding:2px 7px; border:1px solid var(--line);
+      background:var(--surface-2); color:var(--muted); white-space:nowrap}
+.chip.eng{border-color:var(--ok); color:var(--ok); background:var(--ok-soft)}
+.chip.gold{border-color:var(--info); color:var(--info); background:var(--info-soft)}
+.chip.ai{border-color:var(--seal); color:var(--seal); background:var(--seal-soft)}
+.chip.manual{border-color:var(--warn); color:var(--warn); background:var(--warn-soft)}
+.mrow[open] > summary{background:var(--surface-2)}
+.mdetail{padding:4px 22px 18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+         gap:14px 24px; font-size:12.5px}
+.mdetail dt{font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+            margin-bottom:3px}
+.mdetail dd{margin:0 0 10px; color:var(--ink-2)}
+.mdetail .ev{font-family:"IBM Plex Mono",monospace; font-size:11px; line-height:1.5}
+.hr-reason{border-left:2px solid var(--warn); padding-left:10px; color:var(--warn)}
+.disc td, .disc .area{color:var(--muted)}
+
+.foot{border:1px solid var(--line); background:var(--surface); padding:18px 22px; font-size:12.5px;
+      color:var(--muted); display:flex; flex-direction:column; gap:9px}
+.foot b{color:var(--ink-2); font-weight:600}
+code{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:var(--surface-2);
+     padding:1px 5px; border:1px solid var(--line-soft)}
+@media (max-width:720px){
+  .mrow > summary{grid-template-columns:1fr; gap:5px}
+  .step{grid-template-columns:24px 22px 1fr; }
+  .step .dt{display:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="mh-top">
+      <div>
+        <h1>6·30 규제 변경 검증보고서</h1>
+        <p class="sub">주택시장 안정대책 — 공문에서 룰·고객영향·테스트·검증까지 한 번 관통시킨 결과</p>
+      </div>
+      <div class="docref" id="docref"></div>
+    </div>
+    <div class="mh-bd" id="badges"></div>
+  </header>
+
+  <section class="sec">
+    <div class="sec-hd"><span class="no">01</span><h2>파이프라인 단계</h2>
+      <span class="note">행을 누르면 그 단계의 실제 수치가 열림</span></div>
+    <div class="rail" id="rail"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><span class="no">02</span><h2>고객·포트폴리오 영향</h2>
+      <span class="note" id="pf-note"></span></div>
+    <div class="sec-bd">
+      <p class="lede" id="impact-lede"></p>
+      <div class="tiles" id="tiles"></div>
+    </div>
+    <div class="sec-bd" style="padding-top:0">
+      <div class="grid-legend">
+        <span>LTV 강화 폭</span>
+        <span class="swatches" id="swatches"></span>
+        <span id="ramp-range" class="mono"></span>
+        <span style="display:inline-flex;align-items:center;gap:6px">
+          <span class="sw" style="background:var(--warn-soft);border-color:var(--warn)"></span>
+          사람 검토 — 명세 공백으로 자동판정 거부
+        </span>
+      </div>
+      <div class="tablewrap">
+        <table class="seg-grid" id="seg-grid"></table>
+      </div>
+    </div>
+    <div class="sec-bd" style="padding-top:0">
+      <div class="tablewrap"><table id="group-table"></table></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><span class="no">03</span><h2>임팩트 매트릭스</h2>
+      <span class="note">행을 누르면 근거·산출물·검토사유가 열림</span></div>
+    <div class="sec-bd" style="padding-bottom:6px">
+      <p class="lede"><b>시간축(Phase)이 이 매트릭스의 척추다.</b> 규제 변경의 병목은 규정을 읽는 게 아니라
+      발표~시행일 사이의 시간 압축이다. 일은 두 물결로 온다 — 시행일 전에 반드시 끝나야 하는 것(룰·전산·테스트·공지)과
+      시행 후에 오는 것(전략 재분석·모니터링). 그리고 대외보고 집계기준 변경은 <b>별도 트리거</b>로 나중에 도착한다.</p>
+    </div>
+    <div id="matrix"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><span class="no">04</span><h2>구조화 Rule Change Proposal</h2>
+      <span class="note">전부 사람 승인 대기</span></div>
+    <div class="sec-bd">
+      <p class="lede">LLM이 만든 룰이 아니다. 확정 명세를 구현한 <b>결정론 엔진</b>이 포트폴리오 전체를
+      시행 전/후로 두 번 판정해 <b>실제로 관측된</b> rule_id 전이다. 반영 여부는 사람이 결정한다.</p>
+      <div class="tablewrap"><table id="proposals"></table></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><span class="no">05</span><h2>Human Review 큐</h2></div>
+    <div class="sec-bd">
+      <p class="lede" id="hr-lede"></p>
+      <div class="tablewrap"><table id="hr-table"></table></div>
+    </div>
+  </section>
+
+  <footer class="foot" id="foot"></footer>
+</div>
+
+<script>
+const D = /*__IMPACT__*/ null;
+
+const $ = id => document.getElementById(id);
+const pct = v => (v * 100).toFixed(1) + "%";
+const pct0 = v => Math.round(v * 100) + "%";
+const num = v => v.toLocaleString("ko-KR");
+
+/* ---------- masthead ---------- */
+$("docref").innerHTML = `${D.policy_id}<br>시행 ${D.effective_from}`;
+const missing = D.stages.filter(s => s.status === "미실행");
+$("badges").innerHTML = [
+  missing.length
+    ? `<span class="badge warn">⛔ 미실행 단계 <b>${missing.length}</b> — ${missing.map(s => s.name).join(", ")}</span>`
+    : `<span class="badge ok">✅ 전 단계 실행</span>`,
+  `<span class="badge">파이프라인 <b>${D.stages.length}</b>단계</span>`,
+  `<span class="badge">업무 <b>${D.matrix.length}</b>행 · Phase <b>${D.phases.length}</b>구간</span>`,
+  `<span class="badge">합성 포트폴리오 <b>${num(D.headline.portfolio_n)}</b>건</span>`,
+  `<span class="badge">공문 원문 <b>${Object.keys(D.source_digests).length}</b>건 해시 기록</span>`,
+].join("");
+
+/* ---------- 01 파이프라인 ---------- */
+const MARK = {"완료":"✅", "확인 필요":"⚠️", "미실행":"⛔"};
+$("rail").innerHTML = D.stages.map((s, i) => {
+  const cls = s.status === "미실행" ? "step missing" : "step";
+  const metrics = Object.entries(s.metrics || {});
+  return `<button class="${cls}" data-i="${i}" type="button">
+      <span class="n">${String(i + 1).padStart(2, "0")}</span>
+      <span class="mk">${MARK[s.status]}</span>
+      <span class="nm">${s.name}</span>
+      <span class="dt">${s.detail}</span>
+    </button>
+    <div class="step-detail" id="sd-${i}">
+      <div style="margin-bottom:8px">${s.detail}</div>
+      ${metrics.length ? `<dl>${metrics.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>` : ""}
+    </div>`;
+}).join("");
+$("rail").querySelectorAll(".step").forEach(b =>
+  b.addEventListener("click", () => $("sd-" + b.dataset.i).classList.toggle("open")));
+
+/* ---------- 02 고객영향 ---------- */
+const H = D.headline;
+$("pf-note").textContent =
+  `지역군 4 × 차주유형 6 × 경과규정 이벤트 4 × 가격구간 7 (등가중 완전요인)`;
+$("impact-lede").innerHTML =
+  `이 숫자는 <b>합성 포트폴리오</b>에서 나온다 — 실제 고객 분포가 아니라 판정 분기를 빠짐없이 훑는
+   <b>커버리지 격자</b>다. 그래서 "몇 명이 영향받는다"가 아니라 <b>"어떤 세그먼트가 어떻게 바뀌는가"</b>로 읽어야 한다.
+   격자에서는 경과규정 이벤트가 4분의 3을 차지하므로(그건 현실이 아니라 설계다), 헤드라인 영향률은
+   <b>경과규정 미해당 층 ${num(H.no_event_n)}건</b> 기준으로 뽑았다.`;
+
+$("tiles").innerHTML = [
+  {lab:"영향률 · 경과규정 미해당 층", val:pct(H.no_event_impacted_rate),
+   sub:`${num(H.no_event_n)}건 중 강화 ${num(H.tightened)} · 완화 ${num(H.loosened)}`, cls:"tight"},
+  {lab:"한도 변화 합계", val:H.no_event_limit_delta_eok.toFixed(0) + "억",
+   sub:"LTV만 반영한 참고값 (DTI·차주한도 미반영)", cls:"tight"},
+  {lab:"경과규정 적용", val:num(H.grandfathered),
+   sub:`그중 유예로 판정이 실제로 달라진 건 ${num(H.protected)}`, cls:""},
+  {lab:"자동판정 거부", val:pct(H.escalation_rate),
+   sub:`${num(H.escalated)}건 — 숫자를 지어내지 않은 대가`, cls:"attn"},
+].map(t => `<div class="tile ${t.cls}">
+    <span class="lab">${t.lab}</span><span class="val">${t.val}</span><span class="sub2">${t.sub}</span>
+  </div>`).join("");
+
+/* 순차 램프 — 0%p(중립) → 최대 강화 폭 */
+const deltas = D.segments.map(s => s.ltv_delta).filter(v => v !== null).map(Math.abs);
+const maxDrop = Math.max(0.001, ...deltas);
+const RAMP = ["--r0", "--r1", "--r2", "--r3", "--r4", "--r5"];
+function rampVar(absDelta){
+  if (!absDelta) return "--r0";
+  const i = Math.min(RAMP.length - 1, 1 + Math.floor((absDelta / maxDrop) * (RAMP.length - 2)));
+  return RAMP[i];
+}
+$("swatches").innerHTML = RAMP.map(v => `<span class="sw" style="background:var(${v})"></span>`).join("");
+$("ramp-range").textContent = `0 → −${Math.round(maxDrop * 100)}%p`;
+
+/* 세그먼트 그리드: 행=지역군, 열=차주유형 */
+const groups = D.by_region_group.map(g => g.label);
+const borrowers = D.by_borrower.map(b => b.label);
+const segAt = {};
+D.segments.forEach(s => { segAt[s.region_group + "|" + s.borrower] = s; });
+
+$("seg-grid").innerHTML =
+  `<thead><tr><th>지역군 \\ 차주유형</th>${borrowers.map(b => `<th class="rot num">${b}</th>`).join("")}</tr></thead>
+   <tbody>${groups.map(g => `<tr>
+     <td style="font-weight:500">${g}</td>
+     ${borrowers.map(b => {
+        const s = segAt[g + "|" + b];
+        if (!s) return `<td class="cell zero"><div class="box"><span class="d">—</span></div></td>`;
+        if (s.escalation_rate > 0 && s.ltv_delta === null)
+          return `<td class="cell esc" title="${g} / ${b} — 자동판정 거부 ${pct(s.escalation_rate)}">
+            <div class="box"><span class="d">검토</span><span class="t">${pct0(s.escalation_rate)}</span></div></td>`;
+        const d = s.ltv_delta || 0;
+        const v = rampVar(Math.abs(d));
+        const strong = v === "--r4" || v === "--r5";
+        const label = d ? `${Math.round(d * 100)}%p` : "0";
+        const after = s.ltv_after === null ? "—" : pct0(s.ltv_after);
+        const before = s.ltv_before === null ? "—" : pct0(s.ltv_before);
+        return `<td class="cell ${d ? "" : "zero"}"
+            title="${g} / ${b} — LTV ${before} → ${after}${s.top_transition ? " · " + s.top_transition : ""}">
+          <div class="box" style="background:var(${v});${strong ? "color:var(--on-ramp-hi)" : ""}">
+            <span class="d">${label}</span><span class="t">${before}→${after}</span></div></td>`;
+     }).join("")}
+   </tr>`).join("")}</tbody>`;
+
+$("group-table").innerHTML =
+  `<thead><tr><th>지역군</th><th class="num">건수</th><th class="num">영향률</th>
+    <th class="num">경과규정 적용</th><th class="num">유예로 달라진 건</th>
+    <th class="num">자동판정 거부</th><th class="num">한도 변화</th></tr></thead>
+   <tbody>${D.by_region_group.map(g => `<tr>
+     <td>${g.label}</td><td class="num">${num(g.n)}</td><td class="num">${pct(g.impacted_rate)}</td>
+     <td class="num">${num(g.grandfathered)}</td><td class="num">${num(g.protected)}</td>
+     <td class="num">${pct(g.escalation_rate)}</td>
+     <td class="num">${g.limit_delta_eok ? g.limit_delta_eok.toFixed(1) + "억" : "0"}</td></tr>`).join("")}</tbody>`;
+
+/* ---------- 03 매트릭스 ---------- */
+const PROV_CLS = {"결정론 엔진":"eng", "사람 확정(골드)":"gold", "AI 추출(검증 대상)":"ai",
+                  "확정 명세":"", "미실행":"manual"};
+const BAND_CLS = {"D-day 전":"before", "시행 후":"after", "별도 트리거":"trigger"};
+const BAND_HINT = {
+  "D-day 전":"시행일까지 반드시 끝나야 하는 일 — 시간 압축이 걸리는 구간",
+  "시행 후":"시행 뒤에 오는 두 번째 물결",
+  "별도 트리거":"이 정책 변경만으로는 확정 불가 — 외부 요청 도착 시",
+};
+$("matrix").innerHTML = D.phases.map(ph => {
+  const rows = D.matrix.filter(r => r.phase === ph);
+  return `<div class="band ${BAND_CLS[ph]}">
+      <h3>${ph}</h3><span class="cnt">${rows.length}행</span>
+      <span class="hint">${BAND_HINT[ph] || ""}</span>
+    </div>` + rows.map(r => `
+    <details class="mrow ${r.discovery ? "disc" : ""}">
+      <summary>
+        <span class="area">${r.area}</span>
+        <span class="chg">${r.change}</span>
+        <span class="chip ${PROV_CLS[r.provenance] || ""}">${r.provenance}</span>
+        <span class="chip ${r.automation === "수동" ? "manual" : ""}">${r.automation}</span>
+      </summary>
+      <div class="mdetail">
+        <div><dt>근거 / evidence</dt><dd class="ev">${r.evidence.join("<br>")}</dd></div>
+        <div><dt>영향 대상</dt><dd>${r.target}</dd>
+             <dt>산출물</dt><dd>${r.deliverable}</dd></div>
+        <div><dt>우선순위 · 담당 · 승인</dt>
+             <dd>${r.priority} · ${r.owner} · ${r.approval}</dd>
+             ${Object.keys(r.metrics).length ? `<dt>산출 수치</dt><dd class="ev">${
+               Object.entries(r.metrics).map(([k, v]) => `${k}: ${v}`).join("<br>")}</dd>` : ""}</div>
+        ${r.human_review_reason
+          ? `<div><dt>Human Review 사유</dt><dd class="hr-reason">${r.human_review_reason}</dd></div>` : ""}
+      </div>
+    </details>`).join("");
+}).join("");
+
+/* ---------- 04 제안 ---------- */
+$("proposals").innerHTML =
+  `<thead><tr><th>rule_id 전이</th><th class="num">LTV</th><th class="num">관측 건수</th>
+    <th>영향 세그먼트</th><th>근거 정책</th><th>승인</th></tr></thead>
+   <tbody>${D.proposals.map(p => `<tr>
+     <td class="mono">${p.before} → ${p.after}</td>
+     <td class="num">${pct0(p.ltv_before)} → ${pct0(p.ltv_after)}</td>
+     <td class="num">${num(p.affected)}</td>
+     <td style="font-size:12px">${p.segments.join("<br>")}</td>
+     <td class="mono" style="font-size:11.5px">${p.sources.join("<br>")}</td>
+     <td style="color:var(--warn)">사람 승인 필요</td></tr>`).join("")}</tbody>`;
+
+/* ---------- 05 Human Review ---------- */
+const hrRows = D.matrix.filter(r => r.human_review_reason);
+$("hr-lede").innerHTML =
+  `자동판정을 거부한 건 <b>${num(H.escalated)}건 (${pct(H.escalation_rate)})</b>.
+   이건 실패가 아니라 <b>숫자를 지어내지 않은 대가</b>이고, 확정 명세에 구멍이 어디 있는지를 그대로 드러낸다 —
+   ${Object.entries(D.escalation_reasons).map(([k, v]) => `<code>${k}</code> ${num(v)}건`).join(", ")}.`;
+$("hr-table").innerHTML =
+  `<thead><tr><th>업무영역</th><th>Phase</th><th>승인 상태</th><th>사유</th></tr></thead>
+   <tbody>${hrRows.map(r => `<tr>
+     <td>${r.area}</td><td>${r.phase}</td>
+     <td${r.approval === "선행작업 대기" ? ' style="color:var(--warn);font-weight:600"' : ""}>${r.approval}</td>
+     <td>${r.human_review_reason}</td></tr>`).join("")}</tbody>`;
+
+/* ---------- footer ---------- */
+const prov = {};
+D.matrix.forEach(r => { prov[r.provenance] = (prov[r.provenance] || 0) + 1; });
+$("foot").innerHTML = `
+  <p style="margin:0"><b>근거 출처 분포.</b> ${Object.entries(prov)
+    .sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}행`).join(" · ")}.
+  "AI가 만들었다"와 "사람이 확정했다"가 한 표 안에서 구분되지 않으면 이 표는 감사에 쓸 수 없다.</p>
+  ${missing.length ? `<p style="margin:0"><b>미실행 단계를 감추지 않았다.</b>
+    ${missing.map(s => s.name).join(", ")} 는 <code>ANTHROPIC_API_KEY</code>가 없어 돌지 않았다.
+    그래서 원문 인용이 필요한 행들은 사람 확정 골드(<code>docs/eval/</code>)를 근거로 삼고 있고,
+    Citation Correctness·Change Completeness는 <code>N/A</code>다. 키를 넣고 다시 돌리면 그 행들의 출처가
+    "AI 추출(검증 대상)"로 바뀌고 Assurance 수치가 채워진다.</p>` : ""}
+  <p style="margin:0"><b>한계.</b> 코어 자동판정은 LTV뿐이다 — DTI·최대한도는 참고값이고, 전세대출·신용대출·
+  중도금·사업자대출은 <code>Discovery</code>로 표시만 한다(영향 범위는 넓게 발견하되 자동판정은 좁게 —
+  기능 부족이 아니라 의도된 Governance 설계). 포트폴리오는 합성이며 실제 고객데이터를 쓰지 않는다.</p>
+  <p style="margin:0">모든 수치는 <code>tools/export_impact.py</code>가 Python 파이프라인을 실행해 산출한 것이다.
+  이 페이지는 계산하지 않고 싣기만 한다.</p>`;
+</script>

@@ -33,6 +33,9 @@ from regimpact.regions import (  # noqa: E402
 )
 from regimpact.rule_engine import evaluate  # noqa: E402
 from regimpact.tc_generator import Category, generate_all, run_regression  # noqa: E402
+from regimpact.impact import (  # noqa: E402
+    Phase, analyze_customer_impact, build_impact_matrix, render_report, run_e2e,
+)
 
 st.set_page_config(page_title="RegImpact AI — 검증 콘솔", page_icon="⚖️", layout="wide")
 
@@ -381,18 +384,113 @@ def tab_extractor() -> None:
     })
 
 
+# ============================== 임팩트 매트릭스 탭 ==============================
+@st.cache_data(show_spinner="6·30 파이프라인 실행 중…")
+def _run_pipeline():
+    """E2E 결과를 캐시. LLM 미주입(키 없이 9/10 단계 실제 실행)."""
+    gold = json.loads((REPO / "docs" / "eval" / "regchange_gold_6_30.json").read_text(encoding="utf-8"))
+    result = run_e2e(gold=gold)
+    return result, render_report(result)
+
+
+def tab_impact() -> None:
+    st.subheader("6·30 End-to-End — 공문에서 검증보고서까지")
+    st.caption("브리프 §18 '코어 완성의 정의' 전 단계를 실제로 관통시킨 결과. "
+               "안 돌린 단계는 ⛔로 남긴다 — 채워넣지 않는다.")
+
+    result, report_md = _run_pipeline()
+    impact = result.impact
+    no_event = impact.no_event_only()
+    m = result.matrix
+
+    mark = {"완료": "✅", "확인 필요": "⚠️", "미실행": "⛔"}
+    st.dataframe(
+        [{"#": i, "단계": s_.name, "상태": f"{mark[s_.status.value]} {s_.status.value}",
+          "내용": s_.detail}
+         for i, s_ in enumerate(result.stages, 1)],
+        width="stretch", hide_index=True)
+
+    st.divider()
+    st.markdown("### 고객·포트폴리오 영향")
+    st.caption("합성 포트폴리오(커버리지 격자)다. 실제 고객 분포가 아니므로 '몇 명이 영향받는다'가 아니라 "
+               "'어떤 세그먼트가 어떻게 바뀌는가'로 읽어야 한다. 헤드라인 영향률은 경과규정 미해당 층 기준.")
+    c = st.columns(4)
+    c[0].metric("영향률 (경과규정 미해당 층)", f"{no_event.impacted_rate:.1%}",
+                f"{no_event.total:,.0f}건 중")
+    c[1].metric("한도 변화 합계", f"{no_event.limit_delta_sum_eok:,.0f}억",
+                "LTV만 반영한 참고값", delta_color="off")
+    c[2].metric("경과규정 적용", f"{impact.grandfathered:,.0f}건",
+                f"유예로 판정이 달라진 건 {impact.protected_by_grandfathering:,.0f}", delta_color="off")
+    c[3].metric("자동판정 거부", f"{impact.escalation_rate:.1%}",
+                f"{impact.escalated:,.0f}건", delta_color="inverse")
+
+    st.dataframe(
+        [{"지역군": k, "건수": f"{v.n:,.0f}", "영향률": f"{v.impacted_rate:.1%}",
+          "경과규정 적용": f"{v.grandfathered:,.0f}", "유예로 달라진 건": f"{v.protected:,.0f}",
+          "자동판정 거부": f"{v.escalation_rate:.1%}",
+          "한도 변화": f"{v.limit_delta_sum_eok:,.1f}억"}
+         for k, v in impact.by_region_group().items()],
+        width="stretch", hide_index=True)
+
+    st.markdown("**세그먼트별 LTV 변화** (경과규정 미해당 층)")
+    st.dataframe(
+        [{"지역군": s_.region_group, "차주 유형": s_.borrower_label,
+          "Before": "—" if s_.avg_ltv_before is None else f"{s_.avg_ltv_before:.0%}",
+          "After": "—" if s_.avg_ltv_after is None else f"{s_.avg_ltv_after:.0%}",
+          "변화": "사람 검토" if s_.avg_ltv_delta is None else f"{s_.avg_ltv_delta * 100:+.0f}%p",
+          "주 전이": s_.top_transition or "—"}
+         for s_ in no_event.segments],
+        width="stretch", hide_index=True)
+
+    st.divider()
+    st.markdown("### 임팩트 매트릭스")
+    st.caption("LOCKED §7 — 시간축(Phase)은 이 매트릭스의 핵심 차별점이라 삭제하지 않는다. "
+               "일은 두 물결로 온다: 시행일 전 필수 / 시행 후. 대외보고는 별도 트리거로 나중에 도착한다.")
+    for phase in (Phase.BEFORE_DDAY, Phase.AFTER_EFFECTIVE, Phase.SEPARATE_TRIGGER):
+        rows = m.by_phase(phase)
+        st.markdown(f"**{phase.value}** · {len(rows)}행")
+        st.dataframe(
+            [{"업무영역": r.area, "변경 내용": r.change, "산출물": r.deliverable,
+              "우선순위": r.priority.value, "담당": r.owner.value, "승인": r.approval.value,
+              "자동처리": r.automation.value, "근거 출처": r.provenance.value,
+              "Human Review 사유": r.human_review_reason or "—"}
+             for r in rows],
+            width="stretch", hide_index=True)
+
+    st.divider()
+    st.markdown("### 구조화 Rule Change Proposal")
+    st.caption("LLM이 만든 룰이 아니다. 결정론 엔진이 Before/After를 실제로 판정해 관측한 rule_id 전이이며, "
+               "반영은 사람이 승인한다 (LOCKED §4·§9).")
+    st.dataframe(
+        [{"전이": p.label, "LTV": f"{p.ltv_before:.0%} → {p.ltv_after:.0%}",
+          "관측 건수": f"{p.affected:,.0f}", "근거 정책": ", ".join(p.source_policy_ids),
+          "승인": "사람 승인 필요"}
+         for p in result.proposals],
+        width="stretch", hide_index=True)
+
+    st.divider()
+    st.markdown("### 검증보고서")
+    st.download_button("검증보고서 내려받기 (Markdown)", report_md,
+                       file_name="regimpact_6_30_validation_report.md", mime="text/markdown")
+    with st.expander("보고서 미리보기"):
+        st.markdown(report_md)
+
+
 # ============================== main ==============================
 st.title("⚖️ RegImpact AI — 검증 콘솔")
 st.caption("2026-06-30 주택시장 안정대책 · 주택구입목적 주담대 LTV. "
            "규칙 값·우선순위는 사람이 확정한 명세(`docs/05_RULE_SPEC.md` v1)에서 오며 LLM이 생성하지 않는다. "
            "이 엔진은 LLM 출력을 채점하는 기준점(ground truth)이다.")
 
-t1, t2, t3 = st.tabs(["LTV 판정", f"회귀 콘솔 ({len(generate_all())})", "Extractor (LLM)"])
+t1, t2, t3, t4 = st.tabs(
+    ["LTV 판정", "임팩트 매트릭스 (E2E)", f"회귀 콘솔 ({len(generate_all())})", "Extractor (LLM)"])
 with t1:
     tab_verdict()
 with t2:
-    tab_regression()
+    tab_impact()
 with t3:
+    tab_regression()
+with t4:
     tab_extractor()
 
 st.divider()
