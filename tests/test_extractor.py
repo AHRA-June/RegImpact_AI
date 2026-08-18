@@ -99,17 +99,38 @@ def test_grounding_perfect_when_all_real():
     assert report.unsupported_claim_rate == 0.0
 
 
+# 채점 로직 자체를 보는 테스트는 **자체 골드**를 쓴다.
+# 실제 골드(regchange_gold_6_30.json)는 커버리지를 넓히려고 계속 자라므로, 그것에 묶어 두면
+# 골드를 확장할 때마다 스코어러 테스트가 깨진다 — 테스트가 골드 확장을 방해하게 된다.
+MINI_GOLD = {
+    "effective_from": "2026-07-01",
+    "target_regions": ["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"],
+    "required_changes": [
+        {"id": "LTV_40", "keywords": ["40%"]},
+        {"id": "GF", "keywords": ["경과", "종전규정"]},
+    ],
+    "exceptions": [{"name": "first_home_buyer", "keywords": ["생애최초"]}],
+}
+
+
 def test_score_against_gold():
     sources = load_sources()
     ext = extract_regchange(sources, complete=lambda s, u: _fake_extraction_dict(sources))
-    g = score_against_gold(ext, GOLD)
-    # 필수 변경 4개(LTV/시행일/경과규정/지역) 모두 포착
+    g = score_against_gold(ext, MINI_GOLD)
     assert g.change_completeness == 1.0
-    # 예외 2개(생애최초·서민실수요) 포착
     assert g.exception_recall == 1.0
     assert g.effective_date_correct is True
     assert g.regions_correct is True
     assert g.missed_changes == []
+
+
+def test_score_matches_keywords_containing_spaces():
+    """키워드와 원문 양쪽을 같은 기준으로 정규화하지 않으면 공백이 든 키워드가 영원히 안 맞는다."""
+    sources = load_sources()
+    ext = extract_regchange(sources, complete=lambda s, u: _fake_extraction_dict(sources))
+    gold = {"required_changes": [{"id": "X", "keywords": ["7월 1일", "2026-07-01", "7.1"]}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).change_completeness == 1.0
 
 
 def test_score_detects_missing_exception():
@@ -118,6 +139,218 @@ def test_score_detects_missing_exception():
     # 예외 항목 제거 → exception_recall 하락해야 함
     d["changes"] = [c for c in d["changes"] if c["category"] != "EXCEPTION"]
     ext = extract_regchange(sources, complete=lambda s, u: d)
-    g = score_against_gold(ext, GOLD)
+    g = score_against_gold(ext, MINI_GOLD)
     assert g.exception_recall == 0.0
     assert "first_home_buyer" in g.missed_exceptions
+
+
+# ---------- 인용 대조 정규화 (2026-08-18 정정) ----------
+
+def test_grounding_tolerates_pdf_line_breaks_inside_words():
+    """PDF 추출본은 단어 중간에서도 줄을 바꾼다 — 그것 때문에 실제 인용이 환각으로 잡혔었다."""
+    from regimpact.extractor import RegChangeExtraction, check_citation_grounding
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [],
+        "changes": [{
+            "category": "LTV", "summary": "s", "before": None, "after": None,
+            "citation": {"source_doc_id": "D1", "quote": "규제지역 내 3억원 초과 APT 취득"},
+            "confidence": 0.9,
+        }],
+    })
+    sources = {"D1": "전세대출 보유 차주의 규제\n지역 내 3억원 초과 APT 취득과"}
+    assert check_citation_grounding(ext, sources).citation_correctness == 1.0
+
+
+def test_grounding_still_catches_fabricated_wording():
+    """공백을 무시해도 **다른 단어를 지어낸 인용**은 걸려야 한다 — 환각 탐지력을 잃지 않았는가."""
+    from regimpact.extractor import RegChangeExtraction, check_citation_grounding
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [],
+        "changes": [{
+            "category": "LTV", "summary": "s", "before": None, "after": None,
+            "citation": {"source_doc_id": "D1", "quote": "규제지역 내 5억원 초과 APT 취득"},
+            "confidence": 0.9,
+        }],
+    })
+    sources = {"D1": "전세대출 보유 차주의 규제\n지역 내 3억원 초과 APT 취득과"}
+    assert check_citation_grounding(ext, sources).unsupported_claim_rate == 1.0
+
+
+# ---------- 문서별 추출 + 문서 간 병합 (D-02 대책) ----------
+
+def _item(cat, summary, doc, quote="q", before=None, after=None):
+    from regimpact.extractor.schema import Citation, RegChangeItem
+    return RegChangeItem(category=cat, summary=summary, citation=Citation(doc, quote),
+                         before=before, after=after, confidence=0.9)
+
+
+def test_per_document_extraction_calls_once_per_document():
+    """문서별 추출은 문서 수만큼 호출하고, 각 호출에는 그 문서만 들어간다."""
+    from regimpact.extractor import extract_per_document
+
+    seen = []
+
+    def fake(system, user):
+        doc = next(d for d in ("A", "B") if f"<doc id={d}>" in user)
+        seen.append(doc)
+        assert f"<doc id={'B' if doc == 'A' else 'A'}>" not in user
+        return {"policy_id": "P", "effective_from": "2026-07-01", "target_regions": [doc],
+                "changes": [{"category": "LTV", "summary": f"{doc} 변경", "before": None,
+                             "after": None, "citation": {"source_doc_id": doc, "quote": "q"},
+                             "confidence": 0.9}]}
+
+    ext, rep = extract_per_document({"A": "본문A", "B": "본문B"}, complete=fake)
+    assert seen == ["A", "B"]
+    assert rep.per_document == {"A": 1, "B": 1}
+    assert len(ext.changes) == 2 and set(ext.target_regions) == {"A", "B"}
+
+
+def test_per_document_cache_avoids_repeat_calls(tmp_path):
+    """무과금 경로에서 한 번의 실행이 수 분이라, 완료된 문서를 다시 부르지 않아야 한다."""
+    from regimpact.extractor import extract_per_document
+
+    calls = []
+
+    def fake(system, user):
+        calls.append(1)
+        return {"policy_id": "P", "effective_from": None, "target_regions": [],
+                "changes": [{"category": "LTV", "summary": "s", "before": None, "after": None,
+                             "citation": {"source_doc_id": "A", "quote": "q"}, "confidence": 0.9}]}
+
+    for _ in range(2):
+        extract_per_document({"A": "본문"}, complete=fake, cache_dir=tmp_path)
+    assert len(calls) == 1
+
+
+def test_cross_document_merge_combines_the_same_fact_and_keeps_both_citations():
+    from regimpact.extractor import merge_cross_document
+
+    items = [
+        _item("LTV", "규제지역 내 주담대 취급시 LTV 70%에서 40%로 강화", "FSC",
+              before="70%", after="40%"),
+        _item("LTV", "규제지역 내 주담대 취급시 LTV 규제비율 70%→40% 강화", "FAQ",
+              before="70%", after="40%"),
+    ]
+    # 병합 '동작'을 보는 테스트이므로 임계값을 명시한다. 기본값(0.5)은 일부러 보수적이라
+    # 이 정도 표현 차이는 합치지 않는다 — 그 보수성은 아래 테스트가 따로 고정한다.
+    merged, removed = merge_cross_document(items, threshold=0.4)
+    assert removed == 1 and len(merged) == 1
+    # 대표는 더 긴 요약(FAQ), 나머지는 corroboration으로 남는다 — 어느 쪽도 버려지지 않는다
+    docs = {merged[0].citation.source_doc_id} | {
+        c.source_doc_id for c in merged[0].corroborations
+    }
+    assert docs == {"FSC", "FAQ"}
+
+
+def test_default_threshold_is_conservative():
+    """기본값은 '합칠 수 있는 것'보다 '합치면 안 되는 것'을 우선한다 — 누락이 중복보다 위험하다."""
+    from regimpact.extractor import merge_cross_document
+
+    items = [
+        _item("LTV", "규제지역 내 주담대 취급시 LTV 70%에서 40%로 강화", "FSC",
+              before="70%", after="40%"),
+        _item("LTV", "규제지역 내 주담대 취급시 LTV 규제비율 70%→40% 강화", "FAQ",
+              before="70%", after="40%"),
+    ]
+    assert merge_cross_document(items)[1] == 0
+
+
+def test_merge_never_touches_items_from_the_same_document():
+    """한 문서 안에서 모델이 나눈 항목은 나눈 이유가 있다고 본다."""
+    from regimpact.extractor import merge_cross_document
+
+    items = [
+        _item("EXCEPTION", "생애최초는 60% 유지(좌동)", "FAQ", after="60%"),
+        _item("EXCEPTION", "서민·실수요자는 60% 유지(좌동)", "FAQ", after="60%"),
+    ]
+    merged, removed = merge_cross_document(items, threshold=0.1)
+    assert removed == 0 and len(merged) == 2
+
+
+def test_merge_keeps_different_entities_apart_across_documents():
+    """개체어가 다르면 문장 구조가 같아도 다른 사실이다 — 지문(fingerprint)이 막는다."""
+    from regimpact.extractor import merge_cross_document
+
+    items = [
+        _item("EXCEPTION", "서민·실수요자 요건: 연소득 9천만원 이하", "FSC"),
+        _item("EXCEPTION", "생애최초 요건: 연소득 7천만원 이하", "FAQ"),
+    ]
+    merged, removed = merge_cross_document(items, threshold=0.1)
+    assert removed == 0 and len(merged) == 2
+
+
+def test_merge_prefers_the_fuller_summary():
+    """축약된 서술이 완전한 열거를 덮어쓰면 D-02가 병합 단계에서 되살아난다."""
+    from regimpact.extractor import merge_cross_document
+
+    short = _item("EXCEPTION", "생애최초·정책모기지 등 완화 적용", "FSC")
+    full = _item("EXCEPTION", "생애최초·정책모기지 등 완화 적용 대상 상세 서술", "FAQ")
+    merged, _ = merge_cross_document([short, full], threshold=0.5)
+    assert merged[0].summary == full.summary
+
+
+def test_merge_report_surfaces_effective_date_conflicts():
+    """문서마다 시행일이 다르면 조용히 하나를 고르지 않고 드러낸다."""
+    from regimpact.extractor import extract_per_document
+
+    def fake(system, user):
+        doc = next(d for d in ("A", "B") if f"<doc id={d}>" in user)
+        return {"policy_id": "P", "effective_from": "2026-07-01" if doc == "A" else "2026-07-05",
+                "target_regions": [], "changes": []}
+
+    _, rep = extract_per_document({"A": "x", "B": "y"}, complete=fake)
+    assert rep.effective_from_conflict
+    assert any("effective_from" in c for c in rep.conflicts)
+
+
+# ---------- 값 전이 채점 (골드 v3) ----------
+
+def test_transition_matching_checks_before_and_after_fields():
+    """'70%가 어딘가 있다'와 '70%에서 40%로 바뀌었다'는 다른 주장이다."""
+    sources = load_sources()
+    d = _fake_extraction_dict(sources)
+    ext = extract_regchange(sources, complete=lambda s, u: d)
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "40%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).change_completeness == 1.0
+
+
+def test_transition_matching_rejects_a_wrong_after_value():
+    sources = load_sources()
+    ext = extract_regchange(sources, complete=lambda s, u: _fake_extraction_dict(sources))
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "35%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).missed_changes == ["T"]
+
+
+def test_transition_matching_is_not_satisfied_by_the_value_appearing_in_prose():
+    """요약문에 70%·40%가 흩어져 있어도 before/after가 아니면 전이가 아니다."""
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [],
+        "changes": [{"category": "LTV", "summary": "70%와 40%가 언급된 문장",
+                     "before": None, "after": None,
+                     "citation": {"source_doc_id": "D", "quote": "q"}, "confidence": 0.9}],
+    })
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "40%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).change_completeness == 0.0
+
+
+def test_missed_change_label_survives_an_entry_without_keywords():
+    """전이 전용 entry는 keywords가 비어도 되는데, 라벨 계산이 그걸 못 견디면 채점이 죽는다."""
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [], "changes": [],
+    })
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "40%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).missed_changes == ["T"]

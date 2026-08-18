@@ -1,0 +1,881 @@
+{
+  "_note": "LOCKED split — docs/00_BRIEF.md §11/§12. authored_by=ai_draft는 사람 확정 대기(🤖), human_confirmed는 확정(✅).",
+  "split": "LOCKED",
+  "count": 40,
+  "items": [
+    {
+      "id": "LOCKED-NOR-001",
+      "split": "LOCKED",
+      "category": "NORMAL",
+      "question": "규제지역 지정에 따른 대출규제는 어떤 규정들에 근거하는가?",
+      "gold_answer": "은행업·보험업·여신전문금융업·상호저축은행업·상호금융업 감독규정에 근거한다.",
+      "gold_facts": [
+        "은행업",
+        "상호금융업",
+        "감독규정"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "* 은행업감독규정, 보험업감독규정, 여신전문금융업감독규정, 상호저축은행업감독규정, 상호금융업감독규정 [ 규제지역 지정에 따라 강화되는 대출규제 ] (주담대 LT"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-NOR-002",
+      "split": "LOCKED",
+      "category": "NORMAL",
+      "question": "규제지역에서 소유권 이전 조건부 전세대출은 어떻게 되는가?",
+      "gold_answer": "금지된다.",
+      "gold_facts": [
+        "금지"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "- 소유권 이전 조건부 전세대출 금지 - 전세대출 보증비율 80%로 강화(비수도권 90%), 1주택자 대출한도 2억원 일원화 - 전세대출 보유 차주의 규제지역 내"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-NOR-003",
+      "split": "LOCKED",
+      "category": "NORMAL",
+      "question": "전세대출 보증비율과 1주택자 대출한도는 어떻게 바뀌는가?",
+      "gold_answer": "전세대출 보증비율이 80%로 강화되고(비수도권 90%), 1주택자 대출한도는 2억원으로 일원화된다.",
+      "gold_facts": [
+        "80%",
+        "비수도권 90%",
+        "2억원"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "- 전세대출 보증비율 80%로 강화(비수도권 90%), 1주택자 대출한도 2억원 일원화 - 전세대출 보유 차주의 규제지역 내 3억초과 APT취득과 규제지역 내 3"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-NOR-004",
+      "split": "LOCKED",
+      "category": "NORMAL",
+      "question": "규제지역의 중도금대출 보증발급요건은 어떻게 강화되는가?",
+      "gold_answer": "분양가격 10% 계약금 납부, 세대당 보증건수 1건으로 제한된다.",
+      "gold_facts": [
+        "분양가격 10%",
+        "보증건수 1건"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "- 중도금대출 보증발급요건 강화(분양가격 10% 계약금 납부, 세대당 보증건수 1건 제한) * 非규제지역은 분양가격 5% 계약금 납부, 보증건수 2건 사 업 자"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-NOR-005",
+      "split": "LOCKED",
+      "category": "NORMAL",
+      "question": "규제지역 지정 시 전매제한 기간은 어떻게 되는가?",
+      "gold_answer": "주택은 수도권 3년, 지방 1년의 전매제한이 적용된다.",
+      "gold_facts": [
+        "수도권 3년",
+        "지방 1년"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "주택▪수도권 3년, 지방 1년 전매제한 오피 스텔 ▪1년 전매제한 * 오피스텔로서 100실 이상인 건축물은 계약체결일부터 소유권이전등기일까지 1년간 전매제한 청약"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-NOR-006",
+      "split": "LOCKED",
+      "category": "NORMAL",
+      "question": "규제지역의 재당첨 제한 기간은 지역 종류에 따라 어떻게 다른가?",
+      "gold_answer": "조정대상지역은 7년, 투기과열지구는 10년의 재당첨 제한이 적용된다.",
+      "gold_facts": [
+        "7년",
+        "10년"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "▪재당첨 제한 7년 ▪재당첨 제한 10년 ▪부적격 재당첨 제한 1년 정비사업 ▪재건축 조합원당 주택 공급수 1주택으로 제한 - ▪조합원 지위양도 제한 * (재건축"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-001",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "디딤돌대출의 최대한도는 차주 유형별로 어떻게 되는가?",
+      "gold_answer": "일반차주 2.0억원, 생애최초 2.4억원, 신혼 등 3.2억원, 신생아 4.0억원이다.",
+      "gold_facts": [
+        "일반차주 2.0억원",
+        "신생아 4.0억원"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "일반차주2.0억원 / 생애최초2.4억원 신혼 등3.2억원 / 신생아4.0억원 보금자리론 아파트70% / 非아파트65% 아파트60% / 非아파트55% * 생애최초4"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-002",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "보금자리론의 최대한도는 어떻게 되는가?",
+      "gold_answer": "일반 3.6억원, 생애최초 4.2억원이다.",
+      "gold_facts": [
+        "일반 3.6억원",
+        "생애최초 4.2억원"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "일반3.6억원 / 생애최초4.2억원 (좌동) 주1) 무주택자(처분조건부 1주택자 포함) 기준 주2) 주택가격(시가) 구간별 차등 적용 주3) 금융권 대출은 DSR"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-003",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "서민·실수요자(주6) 요건의 소득·주택가격 기준은?",
+      "gold_answer": "부부합산 연소득 7천만원 이하, 주택가격 6억원 이하, 무주택자 요건을 모두 충족해야 한다.",
+      "gold_facts": [
+        "7천만원 이하",
+        "6억원 이하",
+        "무주택자"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "주6) ①부부합산 연소득 7천만원 이하, ②주택가격 6억원 이하, ③무주택자 요건을 모두 충족하는 경우 3. 전세대출 보유자가 투기·투과지역 내 시가 3억원 초과"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-004",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "전세대출을 취득한 APT에 세입자가 살고 있으면 회수가 어떻게 되는가?",
+      "gold_answer": "임대차계약 잔여기간까지 회수가 유예된다. 전세대출 만기와 세입자 임대차계약 만기 중 먼저 도래하는 시기까지만 이용할 수 있다.",
+      "gold_facts": [
+        "잔여기간",
+        "먼저 도래하는"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "ㅇ 다만, 취득한 APT에 세입자가 거주하고 있고, 해당 세입자의 임대차계약 잔여기간이 남은 경우, 그 잔여기간까지는 APT 취득자의 전세대출 회수를 유예* * “APT 취득 차주의 전세대출 만기”와 “취득 APT에 거주하던 세입자의 임대차계약 만기” 중 먼저 도래하는 시기까지만 전세대"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-005",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "전세대출 제한 예외 중 지역 이동 요건에서 인정되지 않는 이동은?",
+      "gold_answer": "특별시·광역시 내 구(區) 간 이동은 인정되지 않는다. 광역지자체(시·군) 간 이동이어야 한다.",
+      "gold_facts": [
+        "구(區) 간 이동은 인정되지 않"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "② 광역지자체(시·군)간 이동할 경우 (다만, 특별시·광역시 내 구(區)간 이동은 불인정) ③ 구입아파트‧임차주택 모두에서 세대원 실거주시 전세대출을 허용 (①~"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-006",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "전세대출 차주의 APT 취득 제한에서 상속은 어떻게 취급되는가?",
+      "gold_answer": "구입·증여는 취득에 포함되지만 상속은 예외다.",
+      "gold_facts": [
+        "상속은 예외"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "전세대출 차주의 투기·투과지역 APT(분양권·입주권포함) 취득(구입·증여(상속은 예외))과 투기·투과지역 APT 취득자의 전세대출 제한 ‘20.6.17~ ㅇ 전세"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EXC-007",
+      "split": "LOCKED",
+      "category": "EXCEPTION",
+      "question": "非규제지역의 중도금대출 보증 요건은 규제지역과 어떻게 다른가?",
+      "gold_answer": "非규제지역은 분양가격 5% 계약금 납부, 보증건수 2건이다.",
+      "gold_facts": [
+        "5% 계약금",
+        "보증건수 2건"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "* 非규제지역은 분양가격 5% 계약금 납부, 보증건수 2건 사 업 자 ￭ 주택 매매·임대사업자* 外 사업자의 주택구입목적 주담대(사업자대출) 제한 * 주택 매매·"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-001",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "집단대출 경과규정에서 입주자모집공고가 없는 사업장은 무엇을 기준으로 하는가?",
+      "gold_answer": "착공신고를 기준으로 하며, 재건축·재개발 사업장 조합원의 경우 관리처분인가를 기준으로 한다.",
+      "gold_facts": [
+        "착공신고",
+        "관리처분인가"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "집단대출의 경우 규제지역 효력 발생일 전일(6.30일)까지 입주자모집공고(없을시 착공신고, 재건축·재개발 사업장 조합원은 관리처분인가)가 된 사업장에 대해서는 종전규정 적용 ※ 생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용 다주택자는 수도권 內 주택구입시"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-002",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "집단대출 경과규정에서 전매기준일은 언제로 보는가?",
+      "gold_answer": "거래당사자가 분양권 등의 거래를 신고한 날이다.",
+      "gold_facts": [
+        "거래를 신고한 날"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "(전매기준일은 거래당사자가 분양권 등의 거래를 신고한 날)된 경우는 제외 전세대출 관련  투기·투과지역 효력 발생일 전일(6.30일)까지 매매계약을 체결하고 계"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-003",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "전세대출 보유 차주의 APT 취득 제한에서 예외가 되는 계약 시점은?",
+      "gold_answer": "투기·투과지역 효력 발생일 이전에 해당 APT에 대한 매매계약을 체결한 경우 등은 예외다.",
+      "gold_facts": [
+        "효력 발생일 이전",
+        "매매계약을 체결"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "* 투과지역 효력 발생일 이전 APT에 대한 매매계약을 체결한 경우 등은 예외 (신용대출) 1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터 1년간 규"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-004",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "경과규정 적용을 위해 매매계약 외에 추가로 증명해야 하는 것은?",
+      "gold_answer": "계약금 납부 사실을 증명해야 한다.",
+      "gold_facts": [
+        "계약금 납부 사실"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "규제지역 효력 발생일 전일(6.30일) 까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결 하고 계약금 납부 사실을 증명한 차주* 등에 대해서는 종전 규정이 그대로 적용된다. * 토지거래허가 적용 주택의 경우, 규"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-005",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "토지거래허가 대상 주택에서 경과규정 기준이 되는 행위는 무엇인가?",
+      "gold_answer": "관할 지자체에 토지거래허가를 신청 접수하는 것이다.",
+      "gold_facts": [
+        "관할 지자체",
+        "토지거래허가를 신청 접수"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "토지거래허가 적용 주택의 경우, 규제지역 효력 발생일 전일까지 관할 지자체에 토지거래허가를 신청 접수하면 그 이후에 부동산매매계약을 체결하여도 종전규정 적용 ----- p3 ----- - 3 - III. 논의사항 금"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-006",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "중도금대출을 잔금대출로 전환할 때 LTV 기준 시점은 언제인가?",
+      "gold_answer": "증액이 없으면 중도금대출 취급시점의 담보인정비율을 적용할 수 있다.",
+      "gold_facts": [
+        "중도금대출 취급시점"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "5. 규제지역 지정 이전에 중도금대출을 LTV 40% 초과하여 받은 경우, 추후 잔금대출시 LTV가 40%으"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-GF-007",
+      "split": "LOCKED",
+      "category": "GRANDFATHERING",
+      "question": "증액 없는 대환대출에 적용되는 LTV 비율의 기준 시점은?",
+      "gold_answer": "해당 주택담보대출을 취급한 시점의 LTV 규제비율을 적용한다.",
+      "gold_facts": [
+        "취급한 시점"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "6. 규제지역 내 주택담보대출의 대환대출에 대해서도 강화된 LTV 규제비율(40%)이 적용되는지? □ 규제지"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EFF-001",
+      "split": "LOCKED",
+      "category": "EFFECTIVE_DATE",
+      "question": "전세대출 차주의 투기·투과지역 APT 취득 제한은 언제부터 시행된 제도인가?",
+      "gold_answer": "'20.6.17부터 시행된 제도다.",
+      "gold_facts": [
+        "20.6.17|2020년 6월 17일"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "취득자의 전세대출 제한 ‘20.6.17~ ㅇ 전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득*시 전세대출 회수 (배우자 포함) * 투기·투과지역 효력"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EFF-002",
+      "split": "LOCKED",
+      "category": "EFFECTIVE_DATE",
+      "question": "재건축·재개발 중도금·이주비 대출에 따른 추가 주택구입 제한은 언제부터 시행됐는가?",
+      "gold_answer": "'18.9.13부터 시행된 제도다.",
+      "gold_facts": [
+        "18.9.13|2018년 9월 13일"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "추가 주택구입이 제한 ’18.9.13~ * 재건축·재개발 주택의 관리처분인가일을 기준으로 규제지역 해당 여부를 판단 󰊵 주택 매매·임대사업자* 외 여타 사업자도"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EFF-003",
+      "split": "LOCKED",
+      "category": "EFFECTIVE_DATE",
+      "question": "사업자대출의 규제지역 주택구입 제한은 언제부터 시행된 제도인가?",
+      "gold_answer": "'19.12.16부터 시행된 제도다.",
+      "gold_facts": [
+        "19.12.16|2019년 12월 16일"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "주담대(사업자대출) 제한** ’19.12.16~ * 주택 매매·임대사업자의 경우 ｢가계대출 추가 관리 방안｣(9.7일)에 따라 수도권·규제지역 내 주담대(사업자대"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EFF-004",
+      "split": "LOCKED",
+      "category": "EFFECTIVE_DATE",
+      "question": "전세대출 회수 시점은 APT의 경우 언제인가?",
+      "gold_answer": "해당 APT에 대한 소유권 이전 등기완료일에 기한이익 상실 및 대출회수가 이루어진다.",
+      "gold_facts": [
+        "소유권 이전 등기완료일"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "□ (APT인 경우) 해당 APT에 대한 소유권 이전 등기완료일에 기한이익 상실 및 대출회수 ㅇ 다만, 취득한 APT에 세입자가 거주하고 있고, 해당 세입자의 임"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EFF-005",
+      "split": "LOCKED",
+      "category": "EFFECTIVE_DATE",
+      "question": "분양권·입주권의 경우 전세대출 회수 시점은 어떻게 정해지는가?",
+      "gold_answer": "소유권 이전 등기완료일과 잔금대출 실행일 중 더 빠른 날짜를 기준으로 한다.",
+      "gold_facts": [
+        "더 빠른 날짜"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "* 소유권 이전 등기완료일과 잔금대출 실행일 중 더 빠른 날짜를 의미 ** 당해 전세대출 만기까지도 소유권 이전등기 등이 일어나지 않은 경우에는 전세대출 만기 연"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-EFF-006",
+      "split": "LOCKED",
+      "category": "EFFECTIVE_DATE",
+      "question": "규제지역 지정은 어떤 절차를 거쳐 언제 의결·발표되었는가?",
+      "gold_answer": "국토교통부 주거정책심의위원회 의결을 거쳐 2026년 6월 30일 발표되었다.",
+      "gold_facts": [
+        "주거정책심의위원회"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "국토교통부는 투기적 매수를 차단하여 실수요자를 보호하고, 주택 시장 과열에 대응하기 위해 주거정책심의위원회를"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "의결 절차 인용 — 사람 검수에서 정확한 문장으로 조정 가능"
+    },
+    {
+      "id": "LOCKED-REG-001",
+      "split": "LOCKED",
+      "category": "REGION",
+      "question": "규제지역 지정의 목적은 무엇이라고 밝히고 있는가?",
+      "gold_answer": "투기적 매수를 차단하여 실수요자를 보호하고 주택시장을 안정시키기 위함이다.",
+      "gold_facts": [
+        "투기적 매수",
+        "실수요자를 보호"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "ㅇ 이에 국토교통부는 투기적 매수를 차단하여 실수요자를 보호하고, 주택 시장 과열에 대응하기 위해 주거정책심의위원회를 거쳐 투"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-REG-002",
+      "split": "LOCKED",
+      "category": "REGION",
+      "question": "규제지역의 무순위청약 청약홈 활용 의무는 비규제지역과 어떻게 다른가?",
+      "gold_answer": "규제지역은 최소 2회, 비규제지역은 최소 1회 청약홈 활용 의무가 있다.",
+      "gold_facts": [
+        "최소 2회",
+        "최소 1회"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "* (규제지역) 최소 2회 청약홈 활용 의무 / (비규제지역) 최소 1회 청약홈 활용 의무 ▪재당첨 제한 7년 ▪재당첨 제한 10년 ▪부적격 재당첨 제한 1년 정"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-REG-003",
+      "split": "LOCKED",
+      "category": "REGION",
+      "question": "규제지역·수도권·광역시의 추첨제 무주택자 비율은 어떻게 적용되는가?",
+      "gold_answer": "75% 무주택자, 25% 1주택자, 남은 주택은 2주택 이상자 순으로 적용된다.",
+      "gold_facts": [
+        "75% 무주택자",
+        "25% 1주택자"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "* (규제지역, 수도권, 광역시) 75% 무주택자→25% 1주택자→(남은 주택) 2주택 이상자 * (그 외 지역<비수도권, 비규제지역>) 주택 수 관계없이 추첨"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-REG-004",
+      "split": "LOCKED",
+      "category": "REGION",
+      "question": "규제지역 내 오피스텔 분양 시 해당지역 거주자 우선분양 비율은?",
+      "gold_answer": "20% 내에서 우선 분양하며, 100실 이상은 10~20%, 100실 미만은 10% 이하에서 허가권자가 정한다.",
+      "gold_facts": [
+        "20% 내",
+        "100실 이상"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "* 규제지역 내 오피스텔 분양 시 20% 내에서 해당지역 거주자 우선 분양 ** 100실 이상: 10%~20% / 100실 미만: 10%이하에서 허가권자가 정하는 비율의 분양분 ▪국민·민영주택 등의 1순위 자격요건 강화 * 청약통장"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-BOR-001",
+      "split": "LOCKED",
+      "category": "BORROWER_TYPE",
+      "question": "전세대출 차주의 APT 취득 제한에서 배우자는 어떻게 취급되는가?",
+      "gold_answer": "배우자도 포함하여 판단한다.",
+      "gold_facts": [
+        "배우자도 포함"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "ㅇ 전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득*시 전세대출 회수 (배우자 포함) * 투기·투과지역 효력 발생일 이전 APT에 대한 매매계약을 체"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-BOR-002",
+      "split": "LOCKED",
+      "category": "BORROWER_TYPE",
+      "question": "6.30 이전 非규제지역(수도권)에서 일반 차주의 LTV는 얼마였는가?",
+      "gold_answer": "70%였다. 규제지역 지정으로 40%로 강화된다.",
+      "gold_facts": [
+        "70%",
+        "40%"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "NONREG_STD_70",
+      "authored_by": "human_confirmed",
+      "note": "✅2026-08-18 검수: 초안은 FAQ Q2 표의 '60%'를 LTV로 읽었으나 그 60%는 DTI다. 명세(05_RULE_SPEC C-2 B1) 70%가 맞음을 사용자가 확정."
+    },
+    {
+      "id": "LOCKED-BOR-003",
+      "split": "LOCKED",
+      "category": "BORROWER_TYPE",
+      "question": "조정대상지역과 투기과열지구의 일반 차주 LTV는 각각 얼마인가?",
+      "gold_answer": "둘 다 40%로 같다. 지역 종류별로 갈리는 40%/50%는 LTV가 아니라 DTI다.",
+      "gold_facts": [
+        "둘 다 40%",
+        "DTI"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "LTV : 무주택(처분조건부 1주택 포함) 40%, 유주택 0% * 非규제지역(수도권 외)"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": "REG_STD",
+      "authored_by": "human_confirmed",
+      "note": "✅2026-08-18 검수: 초안은 FAQ Q2 표의 40/50을 LTV로 읽었으나 그것은 DTI 열이다. 평탄화된 텍스트에서는 LTV 열과 구분되지 않으므로 원본 표를 봐야 한다."
+    },
+    {
+      "id": "LOCKED-BOR-004",
+      "split": "LOCKED",
+      "category": "BORROWER_TYPE",
+      "question": "재건축 조합원의 주택 공급수는 어떻게 제한되는가?",
+      "gold_answer": "조합원당 1주택으로 제한된다.",
+      "gold_facts": [
+        "1주택으로 제한"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "▪재건축 조합원당 주택 공급수 1주택으로 제한 - ▪조합원 지위양도 제한 * (재건축) 조합설립인가~ * (재개발) 관리처분인가~ ▪정비사업 분양(조합원/일반)"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-PUR-001",
+      "split": "LOCKED",
+      "category": "LOAN_PURPOSE",
+      "question": "주택임대업 개인사업자대출의 RTI 요건은?",
+      "gold_answer": "1.5배 이상이다.",
+      "gold_facts": [
+        "1.5배 이상"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "￭ 주택임대업 개인사업자대출 RTI →1.5배 이상 ----- p4 ----- - 4 - 세제 ￭ 다주택자 취득세 중과 * 조정 2주택(비조정 3) 8%, 3주택"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-PUR-002",
+      "split": "LOCKED",
+      "category": "LOAN_PURPOSE",
+      "question": "주택 매매·임대사업자의 규제지역 사업자대출은 이번 조치로 새로 제한되는가?",
+      "gold_answer": "새로 제한되는 것이 아니라 9.7일 방안에 따라 이미 제한 중이다.",
+      "gold_facts": [
+        "이미 제한 중"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "* 주택 매매·임대사업자의 경우 ｢가계대출 추가 관리 방안｣(9.7일)에 따라 수도권·규제지역 내 주담대(사업자대출)를 이미 제한중 ※ 각 규제별 경과규정·예외사"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-PUR-003",
+      "split": "LOCKED",
+      "category": "LOAN_PURPOSE",
+      "question": "대환대출에 취급시점 LTV를 적용하는 대상은 어떤 차주로 한정되는가?",
+      "gold_answer": "생활안정자금목적 주담대 한도 1억원 기준이 적용되는 차주에 한하여 적용된다.",
+      "gold_facts": [
+        "1억원 기준",
+        "차주에 한하여"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "* ’25.9.7, ‘25.10.24일 조치와 동일하게 생활안정자금목적 주담대 한도 1억원 기준이 적용되는 차주에 한하여 적용됨"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": ""
+    },
+    {
+      "id": "LOCKED-CFL-001",
+      "split": "LOCKED",
+      "category": "CONFLICT",
+      "question": "대출규제 시행일(7.1)과 토지거래허가구역 효력일(7.5) 사이에 매매계약을 체결하면 어느 규제가 적용되는가?",
+      "gold_answer": "대출규제는 7.1부터 이미 적용되고, 토지거래허가는 7.5부터 적용된다. 두 날짜가 다르므로 하나의 시행일로 묶어 판단하면 안 된다.",
+      "gold_facts": [
+        "7.1",
+        "7.5"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "투기과열지구와 조정대상지역을 추가 지정하였다.(7월 1일부터 지정효력 발생) □ 금번 국토교통부의 투기과열지구 및 조정대상지역 지정과 함께, 경기도는 시·도 도시"
+        },
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "구리시를 2026년 7월 5일*부터 2027년 12월 31일까지 토지거래허가구역으로 지정할 계획이라고 밝혔다. * 「부동산 거래신고 등에 관한 법률」에 따라 토지"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "시행일이 2종 — 단일 시행일로 뭉뚱그리면 실패"
+    },
+    {
+      "id": "LOCKED-NOC-001",
+      "split": "LOCKED",
+      "category": "NO_CHANGE",
+      "question": "전세대출 회수 규정은 이번 6·30 조치로 새로 도입된 것인가?",
+      "gold_answer": "새로 도입된 것이 아니다. 규제 도입시('20.6.17일)부터 지속 적용하던 사항이다.",
+      "gold_facts": [
+        "20.6.17",
+        "지속 적용"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "※ 위 내용은 규제 도입시(‘20.6.17일)부터 지속 적용하던 사항임 4. 투기·투과지역"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "오탐 유도 — '이번에 신설'이라고 답하면 실패"
+    },
+    {
+      "id": "LOCKED-AMB-001",
+      "split": "LOCKED",
+      "category": "AMBIGUOUS",
+      "question": "비수도권 非규제지역에서 다주택자의 주택구입 LTV는 얼마인가?",
+      "gold_answer": "이 공문들에는 답이 없다. 다주택 0% 규칙은 수도권에 한정되고, 非규제(수도권 외) 값은 유주택 60%만 제시되어 다주택에 그대로 적용할 수 있는지 원문이 말하지 않는다. 사람 확인이 필요하다.",
+      "gold_facts": [
+        "답이 없다",
+        "수도권에 한정"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용 (전세대출) 전세대출 보유 차주의 규제지역 내 3억원 초과 APT 취득과 규제 지역"
+        },
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "* 非규제지역(수도권 외) 무주택(처분조건부 1주택) 70% / 유주택 60% - 최대한도 6억원 제한*, 6개월 이내 전입의무 부과, 최대 만기 30년이내 *"
+        }
+      ],
+      "expect_escalation": true,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "Q10 부수 미결 — 지어내면 실패"
+    }
+  ]
+}

@@ -1,0 +1,1009 @@
+{
+  "split": "DEV",
+  "provider": "replay",
+  "model": "claude-sonnet-5",
+  "batch_size": 5,
+  "item_count": 40,
+  "metrics": {
+    "fact_coverage": 0.95,
+    "exact_rate": 0.925,
+    "citation_correctness": 1.0,
+    "unsupported_claim_rate": 0.0,
+    "escalation_precision": 1.0,
+    "escalation_recall": 1.0,
+    "by_category": {
+      "AMBIGUOUS": [
+        1,
+        0.3333333333333333,
+        0.0
+      ],
+      "BORROWER_TYPE": [
+        4,
+        1.0,
+        1.0
+      ],
+      "CONFLICT": [
+        1,
+        1.0,
+        1.0
+      ],
+      "EFFECTIVE_DATE": [
+        6,
+        0.7142857142857143,
+        0.6666666666666666
+      ],
+      "EXCEPTION": [
+        7,
+        1.0,
+        1.0
+      ],
+      "GRANDFATHERING": [
+        7,
+        1.0,
+        1.0
+      ],
+      "LOAN_PURPOSE": [
+        3,
+        1.0,
+        1.0
+      ],
+      "NORMAL": [
+        6,
+        1.0,
+        1.0
+      ],
+      "NO_CHANGE": [
+        1,
+        1.0,
+        1.0
+      ],
+      "REGION": [
+        4,
+        1.0,
+        1.0
+      ]
+    },
+    "failure_modes": {
+      "골드 사실 누락": 3
+    }
+  },
+  "scores": [
+    {
+      "item_id": "DEV-NOR-001",
+      "category": "NORMAL",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-002",
+      "category": "NORMAL",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-003",
+      "category": "NORMAL",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-004",
+      "category": "NORMAL",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-005",
+      "category": "NORMAL",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-006",
+      "category": "NORMAL",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-001",
+      "category": "EXCEPTION",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-002",
+      "category": "EXCEPTION",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-003",
+      "category": "EXCEPTION",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-004",
+      "category": "EXCEPTION",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-005",
+      "category": "EXCEPTION",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-006",
+      "category": "EXCEPTION",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EXC-007",
+      "category": "EXCEPTION",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-001",
+      "category": "GRANDFATHERING",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-002",
+      "category": "GRANDFATHERING",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-003",
+      "category": "GRANDFATHERING",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-004",
+      "category": "GRANDFATHERING",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-005",
+      "category": "GRANDFATHERING",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-006",
+      "category": "GRANDFATHERING",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-GF-007",
+      "category": "GRANDFATHERING",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EFF-001",
+      "category": "EFFECTIVE_DATE",
+      "facts_total": 1,
+      "facts_hit": 0,
+      "missed_facts": [
+        "7월 1일"
+      ],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EFF-002",
+      "category": "EFFECTIVE_DATE",
+      "facts_total": 2,
+      "facts_hit": 1,
+      "missed_facts": [
+        "7월 5일"
+      ],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EFF-003",
+      "category": "EFFECTIVE_DATE",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EFF-004",
+      "category": "EFFECTIVE_DATE",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EFF-005",
+      "category": "EFFECTIVE_DATE",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-EFF-006",
+      "category": "EFFECTIVE_DATE",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-REG-001",
+      "category": "REGION",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-REG-002",
+      "category": "REGION",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-REG-003",
+      "category": "REGION",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-REG-004",
+      "category": "REGION",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-BOR-001",
+      "category": "BORROWER_TYPE",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-BOR-002",
+      "category": "BORROWER_TYPE",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-BOR-003",
+      "category": "BORROWER_TYPE",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-BOR-004",
+      "category": "BORROWER_TYPE",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-PUR-001",
+      "category": "LOAN_PURPOSE",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-PUR-002",
+      "category": "LOAN_PURPOSE",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-PUR-003",
+      "category": "LOAN_PURPOSE",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-CFL-001",
+      "category": "CONFLICT",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOC-001",
+      "category": "NO_CHANGE",
+      "facts_total": 1,
+      "facts_hit": 1,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-AMB-001",
+      "category": "AMBIGUOUS",
+      "facts_total": 3,
+      "facts_hit": 1,
+      "missed_facts": [
+        "무주택자 기준",
+        "수도권 外 값"
+      ],
+      "citations_total": 1,
+      "citations_grounded": 1,
+      "escalation_expected": true,
+      "escalation_given": true
+    }
+  ],
+  "responses": {
+    "DEV-NOR-001": {
+      "item_id": "DEV-NOR-001",
+      "answer": "규제지역으로 지정되면 규제지역 내 주담대 취급시 LTV가 비규제지역 70%에서 규제지역 40%로 강화 적용된다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "(주담대 LTV) 규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-002": {
+      "item_id": "DEV-NOR-002",
+      "answer": "아니다. 규제지역 지정에 따른 대출규제 강화는 새로 만든 규정이 아니라, 이미 마련되어 있던 규정에 따라 즉시 적용되는 것이다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "금번 조치로 규제지역으로 지정된 지역에 대해서는 旣 마련된 규정*에 \n따라 강화된 대출규제가 7.1일부터 즉시 적용된다."
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-003": {
+      "item_id": "DEV-NOR-003",
+      "answer": "규제지역 주담대는 최대한도 6억원 제한(중도금대출은 제외, 잔금대출 전환시 6억원 한도 적용)이 적용되고, 6개월 이내 전입의무가 부과되며, 최대 만기는 30년 이내이다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "- 최대한도 6억원 제한*, 6개월 이내 전입의무 부과, 최대 만기 30년이내\n  * 중도금대출은 제외, 잔금대출 전환시 6억원 한도 적용"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-004": {
+      "item_id": "DEV-NOR-004",
+      "answer": "규제지역 주담대의 주택가격별 대출한도는 15억원 이하 6억원, 15~25억원 4억원, 25억원 초과 2억원으로 차등 적용된다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "* 다만, 주택가격별 대출한도 규제(15억원이하6억원, 15~25억원4억원, 25억원초과2억원)는 적용"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-005": {
+      "item_id": "DEV-NOR-005",
+      "answer": "금융위원회는 각 협회와 금융회사에 일선 창구 직원 교육, 전산 시스템 점검, 고객 안내 등에 만전을 기해달라고 요청하였으며, 향후 관리목표를 지속적으로 미준수하는 금융회사 등에 대해서는 현장점검 실시 등 적극적 대응을 강화할 계획이다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "각 협회와 금융회사에서 일선 창구 직원 \n교육, 전산 시스템 점검, 고객 안내 등에 만전을 기해달라"
+        ],
+        [
+          "FSC_PRESS_20260630",
+          "지속적으로 관리목표를 미준수하는 금융회사 등에 대한 현장점검\n실시 등 적극적 대응 강화"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-006": {
+      "item_id": "DEV-NOR-006",
+      "answer": "규제지역 내 주담대에도 DSR 규제가 별도로 적용된다. 금융권 대출에 대해 은행권 40%, 2금융권 50%의 DSR 규제가 규제지역 여부와 관계없이 동일하게 적용된다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "주3) 금융권 대출은 DSR 규제(은행권 40% , 2금융권 50%, 규제지역 동일) 적용 중"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-001": {
+      "item_id": "DEV-EXC-001",
+      "answer": "아니다. 규제지역에서도 생애최초 주택구입자에 대해서는 LTV가 강화되지 않고 완화된 LTV(60~70%)가 그대로 적용된다. FAQ의 비교표에서도 생애최초 구매자의 LTV는 6.30일 이전과 7.1일 이후 모두 60%(아파트 限)로 동일(좌동)하게 유지된다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+        ],
+        [
+          "FAQ_20260630",
+          "생애최초 구매자4)\n(좌동)\n60%(아파트 限)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-002": {
+      "item_id": "DEV-EXC-002",
+      "answer": "규제지역에서 완화된 LTV가 적용되는 대상은 금융권 생애최초 주담대, 금융권 서민·실수요자 주담대, 정책모기지(디딤돌대출, 보금자리론 등) 이용 차주이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "규제지역에서도 금융권 생애최초 주담대*, 금융권 서민·실수요자 주담대*, 정책모기지 등에 대해서는 완화된 LTV가 적용됨"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-003": {
+      "item_id": "DEV-EXC-003",
+      "answer": "생애최초 주택구입자로 인정받으려면 세대 구성원 모두가 과거에 주택을 소유한 사실이 없어야 한다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "주4) 세대 구성원 모두가 과거에 주택을 소유한 사실이 없는 자"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-004": {
+      "item_id": "DEV-EXC-004",
+      "answer": "서민·실수요자 요건(주5)은 ①부부합산 연소득 9천만원 이하, ②주택가격 8억원 이하, ③무주택세대주 요건을 모두 충족하는 경우이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "주5) ①부부합산 연소득 9천만원 이하, ②주택가격 8억원 이하, ③무주택세대주 요건을 모두 충족하는 경우"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-005": {
+      "item_id": "DEV-EXC-005",
+      "answer": "부과된다. 생애최초 주택구입자는 LTV 70%가 적용되되, 6개월 이내 전입의무가 함께 부과된다. 다만 생애최초 디딤돌대출의 경우 전입의무 기간이 1개월 이내로 별도 적용된다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "생애최초 LTV 70% + 전입의무(6개월 이내)"
+        ],
+        [
+          "MOLIT_PRESS_20260630",
+          "생애최초 디딤돌대출은 1개월 이내 전입의무 유지"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-006": {
+      "item_id": "DEV-EXC-006",
+      "answer": "불가피한 실수요 등에 대해 예외가 인정되며, 다음 세 가지 요건을 모두 충족해야 한다: ① 직장이동·자녀교육·부모봉양·요양·치료·학교폭력 피해 등 실수요, ② 광역지자체(시·군)간 이동인 경우(단, 특별시·광역시 내 구(區)간 이동은 불인정), ③ 구입아파트·임차주택 모두에서 세대원이 실거주하는 경우.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "불가피한 실수요 등*에 대해서는 적용 예외를 인정 중\n* ① 직장이동, 자녀교육, 부모봉양, 요양‧치료, 학교폭력 피해 등 실수요 ② 광역지자체(시·군)간 이동할 경우 (다만, 특별시·광역시 내 구(區)간 이동은 불인정) ③ 구입아파트‧임차주택 모두에서 세대원 실거주시 전세대출을 허용 (①~③ 모두 충족 필요)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EXC-007": {
+      "item_id": "DEV-EXC-007",
+      "answer": "규제지역 지정(7.1일 이후) 시 보금자리론의 LTV는 아파트 60%, 非아파트 55%로 적용된다. (참고로 6.30일 이전 비규제지역 기준은 아파트 70%, 非아파트 65%였다.)",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "보금자리론\n아파트70% / 非아파트65%\n아파트60% / 非아파트55%"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-001": {
+      "item_id": "DEV-GF-001",
+      "answer": "규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실을 증명한 차주 등에 대해서는 종전 규정이 그대로 적용된다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실을 증명한 차주* 등에 대해서는 종전 규정이 그대로 적용된다."
+        ],
+        [
+          "FAQ_20260630",
+          "(일반 주담대) 규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-002": {
+      "item_id": "DEV-GF-002",
+      "answer": "일반 주담대는 6.30일까지 '주택매매계약 체결 + 계약금 납부 사실 증명'(또는 대출 신청 접수 완료)이 되어야 종전규정이 적용되는 반면, 토지거래허가제가 적용되는 주택은 6.30일까지 관할 지자체에 토지거래허가를 신청 접수하기만 하면, 그 이후에 부동산매매계약을 체결하더라도 종전규정이 적용된다. 즉 매매계약 체결 시점 요건이 완화되어, 토지거래허가 신청만 기한 내 이루어지면 계약 체결은 7.1일 이후로 미뤄져도 무방하다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "토지거래허가 적용 주택의 경우, 규제지역 효력 발생일 전일까지 관할 지자체에 토지거래허가를 신청 접수하면 그 이후에 부동산매매계약을 체결하여도 종전규정 적용"
+        ],
+        [
+          "FAQ_20260630",
+          "단, 토지거래허가제 적용 주택의 경우, 규제지역 효력 발생일 전일(6.30일)까지 관할 지자체에 토지거래허가를 신청 접수시, 그 이후에 부동산매매계약을 체결하여도 종전규정 적용"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-003": {
+      "item_id": "DEV-GF-003",
+      "answer": "집단대출의 경과규정 기준은 규제지역 효력 발생일 전일인 6.30일까지 입주자모집공고(입주자모집공고가 없는 경우 착공신고, 재건축·재개발 사업장 조합원의 경우 관리처분인가 등)가 된 사업장에 대해 종전규정을 적용하는 것이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "(집단대출) 규제지역 효력 발생일 전일(6.30일)까지 입주자모집 공고(입주자모집공고가 없는 경우, 착공신고, 재건축·재개발 사업장 조합원의 경우 관리처분인가 등)된 사업장에 대해 종전규정 적용 가능"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-004": {
+      "item_id": "DEV-GF-004",
+      "answer": "있다. 이미 공고된 사업장이라도 해당 분양권 등이 시행일(7.1일)부터 전매(전매기준일은 거래당사자가 분양권 등의 거래를 신고한 날)된 경우에는 집단대출 경과규정 적용 대상에서 제외된다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "단, 기 공고된 사업장의 분양권 등이 시행일(7.1일)부터 전매(전매기준일은 거래당사자가 분양권 등의 거래를 신고한 날)된 경우는 제외"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-005": {
+      "item_id": "DEV-GF-005",
+      "answer": "전세대출 관련 경과규정 조건은 투기·투과지역 효력 발생일 전일인 6.30일까지 매매계약을 체결하고 계약금 납부사실을 증명하는 경우 예외를 인정받는 것이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "투기·투과지역 효력 발생일 전일(6.30일)까지 매매계약을 체결하고 계약금 납부사실 증명시 예외 인정 가능"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-006": {
+      "item_id": "DEV-GF-006",
+      "answer": "이주비·중도금 대출 제한의 예외 인정 기준은 규제지역 효력 발생일 전일인 6.30일까지 관리처분인가가 나온 재건축·재개발 주택의 경우 예외를 인정받는 것이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "규제지역 효력 발생일 전일(6.30일)까지 관리처분인가가 나온 재건축·재개발 주택의 경우 예외 인정 가능"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-GF-007": {
+      "item_id": "DEV-GF-007",
+      "answer": "사업자 주담대에 대한 경과규정은 규제지역 효력 발생일 전일인 6.30일까지 주택매매계약을 체결하고 계약금 납부 사실을 증명하는 경우 종전규정을 적용받을 수 있다는 것이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "규제지역 효력 발생일 전일(6.30일)까지 주택매매계약 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EFF-001": {
+      "item_id": "DEV-EFF-001",
+      "answer": "경기도 화성시 동탄구, 용인시 기흥구, 구리시의 투기과열지구 및 조정대상지역(규제지역) 지정 효력은 2026년 7월 1일부터 발생한다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "투기적 매수를 차단하여 실수요자를 보호하고, 주택\n시장 과열에 대응하기 위해 주거정책심의위원회를 거쳐 투기과열지구와 \n조정대상지역을 추가 지정하였다.(7월 1일부터 지정효력 발생)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EFF-002": {
+      "item_id": "DEV-EFF-002",
+      "answer": "토지거래허가구역 지정은 2026년 7월 5일부터 2027년 12월 31일까지이다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "화성시 동탄구, 용인시 기흥구, 구리시를 \n2026년 7월 5일*부터 2027년 12월 31일까지 토지거래허가구역으로 \n지정할 계획"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EFF-003": {
+      "item_id": "DEV-EFF-003",
+      "answer": "규제지역 내 주담대 취급시 강화된 LTV(70%→40%) 적용 제도는 2025년 9월 7일부터 시행된 제도이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용* ’25.9.7~"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EFF-004": {
+      "item_id": "DEV-EFF-004",
+      "answer": "1억원 초과 신용대출 보유 차주에 대해 대출실행일로부터 1년간 규제지역 내 주택 구입을 제한하는 제도는 2020년 11월 16일부터 시행된 제도이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "1억원 초과 신용대출 보유 차주는 대출 실행일로부터 1년간 규제지역* 내 주택 구입이 제한 ’20.11.16~"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EFF-005": {
+      "item_id": "DEV-EFF-005",
+      "answer": "신용대출 보유 차주의 규제지역 해당 여부는 해당 주택에 대한 매매계약체결일을 기준으로 판단한다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "* 해당 주택에 대한 매매계약체결일을 기준으로 규제지역 해당 여부를 판단"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-EFF-006": {
+      "item_id": "DEV-EFF-006",
+      "answer": "재건축·재개발에 따른 중도금·이주비대출의 경우, 해당 재건축·재개발 주택의 관리처분인가일을 기준으로 규제지역 해당 여부를 판단한다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "재건축·재개발 주택의 관리처분인가일을 기준으로 규제지역 해당 여부를 판단"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-REG-001": {
+      "item_id": "DEV-REG-001",
+      "answer": "6·30 조치로 경기도 화성시 동탄구, 용인시 기흥구, 구리시 등 3곳이 신규 규제지역으로 지정되었다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "최근 큰 폭으로 집값이 상승한 경기도 화성시 동탄구, 용인시 기흥구, \n구리시 등 3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다."
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-REG-002": {
+      "item_id": "DEV-REG-002",
+      "answer": "화성시 동탄구, 용인시 기흥구, 구리시는 7월 1일부터 투기과열지구 및 조정대상지역으로 지정되고, 이와 별도로 경기도가 7월 5일부터 2027년 12월 31일까지 토지거래허가구역으로도 지정한다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "경기도 화성시 동탄구, 용인시 기흥구, 구리시에 대해 7월 1일부터  \n투기과열지구 및 조정대상지역, 5일부터 토지거래허가구역으로 추가 지정"
+        ],
+        [
+          "MOLIT_PRESS_20260630",
+          "2026년 7월 5일*부터 2027년 12월 31일까지 토지거래허가구역으로"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-REG-003": {
+      "item_id": "DEV-REG-003",
+      "answer": "非규제지역(수도권 외)의 주택구입목적 주담대 LTV는 무주택자(처분조건부 1주택자 포함) 70%, 유주택자 60%이다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70% / 유주택 60%"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-REG-004": {
+      "item_id": "DEV-REG-004",
+      "answer": "적용되지 않는다. 생활안정자금목적 주담대의 경우 1주택 최대 1억원 한도, 다주택 금지 규제는 수도권·규제지역 내 주택보유수를 기준으로 하며, 非규제지역(수도권 외)은 해당없음으로 명시되어 있다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "￭ 생활안정자금목적 주담대 : 1주택 최대 1억원 한도*, 다주택 금지"
+        ],
+        [
+          "MOLIT_PRESS_20260630",
+          "非규제지역은 해당없음, 수도권·규제지역 내 주택보유수 기준"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-BOR-001": {
+      "item_id": "DEV-BOR-001",
+      "answer": "규제지역(조정대상지역·투기과열지구) 내에서 주택구입목적 주담대를 취급할 때 유주택자의 LTV는 0%이다(무주택자·처분조건부 1주택자는 40%).",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "LTV : 무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-BOR-002": {
+      "item_id": "DEV-BOR-002",
+      "answer": "다주택자는 수도권 내에서 주택을 구입할 경우 해당 지역이 규제지역인지 여부와 관계없이 LTV 0%가 적용된다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-BOR-003": {
+      "item_id": "DEV-BOR-003",
+      "answer": "처분조건부 1주택자는 무주택자와 동일한 기준(무주택자에 포함)으로 취급되어, 규제지역 내 주택구입목적 주담대 시 무주택자와 같은 LTV(40%)가 적용된다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "LTV : 무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+        ],
+        [
+          "FAQ_20260630",
+          "주1) 무주택자(처분조건부 1주택자 포함) 기준"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-BOR-004": {
+      "item_id": "DEV-BOR-004",
+      "answer": "생활안정자금 목적 주담대의 경우 1주택자는 최대 1억원 한도로 대출이 가능하지만, 다주택자는 대출 자체가 금지된다. 단, 이는 수도권·규제지역 내 주택보유수를 기준으로 하며 非규제지역에는 해당하지 않는다.",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "생활안정자금목적 주담대 : 1주택 최대 1억원 한도*, 다주택 금지"
+        ],
+        [
+          "MOLIT_PRESS_20260630",
+          "非규제지역은 해당없음, 수도권·규제지역 내 주택보유수 기준"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-PUR-001": {
+      "item_id": "DEV-PUR-001",
+      "answer": "아니다. 중도금대출이 증액 없이 잔금대출로 전환되는 경우에는 강화된 40%가 아니라 해당 중도금대출을 취급한 시점의 LTV 규제비율을 그대로 적용할 수 있다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "중도금대출이 증액없이 잔금대출로 전환되는 경우에는 해당 중도금대출 취급시점의 담보인정비율(LTV)을 적용할 수 있음"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-PUR-002": {
+      "item_id": "DEV-PUR-002",
+      "answer": "아니다. 규제지역 내 주택담보대출의 증액없는 대환대출에는 강화된 LTV 40%가 적용되지 않고, 해당 주택담보대출을 최초 취급한 시점의 LTV 규제비율이 그대로 적용된다. 다만 이는 ‘25.9.7, ‘25.10.24일 조치와 동일하게 생활안정자금목적 주담대 한도 1억원 기준이 적용되는 차주에 한하여 적용되는 것으로 한정된다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "규제지역 내 주택담보대출의 증액없는 대환대출에 대해서는 해당 주택담보대출을 취급한 시점의 LTV 규제비율 적용"
+        ],
+        [
+          "FAQ_20260630",
+          "’25.9.7, ‘25.10.24일 조치와 동일하게 생활안정자금목적 주담대 한도 1억원 기준이 적용되는 차주에 한하여 적용됨"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-PUR-003": {
+      "item_id": "DEV-PUR-003",
+      "answer": "주택 매매·임대사업자 외의 여타 사업자는 규제지역 내 주택구입목적 주담대(사업자대출)가 제한된다. 참고로 주택 매매·임대사업자의 경우는 「가계대출 추가 관리 방안」(9.7일)에 따라 수도권·규제지역 내 주담대(사업자대출)를 이미 제한 중이다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "주택 매매·임대사업자* 외 여타 사업자도 규제지역 내 주택구입목적 주담대(사업자대출) 제한"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-CFL-001": {
+      "item_id": "DEV-CFL-001",
+      "answer": "LTV 0%가 적용된다. 6.30일까지 대출 신청 접수를 완료한 경우 종전규정이 그대로 적용되는 경과규정이 있지만, 다주택자는 수도권 내 주택구입시 규제지역 지정 여부와 무관하게 이미 LTV 0%가 적용되는 별도 규정이 존재하므로, 경과규정 적용 여부와 관계없이 결과는 동일하게 0%이다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+        ],
+        [
+          "FSC_PRESS_20260630",
+          "규제지역 효력 발생일 전일(6.30일)까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실을 증명한 차주* 등에 대해서는 종전 규정이 그대로 적용된다."
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOC-001": {
+      "item_id": "DEV-NOC-001",
+      "answer": "아니다. 규제지역에서도 생애최초 주택구입자에 대해서는 강화된 40%/50%가 아니라 완화된 LTV 규제비율(60~70%)이 그대로 적용되며, FAQ의 비교표에서도 생애최초 구매자의 LTV는 7.1일 이후에도 60%(아파트 限)로 표시되어(直前 값과 '좌동') 변동이 없음을 보여준다. 즉 규제지역 지정으로 생애최초 구매자의 LTV 비율 자체가 낮아지지는 않았다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용"
+        ],
+        [
+          "FAQ_20260630",
+          "생애최초 구매자4)\n(좌동)\n60%(아파트 限)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-AMB-001": {
+      "item_id": "DEV-AMB-001",
+      "answer": "원문에 답이 없다. FAQ의 LTV 비교표는 '일반 차주' 60%(아파트 限)라는 수치를 제시하지만, 표의 각주(주1)에 따라 이 수치는 '무주택자(처분조건부 1주택자 포함) 기준'에 한정된 값이다. 질문에서 말하는 '비처분 1주택자'는 처분조건 없이 이미 주택을 보유한 자로서 이 각주가 정의하는 적용대상(무주택자·처분조건부 1주택자)에 해당하지 않으므로, 제공된 원문만으로는 6.30일 이전 非규제 수도권에서 이러한 자에게 적용된 LTV 기준을 확인할 수 없다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "주1) 무주택자(처분조건부 1주택자 포함) 기준"
+        ]
+      ],
+      "needs_human_review": true
+    }
+  }
+}

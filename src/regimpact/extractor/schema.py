@@ -74,6 +74,9 @@ class RegChangeItem:
     before: Optional[str] = None
     after: Optional[str] = None
     confidence: float = 1.0
+    # 같은 사실을 말한 **다른 문서**의 인용. 병합 단계에서만 채워지며 LLM 출력 스키마에는 없다.
+    # 여러 공문이 같은 변경을 말하면 근거가 강해지므로, 합치되 버리지 않고 모아 둔다.
+    corroborations: tuple[Citation, ...] = field(default_factory=tuple)
 
     @classmethod
     def from_dict(cls, d: dict) -> "RegChangeItem":
@@ -84,6 +87,9 @@ class RegChangeItem:
             before=d.get("before"),
             after=d.get("after"),
             confidence=float(d.get("confidence", 1.0)),
+            corroborations=tuple(
+                Citation.from_dict(c) for c in d.get("corroborations", ())
+            ),
         )
 
 

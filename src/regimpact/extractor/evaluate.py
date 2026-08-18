@@ -14,8 +14,18 @@ from .schema import RegChangeExtraction, RegChangeItem
 
 
 def _norm(s: str) -> str:
-    """공백·개행을 단일 공백으로 정규화 (추출 텍스트 vs 원문 대조용)."""
-    return re.sub(r"\s+", " ", s).strip()
+    """인용 대조용 정규화 — 공백을 **전부 제거**한다.
+
+    처음에는 공백을 단일 공백으로 축약했는데, 그 기준으로 haiku-4-5의 인용 25%가
+    "원문에 없음"으로 잡혔다. 실제로 확인해 보니 전부 원문에 있었고, 원인은 PDF/HWP 추출본이
+    문장은 물론 **단어 중간에서도 줄을 바꾼다**는 것이었다("규제\n지역 내"). 모델이 이를 자연스러운
+    "규제지역 내"로 옮겨 적으면 축약 기준에서는 불일치가 된다.
+
+    공백은 추출 아티팩트이지 내용이 아니므로 대조에서 제외한다. 이 기준에서도 **다른 단어를
+    지어낸 인용은 여전히 걸린다** — 환각 탐지력은 잃지 않는다.
+    (2026-08-18 정정. 이전 기준으로 보고된 haiku Unsupported 25%는 측정 오차였다.)
+    """
+    return re.sub(r"\s+", "", s)
 
 
 @dataclass
@@ -67,7 +77,8 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
     """사람이 확정한 골드 정답지와 비교해 완전성·재현율을 계산한다.
 
     gold 형식(docs/eval/regchange_gold_6_30.json):
-      required_changes: [{category, keywords:[...]}]  # keywords 중 하나라도 summary/after에 있으면 포착
+      required_changes: [{id, keywords:[...]}]            # keywords 중 하나라도 있으면 포착
+                          또는 [{id, transition:{before,after}}]  # 값 전이를 before/after 필드에 직접 대조
       exceptions: [{name, keywords:[...]}]
       effective_from: "YYYY-MM-DD"
       target_regions: [...]
@@ -77,19 +88,46 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
         for c in extraction.changes
     ]
 
+    def _transition_found(spec: dict) -> bool:
+        """값 전이(before→after)를 항목의 before/after 필드에 **직접** 대조한다.
+
+        키워드는 summary·before·after를 이어붙인 문자열을 훑기 때문에 "70%가 있다"까지만 볼 수
+        있고, 그 70%가 시행 전 값인지 생애최초 값인지 구분하지 못한다. 이 제품의 핵심 주장이
+        "무엇이 무엇으로 바뀌었는가"인 이상, 전이는 전이로 채점해야 한다.
+        """
+        want_b, want_a = _norm(spec.get("before", "")).lower(), _norm(spec.get("after", "")).lower()
+        for c in extraction.changes:
+            got_b, got_a = _norm(c.before or "").lower(), _norm(c.after or "").lower()
+            if (not want_b or want_b == got_b) and (not want_a or want_a == got_a):
+                if want_b or want_a:
+                    return True
+        return False
+
     def _found(keywords: list[str], categories: list[str] | None = None) -> bool:
+        """키워드 중 **하나라도** 포착되면 히트. 여러 사실을 한 항목에 묶지 말고 별도 entry로 나눈다.
+
+        키워드도 haystack과 같은 정규화를 거쳐야 한다 — 한쪽만 정규화하면 공백이 든 키워드
+        ("7월 1일")가 영원히 매칭되지 않는다.
+        """
         cats = {c.category for c in extraction.changes}
         if categories and not (set(categories) & cats):
             # 카테고리 힌트가 있으면 우선 확인하되, 키워드 매칭이 본판정
             pass
-        return any(any(kw.lower() in h for kw in keywords) for h in hay)
+        return any(any(_norm(kw).lower() in h for kw in keywords) for h in hay)
 
     missed_changes, hit_changes = [], 0
     for req in gold.get("required_changes", []):
-        if _found(req["keywords"], req.get("categories")):
+        if "transition" in req:
+            hit = _transition_found(req["transition"])
+        else:
+            hit = _found(req["keywords"], req.get("categories"))
+        if hit:
             hit_changes += 1
         else:
-            missed_changes.append(req.get("id", req["keywords"][0]))
+            # dict.get의 기본값은 **먼저 평가**되므로 req["keywords"][0]를 그대로 쓰면
+            # keywords가 빈 entry(전이 전용)에서 IndexError가 난다.
+            kws = req.get("keywords") or []
+            missed_changes.append(req.get("id") or (kws[0] if kws else "?"))
     total_changes = len(gold.get("required_changes", [])) or 1
 
     missed_exc, hit_exc = [], 0

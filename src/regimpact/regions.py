@@ -48,3 +48,99 @@ def resolve_region_status(
         if after_start and before_end:
             return v.status, v.regulated_type
     return RegionStatus.NON_REGULATED, RegulatedType.NONE
+
+
+# --------------------------------------------------------------- 수도권 여부
+#
+# 왜 필요한가: 6·30 공문의 다주택 규칙은 **지역 규제상태가 아니라 수도권 여부**로 갈린다.
+#   FSC 보도참고자료 p2 / FAQ Q1 ※: "다주택자는 수도권 內 주택구입시 **규제지역 여부와 무관하게**
+#   LTV 0% 적용"
+# 따라서 REGULATED/NON_REGULATED 축만으로는 이 규칙을 표현할 수 없다.
+#
+# 수도권 = 서울·인천·경기 (｢수도권정비계획법｣ 제2조). 세종·청주 등은 수도권이 아니다.
+CAPITAL_AREA_REGIONS: frozenset[str] = frozenset({
+    "GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN",          # 6·30 신규 지정 3곳 (경기)
+    "SEOUL", "SEOUL_GANGNAM", "SEOUL_SEOCHO", "SEOUL_SONGPA",
+    "SEOUL_YONGSAN", "SEOUL_SEONGDONG", "SEOUL_MAPO",
+    "GWACHEON", "SEONGNAM_BUNDANG", "SUWON_YEONGTONG",
+    "ANYANG_DONGAN", "GWANGMYEONG", "HANAM",
+})
+
+
+def is_capital_area(region_code: str) -> bool:
+    """수도권(서울·인천·경기) 여부. 미등록 지역은 **수도권 아님**으로 간주한다.
+
+    보수적 기본값이다: 수도권으로 잘못 간주하면 0% 자동판정이 잘못 내려가지만,
+    수도권이 아니라고 보면 기준값 부재로 사람 검토(escalation)로 빠진다.
+    """
+    return region_code in CAPITAL_AREA_REGIONS
+
+
+# --------------------------------------------------------------- 명칭 → 코드 정규화
+#
+# LLM 추출기는 공문 원문의 **한글 지역명**("화성시 동탄구")을 내놓지만 룰엔진은
+# **코드**("HWASEONG_DONGTAN")로 동작한다. 이 경계를 LLM에게 맡기면(프롬프트에 코드
+# 어휘를 주면) 정답 후보를 흘리는 셈이 되므로, **결정적 별칭 테이블**로 변환한다.
+# 매칭 실패는 조용히 버리지 않고 None을 돌려 호출측이 escalate 하게 한다.
+#
+# 이 표는 규제 "값"이 아니라 식별자 별칭이다(LOCKED §4의 규칙값 범위 밖). 신규 지역이
+# 등장하면 여기에 추가한다.
+REGION_ALIASES: dict[str, str] = {
+    # 6·30 신규 지정 3곳
+    "구리시": "GURI",
+    "구리": "GURI",
+    "용인시 기흥구": "YONGIN_GIHEUNG",
+    "기흥구": "YONGIN_GIHEUNG",
+    "용인기흥": "YONGIN_GIHEUNG",
+    "화성시 동탄구": "HWASEONG_DONGTAN",
+    "동탄구": "HWASEONG_DONGTAN",
+    "화성동탄": "HWASEONG_DONGTAN",
+    # 기존 규제지역·비교 대상 (별칭표가 정답 3곳만 담아 어휘 자체가 힌트가 되지 않도록)
+    "서울특별시": "SEOUL",
+    "강남구": "SEOUL_GANGNAM",
+    "서초구": "SEOUL_SEOCHO",
+    "송파구": "SEOUL_SONGPA",
+    "용산구": "SEOUL_YONGSAN",
+    "성동구": "SEOUL_SEONGDONG",
+    "마포구": "SEOUL_MAPO",
+    "과천시": "GWACHEON",
+    "성남시 분당구": "SEONGNAM_BUNDANG",
+    "분당구": "SEONGNAM_BUNDANG",
+    "수원시 영통구": "SUWON_YEONGTONG",
+    "안양시 동안구": "ANYANG_DONGAN",
+    "광명시": "GWANGMYEONG",
+    "하남시": "HANAM",
+    "세종특별자치시": "SEJONG",
+    "세종시": "SEJONG",
+    "청주시": "CHEONGJU",
+}
+
+_ALIAS_STRIP = ("경기도", "경기", "인천광역시", "서울시", "특별자치시", "광역시")
+
+
+def normalize_region_name(name: str) -> Optional[str]:
+    """공문 표기 지역명을 룰엔진 지역코드로 변환한다. 모르면 None.
+
+    이미 코드 형태("GURI")로 들어오면 그대로 통과시킨다. 광역 접두어("경기도 ")는
+    떼고 매칭하며, 그래도 못 찾으면 별칭 키가 포함된 항목을 마지막으로 시도한다.
+    """
+    if not name:
+        return None
+    raw = name.strip()
+    if raw in REGION_VERSIONS or (raw.isascii() and raw.isupper()):
+        return raw
+
+    cleaned = raw
+    for prefix in _ALIAS_STRIP:
+        cleaned = cleaned.replace(prefix, " ")
+    cleaned = " ".join(cleaned.split())
+
+    for candidate in (raw, cleaned):
+        if candidate in REGION_ALIASES:
+            return REGION_ALIASES[candidate]
+
+    # 부분 포함(예: "경기도 화성시 동탄구 일원") — 가장 긴 별칭을 우선 매칭
+    for alias in sorted(REGION_ALIASES, key=len, reverse=True):
+        if alias in cleaned:
+            return REGION_ALIASES[alias]
+    return None

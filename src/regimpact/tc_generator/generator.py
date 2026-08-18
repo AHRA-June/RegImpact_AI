@@ -101,8 +101,19 @@ def baseline_cases() -> list[GeneratedCase]:
               "미등록 지역 → 非규제 기준선 70%",
               _app(region_code="SEOUL_GANGNAM", house_count=0)),
         _case("BASE-03", Category.BASELINE,
-              "非규제 유주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
-              _app(region_code="SEOUL_GANGNAM", house_count=1)),
+              "非규제 비처분 1주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
+              _app(region_code="SEOUL_GANGNAM", house_count=1),
+              spec_note="Q10 잔여 미결: FAQ Q2 非규제(수도권) 열은 주1) 무주택 기준이라 "
+                        "비처분 1주택 값이 없다. 추정 금지(LOCKED §4) → escalation."),
+        _case("BASE-04", Category.BASELINE,
+              "수도권 다주택 · 시행 전(非규제) → 0% (규제 여부 무관 규칙)",
+              _app(evaluation_date=_BEFORE, house_count=2),
+              spec_note="FSC p2 / FAQ Q1 ※ '다주택자는 수도권 內 주택구입시 규제지역 여부와 "
+                        "무관하게 LTV 0% 적용'. 旣 마련된 규정이라 시행 전에도 동일."),
+        _case("BASE-05", Category.BASELINE,
+              "비수도권 다주택 · 非규제 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
+              _app(region_code="CHEONGJU", house_count=2),
+              spec_note="수도권 0% 규칙은 수도권 限. 비수도권 非규제 다주택 값은 원문에 없다."),
     ]
 
 
@@ -184,6 +195,16 @@ def grandfathering_cases() -> list[GeneratedCase]:
               "G3 토허제 대상 아님 → 신청일 있어도 경과규정 불인정",
               _app(house_count=0, land_permit_target=False,
                    land_permit_applied_at=_CUTOFF)),
+        _case("GF-MULTI-01", Category.GRANDFATHERING,
+              "수도권 다주택 + 경과규정 해당 → 여전히 0% (보호할 변화가 없음)",
+              _app(house_count=2, application_accepted_at=_CUTOFF),
+              spec_note="경과규정은 6·30 지정으로 바뀐 것으로부터 보호하는 장치인데, 수도권 "
+                        "다주택은 지정 전후 모두 0%라 되돌릴 값이 없다. 이 케이스가 P0c의 "
+                        "우선순위 위치(경과규정보다 앞)를 고정한다 — 뒤로 옮기면 실패."),
+        _case("GF-OWNER-01", Category.GRANDFATHERING,
+              "비처분 1주택 + 경과규정 해당 → 종전값 부재로 NEEDS_HUMAN_REVIEW",
+              _app(house_count=1, application_accepted_at=_CUTOFF),
+              spec_note="Q10 잔여 미결 — 경과규정이 되돌릴 '종전 非규제 수도권 유주택' 값이 없다."),
     ]
 
 

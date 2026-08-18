@@ -13,6 +13,7 @@
 독립성의 범위:
     - 지역상태 해석: regions.py 를 쓰지 않고 여기서 날짜 비교로 직접 판정.
     - 경과규정: grandfathering.py 를 쓰지 않고 여기서 G1/G2/G3 를 직접 판정.
+    - 수도권 판정: regions.py 의 CAPITAL_AREA_REGIONS 를 쓰지 않고 여기서 독립 집합으로 재기입.
     - 판정 로직: 명령형 short-circuit(엔진)과 달리, 우선순위 규칙을 '데이터 표'로 선언하고
       작은 범용 해석기로 평가한다(구조적 독립 → 전사 오류가 상관되지 않음).
 
@@ -32,6 +33,18 @@ from ..models import EvaluationStatus, LoanPurpose, MortgageApplication
 _GF_CUTOFF = date(2026, 6, 30)          # 경과규정 경계 (<= 포함) — §F
 _REG_EFFECTIVE = date(2026, 7, 1)       # 규제 효력일 — regulatory_facts C02/C03
 _SIX_THIRTY_REGIONS = frozenset({"GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"})
+
+# 수도권(서울·인천·경기) — regions.py 를 import 하지 않고 명세에서 독립 재기입.
+# 근거: FSC p2 / FAQ Q1 ※ "다주택자는 수도권 內 ... 규제지역 여부와 무관하게 LTV 0%".
+# 오라클은 6·30 시나리오에 등장하는 지역만 알면 충분하므로 최소 집합으로 둔다
+# — 엔진이 수도권 집합을 넓게 잡아 오판하면 disagreement 로 드러나게 하는 편이 낫다.
+_CAPITAL_AREA = frozenset({
+    "GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN",
+    "SEOUL", "SEOUL_GANGNAM", "SEOUL_SEOCHO", "SEOUL_SONGPA",
+    "SEOUL_YONGSAN", "SEOUL_SEONGDONG", "SEOUL_MAPO",
+    "GWACHEON", "SEONGNAM_BUNDANG", "SUWON_YEONGTONG",
+    "ANYANG_DONGAN", "GWANGMYEONG", "HANAM",
+})
 
 _LTV_REGULATED_STD = 0.40
 _LTV_FIRST_HOME = 0.70
@@ -97,6 +110,15 @@ def _is_owner(app: MortgageApplication) -> bool:
     return False
 
 
+def _baseline_gap_reason(app: MortgageApplication) -> str:
+    """非규제 기준선 표(C-2)에 값이 없는 유주택의 사유 라벨 — §D.
+
+    C-2는 주1)에 따라 무주택 기준이므로 유주택 값이 없다. 남는 두 종류를 구분한다:
+    비처분 1주택(Q10 잔여 미결) / 비수도권 다주택(수도권 규칙 적용 밖).
+    """
+    return "MULTI_HOME_BASELINE_UNKNOWN" if app.house_count >= 2 else "OWNER_BASELINE_UNKNOWN"
+
+
 # ---------------------------------------------------------------------------
 # 오라클 판정 (§H 우선순위 P0~P7 — 선언적 재구현)
 # ---------------------------------------------------------------------------
@@ -117,15 +139,29 @@ def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
             must_include_reasons=("DISCOVERY_POLICY_LOAN",),
         )
 
-    # P1. 경과규정 (최우선)
+    # P0c. 수도권 다주택 → 0% (지역 규제상태·시점·경과규정 무관) — §E P0c
+    # 원문: "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+    # 旣 마련된 규정이므로 6.30 이전에도 동일.
+    # P1(경과규정)보다 앞에 와야 한다 — P1은 유주택 전체를 기준값 부재로 escalate 하므로
+    # 뒤에 두면 경과규정 해당 수도권 다주택이 0%를 받지 못한다(회귀 GF-MULTI-01 이 고정).
+    if app.house_count >= 2 and app.region_code in _CAPITAL_AREA:
+        return ExpectedOutcome(
+            status=EvaluationStatus.DECIDED,
+            max_ltv=_LTV_MULTI,
+            applicable_rule_id="MULTI_0",
+            must_include_reasons=("LTV_MULTI_HOME_0",),
+        )
+
+    # P1. 경과규정
     gf_reason = _is_grandfathered(app)
     if gf_reason is not None:
         if _is_owner(app):
             # 非규제 수도권 유주택 기준선 부재 → escalation
+            # (수도권 다주택은 P0c 에서 이미 확정되어 도달하지 않음 → 여기 남는 다주택은 비수도권)
             return ExpectedOutcome(
                 status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
                 grandfathering_applied=True,
-                must_include_reasons=(gf_reason, "OWNER_BASELINE_UNKNOWN"),
+                must_include_reasons=(gf_reason, _baseline_gap_reason(app)),
             )
         return ExpectedOutcome(
             status=EvaluationStatus.DECIDED,
@@ -141,7 +177,7 @@ def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
         if _is_owner(app):
             return ExpectedOutcome(
                 status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
-                must_include_reasons=("OWNER_BASELINE_UNKNOWN",),
+                must_include_reasons=(_baseline_gap_reason(app),),
             )
         return ExpectedOutcome(
             status=EvaluationStatus.DECIDED,
