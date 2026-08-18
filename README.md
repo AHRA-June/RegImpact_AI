@@ -51,7 +51,9 @@
 | `docs/sources/` | 공문 원본 스냅샷 + 추출 텍스트 + 해시 (SOURCES.md 레지스트리) |
 | `docs/ui/stitch_prompts.md` | UI 목업용 Google Stitch 프롬프트 모음(5개 화면) |
 | `docs/ui/DEPLOY.md` | **온라인 테스트 환경 배포 가이드** (Artifact 샌드박스 / Streamlit Cloud) |
-| `web/` | **정적 LTV 샌드박스** — 엔진 JS 포팅본 + Python 골든 픽스처 대조 (자체완결 1파일) |
+| `web/` | **정적 페이지** — LTV 샌드박스 · 검증보고서 (Artifact 조각) |
+| `web/dist/` | 정적 호스팅용 **독립 HTML 문서** (viewport 포함, 모바일 대응) + 랜딩 |
+| `vercel.json` | Vercel 배포 설정 (`outputDirectory: web/dist`, 빌드 스텝 없음) |
 | `app/streamlit_app.py` | **Streamlit 검증 콘솔** — 실제 Python 엔진 · 회귀 대시보드 · Extractor 실행 |
 | `tools/` | 픽스처 export · 샌드박스 빌드 · JS 포팅 대조 스크립트 |
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) + **전국 241곳 지역 레지스트리** |
@@ -89,7 +91,18 @@ pip install -r requirements.txt && streamlit run app/streamlit_app.py
 python examples/demo_impact_e2e.py --out report.md
 ```
 
-배포는 `docs/ui/DEPLOY.md` 참고.
+### 배포
+
+| 대상 | 호스트 | 비고 |
+|---|---|---|
+| `web/dist/` (샌드박스 + 검증보고서 + 랜딩) | **Vercel** / GitHub Pages | `vercel.json` 준비됨, 빌드 스텝 없음 |
+| Streamlit 콘솔 (정책 업로드·Extractor) | **Streamlit Community Cloud** | 상주 서버가 필요해 Vercel 불가 |
+
+```bash
+python tools/build_static.py    # web/*.html(Artifact 조각) → web/dist/(독립 문서, 모바일 대응)
+```
+
+절차는 `docs/ui/DEPLOY.md`.
 
 ## 개발 브랜치
 
