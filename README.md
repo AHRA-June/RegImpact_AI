@@ -93,6 +93,9 @@ python examples/demo_impact_e2e.py --out report.md
 
 ### 배포
 
+**🌐 라이브: https://regimpact-ai-beta.vercel.app**
+([`/sandbox`](https://regimpact-ai-beta.vercel.app/sandbox) · [`/impact`](https://regimpact-ai-beta.vercel.app/impact)) — 로그인 없이 열리고 모바일 대응.
+
 | 대상 | 호스트 | 비고 |
 |---|---|---|
 | `web/dist/` (샌드박스 + 검증보고서 + 랜딩) | **Vercel** / GitHub Pages | `vercel.json` 준비됨, 빌드 스텝 없음 |

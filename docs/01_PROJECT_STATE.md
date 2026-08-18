@@ -9,6 +9,7 @@
 - **개발 브랜치:** `claude/online-testing-plan-8k0xmx`
 - **전체 단계:** 🟢 Phase 1~2 진행 — **6·30 E2E 10/11 단계 관통** (남은 1개는 LLM 추출, API 키만 있으면 됨). 테스트 146 통과
 - (해결됨) 원격 푸시 권한 부여됨.
+- **라이브 URL:** https://regimpact-ai-beta.vercel.app
 
 ---
 
@@ -193,6 +194,7 @@ API 키를 넣으면 바로 채워진다. 재현: `python examples/demo_impact_e
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18** — ✅ **Vercel 배포 완료: https://regimpact-ai-beta.vercel.app** (`/sandbox`, `/impact`). GitHub Login Connection + GitHub App 설치가 모두 필요했고(둘은 별개), 프로젝트 `regimpact-ai` 생성 후 브랜치 푸시로 배포. `.vercelignore` 추가로 `web/dist/` 만 업로드. 랜딩 링크는 `.html` 을 유지 — 확장자 없는 경로는 Vercel cleanUrls 에서만 동작하고 로컬·GitHub Pages 에서는 404 라 이식성을 택했다. **잔여: Production Branch 를 `claude/online-testing-plan-8k0xmx` 로 지정해야** 이후 푸시가 반영된다(기본 브랜치가 구버전).
 - **2026-08-18** — ✅ **Vercel 정적 배포 준비 + 모바일 대응.** `web/*.html` 은 Artifact 가 head 를 씌워 주는 전제의 **조각**이라 그대로 정적 호스팅하면 viewport 메타가 없어 휴대폰에서 980px 로 렌더된다(실측 확인). `tools/build_static.py` 로 온전한 HTML 문서 + 랜딩 페이지를 `web/dist/` 에 생성하고 390px 뷰포트에서 가로 스크롤 없음을 확인. `vercel.json`(outputDirectory=web/dist, 빌드 스텝 없음) 추가. **Streamlit 은 상주 WebSocket 서버라 Vercel 불가** — Community Cloud 유지. DEPLOY.md 재구성.
 - **2026-08-18** — ✅ **Policy Version DB + 정책 업로드(Temporal Policy Resolver) + Q12 해소.** `src/regimpact/policy/`(version·registry·resolver·ingest), 정책 버전을 git 안 JSON으로 저장(`docs/policies/`), 시드 4건 등록(정책 delta 합집합 == 지역 기준선 검사로 드리프트 탐지). 현재/다음/직전 정책 해석·타임라인·중첩 경고. DRAFT는 판정에 미반영(LOCKED §4), 미매핑 지역명은 조용히 버리지 않고 보고. 오버레이는 기준선 무영향(순수 함수). Streamlit '정책 버전' 탭에 업로드→해시→초안→미리보기→사람확정→JSON 다운로드 플로우. E2E 2단계가 Policy DB를 읽고 검증보고서에 타임라인 섹션 추가. Q12는 스키마 근거 있는 3건만 채택하고 가계약금 관련 2건은 보류(이전 권고 정정). 테스트 146.
 - **2026-08-18** — ✅ **Q8 해소: 입력 무결성 게이트(P0c) 신설.** §E-138이 '처분조건부 1주택+생애최초'를 유효 조합으로 명시하므로 §E-139의 '유주택'은 is_owner() 의미 → §E-139는 우선순위 규칙이 아니라 **입력 유효성 규칙**이고 §H와 층위가 다르다(둘 다 참). 0% 자동판정을 폐기하고 NEEDS_HUMAN_REVIEW로 전환 — 0%는 대출 거절이고 틀린 쪽이 생애최초 플래그였다면 정답은 70%다. `validation.py` 신설, 게이트는 P0/P0b 뒤·P1 앞. 오라클은 규칙표 상단에 조건 독립 재기입. 다른 모순 후보는 임의 추가하지 않고 Q12로 표면화. 회귀 60 케이스 100%, pytest 110, JS 56/56.

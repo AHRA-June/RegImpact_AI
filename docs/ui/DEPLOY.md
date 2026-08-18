@@ -55,6 +55,16 @@ python tools/build_static.py     # 조각 → 온전한 HTML 문서 → web/dist
 
 ## 2. Vercel 배포 (정적 2종 — 휴대폰용 공개 URL)
 
+> ✅ **배포됨 (2026-08-18): https://regimpact-ai-beta.vercel.app**
+> `/` 랜딩 · `/sandbox` 판정 샌드박스 · `/impact` 검증보고서.
+> 프로젝트 `regimpact-ai` (`prj_lcPd2nukhV8zxYbucNuGSX7fm6bA`), GitHub 연동.
+> 도메인에 `-beta` 가 붙은 것은 `regimpact-ai.vercel.app` 이 전역에서 이미 쓰이고 있어
+> Vercel 이 suffix 를 붙였기 때문이다(`.vercel.app` 서브도메인은 전역 유일).
+>
+> ⚠️ **Production Branch 확인 필요.** 저장소 기본 브랜치가 `claude/portfolio-project-planning-9sip11`
+> (구버전)이므로, Vercel Project → Settings → Git → Production Branch 가
+> `claude/online-testing-plan-8k0xmx` 로 지정돼 있어야 이후 푸시가 이 URL에 반영된다.
+
 **Streamlit 은 Vercel 에 올릴 수 없다.** Streamlit 은 WebSocket 을 유지하는 상주 서버라
 서버리스 함수 모델과 맞지 않는다. Vercel 에는 정적 페이지 2종만 올리고, Streamlit 은
 Community Cloud 를 쓴다(아래 §3).
@@ -62,6 +72,10 @@ Community Cloud 를 쓴다(아래 §3).
 저장소 루트의 `vercel.json` 이 이미 설정돼 있다(`outputDirectory: web/dist`, 빌드 스텝 없음).
 
 ### 방법 A — GitHub 연동 (권장, 푸시하면 자동 재배포)
+
+> 선행: Vercel 계정에 **GitHub Login Connection** + **GitHub App(`github.com/apps/vercel`) 설치**가
+> 모두 돼 있어야 한다. 둘은 별개이며, 하나만 있으면 프로젝트 링크가 400 으로 실패한다.
+
 1. https://vercel.com → **Add New… → Project**
 2. `AHRA-June/RegImpact_AI` 선택 → Import
 3. 설정은 건드리지 않는다 — `vercel.json` 이 Framework `Other`, Output Directory `web/dist` 를 지정한다
