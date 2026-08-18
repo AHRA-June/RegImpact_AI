@@ -133,12 +133,35 @@ def test_regression_catches_mutated_priority(monkeypatch):
     assert Category.GRANDFATHERING in failed_cats
 
 
-# ---------- 충돌 케이스가 명세 주석(spec_note)을 보존 ----------
-def test_conflict_owner_first_home_carries_spec_note():
+# ---------- 입력 무결성 게이트 (Q8 확정 2026-08-18) ----------
+def test_owner_plus_first_home_is_a_contradiction_not_a_zero_percent_decision():
+    """§E-139 는 우선순위 규칙이 아니라 입력 유효성 규칙이다.
+
+    0%를 자동으로 내주면 '정상 입력이고 답이 0%'와 '입력이 모순인데 우연히 0%'를 구분할 수 없다.
+    게다가 0%는 대출 거절이고, 틀린 쪽이 first_home_buyer 플래그였다면 정답은 70%다.
+    """
     case = next(c for c in generate_all() if c.case_id == "CFL-04")
-    assert case.spec_note is not None
-    assert "§H" in case.spec_note
-    # §H 권위 기준: 유주택 short-circuit → 0%
-    assert case.expected.max_ltv == 0.0
-    # 엔진도 동일해야 함
-    assert evaluate(case.app).max_ltv == 0.0
+    assert case.expected.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert case.expected.max_ltv is None
+    assert "CONTRADICTION_OWNER_FIRST_HOME" in case.expected.must_include_reasons
+
+    actual = evaluate(case.app)
+    assert actual.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert actual.max_ltv is None
+    assert "CONTRADICTION_OWNER_FIRST_HOME" in actual.reason_codes
+
+
+def test_disposal_condition_plus_first_home_stays_valid():
+    """§E-138 이 유효 조합으로 명시 — 게이트가 여기까지 잡아버리면 과잉이다."""
+    case = next(c for c in generate_all() if c.case_id == "CFL-12")
+    assert evaluate(case.app).max_ltv == 0.70
+
+
+def test_contradiction_gate_outranks_grandfathering_but_not_scope():
+    """게이트 위치: P0/P0b 뒤, P1 앞."""
+    gf = next(c for c in generate_all() if c.case_id == "CFL-10")     # 경과규정 + 모순
+    assert evaluate(gf.app).status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert evaluate(gf.app).grandfathering_applied is False
+
+    policy = next(c for c in generate_all() if c.case_id == "CFL-11")  # 정책대출 + 모순
+    assert evaluate(policy.app).status == EvaluationStatus.DISCOVERY

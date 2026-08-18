@@ -65,6 +65,7 @@ REASON_KO = {
     "OWNER_BASELINE_UNKNOWN": "유주택 기준값 명세 부재 → 사람 검토",
     "OUT_OF_SCOPE_PRODUCT": "주택구입목적 아님",
     "UNKNOWN_REGION": "레지스트리 미등록 지역 → 사람 검토",
+    "CONTRADICTION_OWNER_FIRST_HOME": "입력 모순 — 유주택인데 생애최초",
     "DISCOVERY_POLICY_LOAN": "정책대출 → 수동 검토",
 }
 STATUS_KO = {
@@ -78,6 +79,7 @@ STATUS_KO = {
 STEPS = [
     ("P0", "스코프 — 주택구입목적인가"),
     ("P0b", "정책대출 → Discovery"),
+    ("P0c", "입력 무결성 — 유주택 AND 생애최초는 성립 불가"),
     ("P1", "경과규정 G1 / G2 / G3 → 종전규정 시점으로 재판정"),
     ("P2", "지역 규제상태 해석 (미등록 코드 검사)"),
     ("P3", "다주택 — 규제지역 또는 수도권이면 0%"),
@@ -98,6 +100,8 @@ def halting_step(decision, house_count: int = 0) -> str:
     codes = set(decision.reason_codes)
     if "OUT_OF_SCOPE_PRODUCT" in codes:
         return "P0"
+    if "CONTRADICTION_OWNER_FIRST_HOME" in codes:
+        return "P0c"
     if "UNKNOWN_REGION" in codes:
         return "P2"
     if "OWNER_BASELINE_UNKNOWN" in codes:
@@ -208,8 +212,14 @@ def tab_verdict() -> None:
                            f"**{price * decision.max_ltv:,.2f}억** "
                            "(LTV만 적용한 참고값 — DTI·차주별 한도 미반영)")
         elif decision.status is EvaluationStatus.NEEDS_HUMAN_REVIEW:
-            extra = ("수도권 비규제 유주택은 원문이 '非규제(수도권 外) 유주택 60%'만 명시해 근거가 없다. "
-                     if "OWNER_BASELINE_UNKNOWN" in decision.reason_codes else "")
+            if "CONTRADICTION_OWNER_FIRST_HOME" in decision.reason_codes:
+                extra = ("**입력이 모순이다** — 생애최초는 세대원 전원 무주택 이력을 전제하므로 "
+                         "유주택과 동시에 성립할 수 없다. 0%(대출 거절)를 자동으로 내주지 않는 이유는, "
+                         "틀린 쪽이 생애최초 플래그였다면 정답이 70%이기 때문이다. ")
+            elif "OWNER_BASELINE_UNKNOWN" in decision.reason_codes:
+                extra = ("수도권 비규제 유주택은 원문이 '非규제(수도권 外) 유주택 60%'만 명시해 근거가 없다. ")
+            else:
+                extra = ""
             st.warning("자동 판정을 **거부**했다. " + extra
                        + "확정 명세에 해당 기준값이 없으므로 숫자를 지어내지 않고 사람에게 넘긴다.")
         elif decision.status is EvaluationStatus.DISCOVERY:

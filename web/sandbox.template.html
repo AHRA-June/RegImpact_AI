@@ -340,9 +340,12 @@ td.num{font-family:"IBM Plex Mono",monospace; text-align:right; white-space:nowr
     그래서 인천 연수구 다주택은 비규제여도 0%이고, 울산·제주 다주택은 수도권이 아니므로 유주택 기준 60%다.
     ③ <b>경과규정의 '종전규정'은 70% 고정이 아니다</b> — 종전규정은 지역마다 다르다. 컷오프(2026-06-30) 시점 규정으로
     다시 판정하므로, 이미 규제지역이던 강남은 경과규정이 붙어도 40%다.</p>
-    <p style="margin:0"><b>한계.</b> 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리).
-    <code>CFL-04</code>(유주택+생애최초)는 명세 §E와 §H가 상충하는 알려진 미결 항목이며, 현재는 §H를 권위 기준으로
-    채택했다(<code>Q8</code>).</p>
+    <p style="margin:0"><b>입력 무결성 게이트(P0c).</b> 유주택이면서 생애최초인 입력은 정상 신청건이 아니라
+    <b>데이터 모순</b>이다(생애최초는 세대원 전원 무주택 <i>이력</i>을 전제). 종전에는 P4에서 0%로 short-circuit 했는데,
+    그러면 "정상 입력이고 답이 0%"와 "입력이 모순인데 우연히 0%"를 구분할 수 없다. 게다가 0%는 무해한 답이 아니라
+    <b>대출 거절</b>이고, 틀린 쪽이 생애최초 플래그였다면 정답은 70%다 — 그 70%p 격차를 데이터 오류 뒤에 숨기지 않는다.
+    처분조건부 1주택 + 생애최초는 명세가 유효 조합으로 명시하므로 잡지 않는다(<code>CFL-12</code>).</p>
+    <p style="margin:0"><b>한계.</b> 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리).</p>
   </footer>
 </div>
 
@@ -366,6 +369,7 @@ const SOURCE_6_30 = ["FSC_20260630", "MOLIT_20260630"];
 const STEPS = [
   {id:"P0",  label:"스코프 — 주택구입목적인가"},
   {id:"P0b", label:"정책대출 → Discovery"},
+  {id:"P0c", label:"입력 무결성 — 유주택 AND 생애최초는 성립 불가"},
   {id:"P1",  label:"경과규정 G1 / G2 / G3 → 종전규정 시점으로 재판정"},
   {id:"P2",  label:"지역 규제상태 해석 (미등록 코드 검사)"},
   {id:"P3",  label:"다주택 — 규제지역 또는 수도권이면 0%"},
@@ -389,6 +393,7 @@ const REASON_KO = {
   OWNER_BASELINE_UNKNOWN:"유주택 기준값 명세 부재 → 사람 검토",
   OUT_OF_SCOPE_PRODUCT:"주택구입목적 아님",
   UNKNOWN_REGION:"레지스트리 미등록 지역 → 사람 검토",
+  CONTRADICTION_OWNER_FIRST_HOME:"입력 모순 — 유주택인데 생애최초",
   DISCOVERY_POLICY_LOAN:"정책대출 → 수동 검토",
 };
 const STATUS_KO = {
@@ -466,6 +471,15 @@ function evaluate(app){
                    grandfathering_applied:false, reason_codes:["DISCOVERY_POLICY_LOAN"], source_policy_ids:[]});
   }
   mark("P0b","pass","해당 없음");
+
+  /* P0c. 입력 무결성 (§E-139). 생애최초 = 세대원 전원 무주택 '이력' 이므로 유주택과 동시 성립 불가.
+     여기서 0%를 자동으로 내주면 '정상 입력이고 답이 0%'와 '입력이 모순인데 우연히 0%'를 구분할 수 없다.
+     처분조건부 1주택은 §E-138 이 유효 조합으로 명시 → isOwner() 가 이미 제외한다. */
+  if(isOwner(app) && app.first_home_buyer){
+    mark("P0c","halt","유주택 + 생애최초");
+    return finish(escalate("CONTRADICTION_OWNER_FIRST_HOME"));
+  }
+  mark("P0c","pass","모순 없음");
 
   /* P1. 경과규정 — 성립하면 '종전규정', 즉 컷오프(6.30) 시점 규정으로 이하를 판정한다.
      70% 고정이 아니다. 서울 25구·경기 12곳은 6·30 이전에도 이미 규제지역이었다. */

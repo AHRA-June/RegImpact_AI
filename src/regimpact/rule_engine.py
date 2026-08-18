@@ -7,6 +7,7 @@ LLM 출력(RegChange Extractor 등)을 검증하는 기준점(ground truth)이�
 우선순위(short-circuit):
     P0  스코프(주택구입목적)
     P0b 정책대출 → Discovery
+    P0c 입력 무결성 검증 (§E-139) → 모순이면 사람 검토
     P1  경과규정 → **종전규정 = 컷오프(2026-06-30) 시점 규정으로 재판정**
     P2  지역상태 해석 (미등록 코드 → 사람 검토)
     P3  다주택 — 규제지역 또는 수도권이면 0%, 비수도권 비규제는 유주택 60%
@@ -14,7 +15,10 @@ LLM 출력(RegChange Extractor 등)을 검증하는 기준점(ground truth)이�
     P4b 무주택·처분조건부 1주택이 비규제면 기준선 70%
     P5  생애최초 70% → P6 서민·실수요 60% → P7 규제지역 일반 40%
 
-2026-08-18 변경 (Q9·Q10 확정 + 지역 레지스트리 도입에 따른 정합화):
+2026-08-18 변경 (Q8·Q9·Q10 확정 + 지역 레지스트리 도입에 따른 정합화):
+    - P0c 입력 무결성 게이트 신설. §E-139("유주택 AND 생애최초 = 논리상 불가, 데이터 충돌 시
+      NEEDS_HUMAN_REVIEW")는 §H 와 충돌하는 우선순위 규칙이 아니라 **한 층 위의 입력 유효성 규칙**이다.
+      §H 는 유효한 입력에 대한 판정을, §E-139 는 그 입력이 성립하는지를 말한다.
     - P3(다주택)을 지역 분기 **앞**으로 이동. FSC p2 "다주택자는 수도권 內 주택구입시 규제지역
       여부와 무관하게 LTV 0%" (C06) / §C-1b R6. 종전 §H는 P3가 비규제 경로에서 도달 불가였다.
     - 비규제 유주택 = 60% 확정. MOLIT 참고1 "非규제지역(수도권 外) 무주택 70% / 유주택 60%".
@@ -36,6 +40,7 @@ from .models import (
     RegionStatus,
 )
 from .regions import get_region, resolve_region_status
+from .validation import validate_application
 
 # 확정 LTV 값 (docs/05_RULE_SPEC.md §C, regulatory_facts.md)
 LTV_REGULATED_STANDARD = 0.40
@@ -64,6 +69,18 @@ def evaluate(app: MortgageApplication) -> LtvDecision:
         return LtvDecision(
             status=EvaluationStatus.DISCOVERY,
             reason_codes=[ReasonCode.DISCOVERY_POLICY_LOAN],
+        )
+
+    # P0c. 입력 무결성 검증 (§E-139, Q8 확정 2026-08-18).
+    #      유주택 AND 생애최초는 정상 신청건이 아니라 데이터 모순이다. 0%를 자동으로 내주면
+    #      "정상 입력이고 답이 0%"와 "입력이 모순인데 우연히 0%"를 구분할 수 없고, 0%는
+    #      대출 거절이다. 틀린 쪽이 플래그였다면 정답은 70%다 — 그 격차를 숨기지 않는다.
+    #      상세 근거는 validation.py 모듈 docstring.
+    contradictions = validate_application(app)
+    if contradictions:
+        return LtvDecision(
+            status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
+            reason_codes=[c.code for c in contradictions],
         )
 
     # P1. 경과규정 (최우선). 종전규정 = **컷오프 시점의 규정**으로 재판정한다.

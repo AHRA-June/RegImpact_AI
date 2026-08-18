@@ -21,9 +21,11 @@
     - 판정 로직: 명령형 short-circuit(엔진)과 달리, 우선순위 규칙을 '데이터 표'로 선언하고
       작은 범용 해석기로 평가한다(구조적 독립 → 전사 오류가 상관되지 않음).
 
-권위 기준: §H 의사코드가 "엔진 구현의 기준"으로 명시(05_RULE_SPEC.md L154, L194)되어 있으므로
-오라클도 §H 를 따른다. §E 주석의 '유주택+생애최초 충돌 → NEEDS_HUMAN_REVIEW'는 §H(P4 short-circuit)와
-상충하는 알려진 모호성이며, ConflictCase 로 표면화하되 판정 권위는 §H 로 둔다(README·OPEN_QUESTIONS 참고).
+권위 기준: §H 의사코드가 "엔진 구현의 기준"으로 명시되어 있으므로 오라클도 §H 를 따른다.
+**Q8 해소(2026-08-18):** §E-139('유주택+생애최초 → NEEDS_HUMAN_REVIEW')는 §H 와 충돌하는
+우선순위 규칙이 아니라 한 층 위의 **입력 유효성 규칙**이다(§E-138 이 '처분조건부 1주택+생애최초'를
+유효 조합으로 명시하므로 §E 의 "유주택"은 is_owner() 의미). 따라서 규칙표 상단에 입력 무결성 규칙을
+두고, 그 아래를 §H 그대로 유지한다 — 둘 다 참이다.
 """
 from __future__ import annotations
 
@@ -153,6 +155,10 @@ _RULE_TABLE: tuple[_Rule, ...] = (
           reasons=("OUT_OF_SCOPE_PRODUCT",)),
     _Rule(None, lambda c: c.policy_loan, EvaluationStatus.DISCOVERY,
           reasons=("DISCOVERY_POLICY_LOAN",)),
+    # P0c — 입력 무결성(§E-139). 엔진의 validation.py 를 import 하지 않고 조건을 직접 쓴다
+    #        (판정 구현 독립성 유지). 유주택 AND 생애최초 = 논리상 불가.
+    _Rule(None, lambda c: c.owner and c.first_home,
+          EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("CONTRADICTION_OWNER_FIRST_HOME",)),
     # P2 — 지역 미등록은 추측하지 않는다
     _Rule(None, lambda c: c.region is RegionStatus.UNKNOWN,
           EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("UNKNOWN_REGION",)),
@@ -219,8 +225,10 @@ def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
     # 스코프·정책대출은 경과규정보다 앞선다(P0/P0b) — 규칙표 상단이 그 순서를 담고 있다.
     rule = _apply(ctx)
 
-    grandfathered = gf_reason is not None and rule.status not in (
-        EvaluationStatus.OUT_OF_SCOPE, EvaluationStatus.DISCOVERY)
+    # 스코프 밖·Discovery·입력 모순은 '경과규정이 적용된 판정'이 아니다.
+    contradiction = "CONTRADICTION_OWNER_FIRST_HOME" in rule.reasons
+    grandfathered = (gf_reason is not None and not contradiction and rule.status not in (
+        EvaluationStatus.OUT_OF_SCOPE, EvaluationStatus.DISCOVERY))
     reasons = (gf_reason, *rule.reasons) if grandfathered else rule.reasons
 
     return ExpectedOutcome(

@@ -2,7 +2,7 @@
   "generated_by": "tools/export_fixtures.py",
   "spec": "docs/05_RULE_SPEC.md v1 (§C·§E·§F·§H)",
   "regions_source": "docs/sources/raw/molit_press_20260630.txt 참고2 현황표",
-  "case_count": 52,
+  "case_count": 56,
   "regions": [
     {
       "code": "SEOUL_GANGNAM",
@@ -5946,8 +5946,8 @@
     {
       "case_id": "CFL-04",
       "category": "CONFLICT",
-      "description": "유주택(비처분 1주택) + 생애최초: §H(P4) short-circuit → 0%",
-      "spec_note": "알려진 명세 모호성: §E 주석은 '유주택+생애최초=논리상 불가, 데이터 충돌 시 NEEDS_HUMAN_REVIEW'라 하나, §H(엔진 구현 기준) 의사코드는 P4에서 0%로 short-circuit 한다. 여기서는 권위 기준(§H)을 채택. 03_OPEN_QUESTIONS 참조.",
+      "description": "유주택(비처분 1주택) + 생애최초 → 입력 모순 → NEEDS_HUMAN_REVIEW (Q8 확정)",
+      "spec_note": null,
       "input": {
         "region_code": "GYEONGGI_GURI",
         "evaluation_date": "2026-07-02",
@@ -5965,12 +5965,176 @@
         "customer_id": null
       },
       "engine": {
-        "status": "DECIDED",
-        "max_ltv": 0.0,
-        "applicable_rule_id": "REG_OWNER_0",
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
         "grandfathering_applied": false,
         "reason_codes": [
-          "LTV_OWNER_0"
+          "CONTRADICTION_OWNER_FIRST_HOME"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "CONTRADICTION_OWNER_FIRST_HOME"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-09",
+      "category": "CONFLICT",
+      "description": "다주택 + 생애최초 → 입력 모순. 다주택 0%보다 무결성 게이트가 앞선다",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 2,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "CONTRADICTION_OWNER_FIRST_HOME"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "CONTRADICTION_OWNER_FIRST_HOME"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-10",
+      "category": "CONFLICT",
+      "description": "유주택 + 생애최초 + 경과규정 → 모순 게이트가 경과규정(P1)보다 앞",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-06-30",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "CONTRADICTION_OWNER_FIRST_HOME"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "CONTRADICTION_OWNER_FIRST_HOME"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-11",
+      "category": "CONFLICT",
+      "description": "정책대출 + 유주택 + 생애최초 → P0b가 먼저, Discovery로 분리 (모순 판정 안 함)",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": true,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "DISCOVERY_POLICY_LOAN"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "DISCOVERY_POLICY_LOAN"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-12",
+      "category": "CONFLICT",
+      "description": "처분조건부 1주택 + 생애최초 → 모순 아님(§E-138), 유효 조합 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": true,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "EXCEPTION_FIRST_HOME"
         ],
         "source_policy_ids": [
           "FSC_20260630",
@@ -5979,11 +6143,11 @@
       },
       "oracle": {
         "status": "DECIDED",
-        "max_ltv": 0.0,
-        "applicable_rule_id": "REG_OWNER_0",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
         "grandfathering_applied": false,
         "must_include_reasons": [
-          "LTV_OWNER_0"
+          "EXCEPTION_FIRST_HOME"
         ]
       }
     },

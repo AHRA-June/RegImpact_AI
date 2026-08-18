@@ -85,7 +85,7 @@ Hugging Face Spaces(SDK: streamlit)도 동일하게 동작한다. `requirements.
 ## 검증
 
 ```bash
-python -m pytest          # 108개 — 엔진 · 지역 레지스트리 · Extractor · TC · Impact · Streamlit
+python -m pytest          # 110개 — 엔진 · 지역 레지스트리 · Extractor · TC · Impact · Streamlit
 node tools/verify_js_port.mjs
 python examples/demo_impact_e2e.py    # 6·30 E2E 10/11 단계 (LLM 없이)
 ```
