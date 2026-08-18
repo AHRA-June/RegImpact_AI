@@ -1,7 +1,7 @@
 # RegImpact AI
 
 > **생성형 AI 기반 주택담보대출 규제 변경 영향분석 및 검증 시스템**
-> RegChange AI — Financial Policy Impact & Assurance Lab
+> RegImpact AI — Financial Regulation Impact & Assurance Platform
 
 정부의 가계대출 정책이 바뀌었을 때, 공식 원문에서 **무엇이 달라졌는지**를 탐지하고,
 그 변경이 **여신 Rule · 고객 영향 · 테스트케이스**로 어떻게 전파되는지를

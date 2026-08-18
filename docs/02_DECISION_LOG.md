@@ -27,6 +27,15 @@
 
 ## 결정 로그
 
+### 2026-08-18 · 제품 명칭 통일: RegImpact AI · ✅ 승인됨(사용자 확정)
+- **결정:** 제품/프로젝트 명칭을 **RegImpact AI** (Regulation + Impact) 하나로 통일. 영문 부제는
+  **"RegImpact AI — Financial Regulation Impact & Assurance Platform"**.
+  - 구 표기 "RegChange AI — Financial Policy Impact & Assurance Lab"는 폐기. "RegChange"는 변경 추출 컴포넌트명으로만 사용.
+  - 부제에서 "Policy"→"Regulation"(이름 약어와 일치 + 정책학 용어 오독 방지), "Lab"→"Platform"(사업화 트랙 반영).
+- **이유:** 이름 이원화(RegImpact vs RegChange)가 문서 최초 독자에게 혼란. 사업화 멘토링을 앞두고 단일 표기 필요.
+- **적용 범위:** README, 00_BRIEF(영문 부제·본문 상품명 3곳 — 원본 보존 원칙이나 사용자 명시 지시로 명칭 표기만 수정, 수정 사실을 해당 위치에 병기), BUSINESS_PLAN_v1. 코드 패키지명(`regimpact`)은 이미 일치.
+- **LOCKED 정합성:** 명칭은 LOCKED 목록에 없음(정체성 원칙 무관). ADJUSTABLE.
+
 ### 2026-08-10 · RegChange Extractor 구현 + LLM 선택 · ✅ 완료
 - **LLM:** Anthropic Claude, 기본 `claude-opus-5` (ADJUSTABLE §0 — 비용/성능 따라 교체 가능). structured output(`output_config.format`).
 - **아키텍처:** LLM 호출 주입 가능(injectable) → API 키·비용 없이 오프라인 테스트. `src/regimpact/extractor/`.

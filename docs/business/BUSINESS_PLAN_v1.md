@@ -1,7 +1,7 @@
 # RegImpact AI — 사업계획서 v1 (PSST)
 
 > **아이템명: RegImpact AI** (Regulation + Impact)
-> 영문: RegImpact AI — Regulation Impact & Assurance Platform
+> 영문: RegImpact AI — Financial Regulation Impact & Assurance Platform
 > 한 줄: **규제 오적용 사고를 막고, 막았다는 것을 증명하는 시스템**
 >
 > 작성일 2026-08-18 · v1 (v0 전면 재작성: 사건 서사 도입, 쐐기 상품 정의, BM 단일 경로 커밋, Live Fire 승격, 보수적 재무 추정)
