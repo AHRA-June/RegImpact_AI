@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-18
+- **갱신자:** Claude (온라인 테스트 환경 구축 세션)
+- **개발 브랜치:** `claude/online-testing-plan-8k0xmx`
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **온라인 테스트 환경 2종**(테스트 44 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -21,7 +21,20 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-10)
+## ✅ 방금 완료 (2026-08-18)
+- **온라인 테스트 환경 2종 구축** — 사용자가 브라우저에서 직접 조건을 바꿔가며 판정을 확인할 수 있게 됨.
+  1. **정적 샌드박스** `web/sandbox.html` — 룰엔진을 JS로 포팅한 자체완결 1파일(Artifact/GitHub Pages 어디든).
+     조건 조작 → LTV·reason_code 즉시 갱신, **우선순위 트레이스**(P0~P7 중 어디서 short-circuit 됐는지 시각화),
+     시행 전 대비 델타(Impact Matrix 1행의 원형), 회귀 30케이스 표(행 클릭 → 그 조건 로드).
+     **포팅 드리프트 방어:** 표의 골든 값은 사람이 적은 게 아니라 `tools/export_fixtures.py`가 실제 Python 엔진을
+     돌려 만든 `web/fixtures.json`이고, 페이지가 브라우저 계산값과 실시간 대조해 어긋나면 배지가 붉어진다.
+     추가로 `node tools/verify_js_port.mjs`가 커밋 전 헤드리스 대조(현재 30/30 일치).
+  2. **Streamlit 검증 콘솔** `app/streamlit_app.py` — 포팅본이 아니라 **저장소 Python 엔진 그대로**.
+     3탭: LTV 판정 / 회귀 콘솔(Pass Rate·카테고리별·미결항목) / Extractor(LLM, 키 있으면 실제 추출+Assurance 수치).
+     AppTest 스모크 테스트 5개 추가(`tests/test_streamlit_app.py`) — UI가 엔진을 잘못 호출하면 테스트가 잡음.
+  - 배포 가이드 `docs/ui/DEPLOY.md`. **사용자 액션 필요:** Streamlit Community Cloud 배포 버튼은 사용자가 눌러야 함.
+
+## ✅ 이전 완료 (2026-08-10)
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
   **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
   명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
@@ -32,11 +45,14 @@
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- **[사용자] Streamlit Cloud 배포** — `docs/ui/DEPLOY.md` 절차대로. 저장소 연결 + main file `app/streamlit_app.py`.
+- **[사용자] ANTHROPIC_API_KEY를 Secrets에 등록** → Extractor 탭에서 실제 LLM 1회 실행 → 첫 실측 Assurance 수치 확보.
+  (로컬로 하려면 `python examples/run_extractor.py`.)
+- **최소 Impact Matrix E2E** — 코어 완성 정의의 남은 큰 구멍. 샌드박스의 '시행 전 대비 델타'가 1행 원형이므로
+  이를 세그먼트별 다행 매트릭스로 확장하는 것이 다음 수직 슬라이스.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -86,6 +102,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18** — ✅ **온라인 테스트 환경 2종.** ①정적 샌드박스 `web/sandbox.html`(엔진 JS 포팅, 우선순위 트레이스 시각화, 회귀 30케이스 인터랙티브 표) + 빌드 파이프라인 `tools/export_fixtures.py`→`tools/build_sandbox.py`, 헤드리스 대조 `tools/verify_js_port.mjs`(30/30). 골든 기대값을 사람이 적지 않고 Python 엔진 실행으로 생성해 포팅 드리프트를 구조적으로 탐지. ②Streamlit 검증 콘솔 `app/streamlit_app.py`(실제 Python 엔진, 3탭) + AppTest 스모크 5개. 배포 가이드 `docs/ui/DEPLOY.md`. 테스트 44 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.

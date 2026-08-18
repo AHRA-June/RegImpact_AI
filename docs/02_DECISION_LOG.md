@@ -27,6 +27,23 @@
 
 ## 결정 로그
 
+### 2026-08-18 · 온라인 테스트 환경을 2종으로 이원화 · ✅ 채택
+- **결정:** 사용자가 온라인에서 직접 조작할 수 있는 표면을 **정적 샌드박스 + Streamlit 앱** 두 개로 나눈다.
+  - `web/sandbox.html` — 엔진 JS 포팅, 자체완결 1파일, 서버 불필요. 링크 하나로 즉시 시연·모바일.
+  - `app/streamlit_app.py` — 저장소 Python 엔진 그대로, LLM(Extractor) 실행 가능. 포트폴리오 실배포 URL.
+- **이유:** 두 표면의 목적이 다르다. 전자는 "지금 당장 클릭해서 보여줄 수 있는가"(배포·계정·키 불필요),
+  후자는 "실제 시스템이 도는가"(엔진 동일성·지표 산출·LLM). 하나로 합치면 둘 중 하나를 잃는다.
+- **감수한 비용과 그 통제:** JS 포팅본은 Python 엔진과 **어긋날 수 있다(드리프트)**. 이를 문서로 부탁하지 않고
+  구조로 막았다 — 골든 기대값을 사람이 적지 않고 `tools/export_fixtures.py`가 **실제 엔진을 돌려** 생성하고,
+  ①페이지가 로드 시 브라우저 계산값과 전 케이스 대조해 불일치 시 배지를 붉게 바꾸며
+  ②`node tools/verify_js_port.mjs`가 커밋 전 헤드리스로 같은 대조를 한다(현재 30/30).
+  **룰 변경 시 재빌드가 필수**임을 `docs/ui/DEPLOY.md`에 명시.
+- **LOCKED 정합:** §4(규칙 로직 LLM 미생성) 유지 — JS 포팅본도 확정 명세 §H의 구현이며 값은 명세에서 온다.
+  §10(검증가능성·추적가능성 우선) 강화 — 우선순위 트레이스로 "왜 이 판정인가"가 화면에서 추적된다.
+- **판정 주체 단일화:** Streamlit의 우선순위 트레이스는 규칙을 다시 구현하지 않고 **엔진 출력(reason_code·rule_id)을
+  단계 라벨로 역매핑**한다. 엔진이 유일한 판정 주체라는 원칙을 UI가 깨지 않게 하기 위함.
+- **사용자 액션 필요:** Streamlit Community Cloud 배포와 `ANTHROPIC_API_KEY` Secrets 등록은 계정 소유자만 가능.
+
 ### 2026-08-10 · RegChange Extractor 구현 + LLM 선택 · ✅ 완료
 - **LLM:** Anthropic Claude, 기본 `claude-opus-5` (ADJUSTABLE §0 — 비용/성능 따라 교체 가능). structured output(`output_config.format`).
 - **아키텍처:** LLM 호출 주입 가능(injectable) → API 키·비용 없이 오프라인 테스트. `src/regimpact/extractor/`.

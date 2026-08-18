@@ -1,0 +1,1308 @@
+{
+  "generated_by": "tools/export_fixtures.py",
+  "spec": "docs/05_RULE_SPEC.md v1 (§C·§E·§F·§H)",
+  "case_count": 30,
+  "cases": [
+    {
+      "case_id": "SCOPE-01",
+      "category": "SCOPE",
+      "description": "주택구입목적 아님 → OUT_OF_SCOPE",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "OTHER",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "OUT_OF_SCOPE",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "OUT_OF_SCOPE_PRODUCT"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "OUT_OF_SCOPE",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "OUT_OF_SCOPE_PRODUCT"
+        ]
+      }
+    },
+    {
+      "case_id": "SCOPE-02",
+      "category": "SCOPE",
+      "description": "정책대출 → Discovery (다른 조건 무시)",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": true,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "DISCOVERY_POLICY_LOAN"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "DISCOVERY_POLICY_LOAN"
+        ]
+      }
+    },
+    {
+      "case_id": "SCOPE-03",
+      "category": "SCOPE",
+      "description": "정책대출 + 다주택 → 여전히 Discovery",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 3,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": true,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "DISCOVERY_POLICY_LOAN"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "DISCOVERY",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "DISCOVERY_POLICY_LOAN"
+        ]
+      }
+    },
+    {
+      "case_id": "BASE-01",
+      "category": "BASELINE",
+      "description": "시행 전(6.15) 규제지역 코드 → 아직 非규제, 무주택 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-06-15",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_BASELINE_70"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      }
+    },
+    {
+      "case_id": "BASE-02",
+      "category": "BASELINE",
+      "description": "미등록 지역 → 非규제 기준선 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "SEOUL_GANGNAM",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_BASELINE_70"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      }
+    },
+    {
+      "case_id": "BASE-03",
+      "category": "BASELINE",
+      "description": "非규제 유주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
+      "spec_note": null,
+      "input": {
+        "region_code": "SEOUL_GANGNAM",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "OWNER_BASELINE_UNKNOWN"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "OWNER_BASELINE_UNKNOWN"
+        ]
+      }
+    },
+    {
+      "case_id": "EXC-01",
+      "category": "EXCEPTION",
+      "description": "규제지역 무주택 일반 → 40%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "EXC-02",
+      "category": "EXCEPTION",
+      "description": "규제지역 생애최초 → 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "EXCEPTION_FIRST_HOME"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      }
+    },
+    {
+      "case_id": "EXC-03",
+      "category": "EXCEPTION",
+      "description": "규제지역 서민·실수요 → 60%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": true,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.6,
+        "applicable_rule_id": "REG_REALDEMAND",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "EXCEPTION_REAL_DEMAND"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.6,
+        "applicable_rule_id": "REG_REALDEMAND",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_REAL_DEMAND"
+        ]
+      }
+    },
+    {
+      "case_id": "EXC-04",
+      "category": "EXCEPTION",
+      "description": "처분조건부 1주택 = 무주택 기준 → 40%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": true,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "EXC-05",
+      "category": "EXCEPTION",
+      "description": "처분조건부 1주택 + 생애최초 → 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": true,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "EXCEPTION_FIRST_HOME"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-EFF-01",
+      "category": "BOUNDARY",
+      "description": "효력일 전일(6.30) 평가 → 아직 非규제 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-06-30",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_BASELINE_70"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_BASELINE_70"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-EFF-02",
+      "category": "BOUNDARY",
+      "description": "효력일 당일(7.1) 평가 → 규제 40%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-01",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-G1-cutoff",
+      "category": "BOUNDARY",
+      "description": "전산 접수일 2026-06-30 (cutoff) → 경과규정 경계",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-06-30",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-G1-cutoff-1",
+      "category": "BOUNDARY",
+      "description": "전산 접수일 2026-06-29 (cutoff-1) → 경과규정 경계",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-06-29",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-G1-cutoff+1",
+      "category": "BOUNDARY",
+      "description": "전산 접수일 2026-07-01 (cutoff+1) → 경과규정 경계",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-07-01",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-HC-0",
+      "category": "BOUNDARY",
+      "description": "규제지역 house_count=0 (비처분) 경계",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-HC-1",
+      "category": "BOUNDARY",
+      "description": "규제지역 house_count=1 (비처분) 경계",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_OWNER_0"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_OWNER_0"
+        ]
+      }
+    },
+    {
+      "case_id": "BND-HC-2",
+      "category": "BOUNDARY",
+      "description": "규제지역 house_count=2 (비처분) 경계",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 2,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "MULTI_0",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_MULTI_HOME_0"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "MULTI_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_MULTI_HOME_0"
+        ]
+      }
+    },
+    {
+      "case_id": "GF-G1-01",
+      "category": "GRANDFATHERING",
+      "description": "G1 전산 접수 6.30 → 종전규정 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-06-30",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      }
+    },
+    {
+      "case_id": "GF-G1-02",
+      "category": "GRANDFATHERING",
+      "description": "G1 전산 접수 7.1 → 신규규정 40%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-07-01",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "GF-G2-01",
+      "category": "GRANDFATHERING",
+      "description": "G2 계약 6.29 + 계약금 → 종전규정 (접수 7.1이어도)",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-07-01",
+        "contract_signed_at": "2026-06-29",
+        "downpayment_paid_at": "2026-06-29",
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      }
+    },
+    {
+      "case_id": "GF-G2-02",
+      "category": "GRANDFATHERING",
+      "description": "G2 계약만 있고 계약금 미납 → 경과규정 불인정 40%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": "2026-06-29",
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "GF-G3-01",
+      "category": "GRANDFATHERING",
+      "description": "G3 토허제 신청 6.30 → 이후 계약해도 종전규정",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": "2026-07-10",
+        "downpayment_paid_at": null,
+        "land_permit_target": true,
+        "land_permit_applied_at": "2026-06-30",
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_LAND_PERMIT"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_LAND_PERMIT"
+        ]
+      }
+    },
+    {
+      "case_id": "GF-G3-02",
+      "category": "GRANDFATHERING",
+      "description": "G3 토허제 대상 아님 → 신청일 있어도 경과규정 불인정",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": "2026-06-30",
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-01",
+      "category": "CONFLICT",
+      "description": "생애최초 + 서민실수요 동시 → 상위(P5) 생애최초 70%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": true,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "EXCEPTION_FIRST_HOME"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "REG_FIRSTHOME",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "EXCEPTION_FIRST_HOME"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-02",
+      "category": "CONFLICT",
+      "description": "경과규정 + 생애최초 동시 → 경과규정(P1) 우선, 종전 70%로 수렴",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-06-30",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.7,
+        "applicable_rule_id": "NONREG_STD_70",
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-03",
+      "category": "CONFLICT",
+      "description": "경과규정 + 유주택(다주택) → 종전 유주택 기준값 부재 → escalation",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 2,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": "2026-06-20",
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": true,
+        "reason_codes": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT",
+          "OWNER_BASELINE_UNKNOWN"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": true,
+        "must_include_reasons": [
+          "GRANDFATHERED_ACCEPTED_OR_CONTRACT",
+          "OWNER_BASELINE_UNKNOWN"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-04",
+      "category": "CONFLICT",
+      "description": "유주택(비처분 1주택) + 생애최초: §H(P4) short-circuit → 0%",
+      "spec_note": "알려진 명세 모호성: §E 주석은 '유주택+생애최초=논리상 불가, 데이터 충돌 시 NEEDS_HUMAN_REVIEW'라 하나, §H(엔진 구현 기준) 의사코드는 P4에서 0%로 short-circuit 한다. 여기서는 권위 기준(§H)을 채택. 03_OPEN_QUESTIONS 참조.",
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 1,
+        "disposal_condition_flag": false,
+        "first_home_buyer": true,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_OWNER_0"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "REG_OWNER_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_OWNER_0"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-05",
+      "category": "CONFLICT",
+      "description": "다주택 + 서민실수요 → 다주택(P3)이 우선 0%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 2,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": true,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "MULTI_0",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_MULTI_HOME_0"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.0,
+        "applicable_rule_id": "MULTI_0",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_MULTI_HOME_0"
+        ]
+      }
+    }
+  ]
+}
