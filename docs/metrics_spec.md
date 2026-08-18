@@ -59,37 +59,65 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 
 ## 1. RegChange / RAG 계열 (브리프 §13.1) — [DEEP] dimension ②③
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계(초안) | high-risk |
-|---|---|---|---|---|---|
-| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | TBD | 놓침=위험 |
-| Exception Recall | 예외조건(생애최초·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | TBD | ★ 높음 |
-| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | TBD | ★ 높음 |
-| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | TBD | ★ 높음 |
-| Citation Correctness | 인용이 실제 원문 위치와 일치하는 비율 | 생성 인용 수 | 정확 인용 수 | TBD | 중 |
-| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 |
+| 지표 | 정의 | 분모 | 분자 | 임계 🤖 | high-risk | 실측 |
+|---|---|---|---|---|---|---|
+| Change Completeness | 원문의 실제 변경사항 중 시스템이 포착한 비율 | 골드 변경 항목 수 | 정확 포착 수 | **≥ 95%** | 놓침=위험 | **100%** |
+| Exception Recall | 예외조건(생애최초·서민실수요·정책대출 등) 중 포착 비율 | 골드 예외 수 | 포착 수 | **100%** | ★ 높음 | **100%** |
+| Grandfathering Recall | 경과규정 적용대상 판정 중 포착 비율 | 골드 경과규정 케이스 | 정확 판정 | **100%** | ★ 높음 | 100%(GF 3종) |
+| Effective-date Accuracy | 시행일 정확 추출 비율 | 시행일 있는 케이스 | 정확 케이스 | **100%** | ★ 높음 | OK |
+| Citation Correctness | 인용이 실제 원문에 verbatim 존재하는 비율 | 생성 인용 수 | 정확 인용 수 | **≥ 98%** | 중 | **100%** |
+| Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 | 미측정(단일 정책) |
+
+#### 임계값 근거 (2026-08-18 🤖 제안 — ✍️ 확정 대기)
+
+**임계값은 "우리가 받은 점수"가 아니라 "이 실패가 얼마나 위험한가"에서 정한다.** 실측치는
+그 임계가 달성 가능함을 보이는 증거일 뿐, 임계의 근거가 아니다(달성치를 그대로 임계로 삼으면
+곡선에 맞춰 채점하는 것이 된다).
+
+- **Exception Recall 100%** — 예외를 놓치면 규제 적용을 과대·과소 판정한다. 여신 심사에서 이건
+  고객에게 직접 손해가 가는 오류다. 타협 구간이 없다. (실제로 D-02에서 50%가 나왔고, 구조를
+  바꿔 100%를 만들었다 — 달성 가능한 요구임이 확인됐다.)
+- **Effective-date / Grandfathering 100%** — 시행일 하나가 틀리면 그 위의 판정이 전부 틀린다.
+  경과규정 누락은 이미 접수한 고객의 조건을 소급해 바꾸는 결과가 된다.
+- **Change Completeness ≥ 95%** — 100%를 요구하지 않는 이유: 변경 항목은 열거의 경계가
+  해석에 따라 달라진다(무엇을 한 건으로 셀 것인가). 다만 놓친 항목은 반드시 목록으로 보고한다.
+- **Citation Correctness ≥ 98%** — 인용 무결성은 검증보고서 전체의 기반이다. 다만 원문 추출
+  아티팩트로 인한 오차 여지를 2% 둔다(공백 처리 문제로 실제 오판정이 있었다 — D-03 참고).
+- **Policy-version Consistency** — 6·30 단일 정책만 있어 측정 불가. 정책 사례가 늘면 정한다.
+  **측정할 수 없는 지표에 임계를 먼저 적지 않는다.**
+
+> 실측 근거: `docs/eval/EXTRACTOR_RUN_REPORT.md` §6·§7 (골드 v3, **사용자 검수 확정**,
+> 지문 `098cd126`). 문서별 추출 기준이며 단일 패스는 88% / 50%다.
 
 ## 2. Hallucination 계열 — 분리 측정 (브리프 §13.2) — [DEEP] dimension ①
 
 > `hallucination rate` 단일 지표로 뭉뚱그리지 않는다.
 
-| 지표 | 정의(초안) | 분모 | 분자 | 임계 |
-|---|---|---|---|---|
-| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | 낮을수록 좋음, TBD |
-| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | 0에 가까울수록, TBD |
+| 지표 | 정의 | 분모 | 분자 | 임계 🤖 | 실측 |
+|---|---|---|---|---|---|
+| Unsupported Claim Rate | 원문 근거 없이 생성된 정책 주장 비율 | 생성된 정책 주장 총수 | 근거 없는 주장 수 | **≤ 2%** | **0%** |
+| Source Contradiction Rate | 원문과 명시적으로 충돌하는 주장 비율 | 생성된 정책 주장 총수 | 원문 충돌 주장 수 | **0%** | 미측정 |
+| **Escalation Recall** | 원문에 답이 없는 질의에서 사람에게 올린 비율 | 답 없는 골드 문항 | escalate한 수 | **100%** | **100%** (DEV) |
+| **Escalation Precision** | 올린 것 중 실제로 올려야 했던 비율 | escalate한 수 | 올려야 했던 수 | **≥ 70%** | 100% (DEV) |
+
+> **Escalation Recall이 이 계열의 핵심이다.** 원문에 없는 답을 지어내는 것이 이 시스템의
+> 1순위 실패이고, 그것을 직접 재는 유일한 지표다. Precision을 100%로 요구하지 않는 이유:
+> 과잉 escalation은 사람의 시간을 쓰는 **비용**이지만, 누락은 틀린 답이 그대로 나가는 **위험**이다.
+> 둘을 같은 무게로 두지 않는다.
 
 ## 3. Rule / Test 계열 (브리프 §13.3) — [DEEP] dimension ④
 
 > ✅ **구현: `src/regimpact/tc_generator/`** — 룰엔진을 **독립 명세 오라클(challenger)** 로 차등 검증.
 > 기대값을 엔진 자신이 아니라 명세(§H)에서 독립 유도 → 회귀가 tautology가 되지 않음.
 > `run_regression()` 이 아래 지표를 카테고리별로 산출(`report.pass_rate_by_category()`).
-> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 30 케이스 전 항목 100%.
+> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 34 케이스 전 항목 100%.
 
 | 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값 |
 |---|---|---|---|---|---|
-| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | 100% 목표 | 30/30 (100%) |
-| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | TBD | 30/30 |
-| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | TBD | 8/8 |
-| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | TBD | 5/5 |
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | **100%** | 34/34 (100%) |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | **100%** | 34/34 |
+| Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | **100%** | 8/8 |
+| Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | **100%** | 5/5 |
 
 > 주: 현재값은 6·30 시나리오 소규모 seed 케이스 기준. 층화 합성 포트폴리오(2,000~5,000, `04_PLAN.md` Phase 2)로 확대 예정.
 

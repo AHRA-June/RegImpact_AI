@@ -50,9 +50,15 @@ conf = check_gold_against_spec(items)
 by_id = {i.id: i for i in items}
 
 VER = gold["_version"].split()[0]
+from regimpact.eval import check_confirmation  # noqa: E402
+
+status = check_confirmation(gold)
 L = [f"# 추출 골드 {VER} 도메인 검수표", "",
-     "> 생성: `python tools/build_gold_review.py` · 전 항목 🤖 `ai_draft` — ✍️ 확정 대기",
-     "> 확정한 항목은 `authored_by`를 `human_confirmed`로 바꾸고 이 표를 다시 생성하세요.", ""]
+     f"> 생성: `python tools/build_gold_review.py` · **{status.summary()}**", ""]
+if status.needs_review:
+    L += ["> ⚠️ 확정 이후 채점 관련 내용이 바뀌었다. 바뀐 항목을 다시 확인해야 한다.", ""]
+elif status.confirmed:
+    L += ["> 이 문서는 이제 **검수 기록**이다. 골드를 손보면 지문이 어긋나 재검수가 필요함이 드러난다.", ""]
 
 # ---------------------------------------------------------------- §1
 resolved = [i for i in items if i.authored_by == "human_confirmed"]
@@ -97,7 +103,8 @@ L += ["---", "", f"## 3. 추출 골드 {VER} — 필수 변경 {len(gold['requir
       "각 항목은 \"공문이 이것을 말하고 있다\"는 주장이다. 인용이 그 주장을 뒷받침하는지 확인한다.", ""]
 for r in gold["required_changes"]:
     n, how = specificity(r)
-    L += [f"#### ☐ `{r['id']}` — {r['claim']}",
+    mark = "✅" if r.get("authored_by") == "human_confirmed" else "☐"
+    L += [f"#### {mark} `{r['id']}` — {r['claim']}",
           f"- 채점: {how} · 현재 추출 {len(_items)}건 중 **{n}건**에 매칭"
           + ("  ⚠ 0건이면 채점 불가" if n == 0 else "")]
     if "transition" not in r:
@@ -109,7 +116,8 @@ for r in gold["required_changes"]:
 L += ["---", "", f"## 4. 추출 골드 {VER} — 예외 {len(gold['exceptions'])}건", ""]
 for e in gold["exceptions"]:
     n, _ = specificity(e)
-    L += [f"#### ☐ `{e['name']}` — {e['claim']}",
+    mark = "✅" if e.get("authored_by") == "human_confirmed" else "☐"
+    L += [f"#### {mark} `{e['name']}` — {e['claim']}",
           f"- 채점: 키워드 `{'`, `'.join(e['keywords'])}` · 현재 추출 {len(_items)}건 중 **{n}건**에 매칭"]
     for cit in e["citations"]:
         L.append(f"  > [{cit['source_doc_id']}] {' '.join(cit['quote'].split())[:150]}")
@@ -199,9 +207,10 @@ for it in resolved:
 def check_items(entries, key):
     out = []
     for e in entries:
+        done = e.get("authored_by") == "human_confirmed"
         out.append(f"""
-      <li class="item">
-        <label class="check"><input type="checkbox" class="cb"><span></span></label>
+      <li class="item{' confirmed' if done else ''}">
+        <label class="check"><input type="checkbox" class="cb"{' checked' if done else ''}><span></span></label>
         <div class="body">
           <div class="head"><code>{esc(e[key])}</code><span class="claim">{esc(e["claim"])}</span></div>
           <div class="kw">{"".join(f'<kbd>{esc(k)}</kbd>' for k in (e["keywords"] if "transition" not in e else [f'{e["transition"].get("before","—")} → {e["transition"].get("after","—")}']))}<span class="hits">{specificity(e)[0]}건 매칭</span></div>
@@ -295,6 +304,7 @@ section {{ display:flex; flex-direction:column; gap:18px; }}
 ol.items {{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }}
 .item {{ display:flex; gap:14px; padding:14px 12px; border-bottom:1px solid var(--line); }}
 .item:has(.cb:checked) {{ background:var(--panel-2); }}
+.item.confirmed {{ border-left:3px solid var(--ok); }}
 .item:has(.cb:checked) .claim {{ color:var(--ink-2); text-decoration:line-through; }}
 .check {{ flex-shrink:0; padding-top:3px; cursor:pointer; }}
 .check input {{ position:absolute; opacity:0; width:0; height:0; }}
@@ -327,7 +337,7 @@ footer {{ color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); 
     <p class="lede">6·30 RegChange 추출 골드 {total_items}항목. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim은 보장되지만,
     <strong>그 인용이 그 주장을 뒷받침하는지는 사람이 판단할 몫</strong>이다.</p>
     <div class="meta">
-      <span>검수 완료 {len(resolved)}건</span><span>충돌 {len(conf.conflicts)}건</span>
+      <span>{esc(status.summary())}</span><span>충돌 {len(conf.conflicts)}건</span>
       <span>필수 변경 {len(gold["required_changes"])}</span><span>예외 {len(gold["exceptions"])}</span>
     </div>
   </header>

@@ -78,21 +78,30 @@ payload = {
     "_scoring": "keywords는 동의 표현 대안이며 하나만 맞아도 히트다. 여러 사실을 한 entry에 묶지 않는다. 매칭 대상은 추출 항목의 summary/before/after이며 citation은 채점에 쓰지 않는다.",
     "_limitation": "키워드가 항목 전체를 훑으므로 한 항목이 두 entry의 키워드를 함께 담으면 둘 다 히트로 잡힌다. 항목 단위 1:1 대응은 검증하지 않는다.",
     "_version": "v3 (2026-08-18) — 검수 중 측정 품질 정비. ①예외 3건을 required_changes에서 제거(exceptions와 동일 키워드로 이중 측정) ②값 전이는 transition으로 before/after 직접 대조 ③광범위 키워드 4건 축소(SCOPE_JEONSE 17건→5건 매칭 등). 엄격해진 뒤에도 Completeness/Exception Recall 100% 유지 — 기존 100%가 느슨한 키워드 덕이 아니었음을 뜻한다. required 19→16이므로 v2.1 수치와 분모가 다르다.",
-    "_review": "전 항목 🤖 ai_draft. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim이 보장되지만, **그 인용이 그 주장을 뒷받침하는지**는 사람 검수 대상이다. 검수표: docs/eval/GOLD_V2_REVIEW.md",
-    "authored_by": "ai_draft",
+    "_review": "✅ 2026-08-18 사용자 도메인 검수 완료 — 20항목 전부 인용이 주장을 뒷받침함을 확인. 이후 내용이 바뀌면 _confirmed.digest가 어긋나 재검수가 필요함이 드러난다. 검수표: docs/eval/GOLD_V2_REVIEW.md",
+    "authored_by": "human_confirmed",
     "policy_id": "FSC_20260630",
     "effective_from": "2026-07-01",
     "target_regions": ["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"],
     "required_changes": [
         {"id": i, "categories": c, "keywords": k, "claim": claim, "citations": cits,
-         **({"transition": tr} if tr else {})}
+         "authored_by": "human_confirmed", **({"transition": tr} if tr else {})}
         for i, c, k, claim, cits, tr in REQUIRED
     ],
     "exceptions": [
-        {"name": n, "keywords": k, "claim": claim, "citations": cits}
+        {"name": n, "keywords": k, "claim": claim, "citations": cits,
+         "authored_by": "human_confirmed"}
         for n, k, claim, cits in EXCEPTIONS
     ],
 }
+
+# 확정 지문 — 이 시점의 채점 관련 내용을 해시로 박아 둔다.
+sys.path.insert(0, str(REPO / "src"))
+from regimpact.eval.confirmation import compute_digest  # noqa: E402
+
+payload["_confirmed"] = {"date": "2026-08-18", "by": "user (domain review)",
+                         "scope": "20 entries — 인용이 주장을 뒷받침함을 확인",
+                         "digest": compute_digest(payload)}
 
 out = REPO / "docs" / "eval" / "regchange_gold_6_30.json"
 out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

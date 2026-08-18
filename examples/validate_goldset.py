@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from regimpact.eval import (  # noqa: E402
     Split,
+    check_confirmation,
     check_gold_against_spec,
     coverage_report,
     load_split,
@@ -60,6 +61,17 @@ def main() -> None:
         print("  ❌", c)
     if conf.conflicts:
         print("  → 검수표: docs/eval/GOLD_V2_REVIEW.md §1")
+
+    # 추출 골드의 확정 상태 — 확정 이후 내용이 바뀌었으면 재검수가 필요하다
+    import json as _json
+    extraction_gold = _json.loads(
+        (Path(__file__).resolve().parent.parent / "docs/eval/regchange_gold_6_30.json")
+        .read_text(encoding="utf-8")
+    )
+    st = check_confirmation(extraction_gold)
+    print(f"\n추출 골드 확정 상태 — {st.summary()}")
+    if st.needs_review:
+        print("  → python tools/build_gold_review.py 로 검수표를 다시 만들고 재검수하세요")
     print("\n주의: LOCKED/CHALLENGE 접근은 docs/eval/gold/SEAL_ACCESS_LOG.md에 기록됩니다.")
 
 

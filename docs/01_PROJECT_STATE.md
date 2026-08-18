@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (골드 v3 측정 정비 세션)
+- **갱신자:** Claude (추출 골드 검수 완료 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 209 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 217 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,19 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 11차)
+## ✅ 방금 완료 (2026-08-18 · 12차)
+- **★ 추출 골드 v3 검수 완료(사용자)** — 20항목 전부 인용이 주장을 뒷받침함 확인, 전 항목
+  `human_confirmed`. **이제 Extractor 지표(Completeness 100% / Exception Recall 100%)가
+  사람이 확정한 골드 위의 수치다.**
+- **확정 지문 도입** — `human_confirmed`는 그 시점 내용에 대한 확정인데 골드는 계속 손보게 된다.
+  채점에 영향을 주는 필드만 해시해 박고, 어긋나면 재검수를 요구한다(변경을 막지는 않음).
+  설명 문구 변경은 지문에서 제외 — 통제가 성가심이 되면 우회당한다.
+- **metrics_spec 임계값 확정 🤖** — TBD 10여 개 → 1개(Policy-version, 측정 불가).
+  임계는 점수가 아니라 **위험**에서 정했다: 예외·시행일·경과규정·escalation 누락은 100%,
+  Completeness 95%·Citation 98%는 해석/추출 아티팩트 여지. ✍️ 확정 대기.
+- 테스트 209 → **217**.
+
+## ✅ 이전 완료 (2026-08-18 · 11차)
 - **★ 골드 v3 — 검수 중 측정 품질 정비.** 각 entry가 실제로 무엇을 재는지 측정해
   ①이중 측정 3건 제거(required ↔ exceptions 키워드 동일) ②과잉 키워드 축소
   (`SCOPE_JEONSE` 17건→5건 매칭) ③**`transition` 채점 신설** — before/after 필드를 직접 대조.
@@ -173,7 +185,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(209), `python examples/validate_goldset.py`(골드셋 무결성),
+- 실행: `python -m pytest`(217), `python examples/validate_goldset.py`(골드셋 무결성),
   `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
@@ -189,9 +201,9 @@
   `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
 - **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
 - ~~**Extractor 튜닝(D-02)**~~ — ✅ **완료(2026-08-18): 문서별 추출 + 병합, 100%/100%.**
-- **✍️ 골드 v2 검수 2차(사용자)** — 충돌 3건은 ✅ 완료. 남은 것은 추출 골드 23항목 확인
-  (검수표 §3·§4). 각 항목의 인용이 그 주장을 뒷받침하는지 판단.
-- **✍️ QA 골드 DEV 40 검수** — 그다음 우선순위. 확정되면 QA 지표가 절대값으로도 신뢰 가능해진다.
+- ~~**추출 골드 검수**~~ — ✅ **완료(2026-08-18). 20항목 전부 확정.**
+- **✍️ metrics_spec 임계값 확정(사용자)** — 🤖 제안 상태. 위험 기준으로 정했고 근거를 함께 적었다.
+- **✍️ QA 골드 DEV 40 검수** — 확정되면 QA 지표(Fact Coverage 95.0% 등)도 절대값으로 신뢰 가능.
 - **LOCKED/CHALLENGE 실행 시점 판단** — 코어 완성 후 1회. 지금은 봉인 유지.
 - **✍️ 골드셋 도메인 검수** — DEV 40부터. 현재 절대 수치는 초안 기준이다.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
@@ -247,6 +259,10 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (13차)** — ✅ **추출 골드 v3 검수 완료.** 사용자가 20항목 전부 확인 → 전 항목
+  `human_confirmed`. Extractor 지표가 확정 근거를 갖게 됐다. **확정 지문** 도입 —
+  확정 이후 채점 관련 내용이 바뀌면 재검수를 요구한다(설명 문구 변경은 제외). metrics_spec
+  임계값을 **위험 기준**으로 확정(🤖) — TBD 10여 개 → 1개(측정 불가한 것만 남김). 테스트 209→217.
 - **2026-08-18 (12차)** — ✅ **골드 v3 측정 정비.** 23항목 검수 준비 중 각 entry의 채점 특이도를
   측정해 이중 측정·과잉 키워드·전이 미측정 세 문제를 고쳤다. `transition` 채점 신설(before/after
   직접 대조) — "70%가 어딘가 있다"와 "70%→40%로 바뀌었다"는 다른 주장이고 이 제품의 핵심은 후자다.

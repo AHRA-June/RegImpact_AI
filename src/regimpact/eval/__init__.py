@@ -4,6 +4,7 @@
     split_stats(Split.LOCKED)      # 정답을 보지 않고 구성만 확인 (봉인 유지)
     validate_items(items, sources) # 인용이 원문에 실제로 있는지 등 무결성 검사
 """
+from .confirmation import ConfirmationStatus, check_confirmation, compute_digest
 from .consistency import ConsistencyReport, check_gold_against_spec
 from .goldset import (
     ACCESS_LOG,
@@ -47,6 +48,7 @@ __all__ = [
     "GoldItem", "Citation", "Category", "Split", "ValidationReport",
     "HIGH_RISK_CATEGORIES", "validate_items", "KNOWN_RULE_IDS",
     "check_gold_against_spec", "ConsistencyReport",
+    "check_confirmation", "compute_digest", "ConfirmationStatus",
     "answer_questions", "score_qa", "format_qa_report", "build_qa_prompt",
     "QAReport", "QAResponse", "QA_SYSTEM_PROMPT", "QA_JSON_SCHEMA",
     "validate_qa_response", "QA_JSON_INSTRUCTION", "fact_matches",
