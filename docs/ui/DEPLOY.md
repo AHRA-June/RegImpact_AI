@@ -62,8 +62,15 @@ python tools/build_static.py     # 조각 → 온전한 HTML 문서 → web/dist
 > Vercel 이 suffix 를 붙였기 때문이다(`.vercel.app` 서브도메인은 전역 유일).
 >
 > ⚠️ **Production Branch 확인 필요.** 저장소 기본 브랜치가 `claude/portfolio-project-planning-9sip11`
-> (구버전)이므로, Vercel Project → Settings → Git → Production Branch 가
-> `claude/online-testing-plan-8k0xmx` 로 지정돼 있어야 이후 푸시가 이 URL에 반영된다.
+> (구버전)이므로, 이 URL 이 최신을 서빙하려면 프로덕션 브랜치가 `claude/online-testing-plan-8k0xmx`
+> 여야 한다.
+>
+> 위치: **Project → Settings → Environments → Production** (예전 `Settings → Git` 이 아니다.
+> Vercel 이 브랜치 트래킹 설정을 Environments 아래로 옮겼다.)
+>
+> **확인 방법:** 랜딩 페이지(`/`) 하단에 **빌드 커밋** 이 찍혀 있다.
+> 그 값이 저장소 최신 커밋과 다르면 배포가 옛 커밋에 머물러 있는 것이다
+> (`git rev-parse --short HEAD` 와 대조).
 
 **Streamlit 은 Vercel 에 올릴 수 없다.** Streamlit 은 WebSocket 을 유지하는 상주 서버라
 서버리스 함수 모델과 맞지 않는다. Vercel 에는 정적 페이지 2종만 올리고, Streamlit 은

@@ -17,6 +17,7 @@ Artifact 플랫폼이 게시 시점에 `<!doctype html><head>…</head><body>` �
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +48,22 @@ img,svg{{max-width:100%;height:auto}}
 </body>
 </html>
 """
+
+
+def build_commit() -> str:
+    """이 산출물이 어느 커밋에서 만들어졌는지.
+
+    `web/dist/` 는 빌드 결과를 커밋해 두므로(Vercel 에서 Python 을 돌리지 않기 위해),
+    배포된 페이지에 이 값을 찍어 두면 **지금 떠 있는 사이트가 어느 커밋인지** 눈으로 확인된다.
+    Production Branch 가 잘못 걸려 옛 커밋이 서빙되는 상황을 바로 잡아낼 수 있다.
+    (여기 찍히는 값은 '빌드 시점의 HEAD' 이므로, 이 산출물을 담은 커밋의 부모다.)
+    """
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              cwd=ROOT, capture_output=True, text=True,
+                              check=True).stdout.strip()
+    except Exception:
+        return "unknown"
 
 
 def _split(fragment: str) -> tuple[str, str, str]:
@@ -157,9 +174,11 @@ footer code{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:
   </div>
 
   <footer>
-    두 페이지 모두 <b>자체완결 정적 파일</b>이며, 화면에 뜨는 수치는 저장소의 Python 파이프라인이
-    산출해 박아 넣은 것이다(페이지는 계산하지 않는다). 정책 업로드·LLM 추출처럼 서버가 필요한 기능은
-    Streamlit 콘솔 쪽에 있다 — <code>docs/ui/DEPLOY.md</code> 참고.
+    <p style="margin:0 0 8px">두 페이지 모두 <b>자체완결 정적 파일</b>이며, 화면에 뜨는 수치는 저장소의
+    Python 파이프라인이 산출해 박아 넣은 것이다(페이지는 계산하지 않는다). 정책 업로드·LLM 추출처럼
+    서버가 필요한 기능은 Streamlit 콘솔 쪽에 있다 — <code>docs/ui/DEPLOY.md</code> 참고.</p>
+    <p style="margin:0">빌드 커밋 <code>__BUILD_COMMIT__</code> · 이 값이 저장소 최신 커밋과 다르면
+    배포가 옛 커밋에 머물러 있다는 뜻이다.</p>
   </footer>
 </div>
 """
@@ -186,7 +205,7 @@ def main() -> None:
                     '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
                     'family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600'
                     '&family=Song+Myung&display=swap">'),
-        body=INDEX_BODY), encoding="utf-8")
+        body=INDEX_BODY.replace("__BUILD_COMMIT__", build_commit())), encoding="utf-8")
     outs.append(index)
 
     for o in outs:
