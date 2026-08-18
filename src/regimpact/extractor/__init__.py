@@ -13,6 +13,7 @@ from .backends import (
     validate_regchange,
 )
 from .extractor import extract_regchange
+from .merge import MergeReport, extract_per_document, merge_cross_document
 from .postprocess import RegionNormalizationReport, normalize_regions
 from .evaluate import (
     GoldReport,
@@ -25,6 +26,9 @@ from .sources import load_sources
 
 __all__ = [
     "extract_regchange",
+    "extract_per_document",
+    "MergeReport",
+    "merge_cross_document",
     # 백엔드 (무과금 경로 우선)
     "resolve_completion",
     "available_providers",

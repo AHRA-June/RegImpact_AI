@@ -88,11 +88,16 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
     ]
 
     def _found(keywords: list[str], categories: list[str] | None = None) -> bool:
+        """키워드 중 **하나라도** 포착되면 히트. 여러 사실을 한 항목에 묶지 말고 별도 entry로 나눈다.
+
+        키워드도 haystack과 같은 정규화를 거쳐야 한다 — 한쪽만 정규화하면 공백이 든 키워드
+        ("7월 1일")가 영원히 매칭되지 않는다.
+        """
         cats = {c.category for c in extraction.changes}
         if categories and not (set(categories) & cats):
             # 카테고리 힌트가 있으면 우선 확인하되, 키워드 매칭이 본판정
             pass
-        return any(any(kw.lower() in h for kw in keywords) for h in hay)
+        return any(any(_norm(kw).lower() in h for kw in keywords) for h in hay)
 
     missed_changes, hit_changes = [], 0
     for req in gold.get("required_changes", []):

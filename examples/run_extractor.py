@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from regimpact.extractor import (  # noqa: E402
     LLMBackendError,
+    extract_per_document,
     available_providers,
     check_citation_grounding,
     extract_regchange,
@@ -44,6 +45,8 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--run", default=None, help="--provider replay 일 때 재생할 run JSON 경로")
     p.add_argument("--tag", default=None, help="실행 기록 파일명에 붙일 태그")
     p.add_argument("--no-save", action="store_true", help="실행 기록을 저장하지 않음")
+    p.add_argument("--per-document", action="store_true",
+                   help="문서별 개별 추출 후 병합 (호출 N배, 문서 간 축약 손실 방지)")
     return p.parse_args()
 
 
@@ -61,15 +64,29 @@ def main() -> None:
     kwargs = {"run_path": args.run} if args.provider == "replay" else {}
     if args.provider == "manual":
         kwargs["workdir"] = RUNS_DIR / "manual"
+    merge_report = None
     try:
         complete = resolve_completion(args.provider, model=args.model, **kwargs)
-        extraction = extract_regchange(sources, complete=complete)
+        if args.per_document:
+            extraction, merge_report = extract_per_document(
+                sources, complete=complete, cache_dir=RUNS_DIR / 'perdoc_cache'
+            )
+        else:
+            extraction = extract_regchange(sources, complete=complete)
     except LLMBackendError as e:
         print(f"\n[LLM 백엔드] {e}")
         return
     except ImportError:
         print("\n[안내] anthropic SDK 미설치. `pip install anthropic` 또는 무과금 provider를 쓰세요.")
         return
+
+    if merge_report is not None:
+        print(f"\n=== 문서별 추출 → 병합 ===")
+        for doc_id, n in merge_report.per_document.items():
+            print(f"    {doc_id}: {n}건")
+        print(f"    병합 {merge_report.merged_count}건 (중복 제거 {merge_report.duplicates_removed}건)")
+        for c in merge_report.conflicts:
+            print(f"    ⚠ {c}")
 
     print(f"\n=== 추출 결과 ({len(extraction.changes)}건) ===")
     for c in extraction.changes:
@@ -116,6 +133,15 @@ def main() -> None:
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     record = {
         "provider": args.provider,
+        "per_document": args.per_document,
+        "merge": None if merge_report is None else {
+            "per_document": merge_report.per_document,
+            "raw_count": merge_report.raw_count,
+            "merged_count": merge_report.merged_count,
+            "duplicates_removed": merge_report.duplicates_removed,
+            "cross_document_merged": merge_report.cross_document_merged,
+            "conflicts": merge_report.conflicts,
+        },
         "model": args.model,
         "source_sha256": {
             doc_id: hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]

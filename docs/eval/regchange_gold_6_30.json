@@ -1,16 +1,38 @@
 {
-  "_note": "6·30 RegChange 골드 정답지 — 사람이 regulatory_facts.md에서 확정(LOCKED §4, AI초안→사람확정). extractor 출력 채점 기준.",
+  "_note": "6·30 RegChange 추출 골드 정답지 — 사람이 regulatory_facts.md에서 확정(LOCKED §4, AI초안→사람확정). extractor 출력 채점 기준. DEV 등급(튜닝에 사용) — 봉인된 QA split과 별개다.",
+  "_scoring": "required_changes/exceptions의 keywords는 **동의 표현 대안**이며 하나만 맞아도 히트다. 여러 사실을 한 entry에 묶지 않는다. 매칭 대상은 추출 항목의 summary/before/after이며 citation은 채점에 쓰지 않는다 — 내용에 담기지 않은 것은 다음 단계로 전달되지 않기 때문이다.",
+  "_limitation": "키워드가 항목 전체를 훑으므로, 한 항목이 두 entry의 키워드를 함께 담으면 둘 다 히트로 잡힌다. 항목 단위 1:1 대응은 검증하지 않는다.",
+  "_version": "v2 (2026-08-18) — v1은 required 4 / exception 2로 너무 얇아 튜닝 근거가 되지 못했다",
   "policy_id": "FSC_20260630",
   "effective_from": "2026-07-01",
   "target_regions": ["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"],
+
   "required_changes": [
-    {"id": "LTV_70_to_40", "categories": ["LTV"], "keywords": ["70%", "40%"]},
-    {"id": "effective_7_1", "categories": ["EFFECTIVE_DATE"], "keywords": ["7.1", "7월 1일", "2026-07-01"]},
-    {"id": "grandfathering", "categories": ["GRANDFATHERING"], "keywords": ["경과", "종전규정", "계약금"]},
-    {"id": "region_designation", "categories": ["REGION"], "keywords": ["규제지역", "투기과열", "조정대상"]}
+    {"id": "LTV_REGULATED_40", "categories": ["LTV"], "keywords": ["40%"]},
+    {"id": "LTV_BASELINE_70", "categories": ["LTV"], "keywords": ["70%"]},
+    {"id": "EXC_FIRST_HOME", "categories": ["EXCEPTION"], "keywords": ["생애최초"]},
+    {"id": "EXC_REAL_DEMAND", "categories": ["EXCEPTION"], "keywords": ["서민", "실수요자"]},
+    {"id": "EXC_POLICY_MORTGAGE", "categories": ["EXCEPTION"], "keywords": ["정책모기지", "디딤돌", "보금자리"]},
+    {"id": "LTV_OWNER_0", "categories": ["EXCEPTION", "LTV"], "keywords": ["유주택"]},
+    {"id": "LTV_MULTI_0", "categories": ["EXCEPTION", "LTV"], "keywords": ["다주택"]},
+    {"id": "EFFECTIVE_7_1", "categories": ["EFFECTIVE_DATE"], "keywords": ["7.1", "7월 1일", "2026-07-01"]},
+    {"id": "LAND_PERMIT_EFFECTIVE_7_5", "categories": ["EFFECTIVE_DATE"], "keywords": ["7.5", "7월 5일", "2026-07-05"]},
+    {"id": "REGION_DESIGNATION", "categories": ["REGION"], "keywords": ["투기과열", "조정대상"]},
+    {"id": "GF_GENERAL", "categories": ["GRANDFATHERING"], "keywords": ["계약금"]},
+    {"id": "GF_LAND_PERMIT", "categories": ["GRANDFATHERING"], "keywords": ["토지거래허가"]},
+    {"id": "GF_GROUP_LOAN", "categories": ["GRANDFATHERING"], "keywords": ["집단대출", "입주자모집"]},
+    {"id": "SCOPE_JEONSE", "categories": ["SCOPE_LIMIT"], "keywords": ["전세대출"]},
+    {"id": "SCOPE_CREDIT", "categories": ["SCOPE_LIMIT"], "keywords": ["신용대출"]},
+    {"id": "SCOPE_INTERIM", "categories": ["SCOPE_LIMIT"], "keywords": ["중도금", "이주비"]},
+    {"id": "SCOPE_BUSINESS", "categories": ["SCOPE_LIMIT"], "keywords": ["사업자"]},
+    {"id": "MAX_LIMIT_6", "categories": ["LTV", "SCOPE_LIMIT"], "keywords": ["6억", "최대한도"]},
+    {"id": "MOVE_IN_DUTY", "categories": ["LTV", "SCOPE_LIMIT"], "keywords": ["전입"]}
   ],
+
   "exceptions": [
     {"name": "first_home_buyer", "keywords": ["생애최초"]},
-    {"name": "real_demand", "keywords": ["서민", "실수요"]}
+    {"name": "real_demand", "keywords": ["서민", "실수요"]},
+    {"name": "policy_mortgage", "keywords": ["정책모기지", "디딤돌", "보금자리"]},
+    {"name": "disposal_condition", "keywords": ["처분조건부"]}
   ]
 }

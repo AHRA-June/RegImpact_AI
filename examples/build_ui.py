@@ -30,7 +30,7 @@ from regimpact.tc_generator import run_regression  # noqa: E402
 from regimpact.ui import render_site, write_site  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-DEFAULT_RUN = REPO / "docs" / "eval" / "runs" / "run_cli_sonnet5_v2.json"
+DEFAULT_RUN = REPO / "docs" / "eval" / "runs" / "run_perdoc_sonnet5.json"
 OUT_DIR = REPO / "docs" / "ui" / "generated"
 
 

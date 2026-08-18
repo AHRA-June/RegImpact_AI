@@ -106,6 +106,22 @@ class ImpactMatrix:
         return [r for r in self.rows if not r.automatable]
 
     @property
+    def discovery_rows(self) -> list[ImpactRow]:
+        """Discovery Scope 행 — 정의상 자동판정하지 않는다(브리프 §24-12)."""
+        return [r for r in self.rows if r.area.startswith("[Discovery]")]
+
+    @property
+    def core_rows(self) -> list[ImpactRow]:
+        return [r for r in self.rows if not r.area.startswith("[Discovery]")]
+
+    @property
     def automation_rate(self) -> float:
-        """자동처리 가능 행 비율 — "AI가 어디까지 했는가"의 정직한 표시."""
-        return sum(r.automatable for r in self.rows) / len(self.rows) if self.rows else 0.0
+        """자동처리 가능 비율 — **Discovery 행은 분모에서 뺀다.**
+
+        Discovery는 애초에 "탐지는 하되 자동판정하지 않는다"고 정한 항목이므로, 탐지를 잘할수록
+        자동화율이 떨어지는 지표는 개선을 후퇴로 보이게 만든다. 실제로 추출 재현율을 100%로
+        올렸더니 Discovery 행이 4→18로 늘면서 자동화율이 50%→27%로 '하락'했다 —
+        코어 작업의 자동화는 전혀 나빠지지 않았는데도. 분모를 코어 행으로 고정한다.
+        """
+        core = self.core_rows
+        return sum(r.automatable for r in core) / len(core) if core else 0.0

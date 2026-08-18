@@ -32,12 +32,25 @@ SYSTEM_PROMPT = """당신은 금융 규제 변경 분석 보조 도구다. 제�
 목표는 사람이 검토할 초안이다. 정확한 인용과 낮은 환각이 정확한 완전성보다 우선이다."""
 
 
-def build_user_prompt(sources: dict[str, str]) -> str:
-    """source_doc_id -> 원문 텍스트 dict로 사용자 프롬프트를 만든다."""
-    parts = [
-        "다음은 공식 공문 원문이다. 각 문서는 <doc id=...> 태그로 구분된다.",
-        "이 원문들에서 주택담보대출 규제의 Before/After 변경사항을 추출하라.\n",
-    ]
+def build_user_prompt(sources: dict[str, str], *, single_document: bool = False) -> str:
+    """source_doc_id -> 원문 텍스트 dict로 사용자 프롬프트를 만든다.
+
+    single_document=True는 문서별 개별 추출 모드다. 이때는 "다른 문서에서 찾아 채우라"는
+    지시가 불가능한 요구가 되므로, 대신 **이 문서 안의 것을 빠짐없이** 훑도록 지시를 바꾼다.
+    """
+    if single_document:
+        parts = [
+            "다음은 공식 공문 원문 1건이다.",
+            "**이 문서 하나만** 보고, 이 문서에 있는 주택담보대출 규제 변경사항을",
+            "**하나도 빠뜨리지 말고** 추출하라. 다른 문서에 같은 내용이 있을지 고려하지 마라",
+            "— 중복은 나중에 병합 단계에서 처리한다. 여기서의 목표는 **누락 0**이다.",
+            "표·각주·괄호 안 단서(최대한도, 전입의무, 만기, 적용범위 등)도 변경사항이면 항목으로 만든다.\n",
+        ]
+    else:
+        parts = [
+            "다음은 공식 공문 원문이다. 각 문서는 <doc id=...> 태그로 구분된다.",
+            "이 원문들에서 주택담보대출 규제의 Before/After 변경사항을 추출하라.\n",
+        ]
     for doc_id, text in sources.items():
         parts.append(f"<doc id={doc_id}>")
         parts.append(text.strip())

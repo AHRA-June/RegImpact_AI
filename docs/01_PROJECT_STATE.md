@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (골드셋 QA 평가 · D-03 철회 세션)
+- **갱신자:** Claude (D-02 해결 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 184 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 194 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,19 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 7차)
+## ✅ 방금 완료 (2026-08-18 · 8차)
+- **★ D-02 해결 — 문서별 추출 + 문서 간 병합.** Change Completeness 79%→**100%**,
+  Exception Recall 50%→**100%**, Citation 100%. 호출 3배(지출 0원), ~8분.
+- **먼저 골드를 고쳤다** — v1은 required 4/exception 2로 튜닝 근거가 되지 못했다. v2로 19+4 확장.
+  **확장하자마자 단일 패스 성적이 79%/50%로 드러났다** — 지표가 좋았던 게 아니라 골드가 얇았다.
+- **⚠️ 유사도 병합은 기각** — 골드 점수는 임계값 0.3까지 100%였으나, 열어 보니 "생애최초 60%"와
+  "서민·실수요자 60%", 서로 다른 요건 임계값, 서로 다른 경과규정이 합쳐지고 있었다.
+  **골드가 과병합을 탐지할 만큼 예민하지 않았다.** → 문서 간 병합만 허용(지문 일치 + 유사도).
+- **자동화율 분모 수정** — Discovery 행이 4→18로 늘자 자동화율이 50%→27%로 '하락'했다.
+  Discovery는 정의상 수동이므로 분모에서 제외 → **코어 자동처리 67%**.
+- 매트릭스 16→30행(코어 12 + Discovery 18). 문서별 캐시 추가(재실행 비용 절감). 테스트 184→**194**.
+
+## ✅ 이전 완료 (2026-08-18 · 7차)
 - **★ 골드셋 QA 평가 하네스 + DEV 40 베이스라인** — `src/regimpact/eval/qa.py`,
   `examples/run_goldset_eval.py`. 정정 후 **Fact Coverage 95.0% / Exact 92.5% /
   Citation Correctness 100% / Escalation Recall 100%** (비용 0원, 6분).
@@ -128,7 +140,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(184), `python examples/validate_goldset.py`(골드셋 무결성),
+- 실행: `python -m pytest`(194), `python examples/validate_goldset.py`(골드셋 무결성),
   `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
@@ -143,8 +155,9 @@
 - **✍️ 골드셋 도메인 검수(사용자)** — 전 문항 🤖 `ai_draft`. 확정분은 `authored_by`를
   `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
 - **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
-- **Extractor(문서 전체 추출) 튜닝** — Q9/D-02(서민·실수요자 누락). QA 평가에서는 재현되지
-  않으므로 **추출 태스크 전용 개선**이 필요하다(문서별 추출 후 union 등). Phase 2 본체.
+- ~~**Extractor 튜닝(D-02)**~~ — ✅ **완료(2026-08-18): 문서별 추출 + 병합, 100%/100%.**
+- **골드 v2 확장 검수(✍️ 사용자)** — required 19 / exception 4로 늘렸다. 도메인 검수 필요.
+- **LOCKED/CHALLENGE 실행 시점 판단** — 코어 완성 후 1회. 지금은 봉인 유지.
 - **✍️ 골드셋 도메인 검수** — DEV 40부터. 현재 절대 수치는 초안 기준이다.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
 - ~~**Stitch UI를 엔진 실제 출력으로 교체**~~ — ✅ **완료(2026-08-18 3차).**
@@ -199,6 +212,13 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (9차)** — ✅ **D-02 해결.** 추출 골드를 v2(19+4)로 확장하니 단일 패스 실성적이
+  79%/50%로 드러났고(v1에서는 100%였다), 누락 4건 중 3건이 MOLIT에 몰려 있었다 → 문서 간
+  그림자가 원인. `extract_per_document`(문서별 추출 + 캐시) + `merge_cross_document`로
+  **100%/100%** 달성. **유사도 병합은 골드가 100%를 줬는데도 기각** — 실제 병합 내용을 열어 보니
+  서로 다른 차주 유형·요건 임계값·경과규정이 합쳐지고 있었다(골드가 과병합에 둔감). 대신
+  다른 문서 + 지문 일치 + 유사도 조건을 모두 만족할 때만 병합하고 `corroborations`로 인용 보존.
+  Discovery 행 증가로 왜곡된 자동화율 분모도 코어 행으로 고정. 매트릭스·UI 재생성. 테스트 184→194.
 - **2026-08-18 (8차)** — ✅ **골드셋 QA 평가 하네스 + DEV 베이스라인.** `eval/qa.py`(프롬프트·
   응답 검증기·결정적 채점기), `examples/run_goldset_eval.py`. DEV 40 실행 결과 정정 후
   Fact Coverage 95.0% / Exact 92.5% / Citation 100% / Escalation Recall 100%.

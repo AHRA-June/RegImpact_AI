@@ -137,9 +137,9 @@ def impact_matrix_page(matrix: ImpactMatrix) -> str:
     stats = (
         '<div class="grid grid-cols-4 gap-4">'
         + stat("매트릭스 행", f"{len(matrix.rows)}행",
-               sub=f"D-day 전 필수 {len(matrix.d_minus_required)}건")
-        + stat("자동처리 가능", f"{matrix.automation_rate:.0%}",
-               tone="good", sub=f"Human Review {len(matrix.human_review_rows)}행")
+               sub=f"코어 {len(matrix.core_rows)} + Discovery {len(matrix.discovery_rows)}")
+        + stat("코어 자동처리", f"{matrix.automation_rate:.0%}",
+               tone="good", sub="Discovery는 정의상 수동 — 분모에서 제외")
         + stat("시행일", f"{matrix.effective_from}", sub="이 날짜 전에 D-day 전 행이 끝나야 한다")
         + stat("대상 지역", f"{len(matrix.target_regions)}곳", sub=", ".join(matrix.target_regions))
         + "</div>"

@@ -29,7 +29,8 @@ def format_matrix_markdown(matrix: ImpactMatrix) -> str:
     L.append("")
     L.append(f"- 시행일: **{matrix.effective_from}**")
     L.append(f"- 대상 지역: {', '.join(matrix.target_regions) or '—'}")
-    L.append(f"- 총 {len(matrix.rows)}행 · 자동처리 가능 {matrix.automation_rate:.0%} "
+    L.append(f"- 총 {len(matrix.rows)}행 (코어 {len(matrix.core_rows)} + Discovery "
+             f"{len(matrix.discovery_rows)}) · 코어 자동처리 {matrix.automation_rate:.0%} "
              f"· D-day 전 필수 {len(matrix.d_minus_required)}건")
     L.append(f"- 생성 근거: {matrix.generated_from}")
     L.append("")
@@ -69,7 +70,8 @@ def format_matrix_text(matrix: ImpactMatrix) -> str:
     L: list[str] = []
     L.append(f"임팩트 매트릭스 — {matrix.policy_id} (시행 {matrix.effective_from})")
     L.append(f"대상 지역: {', '.join(matrix.target_regions)}")
-    L.append(f"{len(matrix.rows)}행 · 자동처리 {matrix.automation_rate:.0%} "
+    L.append(f"{len(matrix.rows)}행 (코어 {len(matrix.core_rows)} + Discovery "
+             f"{len(matrix.discovery_rows)}) · 코어 자동처리 {matrix.automation_rate:.0%} "
              f"· D-day 전 필수 {len(matrix.d_minus_required)}건")
     for phase in Phase:
         rows = matrix.by_phase(phase)

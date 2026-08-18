@@ -38,7 +38,7 @@ from regimpact.impact.portfolio import DEFAULT_SEED, DEFAULT_SIZE  # noqa: E402
 from regimpact.tc_generator import run_regression  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-DEFAULT_RUN = REPO / "docs" / "eval" / "runs" / "run_cli_sonnet5_v2.json"
+DEFAULT_RUN = REPO / "docs" / "eval" / "runs" / "run_perdoc_sonnet5.json"
 OUT_MD = REPO / "docs" / "eval" / "impact_matrix_6_30.md"
 
 

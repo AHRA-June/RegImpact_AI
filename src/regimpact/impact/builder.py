@@ -57,19 +57,20 @@ def _evidence(
     for item in extraction.changes:
         if item.category not in categories:
             continue
-        key = (item.citation.source_doc_id, item.citation.quote)
-        if key in seen:
-            continue          # 같은 문장을 여러 항목이 인용하는 경우(지역 3곳 등) 1회만 싣는다
-        seen.add(key)
-        out.append(
-            Evidence(
-                source_doc_id=item.citation.source_doc_id,
-                quote=item.citation.quote,
+        # 대표 인용 + 다른 문서의 corroboration을 함께 싣는다 — 여러 공문이 같은 변경을
+        # 말했다는 사실 자체가 근거의 강도이므로 표시에서 지우지 않는다.
+        for cit in (item.citation, *item.corroborations):
+            key = (cit.source_doc_id, cit.quote)
+            if key in seen:
+                continue      # 같은 문장을 여러 항목이 인용하는 경우(지역 3곳 등) 1회만
+            seen.add(key)
+            out.append(Evidence(
+                source_doc_id=cit.source_doc_id,
+                quote=cit.quote,
                 grounded=None if grounding is None else key not in ungrounded,
-            )
-        )
-        if len(out) >= limit:
-            break
+            ))
+            if len(out) >= limit:
+                return out
     return out
 
 

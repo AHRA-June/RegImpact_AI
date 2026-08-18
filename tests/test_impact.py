@@ -364,3 +364,15 @@ def test_evidence_short_flattens_newlines_for_table_cells():
     """원문 개행이 마크다운 표 셀을 깨뜨리지 않아야 한다."""
     text = Evidence("D1", "규제지역 내 3억원 초과\nAPT 취득 제한").short()
     assert "\n" not in text and "초과 APT" in text
+
+
+def test_automation_rate_excludes_discovery_rows():
+    """Discovery 탐지를 잘할수록 자동화율이 떨어지면, 개선이 후퇴로 보인다."""
+    _, _, m = _matrix()
+    core = m.core_rows
+    assert m.discovery_rows and len(core) + len(m.discovery_rows) == len(m.rows)
+    assert m.automation_rate == sum(r.automatable for r in core) / len(core)
+    # Discovery 행을 늘려도 코어 자동화율은 변하지 않아야 한다
+    before = m.automation_rate
+    m.rows.extend(m.discovery_rows)
+    assert m.automation_rate == before
