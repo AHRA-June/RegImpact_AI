@@ -28,19 +28,27 @@ from regimpact.models import (  # noqa: E402
     LoanPurpose,
     MortgageApplication,
 )
-from regimpact.regions import resolve_region_status  # noqa: E402
+from regimpact.regions import (  # noqa: E402
+    REGISTRY, SIDO_ORDER, get_region, regulated_codes, resolve_region_status,
+)
 from regimpact.rule_engine import evaluate  # noqa: E402
 from regimpact.tc_generator import Category, generate_all, run_regression  # noqa: E402
 
 st.set_page_config(page_title="RegImpact AI — 검증 콘솔", page_icon="⚖️", layout="wide")
 
-# --- 표시용 라벨 (도메인 값이 아니라 UI 문자열) ---
-REGIONS = {
-    "GURI": "구리시 — 6·30 신규 투기과열지구",
-    "YONGIN_GIHEUNG": "용인시 기흥구 — 6·30 신규 투기과열지구",
-    "HWASEONG_DONGTAN": "화성시 동탄 — 6·30 신규 투기과열지구",
-    "SEOUL_GANGNAM": "SEOUL_GANGNAM — 지역 버전 미등록(→ 非규제로 간주)",
-}
+# --- 지역 선택지: 레지스트리(전국 241곳)를 시도 순서대로 ---
+_SIDO_RANK = {sido: i for i, sido in enumerate(SIDO_ORDER)}
+REGION_CODES = sorted(REGISTRY, key=lambda c: (_SIDO_RANK.get(REGISTRY[c].sido, 99),
+                                               REGISTRY[c].name))
+
+
+def region_label(code: str, as_of: date) -> str:
+    """선택지 라벨. 규제 여부는 평가일에 따라 달라지므로 평가일을 받아 표시한다."""
+    r = REGISTRY[code]
+    status, rtype = resolve_region_status(code, as_of)
+    tag = {"SPECULATIVE_OVERHEATED": "투기과열", "ADJUSTMENT": "조정대상"}.get(
+        rtype.value, "비규제" if status.value == "NON_REGULATED" else status.value)
+    return f"{r.sido} {r.name} · {tag}"
 REASON_KO = {
     "LTV_REGULATED_40": "규제지역 표준 40%",
     "EXCEPTION_FIRST_HOME": "생애최초 예외 70%",
@@ -52,6 +60,7 @@ REASON_KO = {
     "GRANDFATHERED_LAND_PERMIT": "경과규정 — 토지거래허가 신청",
     "OWNER_BASELINE_UNKNOWN": "유주택 기준값 명세 부재 → 사람 검토",
     "OUT_OF_SCOPE_PRODUCT": "주택구입목적 아님",
+    "UNKNOWN_REGION": "레지스트리 미등록 지역 → 사람 검토",
     "DISCOVERY_POLICY_LOAN": "정책대출 → 수동 검토",
 }
 STATUS_KO = {
@@ -84,6 +93,8 @@ def halting_step(decision) -> str:
     codes = set(decision.reason_codes)
     if "OUT_OF_SCOPE_PRODUCT" in codes:
         return "P0"
+    if "UNKNOWN_REGION" in codes:
+        return "P2"
     if "DISCOVERY_POLICY_LOAN" in codes:
         return "P0b"
     if decision.grandfathering_applied:
@@ -132,8 +143,21 @@ def tab_verdict() -> None:
 
     with left:
         st.subheader("신청 조건")
-        region = st.selectbox("지역", list(REGIONS), format_func=lambda k: REGIONS[k])
         evaldate = st.date_input("평가일 (지역 규제상태 해석 기준)", value=date(2026, 7, 2))
+        region = st.selectbox(
+            f"지역 — 전국 {len(REGION_CODES)}곳 (규제 {len(regulated_codes(evaldate))}곳)",
+            REGION_CODES,
+            index=REGION_CODES.index("GYEONGGI_GURI"),
+            format_func=lambda c: region_label(c, evaldate),
+            help="국토부 보도자료 참고2 「투기과열지구 및 조정대상지역 현황」 표 기준. "
+                 "규제지역은 열거주의 — 지정된 곳만 규제지역이다.",
+        )
+        _r = get_region(region)
+        _first_reg = next((v for v in _r.versions if v.status.value == "REGULATED"), None)
+        st.caption(
+            f"`{region}` · {'수도권' if _r.capital_area else '비수도권'} · "
+            + (f"{_first_reg.effective_from} 지정" if _first_reg else "지정된 바 없음")
+        )
         purpose = st.radio("대출 목적", ["주택구입", "그 외"], horizontal=True)
         house_count = st.select_slider("보유 주택 수", options=[0, 1, 2, 3], value=0)
         disposal = st.checkbox("처분조건부 1주택 (P4)", disabled=house_count < 1)
@@ -191,7 +215,7 @@ def tab_verdict() -> None:
 
         status, reg_type = resolve_region_status(region, evaldate)
         st.caption(
-            f"지역상태 `{status.value}` / `{reg_type.value}` · "
+            f"지역상태 `{status.value}` / 지정유형 `{reg_type.value}` · "
             f"경과규정 {'적용' if decision.grandfathering_applied else '미적용'} · "
             f"출처 {', '.join(decision.source_policy_ids) or '—'}"
         )
@@ -367,8 +391,12 @@ with t3:
 
 st.divider()
 st.caption(
+    f"지역 — 전국 {len(REGISTRY)}곳의 규제상태·지정일은 국토부 보도자료 참고2 「투기과열지구 및 "
+    "조정대상지역 현황」 표에서 왔다. 서울 25개 자치구는 6·30과 무관하게 이미 전부 규제지역이며"
+    "(강남4구 '16.11.3 조정 → '17.8.3 투기과열), 6·30이 더한 곳은 화성동탄·용인기흥·구리 3곳이다. "
+    "레지스트리에 없는 코드는 非규제로 넘겨짚지 않고 사람 검토로 넘어간다. "
     "한계 — 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리). "
-    "지역 버전 테이블에 없는 지역은 非규제로 간주되므로 `SEOUL_GANGNAM`이 非규제로 나오는 것은 "
-    "현실 반영이 아니라 미등록 지역의 기본 동작이다. `CFL-04`(유주택+생애최초)는 명세 §E와 §H가 "
-    "상충하는 알려진 미결 항목으로, 현재는 §H를 권위 기준으로 채택했다."
+    "비규제 유주택 기준값은 확정 명세에 없어 escalation 된다(원문의 '非규제(수도권 外) 유주택 60%'는 "
+    "사람 확정 전이라 미채택 — Q9). `CFL-04`(유주택+생애최초)는 명세 §E와 §H가 상충하는 미결 항목으로 "
+    "현재는 §H를 권위 기준으로 채택했다(Q8)."
 )

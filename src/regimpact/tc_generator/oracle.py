@@ -10,8 +10,13 @@
     표(§C)·우선순위(§E)·경과규정(§F)·지역 버전(regulatory_facts)을 독립 코드 경로로 재구현한다.
     → regions.py / grandfathering.py / rule_engine.py 어느 곳의 구현 오차든 disagreement로 드러난다.
 
-독립성의 범위:
-    - 지역상태 해석: regions.py 를 쓰지 않고 여기서 날짜 비교로 직접 판정.
+독립성의 범위 (2026-08-18 갱신):
+    - 지역상태 해석: **규제사실 데이터**(어느 지역이 언제부터 규제인가)는 `regions.REGISTRY` 하나를
+      공유하고, **시점 해석 로직**은 여기서 독립 재구현한다(엔진은 구간 양끝을 검사, 오라클은
+      "as_of 이하인 마지막 버전"을 고른다 — 알고리즘이 다르므로 경계 오차가 disagreement로 드러난다).
+      전국 241개 지역표를 두 곳에 옮겨 적는 것은 검증가치가 아니라 전사 오류만 늘리므로,
+      데이터 자체는 **공문 원문의 지역 수(서울 25 / 경기 12→15)와 대조하는 테스트**로 검증한다
+      (`tests/test_regions.py`). `resolve_region_status`(엔진의 해석 함수)는 import 하지 않는다.
     - 경과규정: grandfathering.py 를 쓰지 않고 여기서 G1/G2/G3 를 직접 판정.
     - 판정 로직: 명령형 short-circuit(엔진)과 달리, 우선순위 규칙을 '데이터 표'로 선언하고
       작은 범용 해석기로 평가한다(구조적 독립 → 전사 오류가 상관되지 않음).
@@ -26,12 +31,11 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional
 
-from ..models import EvaluationStatus, LoanPurpose, MortgageApplication
+from ..models import EvaluationStatus, LoanPurpose, MortgageApplication, RegionStatus
+from ..regions import REGISTRY, canonical_code   # 데이터만 공유 (해석 함수는 import 안 함)
 
 # --- 명세 상수 (05_RULE_SPEC.md §C, §F, regulatory_facts.md — 엔진과 독립적으로 재기입) ---
 _GF_CUTOFF = date(2026, 6, 30)          # 경과규정 경계 (<= 포함) — §F
-_REG_EFFECTIVE = date(2026, 7, 1)       # 규제 효력일 — regulatory_facts C02/C03
-_SIX_THIRTY_REGIONS = frozenset({"GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"})
 
 _LTV_REGULATED_STD = 0.40
 _LTV_FIRST_HOME = 0.70
@@ -55,15 +59,27 @@ class ExpectedOutcome:
 # ---------------------------------------------------------------------------
 # 독립 재구현: 지역상태 · 경과규정 · 소유상태
 # ---------------------------------------------------------------------------
-def _region_is_regulated(region_code: str, as_of: date) -> bool:
-    """지역 규제상태를 regions.py 없이 독립 판정 (regulatory_facts C02/C03).
+def _region_state(region_code: str, as_of: date) -> RegionStatus:
+    """지역 규제상태를 엔진의 해석 함수 없이 독립 판정.
 
-    6·30 신규지정 3개 지역은 효력일(7.1)부터 REGULATED, 그 전엔 非규제.
-    그 외(미등록) 지역은 이 시나리오에서 항상 非규제로 간주.
+    엔진(`regions.resolve_region_status`)은 각 버전의 [effective_from, effective_to] 양끝을
+    검사한다. 오라클은 다른 전략을 쓴다 — 시작일이 as_of 이하인 버전 중 **가장 나중 것**을 고른다.
+    데이터가 정상이면 두 방법은 같은 답을 내고, 경계 비교가 틀리면 서로 다른 답을 낸다.
     """
-    if region_code in _SIX_THIRTY_REGIONS and as_of >= _REG_EFFECTIVE:
-        return True
-    return False
+    region = REGISTRY.get(canonical_code(region_code))
+    if region is None:
+        return RegionStatus.UNKNOWN
+    applicable = [
+        v for v in region.versions
+        if v.effective_from is None or as_of >= v.effective_from
+    ]
+    if not applicable:
+        return RegionStatus.UNKNOWN
+    latest = applicable[-1]
+    # 마지막 버전이 이미 끝난 구간이면(뒤에 버전이 없는데 as_of가 그 뒤) 데이터 결손이다.
+    if latest.effective_to is not None and as_of > latest.effective_to:
+        return RegionStatus.UNKNOWN
+    return latest.status
 
 
 def _is_grandfathered(app: MortgageApplication) -> Optional[str]:
@@ -136,7 +152,13 @@ def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
         )
 
     # P2. 지역상태
-    if not _region_is_regulated(app.region_code, app.evaluation_date):
+    state = _region_state(app.region_code, app.evaluation_date)
+    if state is RegionStatus.UNKNOWN:
+        return ExpectedOutcome(
+            status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
+            must_include_reasons=("UNKNOWN_REGION",),
+        )
+    if state is RegionStatus.NON_REGULATED:
         # 기준선 표 C-2: 무주택 70%, 유주택 기준값 부재 → escalation
         if _is_owner(app):
             return ExpectedOutcome(

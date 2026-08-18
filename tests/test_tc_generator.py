@@ -59,23 +59,41 @@ def test_report_lists_no_failures_when_green():
 
 
 # ---------- 오라클 독립성 (회귀가 tautology가 아님을 구조적으로 보증) ----------
-def test_oracle_does_not_import_rule_engine():
-    # 오라클 모듈이 엔진/지역/경과 구현을 import 하지 않아야 진짜 '챌린저'다.
-    # (docstring 언급이 아니라 실제 import 문을 AST로 검사한다.)
+def _oracle_imports() -> dict[str, set[str]]:
+    """오라클 모듈의 import 를 {모듈: {심볼}} 로 수집 (docstring이 아니라 AST로 검사)."""
     import ast
     import inspect
 
     tree = ast.parse(inspect.getsource(oracle_mod))
-    forbidden = {"rule_engine", "regions", "grandfathering"}
-    imported: set[str] = set()
+    out: dict[str, set[str]] = {}
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom) and node.module:
-            imported.add(node.module.split(".")[-1])
+            out.setdefault(node.module.split(".")[-1], set()).update(
+                a.name for a in node.names)
         elif isinstance(node, ast.Import):
             for alias in node.names:
-                imported.add(alias.name.split(".")[-1])
-    leak = forbidden & imported
-    assert not leak, f"오라클이 엔진 구현을 import 함(독립성 위반): {leak}"
+                out.setdefault(alias.name.split(".")[-1], set())
+    return out
+
+
+def test_oracle_does_not_import_engine_judgment_modules():
+    """판정 구현(rule_engine·grandfathering)은 통째로 금지 — 그래야 진짜 '챌린저'다."""
+    leak = {"rule_engine", "grandfathering"} & set(_oracle_imports())
+    assert not leak, f"오라클이 엔진 판정 구현을 import 함(독립성 위반): {leak}"
+
+
+def test_oracle_shares_region_data_but_not_region_resolution():
+    """지역은 심볼 단위 계약이다 — **데이터**는 공유하되 **해석 함수**는 공유하지 않는다.
+
+    전국 241개 지역표를 오라클에 다시 옮겨 적는 것은 검증가치가 아니라 전사 오류만 늘린다.
+    그래서 규제사실 데이터(REGISTRY)는 하나만 두고 공문 원문과 대조해 검증하며
+    (`tests/test_regions.py`), 시점 해석 로직만 오라클이 독립 재구현한다.
+    """
+    symbols = _oracle_imports().get("regions", set())
+    allowed = {"REGISTRY", "canonical_code"}
+    assert symbols <= allowed, f"오라클이 허용되지 않은 지역 심볼을 import 함: {symbols - allowed}"
+    assert "resolve_region_status" not in symbols, (
+        "오라클이 엔진의 지역 해석 함수를 쓰면 지역 시점 판정이 tautology가 된다")
 
 
 def test_oracle_computes_known_anchor_values():

@@ -97,6 +97,12 @@ legend{padding:0 8px 0 0; font-size:11.5px; letter-spacing:.06em; text-transform
 .btn-reset{font:inherit; font-size:12px; padding:6px 10px; background:transparent; border:1px solid var(--line);
            color:var(--muted); cursor:pointer}
 .btn-reset:hover{color:var(--ink); border-color:var(--ink-2)}
+input[type="search"]{font:inherit; font-size:13.5px; color:var(--ink); background:var(--surface-2);
+  border:1px solid var(--line); padding:7px 10px; width:100%; border-radius:0}
+.cnt{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted); letter-spacing:0}
+.region-note{margin:0; font-size:11.5px; color:var(--muted); font-family:"IBM Plex Mono",monospace}
+optgroup{font-family:"IBM Plex Sans KR",sans-serif; font-size:11px; color:var(--muted)}
+option{font-size:14px; color:var(--ink)}
 
 /* ---------- verdict ---------- */
 .verdict{display:grid; grid-template-columns:auto minmax(0,1fr); gap:22px; padding:20px 22px; align-items:center}
@@ -202,8 +208,10 @@ td.num{font-family:"IBM Plex Mono",monospace; text-align:right; white-space:nowr
       </div>
       <div class="panel-bd">
         <div class="field">
-          <label for="region">지역</label>
-          <select id="region"></select>
+          <label for="region-search">지역 <span class="cnt" id="region-count"></span></label>
+          <input type="search" id="region-search" placeholder="검색 — 강남, 노원, 울산, 제주…" autocomplete="off">
+          <select id="region" size="1"></select>
+          <p class="region-note" id="region-note"></p>
         </div>
         <div class="field">
           <label for="evaldate">평가일 (지역 규제상태 해석 기준)</label>
@@ -316,9 +324,19 @@ td.num{font-family:"IBM Plex Mono",monospace; text-align:right; white-space:nowr
     둘이 어긋나면 상단 배지가 붉게 바뀐다 — 포팅 드리프트를 숨기지 않기 위한 장치다.</p>
     <p style="margin:0"><b>엔진↔오라클</b> 열은 다른 검증이다. 엔진과 독립적으로 명세(§H)에서 유도한 <b>오라클</b>과 대조한 차등 검증 결과로,
     엔진이 자기 출력을 자기가 채점하는 tautology를 피하기 위한 것이다.</p>
-    <p style="margin:0"><b>한계.</b> 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리). 지역 버전 테이블에 없는 지역은 非규제로 간주된다 —
-    <code>SEOUL_GANGNAM</code>이 非규제로 나오는 건 현실 반영이 아니라 <b>미등록 지역의 기본 동작</b>을 보여주는 케이스다.
-    <code>CFL-04</code>(유주택+생애최초)는 명세 §E와 §H가 상충하는 알려진 미결 항목이며, 현재는 §H를 권위 기준으로 채택했다.</p>
+    <p style="margin:0"><b>지역은 어디서 왔나.</b> 전국 <b>241곳</b>의 규제상태·지정일은 국토부 보도자료
+    <code>참고2 「투기과열지구 및 조정대상지역 현황」</code> 표를 그대로 옮긴 것이다. 원문이 밝힌 지역 수(추가지정 전 서울 25 / 경기 12,
+    추가지정 후 경기 15)와 레지스트리가 일치하는지는 <code>tests/test_regions.py</code>가 검사한다.
+    규제지역은 <b>열거주의</b>여서 지정된 곳만 규제지역이고, 나머지 시·군·구는 "지정된 바 없음"이다.
+    <b>서울 25개 자치구는 6·30과 무관하게 이미 전부 규제지역</b>이며(강남4구는 '16.11.3 조정 → '17.8.3 투기과열),
+    6·30이 새로 더한 곳은 화성동탄·용인기흥·구리 3곳뿐이다.</p>
+    <p style="margin:0"><b>미등록 코드는 추측하지 않는다.</b> 레지스트리에 없는 지역코드는 非규제로 넘겨짚지 않고
+    <code>UNKNOWN_REGION</code>으로 사람에게 넘긴다. 이전 버전은 조용히 非규제로 처리했고, 그 탓에 이미 투기과열지구인
+    강남구가 비규제 기준선 70%로 판정됐다(2026-08-18 발견·수정). 위 <code>RGN-*</code> 케이스가 그 회귀선이다.</p>
+    <p style="margin:0"><b>한계.</b> 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리).
+    비규제 지역의 <b>유주택</b> 기준값은 확정 명세에 없어 사람 검토로 넘어간다 — 원문에 "非규제(수도권 外) 유주택 60%"가 있으나
+    사람 확정 전이라 채택하지 않았다(<code>Q9</code>). <code>CFL-04</code>(유주택+생애최초)는 명세 §E와 §H가 상충하는
+    알려진 미결 항목이며, 현재는 §H를 권위 기준으로 채택했다(<code>Q8</code>).</p>
   </footer>
 </div>
 
@@ -327,14 +345,14 @@ const FIXTURES = /*__FIXTURES__*/ null;
 
 /* ===================== 룰엔진 JS 포팅 (src/regimpact 대응) ===================== */
 const GF_CUTOFF = "2026-06-30";        // §F 경과규정 경계 (<= 포함)
-const REG_EFFECTIVE = "2026-07-01";    // 규제 효력일
-const SIX_THIRTY_REGIONS = ["GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"];
-const REGIONS = [
-  {code:"GURI", label:"구리시", note:"6·30 신규 투기과열지구"},
-  {code:"YONGIN_GIHEUNG", label:"용인시 기흥구", note:"6·30 신규 투기과열지구"},
-  {code:"HWASEONG_DONGTAN", label:"화성시 동탄", note:"6·30 신규 투기과열지구"},
-  {code:"SEOUL_GANGNAM", label:"SEOUL_GANGNAM (지역 버전 미등록)", note:"미등록 → 非규제로 간주"},
-];
+
+/* 지역 레지스트리는 Python(regions.REGISTRY)에서 내보낸 것을 그대로 읽는다.
+   241개 지역표를 여기에 다시 옮겨 적으면 그 전사가 다음 사고가 된다.
+   (2026-08-18: 레지스트리에 3곳만 있고 나머지는 '미등록→非규제' 기본값이라
+    이미 투기과열지구인 서울 강남구가 70%로 판정된 사고가 있었다.) */
+const REGION_BY_CODE = Object.fromEntries(FIXTURES.regions.map(r => [r.code, r]));
+const REGION_ALIASES = FIXTURES.region_aliases || {};
+const canonicalCode = c => REGION_ALIASES[c] || c;
 const LTV = {REGULATED_STD:0.40, FIRST_HOME:0.70, REAL_DEMAND:0.60, OWNER:0.00, MULTI:0.00, BASELINE:0.70};
 const SOURCE_6_30 = ["FSC_20260630", "MOLIT_20260630"];
 
@@ -361,6 +379,7 @@ const REASON_KO = {
   GRANDFATHERED_LAND_PERMIT:"경과규정 — 토지거래허가 신청",
   OWNER_BASELINE_UNKNOWN:"유주택 기준값 명세 부재 → 사람 검토",
   OUT_OF_SCOPE_PRODUCT:"주택구입목적 아님",
+  UNKNOWN_REGION:"레지스트리 미등록 지역 → 사람 검토",
   DISCOVERY_POLICY_LOAN:"정책대출 → 수동 검토",
 };
 const STATUS_KO = {
@@ -370,9 +389,26 @@ const STATUS_KO = {
 
 const lte = (a,b) => a !== null && a !== undefined && a !== "" && a <= b;
 
-function regionIsRegulated(code, asOf){
-  if(!SIX_THIRTY_REGIONS.includes(code)) return false;   // 미등록 지역 → 非규제
-  return asOf >= REG_EFFECTIVE;
+/** 시점 규제상태. 미등록 코드는 "UNKNOWN" — 조용히 非규제로 넘겨짚지 않는다. */
+function regionState(code, asOf){
+  const region = REGION_BY_CODE[canonicalCode(code)];
+  if(!region) return "UNKNOWN";
+  for(const v of region.versions){
+    const afterStart = v.from === null || asOf >= v.from;
+    const beforeEnd  = v.to === null || asOf <= v.to;
+    if(afterStart && beforeEnd) return v.status;
+  }
+  return "UNKNOWN";
+}
+function regionType(code, asOf){
+  const region = REGION_BY_CODE[canonicalCode(code)];
+  if(!region) return "NONE";
+  for(const v of region.versions){
+    const afterStart = v.from === null || asOf >= v.from;
+    const beforeEnd  = v.to === null || asOf <= v.to;
+    if(afterStart && beforeEnd) return v.regulated_type;
+  }
+  return "NONE";
 }
 function isGrandfathered(app){
   if(lte(app.application_accepted_at, GF_CUTOFF))
@@ -432,8 +468,13 @@ function evaluate(app){
   mark("P1","pass","미해당");
 
   // P2. 지역 규제상태
-  const regulated = regionIsRegulated(app.region_code, app.evaluation_date);
-  if(!regulated){
+  const state = regionState(app.region_code, app.evaluation_date);
+  if(state === "UNKNOWN"){
+    mark("P2","halt","레지스트리 미등록 코드");
+    return finish({status:"NEEDS_HUMAN_REVIEW", max_ltv:null, applicable_rule_id:null,
+      grandfathering_applied:false, reason_codes:["UNKNOWN_REGION"], source_policy_ids:[]});
+  }
+  if(state === "NON_REGULATED"){
     mark("P2","halt","非규제 → 기준선 경로");
     if(isOwner(app)){
       return finish({status:"NEEDS_HUMAN_REVIEW", max_ltv:null, applicable_rule_id:null,
@@ -442,7 +483,8 @@ function evaluate(app){
     return finish({status:"DECIDED", max_ltv:LTV.BASELINE, applicable_rule_id:"NONREG_STD_70",
       grandfathering_applied:false, reason_codes:["LTV_BASELINE_70"], source_policy_ids:[]});
   }
-  mark("P2","pass","규제지역(투기과열)");
+  mark("P2","pass", regionType(app.region_code, app.evaluation_date) === "ADJUSTMENT"
+        ? "규제지역(조정대상)" : "규제지역(투기과열)");
 
   // P3. 다주택
   if(app.house_count >= 2){ mark("P3","halt",`house_count=${app.house_count}`); return finish(decided(LTV.MULTI,"MULTI_0","LTV_MULTI_HOME_0")); }
@@ -467,7 +509,7 @@ function evaluate(app){
 
 /* ===================== 폼 상태 ===================== */
 const DEFAULTS = {
-  region_code:"GURI", evaluation_date:"2026-07-02", house_count:0,
+  region_code:"GYEONGGI_GURI", evaluation_date:"2026-07-02", house_count:0,
   disposal_condition_flag:false, first_home_buyer:false, real_demand_flag:false,
   policy_mortgage_flag:false, loan_purpose:"HOME_PURCHASE",
   application_accepted_at:null, contract_signed_at:null, downpayment_paid_at:null,
@@ -560,7 +602,8 @@ function render(){
   $("kv").innerHTML = [
     ["규칙 ID", decision.applicable_rule_id || "—"],
     ["경과규정", decision.grandfathering_applied ? "적용" : "미적용"],
-    ["지역상태", regionIsRegulated(state.region_code, state.evaluation_date) ? "REGULATED" : "NON_REGULATED"],
+    ["지역상태", regionState(state.region_code, state.evaluation_date)],
+    ["지정유형", regionType(state.region_code, state.evaluation_date)],
     ["출처", decision.source_policy_ids.length ? decision.source_policy_ids.join(" · ") : "—"],
   ].map(([k,v]) => `<span>${k} <b>${v}</b></span>`).join("");
 
@@ -579,6 +622,8 @@ function render(){
     `<span class="dv">${bp === null ? before.status : bp + "%"}</span>` +
     `<span class="arrow">→</span>` +
     `<span class="dv">${ap === null ? decision.status : ap + "%"}</span>` + chg;
+
+  regionNote();
 
   // 사다리
   $("ladder").innerHTML = trace.map(s => `
@@ -610,6 +655,13 @@ const results = FIXTURES.cases.map(c => {
   const js = evaluate(c.input).decision;
   return {...c, js, jsOk: matchesEngine(js, c.engine), oracleOk: matchesOracle(c.engine, c.oracle)};
 });
+/* 전국 지역 시점해석 대조 — Python이 고정한 프로브 표와 브라우저 해석기를 맞춰본다. */
+const LETTER = {REGULATED:"R", NON_REGULATED:"N", UNKNOWN:"U"};
+const probe = FIXTURES.region_probe;
+const probeCodes = Object.keys(probe.status);
+const probeBad = probeCodes.filter(code =>
+  probe.dates.map(d => LETTER[regionState(code, d)]).join("") !== probe.status[code]);
+
 const jsPass = results.filter(r => r.jsOk).length;
 const orPass = results.filter(r => r.oracleOk).length;
 const n = results.length;
@@ -617,12 +669,14 @@ const n = results.length;
 $("badges").innerHTML = [
   `<span class="badge ${jsPass === n ? "ok" : "bad"}"><span class="dot ${jsPass === n ? "ok" : "bad"}"></span>Python 엔진 ↔ 이 페이지 <b>${jsPass}/${n}</b></span>`,
   `<span class="badge ${orPass === n ? "ok" : "bad"}"><span class="dot ${orPass === n ? "ok" : "bad"}"></span>엔진 ↔ 독립 오라클 <b>${orPass}/${n}</b></span>`,
-  `<span class="badge">회귀 케이스 <b>${n}</b>건 · 6개 분류</span>`,
+  `<span class="badge ${probeBad.length ? "bad" : "ok"}"><span class="dot ${probeBad.length ? "bad" : "ok"}"></span>지역 시점해석 <b>${probeCodes.length - probeBad.length}/${probeCodes.length}</b> × ${probe.dates.length}시점</span>`,
+  `<span class="badge">회귀 케이스 <b>${n}</b>건 · ${new Set(results.map(r => r.category)).size}개 분류</span>`,
+  `<span class="badge">지역 레지스트리 <b>${FIXTURES.regions.length}</b>곳 · 규제 <b>${FIXTURES.regions.filter(r => regionState(r.code, "2026-07-01") === "REGULATED").length}</b>곳(7.1 기준)</span>`,
   `<span class="badge">규칙값 출처: 사람 확정 명세 (LLM 미생성)</span>`,
 ].join("");
 
 /* 표 */
-const CATS = ["ALL","SCOPE","BASELINE","EXCEPTION","BOUNDARY","GRANDFATHERING","CONFLICT"];
+const CATS = ["ALL", ...[...new Set(results.map(r => r.category))]];
 let curCat = "ALL";
 $("filters").innerHTML = CATS.map(c =>
   `<button type="button" data-c="${c}">${c === "ALL" ? `전체 ${n}` : c + " " + results.filter(r => r.category === c).length}</button>`).join("");
@@ -651,6 +705,7 @@ function renderTable(){
     state = {...c.input};
     delete state.customer_id;
     writeForm();
+    regionOptions($("region-search").value);
     render();
     renderTable();
     document.querySelector(".cols").scrollIntoView({behavior:"smooth", block:"start"});
@@ -660,15 +715,57 @@ $("filters").querySelectorAll("button").forEach(b =>
   b.addEventListener("click", () => { curCat = b.dataset.c; renderTable(); }));
 
 /* ===================== 초기화 · 바인딩 ===================== */
-$("region").innerHTML = REGIONS.map(r => `<option value="${r.code}">${r.label} — ${r.note}</option>`).join("");
+/* 241개 지역을 시도별 optgroup 으로. 규제지역은 현재 평가일 기준으로 표시가 갈린다. */
+function regionOptions(query){
+  const q = (query || "").trim().toLowerCase();
+  const asOf = state.evaluation_date;
+  const groups = new Map();
+  let shown = 0;
+  for(const r of FIXTURES.regions){
+    const hay = `${r.sido} ${r.name} ${r.code}`.toLowerCase();
+    if(q && !hay.includes(q) && r.code !== state.region_code) continue;
+    const st = regionState(r.code, asOf);
+    const tag = st === "REGULATED"
+      ? (regionType(r.code, asOf) === "ADJUSTMENT" ? "조정대상" : "투기과열")
+      : "비규제";
+    if(!groups.has(r.sido)) groups.set(r.sido, []);
+    groups.get(r.sido).push(`<option value="${r.code}">${r.name} · ${tag}</option>`);
+    shown++;
+  }
+  $("region-count").textContent = q ? `${shown} / ${FIXTURES.regions.length}` : `전국 ${FIXTURES.regions.length}`;
+  $("region").innerHTML = [...groups]
+    .map(([sido, opts]) => `<optgroup label="${sido}">${opts.join("")}</optgroup>`).join("");
+  $("region").value = state.region_code;
+  if(!$("region").value && shown){ $("region").selectedIndex = 0; state.region_code = $("region").value; }
+}
+function regionNote(){
+  const r = REGION_BY_CODE[canonicalCode(state.region_code)];
+  const el = $("region-note");
+  if(!r){ el.textContent = "레지스트리 미등록 코드 — 판정은 사람 검토로 넘어간다."; return; }
+  const st = regionState(r.code, state.evaluation_date);
+  const first = r.versions.find(v => v.status === "REGULATED");
+  el.textContent = st === "REGULATED"
+    ? `${r.sido} ${r.name} · ${first.from} 지정 (${r.capital_area ? "수도권" : "비수도권"})`
+    : `${r.sido} ${r.name} · 지정된 바 없음 (${r.capital_area ? "수도권" : "비수도권"})`;
+}
+$("region-search").addEventListener("input", e => regionOptions(e.target.value));
+regionOptions("");
 segInit($("purpose"), v => { state.loan_purpose = v; update(); });
 segInit($("housecount"), v => { state.house_count = parseInt(v, 10); update(); });
 ["region","evaldate","disposal","firsthome","realdemand","policy","accepted","contract","downpay","landtarget","landdate","price"]
   .forEach(id => $(id).addEventListener("change", update));
 $("price").addEventListener("input", update);
-$("reset").addEventListener("click", () => { state = {...DEFAULTS}; activeCase = null; writeForm(); render(); renderTable(); });
+$("reset").addEventListener("click", () => {
+  state = {...DEFAULTS}; activeCase = null;
+  $("region-search").value = "";
+  writeForm(); regionOptions(""); render(); renderTable();
+});
 
-function update(){ activeCase = null; readForm(); writeForm(); render(); renderTable(); }
+function update(){
+  activeCase = null; readForm(); writeForm();
+  regionOptions($("region-search").value);   // 평가일이 바뀌면 규제/비규제 태그도 바뀐다
+  render(); renderTable();
+}
 
 writeForm();
 render();

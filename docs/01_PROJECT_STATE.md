@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-18
 - **갱신자:** Claude (온라인 테스트 환경 구축 세션)
 - **개발 브랜치:** `claude/online-testing-plan-8k0xmx`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + **온라인 테스트 환경 2종**(테스트 44 통과)
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + 온라인 테스트 환경 2종 + **전국 지역 레지스트리**(테스트 71 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -21,7 +21,18 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18)
+## ✅ 방금 완료 (2026-08-18) — 지역 레지스트리 교체 (버그 수정)
+- **🐛 발견·수정: 서울 강남구가 LTV 70%로 판정되던 오류.** 지역 테이블에 6·30 신규 3곳만 있었고 나머지는
+  조용히 `NON_REGULATED` 기본값이었다. 실제로는 **서울 25개 자치구와 경기 12곳이 6·30 이전부터 이미 규제지역**
+  (MOLIT 참고2 현황표). 사용자 지적으로 발견.
+- **전국 241개 시·군·구 레지스트리** `src/regimpact/regions.py` — 시점 버전(강남4구는 조정'16.11.3 → 투기과열'17.8.3),
+  `capital_area` 플래그, 구 코드 별칭. 미등록 코드는 `UNKNOWN` → `NEEDS_HUMAN_REVIEW`(추측 금지).
+- **검증:** `tests/test_regions.py`가 **공문 원문의 지역 수**(추가지정 전 서울25·경기12 / 후 경기15)와 대조.
+  회귀 `REGION` 분류 11건 신설 → 43 케이스 Pass 100%. 웹은 전국 241×7시점 프로브 표로 Python↔JS 대조.
+- **부수 발견 → Q9·Q10 신설** (룰 값은 임의 변경하지 않고 `CFL-06`·`CFL-07`로 고정 + 표면화):
+  Q9 비규제 유주택 60%(MOLIT 참고1), Q10 수도권 비규제 다주택 0%(FSC p2·§C-1b) vs §H의 P3 위치.
+
+## ✅ 같은 날 완료 (2026-08-18) — 온라인 테스트 환경
 - **온라인 테스트 환경 2종 구축** — 사용자가 브라우저에서 직접 조건을 바꿔가며 판정을 확인할 수 있게 됨.
   1. **정적 샌드박스** `web/sandbox.html` — 룰엔진을 JS로 포팅한 자체완결 1파일(Artifact/GitHub Pages 어디든).
      조건 조작 → LTV·reason_code 즉시 갱신, **우선순위 트레이스**(P0~P7 중 어디서 short-circuit 됐는지 시각화),
@@ -33,6 +44,7 @@
      3탭: LTV 판정 / 회귀 콘솔(Pass Rate·카테고리별·미결항목) / Extractor(LLM, 키 있으면 실제 추출+Assurance 수치).
      AppTest 스모크 테스트 5개 추가(`tests/test_streamlit_app.py`) — UI가 엔진을 잘못 호출하면 테스트가 잡음.
   - 배포 가이드 `docs/ui/DEPLOY.md`. **사용자 액션 필요:** Streamlit Community Cloud 배포 버튼은 사용자가 눌러야 함.
+  - 두 표면 모두 전국 지역 선택 지원(샌드박스=시도별 optgroup+검색, Streamlit=검색형 selectbox).
 
 ## ✅ 이전 완료 (2026-08-10)
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
@@ -45,6 +57,8 @@
 - 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
+- **[사용자] Q9·Q10 도메인 판단** — 비규제 유주택 60% 채택 여부 / 수도권 비규제 다주택 0% 선판정 여부.
+  둘 다 원문 근거가 있으나 확정 명세가 유보하고 있어 엔진이 escalation 중이다.
 - **[사용자] Streamlit Cloud 배포** — `docs/ui/DEPLOY.md` 절차대로. 저장소 연결 + main file `app/streamlit_app.py`.
 - **[사용자] ANTHROPIC_API_KEY를 Secrets에 등록** → Extractor 탭에서 실제 LLM 1회 실행 → 첫 실측 Assurance 수치 확보.
   (로컬로 하려면 `python examples/run_extractor.py`.)
@@ -102,6 +116,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18** — 🐛 **지역 판정 버그 수정 + 전국 레지스트리.** 사용자 지적("서울 강남은 원래 40 제한 걸려야 되는 거 아냐?")으로 발견 — 지역표에 6·30 신규 3곳만 있고 나머지는 조용히 非규제 기본값이라 이미 투기과열지구인 강남구가 70%로 판정됐다. MOLIT 참고2 현황표를 근거로 전국 241곳을 시점 버전과 함께 등록(`regions.py`), 미등록 코드는 `UNKNOWN`→사람 검토로 전환. 오라클 독립성 계약을 심볼 단위로 정밀화(데이터 공유·해석 로직 독립, `tests/test_regions.py`가 원문 지역 수와 대조). 웹은 241×7시점 프로브로 Python↔JS 대조. 회귀 REGION 11건 신설(43 케이스 100%), pytest 71 통과. 부수로 명세 상충 2건 발견 → Q9(비규제 유주택 60%)·Q10(수도권 비규제 다주택 0%) 신설, 룰 값은 임의 변경하지 않고 표면화.
 - **2026-08-18** — ✅ **온라인 테스트 환경 2종.** ①정적 샌드박스 `web/sandbox.html`(엔진 JS 포팅, 우선순위 트레이스 시각화, 회귀 30케이스 인터랙티브 표) + 빌드 파이프라인 `tools/export_fixtures.py`→`tools/build_sandbox.py`, 헤드리스 대조 `tools/verify_js_port.mjs`(30/30). 골든 기대값을 사람이 적지 않고 Python 엔진 실행으로 생성해 포팅 드리프트를 구조적으로 탐지. ②Streamlit 검증 콘솔 `app/streamlit_app.py`(실제 Python 엔진, 3탭) + AppTest 스모크 5개. 배포 가이드 `docs/ui/DEPLOY.md`. 테스트 44 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.

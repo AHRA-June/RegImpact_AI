@@ -6,6 +6,9 @@ LLM 출력(RegChange Extractor 등)을 검증하는 기준점(ground truth)이�
 
 우선순위(short-circuit): P0 스코프 → P0b 정책대출=Discovery → P1 경과규정 → P2 지역상태
 → P3 다주택 → P4 유주택 → P5 생애최초 → P6 서민실수요 → P7 일반.
+
+지역상태는 `regions.REGISTRY`(전국 시·군·구, 시점 버전)에서 해석한다. 미등록 코드는
+NON_REGULATED로 넘겨짚지 않고 NEEDS_HUMAN_REVIEW로 escalate 한다(regions.py 상단 참고).
 """
 from __future__ import annotations
 
@@ -70,6 +73,13 @@ def evaluate(app: MortgageApplication) -> LtvDecision:
 
     # P2. 지역상태 (시점 해석)
     status, _regulated_type = resolve_region_status(app.region_code, app.evaluation_date)
+    if status == RegionStatus.UNKNOWN:
+        # 레지스트리에 없는 지역코드 = 데이터 품질 문제. 비규제로 넘겨짚지 않는다.
+        # (넘겨짚었더니 규제지역인 강남이 70%로 판정된 사고가 있었다 — regions.py 참고)
+        return LtvDecision(
+            status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
+            reason_codes=[ReasonCode.UNKNOWN_REGION],
+        )
     if status == RegionStatus.NON_REGULATED:
         return _baseline_rule(app)
 

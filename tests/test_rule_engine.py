@@ -46,9 +46,25 @@ def test_p2_before_effective_date_is_baseline_70():
     assert d.max_ltv == 0.70
 
 
-def test_p2_unregistered_region_is_non_regulated():
+def test_p2_seoul_gangnam_is_regulated():
+    """강남은 '17.8.3부터 투기과열지구다. 예전엔 레지스트리 미등록이라 70%로 오판했다."""
     d = evaluate(app(region_code="SEOUL_GANGNAM", house_count=0))
-    assert d.max_ltv == 0.70  # 미등록 지역 → 非규제 기준선
+    assert d.max_ltv == 0.40
+    assert "LTV_REGULATED_40" in d.reason_codes
+
+
+def test_p2_non_regulated_region_uses_baseline():
+    d = evaluate(app(region_code="ULSAN_NAM", house_count=0))
+    assert d.max_ltv == 0.70
+    assert "LTV_BASELINE_70" in d.reason_codes
+
+
+def test_p2_unknown_region_escalates_instead_of_guessing():
+    """레지스트리에 없는 코드를 비규제로 넘겨짚지 않는다(2026-08-18 사고의 재발 방지선)."""
+    d = evaluate(app(region_code="ATLANTIS_XX", house_count=0))
+    assert d.status is EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert d.max_ltv is None
+    assert "UNKNOWN_REGION" in d.reason_codes
 
 
 # ---------- P3 / P4: 소유 상태 ----------

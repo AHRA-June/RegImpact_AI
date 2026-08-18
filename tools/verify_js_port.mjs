@@ -20,7 +20,9 @@ const END = "/* ===================== 폼 상태";
 const body = html.slice(html.indexOf(START), html.indexOf(END));
 if (!body) throw new Error("엔진 구간을 찾을 수 없음 — 템플릿의 구분 주석이 바뀌었는지 확인");
 
-const evaluate = new Function(`${body}; return evaluate;`)();
+// 엔진 구간은 FIXTURES(지역 레지스트리)를 참조하므로 주입해서 실행한다.
+const { evaluate, regionState } = new Function(
+  "FIXTURES", `${body}; return { evaluate, regionState };`)(fixtures);
 
 const sortedEq = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 const failures = [];
@@ -38,9 +40,28 @@ for (const c of fixtures.cases) {
   if (!ok) failures.push({ case_id: c.case_id, python: py, js });
 }
 
+// --- 전국 지역 시점해석 대조 (Python 프로브 표 ↔ JS 해석기) ---
+const LETTER = { REGULATED: "R", NON_REGULATED: "N", UNKNOWN: "U" };
+const probe = fixtures.region_probe;
+const regionFailures = [];
+for (const [code, expected] of Object.entries(probe.status)) {
+  const actual = probe.dates.map((d) => LETTER[regionState(code, d)]).join("");
+  if (actual !== expected) regionFailures.push({ code, expected, actual });
+}
+
+if (regionFailures.length) {
+  console.error(`✕ 지역 시점해석 불일치 ${regionFailures.length}건`);
+  for (const f of regionFailures.slice(0, 20)) console.error(JSON.stringify(f));
+  process.exit(1);
+}
+
 if (failures.length) {
   console.error(`✕ ${failures.length}/${fixtures.cases.length} 불일치`);
   for (const f of failures) console.error(JSON.stringify(f, null, 2));
   process.exit(1);
 }
-console.log(`✓ JS 포팅본이 Python 엔진과 ${fixtures.cases.length}/${fixtures.cases.length} 일치`);
+console.log(
+  `✓ JS 포팅본이 Python 엔진과 일치 — ` +
+  `판정 ${fixtures.cases.length}/${fixtures.cases.length} 케이스, ` +
+  `지역 시점해석 ${Object.keys(probe.status).length}개 지역 × ${probe.dates.length}개 시점`
+);

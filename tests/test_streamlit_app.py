@@ -61,6 +61,35 @@ def test_policy_loan_routes_to_discovery():
     assert _ltv(at) == "—"
 
 
+def test_seoul_gangnam_shows_regulated_40_in_app():
+    """UI에서 서울 강남구를 고르면 40%여야 한다(70%로 보이던 사고의 회귀선)."""
+    at = _run()
+    region = next(sb for sb in at.selectbox if sb.label.startswith("지역"))
+    region.set_value("SEOUL_GANGNAM").run()
+    assert not at.exception, [str(e.value) for e in at.exception]
+    assert _ltv(at) == "40%"
+
+
+def test_non_regulated_region_shows_baseline_70_in_app():
+    at = _run()
+    region = next(sb for sb in at.selectbox if sb.label.startswith("지역"))
+    region.set_value("ULSAN_NAM").run()
+    assert not at.exception
+    assert _ltv(at) == "70%"
+
+
+def test_region_selectbox_offers_whole_country():
+    at = _run()
+    region = next(sb for sb in at.selectbox if sb.label.startswith("지역"))
+    # AppTest 의 .options 는 format_func 가 적용된 표시 라벨을 준다.
+    labels = region.options
+    assert len(labels) > 200
+    for label in ("서울특별시 강남구 · 투기과열", "서울특별시 노원구 · 투기과열",
+                  "경기도 구리시 · 투기과열", "인천광역시 연수구 · 비규제",
+                  "울산광역시 남구 · 비규제", "제주특별자치도 제주시 · 비규제"):
+        assert label in labels
+
+
 def test_regression_tab_reports_full_pass_rate():
     at = _run()
     rate = next(m.value for m in at.metric if m.label == "Rule-regression Pass Rate")

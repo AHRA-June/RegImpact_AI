@@ -10,6 +10,7 @@
     BASELINE       — 非규제/시행 전/미등록 지역 기준선
     EXCEPTION      — 무주택 예외 계층(생애최초·서민실수요·처분조건부)
     BOUNDARY       — 경계값(경과규정 날짜 컷오프, 효력일, house_count 0/1/2)
+    REGION         — 전국 지역 레지스트리(기존 규제지역·비규제·미등록 코드·지정일 경계)
     GRANDFATHERING — G1/G2/G3 경과규정
     CONFLICT       — 동시 충족·우선순위 충돌·escalation(유주택+생애최초 등)
 """
@@ -28,7 +29,11 @@ _AFTER = date(2026, 7, 2)     # 시행 후, 경과규정 미해당
 _BEFORE = date(2026, 6, 15)   # 시행 전
 _CUTOFF = date(2026, 6, 30)   # 경과규정 경계
 _EFFECTIVE = date(2026, 7, 1)  # 규제 효력일
-_REG = "GURI"                 # 6·30 규제지역
+_REG = "GYEONGGI_GURI"                    # 6·30 신규 지정 규제지역
+_SEOUL_GANGNAM = "SEOUL_GANGNAM"          # 6·30 이전부터 이미 규제(투기과열 '17.8.3)
+_SEOUL_NOWON = "SEOUL_NOWON"              # '25.10.16 지정
+_NONREG = "ULSAN_NAM"                     # 비규제(비수도권)
+_WIDE_2025 = date(2025, 10, 16)           # 서울 21구·경기 12곳 지정일
 
 
 class Category(str, Enum):
@@ -36,6 +41,7 @@ class Category(str, Enum):
     BASELINE = "BASELINE"
     EXCEPTION = "EXCEPTION"
     BOUNDARY = "BOUNDARY"
+    REGION = "REGION"
     GRANDFATHERING = "GRANDFATHERING"
     CONFLICT = "CONFLICT"
 
@@ -95,14 +101,58 @@ def scope_cases() -> list[GeneratedCase]:
 def baseline_cases() -> list[GeneratedCase]:
     return [
         _case("BASE-01", Category.BASELINE,
-              "시행 전(6.15) 규제지역 코드 → 아직 非규제, 무주택 70%",
+              "6·30 신규지정 지역, 시행 전(6.15) → 아직 非규제, 무주택 70%",
               _app(evaluation_date=_BEFORE, house_count=0)),
         _case("BASE-02", Category.BASELINE,
-              "미등록 지역 → 非규제 기준선 70%",
-              _app(region_code="SEOUL_GANGNAM", house_count=0)),
+              "비규제 지역(울산 남구) 무주택 → 기준선 70%",
+              _app(region_code=_NONREG, house_count=0)),
         _case("BASE-03", Category.BASELINE,
-              "非규제 유주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
-              _app(region_code="SEOUL_GANGNAM", house_count=1)),
+              "비규제 유주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
+              _app(region_code=_NONREG, house_count=1)),
+    ]
+
+
+def region_cases() -> list[GeneratedCase]:
+    """전국 지역 레지스트리 회귀 — '미등록 → 조용히 非규제' 사고의 재발 방지선.
+
+    2026-08-18 발견: 레지스트리에 3개 지역만 있고 나머지는 기본값 非규제였던 탓에,
+    이미 투기과열지구인 서울 강남구가 비규제 기준선 70%로 판정됐다. 아래 케이스들이 그 회귀선이다.
+    """
+    return [
+        _case("RGN-01", Category.REGION,
+              "서울 강남구(투기과열 '17.8.3~) 무주택 → 규제 40%. 6·30 이전부터 이미 규제지역",
+              _app(region_code=_SEOUL_GANGNAM, house_count=0)),
+        _case("RGN-02", Category.REGION,
+              "서울 강남구, 6·30 시행 전(6.15) 평가여도 이미 규제 → 40% (6·30과 무관)",
+              _app(region_code=_SEOUL_GANGNAM, evaluation_date=_BEFORE, house_count=0)),
+        _case("RGN-03", Category.REGION,
+              "서울 중랑구('25.10.16 지정) 무주택 → 규제 40%",
+              _app(region_code="SEOUL_JUNGNANG", house_count=0)),
+        _case("RGN-04", Category.REGION,
+              "서울 노원구, 지정 전일('25.10.15) → 아직 非규제 70%",
+              _app(region_code=_SEOUL_NOWON,
+                   evaluation_date=_WIDE_2025 - timedelta(days=1), house_count=0)),
+        _case("RGN-05", Category.REGION,
+              "서울 노원구, 지정 당일('25.10.16) → 규제 40%",
+              _app(region_code=_SEOUL_NOWON, evaluation_date=_WIDE_2025, house_count=0)),
+        _case("RGN-06", Category.REGION,
+              "울산 남구(비수도권 비규제) 무주택 → 70%",
+              _app(region_code=_NONREG, house_count=0)),
+        _case("RGN-07", Category.REGION,
+              "제주시(비규제) 생애최초 → 규제지역이 아니므로 기준선 70%",
+              _app(region_code="JEJU_JEJU", house_count=0, first_home_buyer=True)),
+        _case("RGN-08", Category.REGION,
+              "인천 연수구(수도권 비규제) 무주택 → 70%",
+              _app(region_code="INCHEON_YEONSU", house_count=0)),
+        _case("RGN-09", Category.REGION,
+              "레지스트리 미등록 코드 → 非규제로 넘겨짚지 않고 NEEDS_HUMAN_REVIEW",
+              _app(region_code="ATLANTIS_XX", house_count=0)),
+        _case("RGN-10", Category.REGION,
+              "구(舊) 코드 'GURI' 별칭 → 현행 GYEONGGI_GURI 로 정규화되어 규제 40%",
+              _app(region_code="GURI", house_count=0)),
+        _case("RGN-11", Category.REGION,
+              "경기 과천시('25.10.16 지정) 다주택 → 규제지역 0%",
+              _app(region_code="GYEONGGI_GWACHEON", house_count=2)),
     ]
 
 
@@ -209,6 +259,29 @@ def conflict_cases() -> list[GeneratedCase]:
                 "NEEDS_HUMAN_REVIEW'라 하나, §H(엔진 구현 기준) 의사코드는 P4에서 0%로 "
                 "short-circuit 한다. 여기서는 권위 기준(§H)을 채택. 03_OPEN_QUESTIONS 참조."),
         ),
+        _case(
+            "CFL-06", Category.CONFLICT,
+            "수도권 비규제(인천 연수) 다주택: §H는 escalation, 원문 C06은 0% — 미결",
+            _app(region_code="INCHEON_YEONSU", house_count=2),
+            spec_note=(
+                "알려진 명세 상충: FSC 보도자료 p2 원문은 '다주택자는 수도권 內 주택구입시 규제지역 "
+                "여부와 무관하게 LTV 0% 적용'이라 하고 05_RULE_SPEC §C-1b(R6)도 '다주택·수도권"
+                "(규제 무관) 0%'로 적고 있으나, §H(엔진 구현 기준) 의사코드는 P3(다주택)를 P2 지역분기 "
+                "**뒤**에 두어 비규제 경로에서는 도달하지 못한다. 전국 지역 레지스트리가 생기면서 "
+                "비로소 도달 가능해진 경로다. 권위 기준(§H)을 채택해 현재는 escalation. "
+                "03_OPEN_QUESTIONS Q10 참조."),
+        ),
+        _case(
+            "CFL-07", Category.CONFLICT,
+            "비수도권 비규제(울산) 유주택: §C-2에 기준값 없음 → escalation. 원문엔 60% 서술 — 미결",
+            _app(region_code="ULSAN_NAM", house_count=1),
+            spec_note=(
+                "알려진 명세 공백: MOLIT 보도자료 참고1 표에 '非규제지역(수도권 外) 무주택(처분조건부 "
+                "1주택) 70% / 유주택 60%'가 있으나, 05_RULE_SPEC §C-2는 무주택 70%만 확정했고 "
+                "'수도권 外 유주택 60%는 다른 맥락이니 혼동 금지'라고 명시적으로 유보했다. "
+                "LOCKED §4(규칙 값은 사람이 확정)에 따라 임의 채택하지 않고 escalation 유지. "
+                "03_OPEN_QUESTIONS Q9 참조."),
+        ),
         _case("CFL-05", Category.CONFLICT,
               "다주택 + 서민실수요 → 다주택(P3)이 우선 0%",
               _app(house_count=2, real_demand_flag=True)),
@@ -223,6 +296,7 @@ def generate_all() -> list[GeneratedCase]:
     cases: list[GeneratedCase] = []
     cases += scope_cases()
     cases += baseline_cases()
+    cases += region_cases()
     cases += exception_cases()
     cases += boundary_cases()
     cases += grandfathering_cases()
