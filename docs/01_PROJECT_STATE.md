@@ -1,263 +1,127 @@
 # 01 — PROJECT STATE (살아있는 상태판)
 
 > **이 파일은 프로젝트의 단일 진실 상태판이다.**
-> 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
-> 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
+> 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 **이 파일부터** 읽는다.
+> 규칙: "지금 어디 / 다음 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (추출 골드 검수 완료 세션)
-- **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 217 통과)
-- (해결됨) 원격 푸시 권한 부여됨.
-- (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
+- **마지막 갱신:** 2026-08-18 (세션 종료 · 인계 정리)
+- **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f` (원격 푸시됨, PR 미생성)
+- **전체 단계:** 🟢 **Phase 2 진행 중** — Walking Skeleton 관통 완료, 골드셋 구축·추출 튜닝 완료
+- **테스트:** 217개 통과 · **비용: 0원** (유료 API 키 미사용)
 
 ---
 
-## 지금 어디까지 왔나 (DONE)
+## 🚀 새 세션 시작 절차 (2분)
 
-- [x] 프로젝트 브리프 v2 확정 (`docs/00_BRIEF.md`)
-- [x] 브리프에 대한 분석 피드백 완료 (6개 핵심 지적 — 아래 "피드백 요약" 참고)
-- [x] 문서 구조(handoff scaffold) 생성 및 커밋
-  - README, 01_PROJECT_STATE, 02_DECISION_LOG, 03_OPEN_QUESTIONS, regulatory_facts(스켈레톤), metrics_spec(스켈레톤)
+```bash
+python -m pytest -q                  # 217 passed 여야 한다
+python examples/validate_goldset.py  # 골드셋 무결성 + 명세 정합 + 확정 지문
+python examples/demo_impact_e2e.py   # E2E 10단계 전부 ✅ (LLM 호출 0회)
+```
 
----
+의존성은 **SessionStart 훅이 자동 설치**한다(`.claude/hooks/session-start.sh` — 웹 세션 한정).
+수동으로 하려면 `pip install -e ".[dev]"`. 런타임 의존성은 없다(표준 라이브러리만).
+UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 환경에 이미 있음).
 
-## ✅ 방금 완료 (2026-08-18 · 12차)
-- **★ 추출 골드 v3 검수 완료(사용자)** — 20항목 전부 인용이 주장을 뒷받침함 확인, 전 항목
-  `human_confirmed`. **이제 Extractor 지표(Completeness 100% / Exception Recall 100%)가
-  사람이 확정한 골드 위의 수치다.**
-- **확정 지문 도입** — `human_confirmed`는 그 시점 내용에 대한 확정인데 골드는 계속 손보게 된다.
-  채점에 영향을 주는 필드만 해시해 박고, 어긋나면 재검수를 요구한다(변경을 막지는 않음).
-  설명 문구 변경은 지문에서 제외 — 통제가 성가심이 되면 우회당한다.
-- **metrics_spec 임계값 확정 🤖** — TBD 10여 개 → 1개(Policy-version, 측정 불가).
-  임계는 점수가 아니라 **위험**에서 정했다: 예외·시행일·경과규정·escalation 누락은 100%,
-  Completeness 95%·Citation 98%는 해석/추출 아티팩트 여지. ✍️ 확정 대기.
-- 테스트 209 → **217**.
+세 개가 다 통과하면 환경이 정상이다. 전부 **LLM 호출 없이** 돌아간다(저장된 실행 기록 재생).
+실제 LLM이 필요하면 `--provider cli`(Claude Code 구독, 유료 키 불필요) → `docs/06_LLM_PROVIDER.md`.
 
-## ✅ 이전 완료 (2026-08-18 · 11차)
-- **★ 골드 v3 — 검수 중 측정 품질 정비.** 각 entry가 실제로 무엇을 재는지 측정해
-  ①이중 측정 3건 제거(required ↔ exceptions 키워드 동일) ②과잉 키워드 축소
-  (`SCOPE_JEONSE` 17건→5건 매칭) ③**`transition` 채점 신설** — before/after 필드를 직접 대조.
-- **엄격해진 뒤에도 100%/100% 유지** — 기존 100%가 느슨한 키워드 덕이 아니었다는 뜻.
-  단일 패스는 같은 기준에서 88%/50%이므로 개선폭도 유지된다. (required 19→16, 분모 변경)
-- **잠복 버그 발견** — `req.get("id", req["keywords"][0])`는 기본값이 먼저 평가돼
-  키워드가 빈 entry에서 `IndexError`. 회귀 테스트로 고정.
-- 검수표에 **채점 특이도**(추출 75건 중 몇 건에 매칭) 표시 — 그 항목이 실제로 무언가를 재는지 보이게.
-- 테스트 205 → **209**.
-
-## ✅ 이전 완료 (2026-08-18 · 10차)
-- **★ 골드 검수 1차 완료 — 충돌 3건 모두 "명세가 맞음"(사용자 판정).** 골드를 명세에 맞춰 정정.
-  1. 非규제(수도권) 기준선 60%→**70%** 2. 규제지역 LTV **투기과열·조정 모두 40%**(40/50은 DTI)
-  3. 서민·실수요자 **70%→60% 변경 있음** — 값만이 아니라 **분류가 틀려**
-  `CHALLENGE-NOC-001`(NO_CHANGE) → `CHALLENGE-EXC-009`(EXCEPTION)로 재작성, 함정 방향 반전.
-- **세 문항 `authored_by` = `human_confirmed`** — 골드셋 최초 확정 항목. 명세 대조 **충돌 0건**.
-- **05_RULE_SPEC에 재확인 기록** — 텍스트 추출본이 시사한 값 vs 확정값을 나란히 적고
-  "원문 텍스트만 보고 이 구간 값을 유도하지 말 것" 명시.
-- **검사기 보완** — 정정된 항목이 정정 때문에 다시 잡히던 오탐 수정(LTV/DTI를 명시 구분하면 통과).
-- 검수표를 **결정 기록**으로 전환(충돌 0건 시 정정 이력 표시). 테스트 204 → **205**.
-
-## ✅ 이전 완료 (2026-08-18 · 9차)
-- **★ 골드 v2 검수 준비 + 골드 결함 3건 발견.** 추출 골드에 `claim`·`citations` 추가(v2.1)해
-  검수 가능하게 만들고, 검수표 생성(`GOLD_V2_REVIEW.md` + HTML).
-- **⚠️ 확정 명세와 모순되는 골드 3건** — `LOCKED-BOR-002`·`CHALLENGE-NOC-001`(非규제 기준선을
-  60%로 주장, 명세 70%), `LOCKED-BOR-003`(규제지역 LTV가 종류별로 다르다고 주장, 명세는 둘 다 40%).
-  원인은 **FAQ HWP 표의 LTV/DTI 열 평탄화** — 텍스트만 보면 40/50/60이 전부 LTV로 읽힌다.
-- **`check_gold_against_spec()` 신설** — 골드 ⟷ 명세 정합성 자동 검사. 넓은 규칙은 오탐 10/13이라
-  버리고 **관측된 결함 유형 2개만** 잡도록 다시 만들었다(정밀도 3/3).
-- **✍️ 사용자 판단 대기 3건** — 골드가 틀림 / 명세가 틀림 / 문맥이 다름. 원본 HWP 표 대조 권장.
-- 테스트 194 → **204**.
-
-## ✅ 이전 완료 (2026-08-18 · 8차)
-- **★ D-02 해결 — 문서별 추출 + 문서 간 병합.** Change Completeness 79%→**100%**,
-  Exception Recall 50%→**100%**, Citation 100%. 호출 3배(지출 0원), ~8분.
-- **먼저 골드를 고쳤다** — v1은 required 4/exception 2로 튜닝 근거가 되지 못했다. v2로 19+4 확장.
-  **확장하자마자 단일 패스 성적이 79%/50%로 드러났다** — 지표가 좋았던 게 아니라 골드가 얇았다.
-- **⚠️ 유사도 병합은 기각** — 골드 점수는 임계값 0.3까지 100%였으나, 열어 보니 "생애최초 60%"와
-  "서민·실수요자 60%", 서로 다른 요건 임계값, 서로 다른 경과규정이 합쳐지고 있었다.
-  **골드가 과병합을 탐지할 만큼 예민하지 않았다.** → 문서 간 병합만 허용(지문 일치 + 유사도).
-- **자동화율 분모 수정** — Discovery 행이 4→18로 늘자 자동화율이 50%→27%로 '하락'했다.
-  Discovery는 정의상 수동이므로 분모에서 제외 → **코어 자동처리 67%**.
-- 매트릭스 16→30행(코어 12 + Discovery 18). 문서별 캐시 추가(재실행 비용 절감). 테스트 184→**194**.
-
-## ✅ 이전 완료 (2026-08-18 · 7차)
-- **★ 골드셋 QA 평가 하네스 + DEV 40 베이스라인** — `src/regimpact/eval/qa.py`,
-  `examples/run_goldset_eval.py`. 정정 후 **Fact Coverage 95.0% / Exact 92.5% /
-  Citation Correctness 100% / Escalation Recall 100%** (비용 0원, 6분).
-- **⚠️ 첫 채점이 틀렸다 — 모델이 아니라 채점기가 문제였다.** 실패 12건을 답변 원문과 대조하니
-  전부 표현 차이("25.9.7" vs "2025년 9월 7일", "증액 없는" vs "증액없는"). 프롬프트를 고쳤다면
-  **채점기에 맞춰 모델을 훈련시킨 것**이 됐다 → 표면 정규화 + `|` 동의 표현으로 채점기를 고쳤다.
-  느슨해지는 것을 막으려고 `tests/test_qa_eval.py`가 양방향 고정(표면차 통과 / 내용차 실패).
-- **❌ D-03 철회** — "haiku 인용 환각 25%"는 **측정 오차**였다. PDF 추출본이 단어 중간에서
-  줄바꿈하는데 대조가 공백 축약만 했던 탓. 재채점 결과 **0%**. 코어 모델 sonnet-5 결정은 유지하되
-  근거를 "인용 환각"에서 **"추출 완전성 19건 vs 12건"** 으로 교체.
-- **provider 레이어 설계 결함 수정** — RegChange 스키마에 welded 돼 있어 QA 응답을 못 만들었다.
-  검증기·지시문 주입 가능하게 변경.
-- **D-02는 이 평가에서 재현되지 않음** — QA는 질문이 대상을 지목해 주므로 문서 전체 추출과
-  난이도가 다르다. 두 지표를 섞어 보고하지 않는다(`GOLDSET_EVAL_REPORT.md` §4).
-- 테스트 158 → **184**.
-
-## ✅ 이전 완료 (2026-08-18 · 6차)
-- **★ 골드 평가셋 115문항 작성** — `docs/eval/gold/` (DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35).
-  10개 카테고리 전부 커버, high-risk 비중 DEV·LOCKED 52% / CHALLENGE 80%.
-  **튜닝 시작 전에 세 셋을 모두 작성**(브리프 §12-1·2 순서 준수).
-- **봉인을 코드로 강제** — `load_split(LOCKED)`는 사유 없이 `SealedSplitError`. 해제는
-  `SEAL_ACCESS_LOG.md`에 append-only 기록. `split_stats()`는 정답 없이 구성만 반환해
-  일상 점검이 봉인을 소모하지 않게 했다. `src/`·`examples/`의 봉인 셋 참조를 테스트가 금지.
-- **정답지 자신에게 Citation Assurance** — 115문항의 모든 인용이 원문에 verbatim 존재함을
-  매 테스트마다 대조. 인용문은 손으로 옮기지 않고 `q()`가 원문에서 잘라 온다.
-- **DEV/LOCKED 카테고리 분포 동일** 고정(테스트) — 최종 성능 차이가 난이도 차이로 오염되지 않게.
-- 한계 명시: 작성자=개발자이므로 독립 벤치마크 아님(브리프 §12 문구 기록). 전 문항 🤖 초안.
-- 테스트 129 → **158** (`tests/test_goldset.py` 29개).
-
-## ✅ 이전 완료 (2026-08-18 · 5차)
-- **★ Q10 확정(사용자 결정)** — **유주택자를 코어 스코프에 유지**하고, 기준값 없는 구간은
-  추정하지 않고 escalation 유지. 모집단에 존재하는 고객군을 범위 밖으로 선언해 지표를 좋아 보이게
-  하는 회피를 하지 않는다. → `03_OPEN_QUESTIONS` Q10 ✅ 해결.
-- **"자동판정 불가 22.4%"가 잘못된 그림이었음을 발견** — 447건을 열어 보니 **299건(66.9%)은 이미
-  판정된 건**이었다. 규제지역 유주택은 시행일 LTV가 0%로 확정되므로 **오늘 심사가 된다.**
-  못 하는 것은 시행 전 기준값 부재로 인한 **변화량 비교**뿐.
-- **지표를 두 축으로 분리** — `decision_coverage`(심사 판정) **91.4%** vs
-  `impact_coverage`(영향 측정) **74.1%**. 진짜 판정 불가는 7.4%(148건: 경과규정 해당 유주택,
-  비수도권 유주택). `Segment.IMPACT_UNKNOWN` 신설.
-- **미확정을 0으로 세지 않도록 수정** — `limit_before/after/delta`가 미확정 LTV를 0원으로 대체해
-  "한도가 늘었다" 같은 허구 수치를 만들 수 있었다 → `None` 반환.
-- 매트릭스·UI 재생성(커버리지 2축 표시). 테스트 124 → **129**.
-
-## ✅ 이전 완료 (2026-08-18 · 4차)
-- **★ Q10 부분 해결 — 자동판정 불가 33.3% → 22.4%** (666건 → 447건).
-- **원인은 명세 공백이 아니라 구현 결함이었다.** 확정 사실 C06("다주택자는 수도권 內 주택구입시
-  **규제지역 여부와 무관하게** LTV 0%")이 이미 있었는데 엔진이 REGULATED 분기 **안에서만** 적용해
-  "무관"을 좁혀 구현하고 있었다 → `§E P0c` 신설, `regions.is_capital_area()` 추가.
-- **시점 무관 근거도 원문에 있었다(C14 신설)** — "旣 마련된 규정에 따라 ... 7.1일부터 즉시 적용"(FSC p2).
-  6·30 지정은 새 규칙 생성이 아니라 기존 규칙의 발동 → 시행 전(6.30)에도 수도권 다주택 0%.
-- **변이 테스트가 내 주석을 반증** — "P0c 순서 무관"이라고 적었으나 경과규정보다 뒤로 옮기면
-  escalation 447→480. 주석 정정 + 회귀 `GF-MULTI-01`로 순서 고정.
-- **잔여 미결(⛔ Q10):** 非규제 수도권 **비처분 1주택** 397건(19.9%) — FAQ Q2 주1)이 열 전체를
-  무주택 기준으로 한정하므로 값이 원문에 **없다**(C15). MOLIT 유주택 60%는 수도권 **外** 값이라 전용 불가.
-  추정 대신 escalation 유지 → **자동화율 상한 약 78%**를 문서·화면에 상시 노출.
-- 오라클도 독립 재유도(수도권 집합 별도 기입), TC 34케이스로 확대(Pass 100%). 테스트 119 → **124**.
-
-## ✅ 이전 완료 (2026-08-18 · 3차)
-- **★ Stitch UI 하드코딩 → 엔진 실제 출력으로 교체** — `src/regimpact/ui/`(theme·pages·site).
-  5개 화면(규제 변경 분석 / 임팩트 매트릭스 / Rule 변경안 / 검증 / 고객·포트폴리오 영향)을
-  **코드에서 렌더**한다. 산출물 `docs/ui/generated/`. 생성: `python examples/build_ui.py`(0원).
-- **Stitch 재생성 대신 코드 생성 채택** — 정정 프롬프트로 다시 만들면 데이터가 바뀔 때마다 또 환각한다.
-  디자인 토큰은 export에서 verbatim 가져오고(테스트로 고정), 값은 전부 실제 객체에서 온다.
-- **UI grounding 테스트 23개** — 2026-08-10 Stitch 사고를 회귀로 고정: 환각 지역명 / `60%→50%` /
-  경과규정 부등호 반전 / **값 하드코딩(양방향 검사)** / CSS 미정의 클래스 / CDN 재도입.
-  전부 **변이 테스트로 방어력 확인**(각 사고를 주입하면 해당 테스트가 실패).
-- **자기완결 HTML** — `cdn.tailwindcss.com` 런타임 JIT과 아이콘 폰트 제거, 같은 토큰에서 만든
-  정적 CSS 인라인 + 인라인 SVG. 네트워크 없이 열어도 디자인 유지(스크린샷 검증).
-- 테스트 96 → **119**.
-
-## ✅ 이전 완료 (2026-08-18 · 2차)
-- **★ Impact Matrix E2E 관통** — `src/regimpact/impact/`(schema·portfolio·customer·builder·report).
-  `examples/demo_impact_e2e.py`가 브리프 §18 "코어 완성의 정의" 10단계를 **전부 ✅로 관통**한다
-  (LLM 호출 0회 — 저장된 추출 기록 재생, 비용 0원).
-- **§10 매트릭스 16행 생성** — Phase 3축(D-day 전 13 / 시행 후 2 / 별도 트리거 1) 유지.
-  자동처리 50%, Human Review 8행(전부 사유 명시). 산출물 `docs/eval/impact_matrix_6_30.md`.
-- **고객 영향 실계산** — 층화 합성 포트폴리오 2,000건을 6.30 vs 7.1 두 시점으로 룰엔진 평가.
-  한도 감소 638건(31.9%), 총 −1,549억원, 건당 평균 −2.43억원, 경과규정 보호 134건.
-- **⚠ E2E가 드러낸 명세 공백** — **포트폴리오의 33.3%(666건)가 자동 판정 불가**, 사유 전부
-  `OWNER_BASELINE_UNKNOWN`(非규제 유주택 기준선 부재). 유닛 테스트 30건에서는 "1케이스"였던 것이
-  포트폴리오 규모에서는 1/3이었다 → **Q10 신설(영향 큼)**. 자동화율 상한이 구조적으로 67%로 묶인다.
-- Stitch 하드코딩값 대체 준비 완료 — 매트릭스 모든 수치가 엔진·추출기·회귀의 실제 출력에서 나온다.
-- 테스트 66 → **94** (`tests/test_impact.py` 28개 추가).
-
-## ✅ 이전 완료 (2026-08-18 · 1차)
-- **무과금 LLM provider 레이어** — `src/regimpact/extractor/backends.py`. `cli`(Claude Code 구독 포함,
-  유료 키 불필요·기본값) / `gemini`(무료 티어) / `manual`(사람 중계) / `replay`(호출 0회 재생) / `anthropic`(선택).
-  서버측 structured output이 없는 경로를 위해 JSON 정규화 + 스키마 검증 + 1회 교정 재시도 구현.
-  → **Anthropic API 키 없이도 전 기능 동작.** 결정 근거·한계는 `docs/06_LLM_PROVIDER.md`.
-- **Extractor 첫 실제 LLM 실측** — 6·30 공문 3건 실행. sonnet-5: 19건 추출, **Citation Correctness 100% /
-  Unsupported Claim Rate 0% / Change Completeness 100% / Exception Recall 50%**.
-  실행 기록 `docs/eval/runs/run_*.json`(`--provider replay`로 재현), 리포트 `docs/eval/EXTRACTOR_RUN_REPORT.md`.
-- **실측으로 결함 3건 확인** — D-01 지역 어휘 불일치(✅해결: 결정적 정규화 `postprocess.normalize_regions`),
-  D-02 열거 병합에 의한 예외 누락(⚠미해결·Q9로 등록, Phase 2 1순위), D-03 모델별 인용 환각
-  (haiku-4-5 Unsupported 25% vs sonnet-5 0% → 코어 모델은 sonnet-5 이상).
-- 테스트 39 → **66** (`tests/test_backends.py` 27개 추가, 전부 오프라인).
-
-## ✅ 이전 완료 (2026-08-10)
-- **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
-  **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
-  명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
-  EXCEPTION/BOUNDARY/GRANDFATHERING/CONFLICT) Pass Rate 100%. **mutation test**로 fixture 방어력 증명(엔진에
-  버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
-- **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
-- **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(217), `python examples/validate_goldset.py`(골드셋 무결성),
-  `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
-  `python examples/build_ui.py`(**5개 화면 생성**),
-  `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
-  `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
-
-## 다음 액션 (NEXT)
-- ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-18 1차).
-- ~~**최소 Impact Matrix E2E**~~ — ✅ **완료(2026-08-18 2차). Phase 1 Walking Skeleton 관통.**
-- ~~**Q10**~~ — ✅ **확정(2026-08-18): 유주택자 스코프 유지 + 공백은 escalation 유지.**
-- ~~**P0c 도메인 검수**~~ — ✅ **확정(2026-08-18): 시행 전에도 0%.** 🤖 초안 → ✅ 전환 완료.
-- ~~**골드셋 100~120 작성**~~ — ✅ **완료(2026-08-18): 115문항, 봉인 완료.**
-- **✍️ 골드셋 도메인 검수(사용자)** — 전 문항 🤖 `ai_draft`. 확정분은 `authored_by`를
-  `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
-- **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
-- ~~**Extractor 튜닝(D-02)**~~ — ✅ **완료(2026-08-18): 문서별 추출 + 병합, 100%/100%.**
-- ~~**추출 골드 검수**~~ — ✅ **완료(2026-08-18). 20항목 전부 확정.**
-- **✍️ metrics_spec 임계값 확정(사용자)** — 🤖 제안 상태. 위험 기준으로 정했고 근거를 함께 적었다.
-- **✍️ QA 골드 DEV 40 검수** — 확정되면 QA 지표(Fact Coverage 95.0% 등)도 절대값으로 신뢰 가능.
-- **LOCKED/CHALLENGE 실행 시점 판단** — 코어 완성 후 1회. 지금은 봉인 유지.
-- **✍️ 골드셋 도메인 검수** — DEV 40부터. 현재 절대 수치는 초안 기준이다.
-- **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
-- ~~**Stitch UI를 엔진 실제 출력으로 교체**~~ — ✅ **완료(2026-08-18 3차).**
-- **골드셋 100~120 작성 착수 + metrics_spec 임계값 확정** (Phase 2 진입 조건).
-- ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
-  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
-    ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
-
-### (이전) Phase 0 기준선 항목
-
-> 실행 계획은 `docs/04_PLAN.md`(수직 슬라이스 우선, 총 9~10주). Phase 0 항목:
-
-1. **`regulatory_facts.md` 확정** — 6·30 사실 claim(C01~C13) 원문 인용·URL·hash 검수. (사용자 도메인 검수 필요)
-2. **`metrics_spec.md` 확정** — 깊은 4 dimension 지표 공식/분모/임계/high-risk 정의.
-3. ✅ **룰엔진 규칙 명세 v1 확정** — `05_RULE_SPEC.md` (LTV·precedence·경과규정·알고리즘 H). 정책대출→Discovery, 코어=LTV만. **다음: 이 알고리즘을 deterministic 코드+테스트로 구현.**
-4. **6·30 수기 Impact 정답(앵커)** — 사용자 확인 (§24-4). Walking Skeleton의 E2E 테스트 케이스.
-- 이후 Phase 1(Walking Skeleton) 착수 → `04_PLAN.md` 참고.
+읽는 순서: **이 파일 → `00_BRIEF.md`(정체성·LOCKED) → `02_DECISION_LOG.md`(왜 그렇게 했는지)**.
 
 ---
 
-## 대기 중 결정 (BLOCKED ON USER)
+## 지금 어디까지 왔나 — 컴포넌트별
 
-`docs/03_OPEN_QUESTIONS.md`에 상세. 요약:
-- ~~골드셋 규모~~ — **✅ 해결(2026-08-10): 100~120 확정, split DEV40/LOCKED40/CHALLENGE35**
-- ~~Assurance 깊게 갈 4개 선택~~ — **✅ 해결(2026-08-10): 수를 줄임, 깊은 4 dimension + 로드맵**
-- ~~주차 계획 재배열 + 총 기간~~ — **✅ 해결(2026-08-10): 수직 슬라이스 우선, 총 9~10주 (`04_PLAN.md`)**
-- 룰엔진 규칙 명세(사용자 본인 작성 — LOCKED §4) — **미착수 (Phase 0)**
-- 6·30 수기 Impact 정답(사용자 확인 필요 — 브리프 §24-4) — **미착수 (Phase 0)**
+| 컴포넌트 | 상태 | 진입점 | 실측 |
+|---|---|---|---|
+| **LLM Provider 레이어** | ✅ | `extractor/backends.py` | `cli`/`gemini`/`manual`/`replay`/`anthropic`. 무과금 우선 |
+| **RegChange Extractor** | ✅ | `extractor/`, `examples/run_extractor.py --per-document` | Completeness **100%** · Exception Recall **100%** · Citation **100%** |
+| **Deterministic 룰엔진** | ✅ | `rule_engine.py`, `05_RULE_SPEC.md` §H | 알고리즘 P0~P7 + P0c |
+| **TC Generator · 회귀** | ✅ | `tc_generator/`, `examples/demo_tc_regression.py` | 34케이스 **Pass 100%** (독립 오라클) |
+| **Impact Matrix** | ✅ | `impact/`, `examples/demo_impact_e2e.py` | 30행(코어 12+Discovery 18) · 코어 자동처리 67% |
+| **고객 영향 분석** | ✅ | `impact/customer.py` | 심사 판정 **91.4%** / 영향 측정 **74.1%** |
+| **UI 5화면** | ✅ | `ui/`, `examples/build_ui.py` | 자기완결 HTML, `docs/ui/generated/index.html` |
+| **추출 골드** | ✅ **사람 확정** | `docs/eval/regchange_gold_6_30.json` | 16+4항목, 지문 `098cd126` |
+| **QA 골드 115문항** | 🤖 초안 | `docs/eval/gold/`, `examples/run_goldset_eval.py` | DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35 |
+| **QA 평가 하네스** | ✅ | `eval/qa.py` | DEV 실측: Fact 95.0% · Exact 92.5% · **Escalation Recall 100%** |
+| **metrics_spec 임계값** | 🤖 제안 | `docs/metrics_spec.md` | TBD 1개만 남음(측정 불가한 것) |
+| 검증보고서 | ⬜ 미착수 | — | Phase 3 |
+
+---
+
+## 다음 작업 (순서대로)
+
+### 1. ✍️ metrics_spec 임계값 확정 — **사용자 판단 필요, 다른 작업의 전제**
+- 파일: `docs/metrics_spec.md` §1·§2 (🤖 제안 상태, 근거 함께 기재)
+- 요지: 임계는 **점수가 아니라 위험**에서 정했다. 예외·시행일·경과규정·escalation 누락 = 100%,
+  Completeness 95% / Citation 98% / Escalation Precision 70%.
+- 확정하면 표의 🤖를 ✅로 바꾸고 `02_DECISION_LOG.md`에 기록.
+
+### 2. ✍️ QA 골드 DEV 40 검수
+- 검수표 생성: `python tools/build_gold_review.py` (현재는 추출 골드만 다룸 → **DEV 40으로 확장 필요**)
+- 확정되면 `tools/gold_dev.py`에서 `authored_by="human_confirmed"` 지정 후 재생성.
+- 확정 후에야 QA 지표(Fact Coverage 95.0% 등)가 절대값이 된다. 지금은 상대 비교용.
+
+### 3. Phase 3 — LOCKED / CHALLENGE 최초 실행
+- **코어 완성 후 1회만.** 지금 열지 말 것(브리프 §12).
+- 실행: `python examples/run_goldset_eval.py --split LOCKED --unseal-reason "..."`
+  → 20자 이상 사유 필요, `docs/eval/gold/SEAL_ACCESS_LOG.md`에 기록됨.
+- 결과가 나쁘더라도 **그 셋에 맞춰 재튜닝한 성능을 같은 '최종 성능'으로 재보고하지 않는다**(§12-7).
+
+### 4. 검증보고서 15~20쪽 (Phase 3 코어 완성선)
+- 재료는 이미 다 있다: `EXTRACTOR_RUN_REPORT.md`, `GOLDSET_EVAL_REPORT.md`,
+  `impact_matrix_6_30.md`, `GOLD_REVIEW.md`, `02_DECISION_LOG.md`.
+- 브리프 §12 한계 명시 문구를 반드시 포함(독립 벤치마크가 아님).
+
+---
+
+## ✍️ 사용자 결정 대기
+
+| 항목 | 위치 | 영향 |
+|---|---|---|
+| metrics_spec 임계값 확정 | `metrics_spec.md` §1·§2 | 합격/불합격 판정 기준 |
+| QA 골드 DEV 40 검수 | `docs/eval/gold/dev.json` | QA 지표의 절대값 신뢰도 |
+| 非규제(수도권) 비처분 1주택 LTV | Q10 (해결됨·현행 유지 결정) | 원문에 없음 → escalation 유지 중 |
+
+---
+
+## ⚠️ 새 세션이 반드시 알아야 할 것 (비싸게 배운 것들)
+
+1. **지표가 나쁘면 모델보다 측정기를 먼저 의심한다.** 이 프로젝트에서 두 번 겪었다 —
+   "haiku 인용 환각 25%"(D-03)와 QA 첫 채점 실패 12건이 **전부 채점기 결함**이었다.
+   원인은 PDF/HWP 추출본이 단어 중간에서 줄을 바꾼다는 것. → `EXTRACTOR_RUN_REPORT.md` §2
+2. **FAQ Q2 표를 원문 텍스트에서 읽지 마라.** HWP→텍스트 변환에서 LTV 열과 DTI 열이 뭉개져
+   40/50/60이 전부 LTV처럼 보인다. 확정값은 `05_RULE_SPEC` §C(사용자가 원본 이미지로 확정)뿐이다.
+   골드가 이걸 어기면 `check_gold_against_spec()`이 잡는다.
+3. **지표 통과는 채택 근거로 충분하지 않다.** 유사도 병합은 골드 100%를 받았는데 실제로는
+   서로 다른 차주 유형·요건 임계값을 합치고 있었다. **무엇이 바뀌는지 직접 열어 봐야 한다.**
+4. **분모를 조심하라.** "자동판정 불가 22.4%"도 "자동화율 50%→27%"도 분모가 잘못된 것이었다.
+   개선했는데 지표가 나빠지면 분모를 먼저 본다.
+5. **LOCKED/CHALLENGE는 코드가 막는다.** 사유 없이 열리지 않고 접근은 기록된다.
+   구성만 볼 때는 `split_stats()`(정답 없이 개수·분포만).
+6. **확정 골드를 손대면 지문이 어긋난다.** 재검수 요구가 뜬다. 그게 정상 동작이다.
+7. **LOCKED §4:** 룰 값·도메인 정답은 LLM이 만들지 않는다. AI는 🤖 초안까지, 확정은 ✍️ 사람.
 
 ---
 
 ## 블로커 / 리스크
 
-- **최대 리스크:** 6주·1인·LLM 첫 실무에 컴포넌트 11개 → E2E 관통 실패 위험. (수직 슬라이스로 완화)
-- **계정 교체:** 2~3주 후 예정. 모든 상태는 저장소에 유지. 대화 메모리 의존 금지.
-
----
-
-## 피드백 요약 (2026-08-10 세션에서 도출)
-
-브리프에 대한 6개 핵심 지적 (LOCKED 원칙은 하나도 건드리지 않음 — 실행 순서·깊이·문서화 제안):
-
-1. **범위 vs 시간** — "레이어별 완성"이 아니라 "수직 슬라이스 우선"으로 재배열. 2~3주 내 E2E 1회 관통.
-2. **Assurance 11 → 깊은 4개** — 폭보다 깊이. 후보: ①Citation/Source grounding ②Exception+Grandfathering recall ③Temporal consistency ④Rule-regression.
-3. **지표 공식·임계값 부재** — `metrics_spec.md`로 정의. Model Risk 직무의 급소.
-4. **규제 사실 인용 무결성** — `regulatory_facts.md`. 실제 감독규정(사실) vs 은행 내규(모의 문서) 경계 명확화.
-5. **골드셋 100~120 권장** — 질 우선, CHALLENGE 강화. (원안 150~200 유지도 가능)
-6. **가치 제안 과대약속 경계** — "정확한 자동화"가 아니라 "검증 가능한 초안화 + 실패의 명시적 통제".
+- **최대 리스크였던 "E2E 관통 실패"는 해소됨** (Phase 1 완료).
+- 남은 리스크: 단일 정책(6·30) 코퍼스 — Temporal/Policy-version Consistency를 측정할 수 없다.
+  정책 사례가 늘어야 그 계열 지표가 살아난다.
+- **계정 교체 대비:** 모든 상태는 저장소에 있다. 대화 메모리에 의존하지 말 것.
+- 골드셋 한계: 작성자=개발자이므로 독립 벤치마크가 아니다(브리프 §12, 보고서에 명시할 것).
 
 ---
 
 ## 작업 로그 (append-only, 최신이 위)
+
+- **2026-08-18 (14차 · 세션 종료)** — 📦 **인계 정리.** 상태판을 세션별 12개 블록에서
+  **컴포넌트별 표 + 다음 작업 + 함정 목록**으로 재구성(362→216줄, append-only 로그는 보존).
+  새 세션 시작 절차(3개 명령)와 `.claude/hooks/session-start.sh`(pytest 자동 설치, 웹 한정) 추가.
+  `pyproject`에 `[build-system]`·`[project.optional-dependencies].ui` 추가 —
+  editable 설치로 `import regimpact`가 어디서든 된다. 검수 산출물 파일명을 내용(v3)에 맞춰
+  `GOLD_REVIEW.md`/`gold_review.html`로 정리. 테스트 217 유지.
 
 - **2026-08-18 (13차)** — ✅ **추출 골드 v3 검수 완료.** 사용자가 20항목 전부 확인 → 전 항목
   `human_confirmed`. Extractor 지표가 확정 근거를 갖게 됐다. **확정 지문** 도입 —

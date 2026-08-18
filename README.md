@@ -21,6 +21,16 @@
 
 ## 이 저장소를 처음 보는 사람(또는 새 Claude 세션)에게
 
+**먼저 이것부터 (2분):**
+
+```bash
+python -m pytest -q                  # 217 passed
+python examples/validate_goldset.py  # 골드셋 무결성·명세 정합·확정 지문
+python examples/demo_impact_e2e.py   # E2E 10단계 관통 (LLM 호출 0회, 0원)
+```
+
+의존성은 SessionStart 훅이 자동 설치합니다(웹 세션). 셋 다 통과하면 환경은 정상입니다.
+
 **작업을 이어받으려면 반드시 아래 순서로 읽으세요.**
 
 1. **`docs/01_PROJECT_STATE.md`** ← 지금 어디까지 왔는지, 다음 액션이 무엇인지 (가장 먼저!)
@@ -52,7 +62,7 @@
 | `docs/eval/EXTRACTOR_RUN_REPORT.md` | Extractor 첫 실측 리포트 + 확인된 결함 3건 |
 | `docs/eval/impact_matrix_6_30.md` | **6·30 임팩트 매트릭스 산출물** (E2E 실행 결과, §10 스키마) |
 | `docs/eval/GOLDSET_EVAL_REPORT.md` | **DEV 40 QA 평가 리포트** + 채점기 오류 정정 기록 |
-| `docs/eval/GOLD_V2_REVIEW.md` | **골드 v2 검수표** — 명세 충돌 3건 + 23항목 인용 체크리스트 |
+| `docs/eval/GOLD_REVIEW.md` | **골드 v2 검수표** — 명세 충돌 3건 + 23항목 인용 체크리스트 |
 | `docs/eval/gold/` | **골드 평가셋 115문항** (DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35) + 봉인 규율 |
 | `docs/ui/generated/` | **생성된 화면 5개** — 엔진 실제 출력 렌더(`index.html` 열기, 서버 불필요) |
 | `docs/ui/stitch_review.md` | Stitch 목업 데이터 환각 사고 기록 (→ 코드 생성으로 해결) |

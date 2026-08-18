@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "regimpact"
 version = "0.1.0"
@@ -10,6 +14,8 @@ dev = ["pytest>=7.0"]
 # 기본 실행 경로(cli/gemini/manual/replay)는 표준 라이브러리만 사용 — 설치할 것이 없다.
 # 아래는 유료 Anthropic API를 쓰는 선택 경로에만 필요. 상세: docs/06_LLM_PROVIDER.md
 llm = ["anthropic>=0.40"]
+# UI 화면 스크린샷 검증용(선택). 브라우저는 환경에 이미 설치돼 있으므로 파이썬 패키지만 필요.
+ui = ["playwright>=1.40"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

@@ -135,7 +135,7 @@ L += ["---", "", "## 5. 검수 범위와 우선순위", "",
       "**검수가 끝나면:** 해당 항목의 `authored_by`를 `human_confirmed`로 바꾸고",
       "`python tools/build_gold_review.py`로 이 표를 다시 생성한다.", ""]
 
-out = REPO / "docs" / "eval" / "GOLD_V2_REVIEW.md"
+out = REPO / "docs" / "eval" / "GOLD_REVIEW.md"
 out.write_text("\n".join(L), encoding="utf-8")
 print(f"검수표 생성: {out.relative_to(REPO)} ({len(L)}줄, 충돌 {len(conf.conflicts)}건)")
 
@@ -391,6 +391,6 @@ boxes.forEach(b => b.addEventListener('change', sync));
 sync();
 </script>"""
 
-html_out = REPO / "docs" / "eval" / "gold_v2_review.html"
+html_out = REPO / "docs" / "eval" / "gold_review.html"
 html_out.write_text(html, encoding="utf-8")
 print(f"HTML 검수표: {html_out.relative_to(REPO)} ({len(html):,} bytes)")
