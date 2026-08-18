@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from regimpact.eval import (  # noqa: E402
     Split,
+    check_gold_against_spec,
     coverage_report,
     load_split,
     split_stats,
@@ -48,6 +49,17 @@ def main() -> None:
         print()
 
     print(f"총 {total}문항 — {'✅ 전체 무결성 통과' if all_ok else '❌ 오류 있음'}")
+
+    # 무결성(인용이 원문에 있는가)과 별개로, 확정 명세와 어긋나지 않는지도 본다.
+    every = load_split(Split.DEV) + [
+        i for sp in SEALED for i in load_split(sp, unseal_reason=REASON)
+    ]
+    conf = check_gold_against_spec(every)
+    print(f"\n확정 명세 대조 — {conf.summary()}")
+    for c in conf.conflicts:
+        print("  ❌", c)
+    if conf.conflicts:
+        print("  → 검수표: docs/eval/GOLD_V2_REVIEW.md §1")
     print("\n주의: LOCKED/CHALLENGE 접근은 docs/eval/gold/SEAL_ACCESS_LOG.md에 기록됩니다.")
 
 

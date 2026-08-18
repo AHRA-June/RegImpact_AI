@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (D-02 해결 세션)
+- **갱신자:** Claude (골드 v2 검수 준비 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 194 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 204 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,18 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 8차)
+## ✅ 방금 완료 (2026-08-18 · 9차)
+- **★ 골드 v2 검수 준비 + 골드 결함 3건 발견.** 추출 골드에 `claim`·`citations` 추가(v2.1)해
+  검수 가능하게 만들고, 검수표 생성(`GOLD_V2_REVIEW.md` + HTML).
+- **⚠️ 확정 명세와 모순되는 골드 3건** — `LOCKED-BOR-002`·`CHALLENGE-NOC-001`(非규제 기준선을
+  60%로 주장, 명세 70%), `LOCKED-BOR-003`(규제지역 LTV가 종류별로 다르다고 주장, 명세는 둘 다 40%).
+  원인은 **FAQ HWP 표의 LTV/DTI 열 평탄화** — 텍스트만 보면 40/50/60이 전부 LTV로 읽힌다.
+- **`check_gold_against_spec()` 신설** — 골드 ⟷ 명세 정합성 자동 검사. 넓은 규칙은 오탐 10/13이라
+  버리고 **관측된 결함 유형 2개만** 잡도록 다시 만들었다(정밀도 3/3).
+- **✍️ 사용자 판단 대기 3건** — 골드가 틀림 / 명세가 틀림 / 문맥이 다름. 원본 HWP 표 대조 권장.
+- 테스트 194 → **204**.
+
+## ✅ 이전 완료 (2026-08-18 · 8차)
 - **★ D-02 해결 — 문서별 추출 + 문서 간 병합.** Change Completeness 79%→**100%**,
   Exception Recall 50%→**100%**, Citation 100%. 호출 3배(지출 0원), ~8분.
 - **먼저 골드를 고쳤다** — v1은 required 4/exception 2로 튜닝 근거가 되지 못했다. v2로 19+4 확장.
@@ -140,7 +151,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(194), `python examples/validate_goldset.py`(골드셋 무결성),
+- 실행: `python -m pytest`(204), `python examples/validate_goldset.py`(골드셋 무결성),
   `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
@@ -156,7 +167,8 @@
   `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
 - **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
 - ~~**Extractor 튜닝(D-02)**~~ — ✅ **완료(2026-08-18): 문서별 추출 + 병합, 100%/100%.**
-- **골드 v2 확장 검수(✍️ 사용자)** — required 19 / exception 4로 늘렸다. 도메인 검수 필요.
+- **✍️ 골드 v2 검수(사용자) — 진행 중.** 충돌 3건 판정이 먼저, 그다음 23항목 확인.
+  검수표: `docs/eval/GOLD_V2_REVIEW.md`. 확정분은 `authored_by`를 `human_confirmed`로 전환.
 - **LOCKED/CHALLENGE 실행 시점 판단** — 코어 완성 후 1회. 지금은 봉인 유지.
 - **✍️ 골드셋 도메인 검수** — DEV 40부터. 현재 절대 수치는 초안 기준이다.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
@@ -212,6 +224,11 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (10차)** — ✅ **골드 v2 검수 준비.** 추출 골드에 인용 추가(v2.1)해 검수 가능하게 만들고
+  검수표(MD+HTML) 생성. **검수 준비 중 골드 결함 3건 발견** — FAQ HWP 표의 LTV/DTI 열이 텍스트
+  추출에서 뭉개져 DTI 값을 LTV로 읽은 문항들. `check_gold_against_spec()`로 자동 검사화했고,
+  첫 넓은 규칙이 오탐 10/13이라 관측된 결함 유형 2개만 잡도록 다시 만들었다(정밀도 3/3).
+  테스트 194→204.
 - **2026-08-18 (9차)** — ✅ **D-02 해결.** 추출 골드를 v2(19+4)로 확장하니 단일 패스 실성적이
   79%/50%로 드러났고(v1에서는 100%였다), 누락 4건 중 3건이 MOLIT에 몰려 있었다 → 문서 간
   그림자가 원인. `extract_per_document`(문서별 추출 + 캐시) + `merge_cross_document`로
