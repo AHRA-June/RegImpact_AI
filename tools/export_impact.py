@@ -36,6 +36,20 @@ def build() -> dict:
         ],
         "source_digests": r.source_digests,
         "policy_version_diff": r.policy_version_diff,
+        "policy_timeline": [
+            {"policy_id": e.policy.policy_id, "title": e.policy.title,
+             "issuer": e.policy.issuer, "state": e.state,
+             "published_at": e.policy.published_at.isoformat(),
+             "effective_from": e.policy.effective_from.isoformat(),
+             "predecessor": e.predecessor_id,
+             "region_delta_count": len(e.policy.region_deltas),
+             "provenance": e.policy.provenance.value,
+             "rule_notes": [{"field": n.field, "before": n.before, "after": n.after}
+                            for n in e.policy.rule_notes],
+             "sources": [{"id": s_.source_document_id, "hash": s_.source_hash[:16]}
+                         for s_ in e.policy.sources]}
+            for e in r.policy_timeline
+        ],
         "headline": {
             "portfolio_n": impact.total,
             "no_event_n": no_event.total,

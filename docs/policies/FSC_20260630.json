@@ -1,0 +1,93 @@
+{
+  "policy_id": "FSC_20260630",
+  "title": "6·30 주택시장 안정대책 — 화성동탄·용인기흥·구리 규제지역 지정 및 주담대 LTV 강화",
+  "issuer": "금융위원회·국토교통부",
+  "published_at": "2026-06-30",
+  "effective_from": "2026-07-01",
+  "effective_to": null,
+  "supersedes_policy_id": "MOLIT_20251016",
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "CONFIRMED",
+  "provenance": "HUMAN_CONFIRMED",
+  "sources": [
+    {
+      "source_document_id": "FSC_PRESS_20260630",
+      "title": "주택시장 안정대책 — 가계대출 규제 강화",
+      "source_hash": "2063e336c60b9f1c3cab88cf630db10ba0833ad5dad4e89bf65da28b97414bb7",
+      "retrieved_at": "2026-06-30",
+      "source_url": null,
+      "filename": "fsc_press_20260630.txt",
+      "byte_size": 6470
+    },
+    {
+      "source_document_id": "MOLIT_PRESS_20260630",
+      "title": "투기과열지구 및 조정대상지역 추가 지정 (참고2 현황표 포함)",
+      "source_hash": "67a40543914f1957e42a0480f257c28b213f250029bdc9e19f7a9799714ad902",
+      "retrieved_at": "2026-06-30",
+      "source_url": null,
+      "filename": "molit_press_20260630.txt",
+      "byte_size": 9289
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "GYEONGGI_GURI",
+      "region_name": "경기도 구리시",
+      "region_status": "REGULATED",
+      "effective_from": "2026-07-01",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_HWASEONG_DONGTAN",
+      "region_name": "경기도 화성시 동탄",
+      "region_status": "REGULATED",
+      "effective_from": "2026-07-01",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_YONGIN_GIHEUNG",
+      "region_name": "경기도 용인시 기흥구",
+      "region_status": "REGULATED",
+      "effective_from": "2026-07-01",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    }
+  ],
+  "rule_notes": [
+    {
+      "field": "LTV_규제지역_무주택",
+      "before": "70%",
+      "after": "40%",
+      "citation": "MOLIT 참고1 / FAQ Q2"
+    },
+    {
+      "field": "LTV_규제지역_생애최초",
+      "before": "70%",
+      "after": "70% (좌동)",
+      "citation": "FAQ Q2"
+    },
+    {
+      "field": "LTV_규제지역_서민실수요",
+      "before": "70%",
+      "after": "60%",
+      "citation": "FAQ Q2"
+    },
+    {
+      "field": "LTV_규제지역_유주택",
+      "before": "—",
+      "after": "0%",
+      "citation": "MOLIT 참고1"
+    },
+    {
+      "field": "경과규정_컷오프",
+      "before": "—",
+      "after": "2026-06-30 (G1 접수 / G2 계약+계약금 / G3 토허제 신청)",
+      "citation": "FSC 보도자료"
+    }
+  ],
+  "notes": "대출규제 7.1 시행, 토지거래허가구역은 7.5 효력(C03). 지역 지정 효력은 7.1."
+}

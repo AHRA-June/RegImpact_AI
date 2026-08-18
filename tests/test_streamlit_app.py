@@ -31,10 +31,20 @@ def _status(at: AppTest) -> str:
     return next(m.value for m in at.metric if m.label == "판정 상태")
 
 
-def test_app_runs_and_renders_four_tabs():
+def test_app_runs_and_renders_five_tabs():
     at = _run()
     assert at.title[0].value.startswith("⚖️")
-    assert len(at.tabs) == 4
+    assert len(at.tabs) == 5
+
+
+def test_policy_tab_shows_current_and_upcoming_versions():
+    """정책 버전 탭이 Policy Version DB 를 읽어 현재/예정을 보여준다."""
+    at = _run()
+    labels = [m.label for m in at.metric]
+    assert "현재 유효 정책" in labels
+    assert "시행 예정" in labels
+    current = next(m for m in at.metric if m.label == "현재 유효 정책")
+    assert current.value == "FSC_20260630"      # 기준 시점 2026-07-02
 
 
 def test_impact_tab_reports_e2e_headline():

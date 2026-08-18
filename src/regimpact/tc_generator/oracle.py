@@ -129,6 +129,8 @@ class _Ctx:
     policy_loan: bool
     region: RegionStatus
     capital_area: bool
+    houses: int          # 보유 주택 수 (무결성 검사용)
+    disposal: bool       # 처분조건부 1주택 플래그
     multi: bool          # 2주택 이상
     owner: bool          # 유주택(비처분 1주택 이상, 다주택 포함)
     first_home: bool
@@ -157,8 +159,14 @@ _RULE_TABLE: tuple[_Rule, ...] = (
           reasons=("DISCOVERY_POLICY_LOAN",)),
     # P0c — 입력 무결성(§E-139). 엔진의 validation.py 를 import 하지 않고 조건을 직접 쓴다
     #        (판정 구현 독립성 유지). 유주택 AND 생애최초 = 논리상 불가.
+    _Rule(None, lambda c: c.houses < 0,
+          EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("INVALID_HOUSE_COUNT",)),
     _Rule(None, lambda c: c.owner and c.first_home,
           EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("CONTRADICTION_OWNER_FIRST_HOME",)),
+    _Rule(None, lambda c: c.disposal and c.houses == 0,
+          EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("CONTRADICTION_DISPOSAL_WITHOUT_HOUSE",)),
+    _Rule(None, lambda c: c.disposal and c.houses >= 2,
+          EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("CONTRADICTION_DISPOSAL_MULTI_HOUSE",)),
     # P2 — 지역 미등록은 추측하지 않는다
     _Rule(None, lambda c: c.region is RegionStatus.UNKNOWN,
           EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("UNKNOWN_REGION",)),
@@ -196,6 +204,8 @@ def _context(app: MortgageApplication, as_of: date) -> _Ctx:
         policy_loan=app.policy_mortgage_flag,
         region=region,
         capital_area=bool(entry and entry.capital_area),
+        houses=app.house_count,
+        disposal=app.disposal_condition_flag,
         multi=app.house_count >= 2,
         owner=_is_owner(app),
         first_home=app.first_home_buyer,
@@ -226,7 +236,7 @@ def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
     rule = _apply(ctx)
 
     # 스코프 밖·Discovery·입력 모순은 '경과규정이 적용된 판정'이 아니다.
-    contradiction = "CONTRADICTION_OWNER_FIRST_HOME" in rule.reasons
+    contradiction = any(r.startswith(("CONTRADICTION_", "INVALID_")) for r in rule.reasons)
     grandfathered = (gf_reason is not None and not contradiction and rule.status not in (
         EvaluationStatus.OUT_OF_SCOPE, EvaluationStatus.DISCOVERY))
     reasons = (gf_reason, *rule.reasons) if grandfathered else rule.reasons

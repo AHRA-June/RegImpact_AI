@@ -56,10 +56,12 @@
 | `tools/` | 픽스처 export · 샌드박스 빌드 · JS 포팅 대조 스크립트 |
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) + **전국 241곳 지역 레지스트리** |
 | `src/regimpact/extractor/` | **RegChange Extractor(E) + Citation Assurance(A)** — 공문→추출→검증 |
+| `src/regimpact/policy/` | **Policy Version DB + Temporal Policy Resolver** — 정책 버전·시점 해석·업로드/확정 |
+| `docs/policies/` | 정책 버전 저장소 (JSON, git 이력이 곧 확정 기록) |
 | `src/regimpact/impact/` | **Impact Analyzer** — 층화 합성 포트폴리오 · 고객영향 · 임팩트 매트릭스(Phase) · E2E 파이프라인 · 검증보고서 |
 | `src/regimpact/tc_generator/` | **TC Generator + Rule-Regression** — 독립 명세 오라클로 룰엔진 차등 검증(Assurance ④) |
 | `docs/eval/` | 골드 정답지 (RegChange 채점 기준) |
-| `tests/` | 테스트 하네스 (pytest, 110개 — 지역 레지스트리·Streamlit 스모크 포함) |
+| `tests/` | 테스트 하네스 (pytest, 146개 — 지역 레지스트리·Streamlit 스모크 포함) |
 | `examples/` | 6·30 룰엔진 데모 / Extractor 실행 / TC 회귀 데모 / **E2E 파이프라인 데모** |
 | `docs/regulatory_facts.md` | 규제 사실 + 인용 (골드셋·룰엔진·Proposal 공통 기준점) |
 | `docs/metrics_spec.md` | 평가지표 정의·분모·임계값·high-risk 정의 |
@@ -67,7 +69,7 @@
 
 ## 현재 상태
 
-🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + 온라인 테스트 환경 2종 + 전국 지역 레지스트리 + **Impact Matrix E2E**(테스트 110개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
+🟢 **Phase 1~2 진행** — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + 온라인 테스트 환경 2종 + 전국 지역 레지스트리 + Impact Matrix E2E + **Policy Version DB**(테스트 146개 통과). 자세한 내용은 `docs/01_PROJECT_STATE.md` 참고.
 
 ```bash
 python -m pytest && python examples/demo_6_30.py && python examples/demo_tc_regression.py

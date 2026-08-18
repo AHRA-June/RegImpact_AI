@@ -143,7 +143,7 @@ P7.  else (무주택 일반 / 처분조건부 1주택)    → 40% (R1/R4), STOP
   > **둘 다 참**이며, §H 에 검증 게이트(P0c)를 추가하는 것으로 해소된다. 종전에는 §H 의 P4 short-circuit이
   > 0%를 내주고 있었는데, 그러면 "정상 입력이고 답이 0%"와 "입력이 모순인데 우연히 0%"를 구분할 수 없다.
   > 0%는 무해한 답이 아니라 대출 거절이고, 틀린 쪽이 `first_home_buyer` 플래그였다면 정답은 70%다.
-  > 구현: `src/regimpact/validation.py`. reason_code `CONTRADICTION_OWNER_FIRST_HOME`.
+  > 구현: `src/regimpact/validation.py`. reason_code `CONTRADICTION_OWNER_FIRST_HOME`, `CONTRADICTION_DISPOSAL_WITHOUT_HOUSE`, `CONTRADICTION_DISPOSAL_MULTI_HOUSE`, `INVALID_HOUSE_COUNT`.
 - **정책대출:** P0b에서 Discovery로 조기 분리 → 코어 LTV 자동판정 안 함.
 
 ---
@@ -194,11 +194,20 @@ def evaluate_mortgage_ltv(inp) -> Result:
     if inp.policy_mortgage_flag:
         return Result(status="DISCOVERY", reasons=["DISCOVERY_POLICY_LOAN"])
 
-    # P0c. 입력 무결성 (§E-139) — 유효성 검증. 유효한 입력에 대한 판정은 그 아래부터.
+    # P0c. 입력 무결성 (§E-139 + Q12) — 유효성 검증. 유효한 입력에 대한 판정은 그 아래부터.
     #      위치: P0/P0b 뒤(스코프 밖이면 따질 필요 없음), P1 앞(모순 입력에 종전규정 70%도 위험).
+    #      가계약금(정식 계약 전 계약금 선납)은 실무에 실재하므로 모순으로 보지 않는다(Q12).
+    if inp.house_count < 0:
+        return Result(status="NEEDS_HUMAN_REVIEW", reasons=["INVALID_HOUSE_COUNT"])
     if is_owner(inp) and inp.first_home_buyer:
         return Result(status="NEEDS_HUMAN_REVIEW",
                       reasons=["CONTRADICTION_OWNER_FIRST_HOME"])
+    if inp.disposal_condition_flag and inp.house_count == 0:
+        return Result(status="NEEDS_HUMAN_REVIEW",
+                      reasons=["CONTRADICTION_DISPOSAL_WITHOUT_HOUSE"])
+    if inp.disposal_condition_flag and inp.house_count >= 2:
+        return Result(status="NEEDS_HUMAN_REVIEW",
+                      reasons=["CONTRADICTION_DISPOSAL_MULTI_HOUSE"])
 
     # P1. 경과규정 (최우선) — F 참조. 경계 <= 2026-06-30
     #     '종전규정 적용' = 컷오프 시점의 규정으로 이하를 판정한다. 70% 고정이 아니다:

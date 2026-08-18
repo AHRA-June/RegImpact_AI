@@ -2,7 +2,7 @@
   "generated_by": "tools/export_fixtures.py",
   "spec": "docs/05_RULE_SPEC.md v1 (§C·§E·§F·§H)",
   "regions_source": "docs/sources/raw/molit_press_20260630.txt 참고2 현황표",
-  "case_count": 56,
+  "case_count": 60,
   "regions": [
     {
       "code": "SEOUL_GANGNAM",
@@ -6104,6 +6104,173 @@
         "grandfathering_applied": false,
         "must_include_reasons": [
           "DISCOVERY_POLICY_LOAN"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-13",
+      "category": "CONFLICT",
+      "description": "처분조건부 플래그 + 보유 0채 → 처분할 주택이 없음 → 입력 모순 (Q12)",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": true,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "CONTRADICTION_DISPOSAL_WITHOUT_HOUSE"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "CONTRADICTION_DISPOSAL_WITHOUT_HOUSE"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-14",
+      "category": "CONFLICT",
+      "description": "처분조건부 플래그 + 다주택 2 → 필드가 전제한 '1주택'이 아님 → 입력 모순 (Q12)",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 2,
+        "disposal_condition_flag": true,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "CONTRADICTION_DISPOSAL_MULTI_HOUSE"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "CONTRADICTION_DISPOSAL_MULTI_HOUSE"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-15",
+      "category": "CONFLICT",
+      "description": "house_count 음수 → 무효값 (Q12)",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": -1,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": null,
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "INVALID_HOUSE_COUNT"
+        ],
+        "source_policy_ids": []
+      },
+      "oracle": {
+        "status": "NEEDS_HUMAN_REVIEW",
+        "max_ltv": null,
+        "applicable_rule_id": null,
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "INVALID_HOUSE_COUNT"
+        ]
+      }
+    },
+    {
+      "case_id": "CFL-16",
+      "category": "CONFLICT",
+      "description": "계약금 납부일만 있고 계약체결일 없음 → 모순 아님(가계약금 실재). G2 미성립 40%",
+      "spec_note": null,
+      "input": {
+        "region_code": "GYEONGGI_GURI",
+        "evaluation_date": "2026-07-02",
+        "house_count": 0,
+        "disposal_condition_flag": false,
+        "first_home_buyer": false,
+        "real_demand_flag": false,
+        "policy_mortgage_flag": false,
+        "loan_purpose": "HOME_PURCHASE",
+        "application_accepted_at": null,
+        "contract_signed_at": null,
+        "downpayment_paid_at": "2026-06-30",
+        "land_permit_target": false,
+        "land_permit_applied_at": null,
+        "customer_id": null
+      },
+      "engine": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "reason_codes": [
+          "LTV_REGULATED_40"
+        ],
+        "source_policy_ids": [
+          "FSC_20260630",
+          "MOLIT_20260630"
+        ]
+      },
+      "oracle": {
+        "status": "DECIDED",
+        "max_ltv": 0.4,
+        "applicable_rule_id": "REG_STD",
+        "grandfathering_applied": false,
+        "must_include_reasons": [
+          "LTV_REGULATED_40"
         ]
       }
     },

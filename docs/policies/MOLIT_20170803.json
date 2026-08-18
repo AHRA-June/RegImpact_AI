@@ -1,0 +1,61 @@
+{
+  "policy_id": "MOLIT_20170803",
+  "title": "강남·서초·송파·용산 투기과열지구 지정",
+  "issuer": "국토교통부",
+  "published_at": "2017-08-03",
+  "effective_from": "2017-08-03",
+  "effective_to": null,
+  "supersedes_policy_id": "MOLIT_20161103",
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "CONFIRMED",
+  "provenance": "HUMAN_CONFIRMED",
+  "sources": [
+    {
+      "source_document_id": "MOLIT_PRESS_20260630",
+      "title": "투기과열지구 및 조정대상지역 추가 지정 (참고2 현황표 포함)",
+      "source_hash": "67a40543914f1957e42a0480f257c28b213f250029bdc9e19f7a9799714ad902",
+      "retrieved_at": "2026-06-30",
+      "source_url": null,
+      "filename": "molit_press_20260630.txt",
+      "byte_size": 9289
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "SEOUL_GANGNAM",
+      "region_name": "서울특별시 강남구",
+      "region_status": "REGULATED",
+      "effective_from": "2017-08-03",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEOCHO",
+      "region_name": "서울특별시 서초구",
+      "region_status": "REGULATED",
+      "effective_from": "2017-08-03",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SONGPA",
+      "region_name": "서울특별시 송파구",
+      "region_status": "REGULATED",
+      "effective_from": "2017-08-03",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_YONGSAN",
+      "region_name": "서울특별시 용산구",
+      "region_status": "REGULATED",
+      "effective_from": "2017-08-03",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    }
+  ],
+  "rule_notes": [],
+  "notes": "MOLIT 참고2 현황표의 '(’17.8.3)' 표기 근거. 조정대상 → 투기과열로 강화."
+}

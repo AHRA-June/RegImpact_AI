@@ -24,6 +24,7 @@ from ..extractor import (
     score_against_gold,
 )
 from ..extractor.schema import RegChangeExtraction
+from ..policy import current_policy, load_registry, previous_policy, timeline, upcoming
 from ..regions import regulated_codes
 from ..tc_generator import RegressionReport, generate_all, run_regression
 from .customer_impact import AFTER_AS_OF, BEFORE_AS_OF, CustomerImpactReport, analyze_customer_impact
@@ -69,6 +70,7 @@ class E2EResult:
     stages: list[Stage]
     source_digests: dict[str, str]
     policy_version_diff: dict[str, list[str]]
+    policy_timeline: list
     extraction: Optional[RegChangeExtraction]
     grounding: Any
     gold_score: Any
@@ -132,7 +134,7 @@ def run_e2e(
         {doc_id: d for doc_id, d in digests.items()},
     ))
 
-    # 2. Policy Version Resolution — 시행 전/후 규제지역 집합 차이
+    # 2. Policy Version Resolution — Policy Version DB 에서 직전 유효 정책을 찾고 지역 diff 를 낸다
     before_codes = set(regulated_codes(BEFORE_AS_OF))
     after_codes = set(regulated_codes(AFTER_AS_OF))
     diff = {
@@ -140,11 +142,20 @@ def run_e2e(
         "removed": sorted(before_codes - after_codes),
         "unchanged_count": [str(len(before_codes & after_codes))],
     }
+    policy_reg = load_registry()
+    cur = current_policy(policy_reg, AFTER_AS_OF)
+    prev = previous_policy(policy_reg, cur) if cur else None
+    pending = upcoming(policy_reg, AFTER_AS_OF)
     stages.append(Stage(
         "Policy Version Resolution",
         StageStatus.DONE,
-        f"{BEFORE_AS_OF} 규제 {len(before_codes)}곳 → {AFTER_AS_OF} 규제 {len(after_codes)}곳",
-        {"신규 지정": ", ".join(diff["added"]) or "없음",
+        (f"현재 유효 {cur.policy_id if cur else '없음'} ← 직전 {prev.policy_id if prev else '없음'} · "
+         f"규제지역 {len(before_codes)}곳({BEFORE_AS_OF}) → {len(after_codes)}곳({AFTER_AS_OF})"),
+        {"등록된 정책 버전": f"{len(policy_reg.policies)}건 (확정 {len(policy_reg.confirmed())})",
+         "현재 유효": f"{cur.policy_id} · 시행 {cur.effective_from}" if cur else "없음",
+         "직전 유효": f"{prev.policy_id} · 시행 {prev.effective_from}" if prev else "없음",
+         "시행 예정": ", ".join(p.policy_id for p in pending) or "없음",
+         "신규 지정": ", ".join(diff["added"]) or "없음",
          "지정 해제": ", ".join(diff["removed"]) or "없음",
          "변동 없음": f"{len(before_codes & after_codes)}곳"},
     ))
@@ -268,6 +279,7 @@ def run_e2e(
 
     return E2EResult(
         stages=stages, source_digests=digests, policy_version_diff=diff,
+        policy_timeline=timeline(policy_reg, AFTER_AS_OF),
         extraction=extraction, grounding=grounding, gold_score=gold_score,
         impact=impact, regression=regression, proposals=proposals, matrix=matrix,
     )

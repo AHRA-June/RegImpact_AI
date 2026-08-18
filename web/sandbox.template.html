@@ -394,6 +394,9 @@ const REASON_KO = {
   OUT_OF_SCOPE_PRODUCT:"주택구입목적 아님",
   UNKNOWN_REGION:"레지스트리 미등록 지역 → 사람 검토",
   CONTRADICTION_OWNER_FIRST_HOME:"입력 모순 — 유주택인데 생애최초",
+  CONTRADICTION_DISPOSAL_WITHOUT_HOUSE:"입력 모순 — 처분조건부인데 보유 0채",
+  CONTRADICTION_DISPOSAL_MULTI_HOUSE:"입력 모순 — 처분조건부인데 다주택",
+  INVALID_HOUSE_COUNT:"무효값 — house_count 음수",
   DISCOVERY_POLICY_LOAN:"정책대출 → 수동 검토",
 };
 const STATUS_KO = {
@@ -475,9 +478,23 @@ function evaluate(app){
   /* P0c. 입력 무결성 (§E-139). 생애최초 = 세대원 전원 무주택 '이력' 이므로 유주택과 동시 성립 불가.
      여기서 0%를 자동으로 내주면 '정상 입력이고 답이 0%'와 '입력이 모순인데 우연히 0%'를 구분할 수 없다.
      처분조건부 1주택은 §E-138 이 유효 조합으로 명시 → isOwner() 가 이미 제외한다. */
+  if(app.house_count < 0){
+    mark("P0c","halt","house_count 음수");
+    return finish(escalate("INVALID_HOUSE_COUNT"));
+  }
   if(isOwner(app) && app.first_home_buyer){
     mark("P0c","halt","유주택 + 생애최초");
     return finish(escalate("CONTRADICTION_OWNER_FIRST_HOME"));
+  }
+  /* 처분조건부 플래그는 §A 스키마가 "house_count==1과 함께"로 정의한다.
+     가계약금(정식 계약 전 계약금 선납)은 실무에 실재하므로 모순으로 보지 않는다(Q12). */
+  if(app.disposal_condition_flag && app.house_count === 0){
+    mark("P0c","halt","처분조건부인데 보유 0채");
+    return finish(escalate("CONTRADICTION_DISPOSAL_WITHOUT_HOUSE"));
+  }
+  if(app.disposal_condition_flag && app.house_count >= 2){
+    mark("P0c","halt","처분조건부인데 다주택");
+    return finish(escalate("CONTRADICTION_DISPOSAL_MULTI_HOUSE"));
   }
   mark("P0c","pass","모순 없음");
 

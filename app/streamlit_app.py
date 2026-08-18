@@ -27,12 +27,19 @@ from regimpact.models import (  # noqa: E402
     EvaluationStatus,
     LoanPurpose,
     MortgageApplication,
+    RegionStatus,
+    RegulatedType,
 )
 from regimpact.regions import (  # noqa: E402
     REGISTRY, SIDO_ORDER, get_region, regulated_codes, resolve_region_status,
 )
 from regimpact.rule_engine import evaluate  # noqa: E402
 from regimpact.tc_generator import Category, generate_all, run_regression  # noqa: E402
+from regimpact.policy import (  # noqa: E402
+    PolicyStatus, RegionDelta, confirm, current_policy, detect_overlaps, draft_policy,
+    load_registry, preview_region_impact, previous_policy, registry_from,
+    resolve_region_with_policies, snapshot_document, timeline, upcoming,
+)
 from regimpact.impact import (  # noqa: E402
     Phase, analyze_customer_impact, build_impact_matrix, render_report, run_e2e,
 )
@@ -66,6 +73,9 @@ REASON_KO = {
     "OUT_OF_SCOPE_PRODUCT": "주택구입목적 아님",
     "UNKNOWN_REGION": "레지스트리 미등록 지역 → 사람 검토",
     "CONTRADICTION_OWNER_FIRST_HOME": "입력 모순 — 유주택인데 생애최초",
+    "CONTRADICTION_DISPOSAL_WITHOUT_HOUSE": "입력 모순 — 처분조건부인데 보유 0채",
+    "CONTRADICTION_DISPOSAL_MULTI_HOUSE": "입력 모순 — 처분조건부인데 다주택",
+    "INVALID_HOUSE_COUNT": "무효값 — house_count 음수",
     "DISCOVERY_POLICY_LOAN": "정책대출 → 수동 검토",
 }
 STATUS_KO = {
@@ -100,7 +110,7 @@ def halting_step(decision, house_count: int = 0) -> str:
     codes = set(decision.reason_codes)
     if "OUT_OF_SCOPE_PRODUCT" in codes:
         return "P0"
-    if "CONTRADICTION_OWNER_FIRST_HOME" in codes:
+    if any(c.startswith(("CONTRADICTION_", "INVALID_")) for c in codes):
         return "P0c"
     if "UNKNOWN_REGION" in codes:
         return "P2"
@@ -212,10 +222,21 @@ def tab_verdict() -> None:
                            f"**{price * decision.max_ltv:,.2f}억** "
                            "(LTV만 적용한 참고값 — DTI·차주별 한도 미반영)")
         elif decision.status is EvaluationStatus.NEEDS_HUMAN_REVIEW:
-            if "CONTRADICTION_OWNER_FIRST_HOME" in decision.reason_codes:
-                extra = ("**입력이 모순이다** — 생애최초는 세대원 전원 무주택 이력을 전제하므로 "
-                         "유주택과 동시에 성립할 수 없다. 0%(대출 거절)를 자동으로 내주지 않는 이유는, "
-                         "틀린 쪽이 생애최초 플래그였다면 정답이 70%이기 때문이다. ")
+            bad = [c for c in decision.reason_codes
+                   if c.startswith(("CONTRADICTION_", "INVALID_"))]
+            if bad:
+                why = {
+                    "CONTRADICTION_OWNER_FIRST_HOME":
+                        "생애최초는 세대원 전원 무주택 이력을 전제하므로 유주택과 동시에 성립할 수 없다. "
+                        "0%(대출 거절)를 자동으로 내주지 않는 이유는, 틀린 쪽이 생애최초 플래그였다면 "
+                        "정답이 70%이기 때문이다.",
+                    "CONTRADICTION_DISPOSAL_WITHOUT_HOUSE":
+                        "처분조건부 1주택 플래그인데 보유 주택이 0채다 — 처분할 주택이 없다.",
+                    "CONTRADICTION_DISPOSAL_MULTI_HOUSE":
+                        "처분조건부 '1주택' 플래그인데 보유 주택이 2채 이상이다.",
+                    "INVALID_HOUSE_COUNT": "보유 주택 수가 음수다.",
+                }
+                extra = "**입력이 모순이다** — " + " ".join(why.get(c, c) for c in bad) + " "
             elif "OWNER_BASELINE_UNKNOWN" in decision.reason_codes:
                 extra = ("수도권 비규제 유주택은 원문이 '非규제(수도권 外) 유주택 60%'만 명시해 근거가 없다. ")
             else:
@@ -486,21 +507,190 @@ def tab_impact() -> None:
         st.markdown(report_md)
 
 
+# ============================== 정책 버전 탭 ==============================
+_STATE_STYLE = {"현재 유효": "🟢", "시행 예정": "🟡", "지난 정책": "⚪", "초안(미확정)": "📝"}
+
+
+def _session_policies() -> list:
+    return st.session_state.setdefault("uploaded_policies", [])
+
+
+def tab_policy() -> None:
+    st.subheader("Policy Version DB — 날짜로 관리되는 정책 버전")
+    st.caption("브리프 §7 Temporal Policy Resolver. 정책은 문서가 아니라 **시행일 구간을 갖는 버전**이고, "
+               "서로 supersede 관계로 이어진다. 핵심 질문은 "
+               "\"이번 정책 시행 시점에 직전까지 유효했던 정책과 무엇이 달라졌는가\" 다.")
+
+    stored = load_registry()
+    reg = registry_from([*stored.policies, *_session_policies()])
+
+    as_of = st.date_input("기준 시점 (as_of)", value=date(2026, 7, 2), key="policy_as_of")
+    cur = current_policy(reg, as_of)
+    nxt = upcoming(reg, as_of)
+
+    c = st.columns(3)
+    c[0].metric("현재 유효 정책", cur.policy_id if cur else "없음",
+                cur.title[:28] if cur else None, delta_color="off")
+    c[1].metric("시행 예정", str(len(nxt)),
+                nxt[0].policy_id if nxt else "없음", delta_color="off")
+    c[2].metric("등록된 버전", str(len(reg.policies)),
+                f"확정 {len(reg.confirmed())} · 초안 {len(reg.drafts())}", delta_color="off")
+
+    st.markdown("### 타임라인")
+    st.dataframe(
+        [{"": _STATE_STYLE.get(e.state, ""), "상태": e.state,
+          "시행일": str(e.policy.effective_from), "공고일": str(e.policy.published_at),
+          "정책 ID": e.policy.policy_id, "제목": e.policy.title,
+          "발령": e.policy.issuer, "직전 정책": e.predecessor_id or "—",
+          "지역 변경": len(e.policy.region_deltas), "근거 출처": e.policy.provenance.value}
+         for e in timeline(reg, as_of)],
+        width="stretch", hide_index=True)
+
+    with st.expander("정책 상세 보기"):
+        pid = st.selectbox("정책", [p.policy_id for p in reg.sorted_by_effective()],
+                           key="policy_detail_pick")
+        p = reg.get(pid)
+        prev = previous_policy(reg, p)
+        st.markdown(f"**{p.title}** · {p.issuer} · `{p.status.value}` / `{p.provenance.value}`")
+        st.caption(f"공고 {p.published_at} · 시행 {p.effective_from} · "
+                   f"직전 정책 {prev.policy_id if prev else '없음'} · {p.notes}")
+        if p.rule_notes:
+            st.markdown("**룰 변경 메모** (권위는 `05_RULE_SPEC` 과 엔진에 있다 — 여기는 추적용)")
+            st.dataframe([{"항목": r.field, "before": r.before, "after": r.after,
+                           "인용": r.citation} for r in p.rule_notes],
+                         width="stretch", hide_index=True)
+        st.markdown("**원문 스냅샷**")
+        st.dataframe([{"문서 ID": d.source_document_id, "제목": d.title,
+                       "SHA-256": d.source_hash[:24] + "…", "크기": f"{d.byte_size:,}B"
+                       if d.byte_size else "—"} for d in p.sources],
+                     width="stretch", hide_index=True)
+        if p.region_deltas:
+            st.markdown(f"**지역 변경 {len(p.region_deltas)}건**")
+            st.dataframe([{"코드": d.region_code, "지역": d.region_name,
+                           "상태": d.region_status.value, "지정유형": d.regulated_type.value,
+                           "시행일": str(d.effective_from)} for d in p.region_deltas],
+                         width="stretch", hide_index=True)
+
+    st.divider()
+    st.markdown("### 새 정책 업로드")
+    st.caption("브리프 §19 라이브 파이어 1~3단계 — 원문 스냅샷 → source hash 기록 → Policy Version DB 등록. "
+               "업로드 결과는 항상 **초안(DRAFT)** 이며, 사람이 확정하기 전에는 어떤 판정에도 쓰이지 않는다.")
+
+    files = st.file_uploader("공문 원문 (txt·pdf·hwp — 해시는 원본 바이트 기준)",
+                             accept_multiple_files=True, key="policy_upload")
+    f1, f2 = st.columns(2)
+    new_id = f1.text_input("정책 ID", value="FSC_2026XXXX", key="np_id")
+    issuer = f2.text_input("발령 기관", value="금융위원회·국토교통부", key="np_issuer")
+    title = st.text_input("제목", value="", placeholder="예: 9·15 주택시장 안정대책", key="np_title")
+    d1, d2 = st.columns(2)
+    published_at = d1.date_input("공고일", value=date.today(), key="np_pub")
+    effective_from = d2.date_input("시행일 (지정 효력 발생)", value=date.today(), key="np_eff")
+
+    region_codes = st.multiselect(
+        "신규 규제지역 지정 (레지스트리 코드)", REGION_CODES,
+        format_func=lambda c: region_label(c, effective_from), key="np_regions",
+        help="LLM 추출을 쓰면 자동으로 채워지지만, 매핑 못 한 지역명은 넘겨짚지 않고 비워 둔다. "
+             "여기서 사람이 확정한다.")
+
+    if st.button("초안 만들기", type="primary", key="np_draft"):
+        if not files:
+            st.error("원문 파일이 필요하다. 해시 없는 정책은 등록하지 않는다 (LOCKED §10 추적 가능성).")
+        elif not title.strip():
+            st.error("제목을 입력해야 한다.")
+        else:
+            docs = [snapshot_document(
+                source_document_id=f"{new_id}_{i+1}", title=f.name,
+                content=f.getvalue(), filename=f.name, retrieved_at=date.today())
+                for i, f in enumerate(files)]
+            result = draft_policy(policy_id=new_id, title=title, issuer=issuer,
+                                  published_at=published_at, effective_from=effective_from,
+                                  sources=docs,
+                                  supersedes_policy_id=cur.policy_id if cur else None)
+            policy = result.policy
+            policy.region_deltas = [
+                RegionDelta(region_code=c, region_name=REGISTRY[c].label,
+                            region_status=RegionStatus.REGULATED,
+                            effective_from=effective_from,
+                            regulated_type=RegulatedType.SPECULATIVE_OVERHEATED)
+                for c in region_codes]
+            st.session_state["policy_draft"] = policy
+            for w in result.warnings:
+                st.warning(w)
+
+    draft = st.session_state.get("policy_draft")
+    if draft is None:
+        return
+
+    st.markdown("#### 초안 검토")
+    st.caption(f"`{draft.policy_id}` · {draft.status.value} / {draft.provenance.value} · "
+               f"직전 정책 {draft.supersedes_policy_id or '없음'}")
+    st.dataframe([{"문서 ID": d.source_document_id, "파일": d.filename,
+                   "SHA-256": d.source_hash[:32] + "…", "크기": f"{d.byte_size:,}B"}
+                  for d in draft.sources], width="stretch", hide_index=True)
+
+    changes = preview_region_impact(draft)
+    if changes:
+        st.markdown("**적용 시 지역 상태 변화 (미리보기)**")
+        st.dataframe([{"코드": c_.region_code, "지역": c_.region_name,
+                       "before": c_.before.value, "after": c_.after.value,
+                       "시행일": str(c_.effective_from),
+                       "비고": "이미 기준선에 반영됨(중복 가능)" if c_.already_in_baseline else "신규 변경"}
+                      for c_ in changes], width="stretch", hide_index=True)
+    else:
+        st.info("지역 변경이 없는 정책이다 — 룰 변경만 있는 경우일 수 있다.")
+
+    for w in detect_overlaps(reg, draft):
+        st.warning(f"중첩 — `{w.region_code}`: {w.detail}")
+
+    st.markdown("**확정 전후 비교** (시행일 기준, 확정하면 이렇게 바뀐다)")
+    if changes:
+        confirmed_preview = confirm(draft) if draft.region_deltas else None
+        rows = []
+        for c_ in changes:
+            after_status, after_type = resolve_region_with_policies(
+                c_.region_code, effective_from, [confirmed_preview] if confirmed_preview else [])
+            base_status, _ = resolve_region_status(c_.region_code, effective_from)
+            rows.append({"지역": c_.region_name, "기준선": base_status.value,
+                         "확정 후": after_status.value, "지정유형": after_type.value})
+        st.dataframe(rows, width="stretch", hide_index=True)
+
+    st.markdown("#### 확정 (LOCKED §4 — 사람이 확정해야 판정에 쓰인다)")
+    notes = st.text_area("확정 메모 (원문 대조 결과·유의사항)", key="np_notes")
+    ok = st.checkbox("원문과 대조했고, 위 지역·시행일이 정확함을 확인했다", key="np_check")
+    b1, b2 = st.columns(2)
+    if b1.button("확정하고 이 세션에 등록", disabled=not ok, key="np_confirm"):
+        try:
+            _session_policies().append(confirm(draft, notes=notes))
+            st.session_state["policy_draft"] = None
+            st.success("확정했다. 타임라인에 반영됐다. "
+                       "**저장소에 영구 반영하려면 아래 JSON을 내려받아 `docs/policies/` 에 커밋해야 한다** "
+                       "— 이 앱의 파일시스템은 세션이 끝나면 사라진다.")
+            st.rerun()
+        except ValueError as e:
+            st.error(str(e))
+    b2.download_button("초안 JSON 내려받기", json.dumps(draft.as_dict(), ensure_ascii=False, indent=2),
+                       file_name=f"{draft.policy_id}.json", mime="application/json",
+                       key="np_download")
+
+
 # ============================== main ==============================
 st.title("⚖️ RegImpact AI — 검증 콘솔")
 st.caption("2026-06-30 주택시장 안정대책 · 주택구입목적 주담대 LTV. "
            "규칙 값·우선순위는 사람이 확정한 명세(`docs/05_RULE_SPEC.md` v1)에서 오며 LLM이 생성하지 않는다. "
            "이 엔진은 LLM 출력을 채점하는 기준점(ground truth)이다.")
 
-t1, t2, t3, t4 = st.tabs(
-    ["LTV 판정", "임팩트 매트릭스 (E2E)", f"회귀 콘솔 ({len(generate_all())})", "Extractor (LLM)"])
+t1, t2, t3, t4, t5 = st.tabs(
+    ["LTV 판정", "정책 버전", "임팩트 매트릭스 (E2E)",
+     f"회귀 콘솔 ({len(generate_all())})", "Extractor (LLM)"])
 with t1:
     tab_verdict()
 with t2:
-    tab_impact()
+    tab_policy()
 with t3:
-    tab_regression()
+    tab_impact()
 with t4:
+    tab_regression()
+with t5:
     tab_extractor()
 
 st.divider()

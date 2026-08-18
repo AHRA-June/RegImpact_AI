@@ -24,6 +24,14 @@
 이 프로젝트는 이미 같은 원칙을 두 번 적용했다 — `OWNER_BASELINE_UNKNOWN`(기준값 부재),
 `UNKNOWN_REGION`(미등록 지역). Q8 도 같은 부류다: **모르면 지어내지 않고 사람에게 넘긴다.**
 
+## 넣지 않은 것 (Q12 잔여, 2026-08-18)
+
+`downpayment_paid_at` 만 있고 `contract_signed_at` 이 없는 경우, 그리고 계약금 납부일이 계약 체결일보다
+빠른 경우는 **모순으로 보지 않는다.** 실무에 **가계약금**(정식 계약 전 계약금 선납)이 실재하므로
+기계적으로 막으면 정상 건을 사람 검토로 보낸다. 두 경우 모두 §F G2 가 "계약 체결 + 계약금 납부"를
+쌍으로 요구하므로 **경과규정이 성립하지 않을 뿐**이고, 그건 이미 올바른 동작이다.
+도메인 확인이 되면 그때 넣는다(`03_OPEN_QUESTIONS.md` Q12).
+
 ## 게이트의 위치
 
 P0(스코프)·P0b(정책대출) **뒤**, P1(경과규정) **앞**.
@@ -48,11 +56,18 @@ class InputContradiction:
 def validate_application(app: MortgageApplication) -> list[InputContradiction]:
     """입력의 논리적 모순을 찾는다. 빈 목록이면 판정을 진행해도 되는 입력.
 
-    지금은 §E-139 하나만 확정 규칙으로 검사한다. 다른 후보 모순
-    (처분조건부인데 보유 0채, 계약금 납부일만 있고 계약체결일 없음 등)은
-    `docs/03_OPEN_QUESTIONS.md` Q12 로 표면화해 두었고 사람 확정 전까지 넣지 않는다.
+    검사 대상은 **스키마·논리상 명백히 성립할 수 없는 조합**뿐이다(Q8·Q12 확정).
+    실무 여지가 있는 것(가계약금 = 정식 계약 전 계약금 선납)은 넣지 않는다 — 기계적으로 막으면
+    정상 건을 사람 검토로 보낸다. `docs/03_OPEN_QUESTIONS.md` Q12 잔여 항목 참고.
     """
     out: list[InputContradiction] = []
+
+    # 자명한 무효값.
+    if app.house_count < 0:
+        out.append(InputContradiction(
+            code=ReasonCode.INVALID_HOUSE_COUNT.value,
+            detail=f"house_count={app.house_count} — 음수는 성립하지 않는다",
+        ))
 
     # §E-139. 생애최초 = 세대원 전원 무주택 '이력'. 유주택과 동시에 성립할 수 없다.
     # (처분조건부 1주택은 §E-138 이 유효 조합으로 명시 → is_owner() 가 이미 제외한다.)
@@ -62,6 +77,22 @@ def validate_application(app: MortgageApplication) -> list[InputContradiction]:
             detail=(f"house_count={app.house_count}"
                     f"{'(비처분)' if not app.disposal_condition_flag else ''} 이면서 "
                     "first_home_buyer=True — 생애최초는 세대원 전원 무주택 이력을 전제한다"),
+        ))
+
+    # Q12. 처분조건부 1주택 플래그는 §A 스키마가 "house_count==1과 함께"로 정의한다.
+    #      보유 0채면 처분할 주택이 없고, 2채 이상이면 필드가 전제한 '1주택'이 아니다.
+    #      둘 다 판정이 갈리는 지점이라(0채: 무주택 70% vs 실제는? / 2채: 다주택 0%) 사람이 봐야 한다.
+    if app.disposal_condition_flag and app.house_count == 0:
+        out.append(InputContradiction(
+            code=ReasonCode.CONTRADICTION_DISPOSAL_WITHOUT_HOUSE.value,
+            detail=("disposal_condition_flag=True 인데 house_count=0 — "
+                    "처분할 주택이 없다 (§A: 처분조건부 1주택은 house_count==1과 함께)"),
+        ))
+    elif app.disposal_condition_flag and app.house_count >= 2:
+        out.append(InputContradiction(
+            code=ReasonCode.CONTRADICTION_DISPOSAL_MULTI_HOUSE.value,
+            detail=(f"disposal_condition_flag=True 인데 house_count={app.house_count} — "
+                    "이 필드는 '처분조건부 1주택'을 전제한다 (§A)"),
         ))
 
     return out

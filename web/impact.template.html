@@ -92,6 +92,36 @@ h2{font-family:"Song Myung",serif; font-weight:400; font-size:21px; margin:0; le
 .step-detail dt{color:var(--ink-2)}
 .step-detail dd{margin:0; font-family:"IBM Plex Mono",monospace; font-size:11.5px}
 
+/* 정책 버전 레일 */
+.pvrail{display:flex; flex-direction:column}
+.pv{display:grid; grid-template-columns:104px 12px minmax(0,1fr) auto; gap:14px; align-items:start;
+    padding:14px 22px; border-bottom:1px solid var(--line-soft); position:relative}
+.pv:last-child{border-bottom:0}
+.pv .when{font-family:"IBM Plex Mono",monospace; font-size:12px; font-variant-numeric:tabular-nums;
+          color:var(--ink-2); line-height:1.4}
+.pv .when small{display:block; font-size:10.5px; color:var(--muted)}
+.pv .axis{position:relative; height:100%; min-height:34px}
+.pv .axis::before{content:""; position:absolute; left:5px; top:-14px; bottom:-14px; width:1px;
+                  background:var(--line)}
+.pv:first-child .axis::before{top:6px}
+.pv:last-child .axis::before{bottom:auto; height:20px}
+.pv .axis::after{content:""; position:absolute; left:0; top:6px; width:11px; height:11px; border-radius:50%;
+                 background:var(--surface); border:2px solid var(--line)}
+.pv.now .axis::after{background:var(--seal); border-color:var(--seal)}
+.pv.next .axis::after{background:var(--surface); border-color:var(--warn); border-style:dashed}
+.pv .body{min-width:0}
+.pv .ttl{font-weight:500; font-size:14px; margin-bottom:2px}
+.pv.now .ttl{color:var(--seal); font-weight:600}
+.pv .meta{font-size:11.5px; color:var(--muted); font-family:"IBM Plex Mono",monospace}
+.pv .rules{margin-top:7px; font-size:11.5px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px}
+.pv .rule{font-family:"IBM Plex Mono",monospace; font-size:10.5px; padding:2px 7px;
+          border:1px solid var(--line-soft); background:var(--surface-2)}
+.pv .state{font-size:11px; padding:3px 9px; border:1px solid var(--line); background:var(--surface-2);
+           color:var(--muted); white-space:nowrap; align-self:start}
+.pv.now .state{border-color:var(--seal); background:var(--seal-soft); color:var(--seal); font-weight:600}
+.pv.next .state{border-color:var(--warn); background:var(--warn-soft); color:var(--warn)}
+@media (max-width:640px){ .pv{grid-template-columns:80px 12px minmax(0,1fr)} .pv .state{display:none} }
+
 /* stat tiles */
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px;
        background:var(--line); border:1px solid var(--line)}
@@ -190,7 +220,18 @@ code{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:var(--s
   </section>
 
   <section class="sec">
-    <div class="sec-hd"><span class="no">02</span><h2>고객·포트폴리오 영향</h2>
+    <div class="sec-hd"><span class="no">02</span><h2>정책 버전 타임라인</h2>
+      <span class="note" id="pv-note"></span></div>
+    <div class="sec-bd" style="padding-bottom:8px">
+      <p class="lede">정책은 문서가 아니라 <b>시행일 구간을 갖는 버전</b>이다. 그래서 핵심 질문은
+      "이 문서가 뭐라고 하는가"가 아니라 <b>"이번 정책 시행 시점에 직전까지 유효했던 정책과 무엇이 달라졌는가"</b>다.
+      아래는 지금까지 확정된 지정 이력을 날짜 축으로 세운 것이고, 각 버전은 원문 해시로 고정돼 있다.</p>
+    </div>
+    <div class="pvrail" id="pv-rail"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-hd"><span class="no">03</span><h2>고객·포트폴리오 영향</h2>
       <span class="note" id="pf-note"></span></div>
     <div class="sec-bd">
       <p class="lede" id="impact-lede"></p>
@@ -216,7 +257,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:var(--s
   </section>
 
   <section class="sec">
-    <div class="sec-hd"><span class="no">03</span><h2>임팩트 매트릭스</h2>
+    <div class="sec-hd"><span class="no">04</span><h2>임팩트 매트릭스</h2>
       <span class="note">행을 누르면 근거·산출물·검토사유가 열림</span></div>
     <div class="sec-bd" style="padding-bottom:6px">
       <p class="lede"><b>시간축(Phase)이 이 매트릭스의 척추다.</b> 규제 변경의 병목은 규정을 읽는 게 아니라
@@ -227,7 +268,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:var(--s
   </section>
 
   <section class="sec">
-    <div class="sec-hd"><span class="no">04</span><h2>구조화 Rule Change Proposal</h2>
+    <div class="sec-hd"><span class="no">05</span><h2>구조화 Rule Change Proposal</h2>
       <span class="note">전부 사람 승인 대기</span></div>
     <div class="sec-bd">
       <p class="lede">LLM이 만든 룰이 아니다. 확정 명세를 구현한 <b>결정론 엔진</b>이 포트폴리오 전체를
@@ -237,7 +278,7 @@ code{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:var(--s
   </section>
 
   <section class="sec">
-    <div class="sec-hd"><span class="no">05</span><h2>Human Review 큐</h2></div>
+    <div class="sec-hd"><span class="no">06</span><h2>Human Review 큐</h2></div>
     <div class="sec-bd">
       <p class="lede" id="hr-lede"></p>
       <div class="tablewrap"><table id="hr-table"></table></div>
@@ -287,7 +328,28 @@ $("rail").innerHTML = D.stages.map((s, i) => {
 $("rail").querySelectorAll(".step").forEach(b =>
   b.addEventListener("click", () => $("sd-" + b.dataset.i).classList.toggle("open")));
 
-/* ---------- 02 고객영향 ---------- */
+/* ---------- 02 정책 버전 타임라인 ---------- */
+const PV = D.policy_timeline || [];
+const nowPolicy = PV.find(p => p.state === "현재 유효");
+$("pv-note").textContent = `${PV.length}개 버전 · 현재 유효 ${nowPolicy ? nowPolicy.policy_id : "없음"}`;
+$("pv-rail").innerHTML = PV.map(p => {
+  const cls = p.state === "현재 유효" ? "pv now" : p.state === "시행 예정" ? "pv next" : "pv";
+  const rules = (p.rule_notes || []).map(n =>
+    `<span class="rule">${n.field}${n.before ? ` ${n.before}→${n.after}` : ""}</span>`).join("");
+  return `<div class="${cls}">
+    <div class="when">${p.effective_from}<small>공고 ${p.published_at}</small></div>
+    <div class="axis"></div>
+    <div class="body">
+      <div class="ttl">${p.title}</div>
+      <div class="meta">${p.policy_id} · ${p.issuer} · 지역 변경 ${p.region_delta_count}건 ·
+        직전 ${p.predecessor || "없음"} · 원문 ${(p.sources || []).map(s => s.hash).join(", ") || "—"}</div>
+      ${rules ? `<div class="rules">${rules}</div>` : ""}
+    </div>
+    <span class="state">${p.state}</span>
+  </div>`;
+}).join("");
+
+/* ---------- 03 고객영향 ---------- */
 const H = D.headline;
 $("pf-note").textContent =
   `지역군 4 × 차주유형 6 × 경과규정 이벤트 4 × 가격구간 7 (등가중 완전요인)`;

@@ -1,0 +1,293 @@
+{
+  "policy_id": "MOLIT_20251016",
+  "title": "서울 21개 자치구·경기 12곳 투기과열지구 및 조정대상지역 지정",
+  "issuer": "국토교통부",
+  "published_at": "2025-10-16",
+  "effective_from": "2025-10-16",
+  "effective_to": null,
+  "supersedes_policy_id": "MOLIT_20170803",
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "CONFIRMED",
+  "provenance": "HUMAN_CONFIRMED",
+  "sources": [
+    {
+      "source_document_id": "MOLIT_PRESS_20260630",
+      "title": "투기과열지구 및 조정대상지역 추가 지정 (참고2 현황표 포함)",
+      "source_hash": "67a40543914f1957e42a0480f257c28b213f250029bdc9e19f7a9799714ad902",
+      "retrieved_at": "2026-06-30",
+      "source_url": null,
+      "filename": "molit_press_20260630.txt",
+      "byte_size": 9289
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "GYEONGGI_ANYANG_DONGAN",
+      "region_name": "경기도 안양시 동안구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_GWACHEON",
+      "region_name": "경기도 과천시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_GWANGMYEONG",
+      "region_name": "경기도 광명시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_HANAM",
+      "region_name": "경기도 하남시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_SEONGNAM_BUNDANG",
+      "region_name": "경기도 성남시 분당구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_SEONGNAM_JUNGWON",
+      "region_name": "경기도 성남시 중원구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_SEONGNAM_SUJEONG",
+      "region_name": "경기도 성남시 수정구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_SUWON_JANGAN",
+      "region_name": "경기도 수원시 장안구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_SUWON_PALDAL",
+      "region_name": "경기도 수원시 팔달구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_SUWON_YEONGTONG",
+      "region_name": "경기도 수원시 영통구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_UIWANG",
+      "region_name": "경기도 의왕시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GYEONGGI_YONGIN_SUJI",
+      "region_name": "경기도 용인시 수지구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_DOBONG",
+      "region_name": "서울특별시 도봉구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_DONGDAEMUN",
+      "region_name": "서울특별시 동대문구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_DONGJAK",
+      "region_name": "서울특별시 동작구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_EUNPYEONG",
+      "region_name": "서울특별시 은평구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GANGBUK",
+      "region_name": "서울특별시 강북구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GANGDONG",
+      "region_name": "서울특별시 강동구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GANGSEO",
+      "region_name": "서울특별시 강서구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GEUMCHEON",
+      "region_name": "서울특별시 금천구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GURO",
+      "region_name": "서울특별시 구로구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GWANAK",
+      "region_name": "서울특별시 관악구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GWANGJIN",
+      "region_name": "서울특별시 광진구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_JONGNO",
+      "region_name": "서울특별시 종로구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_JUNG",
+      "region_name": "서울특별시 중구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_JUNGNANG",
+      "region_name": "서울특별시 중랑구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_MAPO",
+      "region_name": "서울특별시 마포구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_NOWON",
+      "region_name": "서울특별시 노원구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEODAEMUN",
+      "region_name": "서울특별시 서대문구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEONGBUK",
+      "region_name": "서울특별시 성북구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEONGDONG",
+      "region_name": "서울특별시 성동구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_YANGCHEON",
+      "region_name": "서울특별시 양천구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_YEONGDEUNGPO",
+      "region_name": "서울특별시 영등포구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    }
+  ],
+  "rule_notes": [],
+  "notes": "MOLIT 참고2 현황표의 '(‘25.10.16)' 표기 근거. 이 지정으로 서울 25개 자치구 전체가 규제지역이 됐다."
+}
