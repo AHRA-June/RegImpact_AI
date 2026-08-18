@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (Impact Matrix E2E 관통 세션)
+- **갱신자:** Claude (UI 코드 생성 전환 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 94 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 119 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,20 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 2차)
+## ✅ 방금 완료 (2026-08-18 · 3차)
+- **★ Stitch UI 하드코딩 → 엔진 실제 출력으로 교체** — `src/regimpact/ui/`(theme·pages·site).
+  5개 화면(규제 변경 분석 / 임팩트 매트릭스 / Rule 변경안 / 검증 / 고객·포트폴리오 영향)을
+  **코드에서 렌더**한다. 산출물 `docs/ui/generated/`. 생성: `python examples/build_ui.py`(0원).
+- **Stitch 재생성 대신 코드 생성 채택** — 정정 프롬프트로 다시 만들면 데이터가 바뀔 때마다 또 환각한다.
+  디자인 토큰은 export에서 verbatim 가져오고(테스트로 고정), 값은 전부 실제 객체에서 온다.
+- **UI grounding 테스트 23개** — 2026-08-10 Stitch 사고를 회귀로 고정: 환각 지역명 / `60%→50%` /
+  경과규정 부등호 반전 / **값 하드코딩(양방향 검사)** / CSS 미정의 클래스 / CDN 재도입.
+  전부 **변이 테스트로 방어력 확인**(각 사고를 주입하면 해당 테스트가 실패).
+- **자기완결 HTML** — `cdn.tailwindcss.com` 런타임 JIT과 아이콘 폰트 제거, 같은 토큰에서 만든
+  정적 CSS 인라인 + 인라인 SVG. 네트워크 없이 열어도 디자인 유지(스크린샷 검증).
+- 테스트 96 → **119**.
+
+## ✅ 이전 완료 (2026-08-18 · 2차)
 - **★ Impact Matrix E2E 관통** — `src/regimpact/impact/`(schema·portfolio·customer·builder·report).
   `examples/demo_impact_e2e.py`가 브리프 §18 "코어 완성의 정의" 10단계를 **전부 ✅로 관통**한다
   (LLM 호출 0회 — 저장된 추출 기록 재생, 비용 0원).
@@ -57,7 +70,8 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(94), `python examples/demo_impact_e2e.py`(**E2E 관통**),
+- 실행: `python -m pytest`(119), `python examples/demo_impact_e2e.py`(**E2E 관통**),
+  `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
   `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
 
@@ -67,7 +81,7 @@
 - **Q10 도메인 확정** — 非규제 유주택 LTV 기준선. 자동화율 33%p가 여기에 걸려 있어 **현재 최우선**.
   값이 확정되면 룰엔진·오라클·회귀·매트릭스가 함께 갱신된다.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
-- **Stitch UI를 엔진 실제 출력으로 교체** — 매트릭스가 이제 실값을 내므로 목업 하드코딩 제거 가능.
+- ~~**Stitch UI를 엔진 실제 출력으로 교체**~~ — ✅ **완료(2026-08-18 3차).**
 - **골드셋 100~120 작성 착수 + metrics_spec 임계값 확정** (Phase 2 진입 조건).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
@@ -119,6 +133,15 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (3차)** — ✅ **★ Stitch UI 하드코딩 → 엔진 실제 출력 교체.** `src/regimpact/ui/` 신규
+  (theme: Stitch 토큰 verbatim + 정적 CSS 생성 / pages: 5개 화면, 리터럴 도메인 수치 금지 /
+  site: 렌더·기록). `examples/build_ui.py` → `docs/ui/generated/`. **Stitch 재생성 대신 코드 생성**
+  채택(재생성은 데이터 변경 때마다 재환각). **UI grounding 테스트** 신설 — Citation Assurance가
+  인용을 원문에 대조하듯 화면 값을 엔진 출력에 대조하고, 2026-08-10 사고(환각 지역명/60%→50%/
+  부등호 반전)를 회귀로 고정. Rule 화면 LTV는 양방향 검사(단방향은 하드코딩을 통과시킴 — 변이로 확인).
+  **자기완결 HTML**로 전환(CDN JIT·아이콘 폰트 제거 → 정적 CSS 인라인 + 인라인 SVG), 오프라인
+  스크린샷으로 검증. 포트폴리오 대조군 지역을 SEJONG→CHEONGJU로 변경(환각 금지어와 충돌 회피).
+  `stitch_review.md`에 해결 배너 추가(사고 기록은 보존). 테스트 96→119.
 - **2026-08-18 (2차)** — ✅ **★ Impact Matrix E2E 관통 (Phase 1 Walking Skeleton 완료).**
   `src/regimpact/impact/` 신규 — `portfolio`(층화 합성 2,000건, 비율을 상수로 노출·시드 고정),
   `customer`(같은 신청건을 6.30/7.1 두 시점으로 룰엔진 평가 → 6개 세그먼트 분류),

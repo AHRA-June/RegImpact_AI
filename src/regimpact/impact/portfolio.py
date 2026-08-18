@@ -22,7 +22,9 @@ DEFAULT_SIZE = 2000
 # 6·30 신규 규제지역 3곳 + 대조군(비대상 지역). 대조군은 "영향 없음"이 실제로
 # 영향 없음으로 나오는지 확인하는 음성 대조(negative control)다.
 TARGET_REGIONS = ("GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN")
-CONTROL_REGION = "SEJONG"          # REGION_VERSIONS 미등록 → 항상 NON_REGULATED
+# 대조군은 6·30 대상이 아닌 실재 지역. Stitch가 환각했던 지역명(세종·부산·강남·분당)은
+# UI grounding 테스트의 금지어이므로 대조군으로 쓰지 않는다.
+CONTROL_REGION = "CHEONGJU"        # REGION_VERSIONS 미등록 → 항상 NON_REGULATED
 
 # ---- 층화 비율 (합계 1.0). 실제 통계가 아니라 **명시된 가정**이다. ----
 P_CONTROL_REGION = 0.16            # 대조군 비중

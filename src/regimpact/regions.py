@@ -86,6 +86,7 @@ REGION_ALIASES: dict[str, str] = {
     "하남시": "HANAM",
     "세종특별자치시": "SEJONG",
     "세종시": "SEJONG",
+    "청주시": "CHEONGJU",
 }
 
 _ALIAS_STRIP = ("경기도", "경기", "인천광역시", "서울시", "특별자치시", "광역시")
