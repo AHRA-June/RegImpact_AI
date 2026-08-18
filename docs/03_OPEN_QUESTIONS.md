@@ -42,9 +42,12 @@
 - `regulatory_facts.md`의 각 claim(LTV 수치, 경과규정 컷오프, 예외 조건 등)을 사용자가 원문과 대조 검수.
 - 실제 감독규정(사실 인용) vs 은행 내규(공개 규정 기반 모의 문서)의 경계 확정.
 
-## Q7. 기술 스택 (ADJUSTABLE) — `[대기, 착수 시 결정]`
-- LLM 제공자/모델, RAG/Agent 프레임워크, Vector DB/저장소, 로컬 DB, UI(Streamlit 수준 권장).
-- 코드 착수 시점에 결정. 지금 확정 불필요.
+## Q7. 기술 스택 (ADJUSTABLE) — `[🟡 부분 해결 2026-08-18]`
+- **✅ LLM 제공자/모델 확정: 무과금 경로.** 기본 `cli`(Claude Code 구독 포함, 유료 키 불필요),
+  보조 `gemini`(무료 티어)/`manual`/`replay`. 코어 실행 모델 = claude-sonnet-5 이상
+  (haiku-4-5는 인용 환각 25% 실측 → 코어 부적합). 상세 `docs/06_LLM_PROVIDER.md`.
+- **미결:** RAG/Agent 프레임워크, Vector DB/저장소, 로컬 DB, UI(Streamlit 수준 권장).
+- 나머지는 해당 컴포넌트 착수 시점에 결정. 지금 확정 불필요.
 
 ## Q8. 명세 내부 상충: 유주택 + 생애최초 처리 — `[대기, 도메인 확인 필요]`
 - **발견 경위:** TC Generator 충돌 케이스(CFL-04) 작성 중 `05_RULE_SPEC` 내부 두 서술이 상충함을 확인.
@@ -55,3 +58,10 @@
 - **사용자 판단 필요:** 실제 운영에서 house_count≥1 & first_home_buyer=True 라는 **모순 입력**이 들어오면
   ①§H대로 0% 자동판정할지, ②§E대로 데이터 무결성 오류로 보고 `NEEDS_HUMAN_REVIEW`로 escalate할지.
   후자를 택하면 엔진에 "입력 모순 감지 → escalation" 분기를 추가하고 오라클·회귀도 함께 갱신.
+
+## Q9. D-02(예외 누락) 대책 선택 — `[대기, Phase 2 착수 시]`
+- **실측 결함:** Exception Recall 50% — 골드 `real_demand`(서민·실수요자)를 sonnet-5·haiku-4-5 모두 누락.
+  FSC 보도자료는 "생애최초, 정책모기지 **등**"으로 축약하고 FAQ만 전부 열거하는데, 모델이 짧은 쪽을 골랐다.
+- **후보 대책:** ①문서별 개별 추출 후 union ②"등/기타" 감지 시 타 문서에서 열거 확장 강제 ③예외 전용 2차 패스.
+- ②·③은 호출 수가 늘어 무과금 한도에 영향. 어느 쪽을 갈지 Phase 2 착수 시 결정.
+- 상세: `docs/eval/EXTRACTOR_RUN_REPORT.md` §2 D-02.

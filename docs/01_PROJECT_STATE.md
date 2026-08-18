@@ -4,11 +4,12 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 이 파일부터 읽는다.
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-10
-- **갱신자:** Claude (TC Generator 구현 세션)
-- **개발 브랜치:** `claude/start-work-71qh9m`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + **TC Generator/Rule-Regression** 구현(테스트 39 통과)
+- **마지막 갱신:** 2026-08-18
+- **갱신자:** Claude (무과금 LLM provider + Extractor 첫 실측 세션)
+- **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor(**실측 완료**) + TC Generator/Rule-Regression (테스트 66 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
+- (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
 ---
 
@@ -21,7 +22,20 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-10)
+## ✅ 방금 완료 (2026-08-18)
+- **무과금 LLM provider 레이어** — `src/regimpact/extractor/backends.py`. `cli`(Claude Code 구독 포함,
+  유료 키 불필요·기본값) / `gemini`(무료 티어) / `manual`(사람 중계) / `replay`(호출 0회 재생) / `anthropic`(선택).
+  서버측 structured output이 없는 경로를 위해 JSON 정규화 + 스키마 검증 + 1회 교정 재시도 구현.
+  → **Anthropic API 키 없이도 전 기능 동작.** 결정 근거·한계는 `docs/06_LLM_PROVIDER.md`.
+- **Extractor 첫 실제 LLM 실측** — 6·30 공문 3건 실행. sonnet-5: 19건 추출, **Citation Correctness 100% /
+  Unsupported Claim Rate 0% / Change Completeness 100% / Exception Recall 50%**.
+  실행 기록 `docs/eval/runs/run_*.json`(`--provider replay`로 재현), 리포트 `docs/eval/EXTRACTOR_RUN_REPORT.md`.
+- **실측으로 결함 3건 확인** — D-01 지역 어휘 불일치(✅해결: 결정적 정규화 `postprocess.normalize_regions`),
+  D-02 열거 병합에 의한 예외 누락(⚠미해결·Q9로 등록, Phase 2 1순위), D-03 모델별 인용 환각
+  (haiku-4-5 Unsupported 25% vs sonnet-5 0% → 코어 모델은 sonnet-5 이상).
+- 테스트 39 → **66** (`tests/test_backends.py` 27개 추가, 전부 오프라인).
+
+## ✅ 이전 완료 (2026-08-10)
 - **TC Generator + Rule-Regression** — `src/regimpact/tc_generator/` (oracle·generator·regression). 룰엔진을
   **독립 명세 오라클(challenger)** 로 차등 검증. 오라클은 rule_engine·regions·grandfathering 을 import 하지 않고
   명세(§H)를 독립 코드 경로로 재구현 → 지역·경과·판정 어느 구현 오차든 잡힘. 30개 케이스(SCOPE/BASELINE/
@@ -29,14 +43,17 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
+- 실행: `python -m pytest`(66), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
+  `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
 
 ## 다음 액션 (NEXT)
-- **Extractor 실제 LLM 1회 실행** — API 키로 `run_extractor.py` 돌려 6·30 실제 추출 + Assurance 수치 확보(첫 실측 지표).
+- ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-18, 무과금 `cli` 경로). 첫 실측 지표 확보.
+- **최소 Impact Matrix E2E** — 정규화된 지역코드(`GURI` 등)를 룰엔진 입력으로 직결해 6·30 1건 관통.
+  Stitch 하드코딩값을 엔진 실제 출력으로 교체. (현재 최우선)
+- **D-02 대책 결정·구현**(Q9) — 예외 누락. 단 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- **최소 Impact Matrix E2E** 산출 → 이후 UI 연동 시 Stitch 하드코딩값을 엔진 실제 출력으로 교체.
 - (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
 
 ### (이전) Phase 0 기준선 항목
@@ -48,8 +65,6 @@
 3. ✅ **룰엔진 규칙 명세 v1 확정** — `05_RULE_SPEC.md` (LTV·precedence·경과규정·알고리즘 H). 정책대출→Discovery, 코어=LTV만. **다음: 이 알고리즘을 deterministic 코드+테스트로 구현.**
 4. **6·30 수기 Impact 정답(앵커)** — 사용자 확인 (§24-4). Walking Skeleton의 E2E 테스트 케이스.
 - 이후 Phase 1(Walking Skeleton) 착수 → `04_PLAN.md` 참고.
-
-> ⚠️ **선행 조건: 원격 push 권한.** 아래 블로커 해결 전까지 새 계정 인계 불가.
 
 ---
 
@@ -86,6 +101,15 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18** — ✅ **무과금 LLM provider 레이어 + Extractor 첫 실측.** 사용자 제약("Anthropic API 키 발급
+  어려움, 프로젝트에 비용 지출 안 함")을 설계로 흡수: `backends.py`에 `cli`/`gemini`/`manual`/`replay`/
+  `anthropic` provider 추가, `resolve_completion("auto")`가 무과금 경로를 우선. structured output 부재는
+  JSON 정규화+스키마 검증+1회 교정 재시도로 대체. 6·30 공문 3건 **실제 LLM 실행**(0원) — sonnet-5
+  Citation Correctness 100%/Unsupported 0%/Completeness 100%/Exception Recall 50%. 결함 3건 확인:
+  D-01 지역 어휘 불일치(해결 — 결정적 별칭 테이블 `normalize_region_name`, 프롬프트에 코드 어휘 주는
+  대안은 정답 누설이라 거부), D-02 예외 누락(미해결·Q9 등록, 앵커 과적합 방지 위해 튜닝 중단),
+  D-03 haiku-4-5 인용 환각 25%(모델 선택=리스크 선택 실증). `docs/06_LLM_PROVIDER.md`,
+  `docs/eval/EXTRACTOR_RUN_REPORT.md`, `docs/eval/runs/*.json` 신규. 테스트 39→66.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.
 - **2026-08-10** — ✅ **RegChange Extractor(E) + Citation Assurance(A) 구현.** `src/regimpact/extractor/`(structured output, LLM 주입 가능=오프라인 테스트, claude-opus-5 기본). Citation grounding으로 환각 인용 탐지 실측 + 골드 대조(Change Completeness/Exception Recall). 골드 `docs/eval/regchange_gold_6_30.json`. 테스트 5개(총 28) 통과. claude-api 스킬 참조. `examples/run_extractor.py` 추가.
 - **2026-08-10** — ✅ **룰엔진 v1 구현·검증.** `src/regimpact/`(models·regions·grandfathering·rule_engine) + `tests/`(pytest 23 통과) + `examples/demo_6_30.py`. 알고리즘 H를 deterministic 코드로. LOCKED §4 준수(규칙값은 확정 명세에서). pyproject·gitignore·엔진 README 추가.
