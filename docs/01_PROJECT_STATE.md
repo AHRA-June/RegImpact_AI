@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (골드셋 작성 세션)
+- **갱신자:** Claude (골드셋 QA 평가 · D-03 철회 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 158 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 184 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,24 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 6차)
+## ✅ 방금 완료 (2026-08-18 · 7차)
+- **★ 골드셋 QA 평가 하네스 + DEV 40 베이스라인** — `src/regimpact/eval/qa.py`,
+  `examples/run_goldset_eval.py`. 정정 후 **Fact Coverage 95.0% / Exact 92.5% /
+  Citation Correctness 100% / Escalation Recall 100%** (비용 0원, 6분).
+- **⚠️ 첫 채점이 틀렸다 — 모델이 아니라 채점기가 문제였다.** 실패 12건을 답변 원문과 대조하니
+  전부 표현 차이("25.9.7" vs "2025년 9월 7일", "증액 없는" vs "증액없는"). 프롬프트를 고쳤다면
+  **채점기에 맞춰 모델을 훈련시킨 것**이 됐다 → 표면 정규화 + `|` 동의 표현으로 채점기를 고쳤다.
+  느슨해지는 것을 막으려고 `tests/test_qa_eval.py`가 양방향 고정(표면차 통과 / 내용차 실패).
+- **❌ D-03 철회** — "haiku 인용 환각 25%"는 **측정 오차**였다. PDF 추출본이 단어 중간에서
+  줄바꿈하는데 대조가 공백 축약만 했던 탓. 재채점 결과 **0%**. 코어 모델 sonnet-5 결정은 유지하되
+  근거를 "인용 환각"에서 **"추출 완전성 19건 vs 12건"** 으로 교체.
+- **provider 레이어 설계 결함 수정** — RegChange 스키마에 welded 돼 있어 QA 응답을 못 만들었다.
+  검증기·지시문 주입 가능하게 변경.
+- **D-02는 이 평가에서 재현되지 않음** — QA는 질문이 대상을 지목해 주므로 문서 전체 추출과
+  난이도가 다르다. 두 지표를 섞어 보고하지 않는다(`GOLDSET_EVAL_REPORT.md` §4).
+- 테스트 158 → **184**.
+
+## ✅ 이전 완료 (2026-08-18 · 6차)
 - **★ 골드 평가셋 115문항 작성** — `docs/eval/gold/` (DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35).
   10개 카테고리 전부 커버, high-risk 비중 DEV·LOCKED 52% / CHALLENGE 80%.
   **튜닝 시작 전에 세 셋을 모두 작성**(브리프 §12-1·2 순서 준수).
@@ -111,7 +128,8 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(158), `python examples/validate_goldset.py`(골드셋 무결성), `python examples/demo_impact_e2e.py`(**E2E 관통**),
+- 실행: `python -m pytest`(184), `python examples/validate_goldset.py`(골드셋 무결성),
+  `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
   `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
@@ -125,7 +143,9 @@
 - **✍️ 골드셋 도메인 검수(사용자)** — 전 문항 🤖 `ai_draft`. 확정분은 `authored_by`를
   `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
 - **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
-- **Extractor 튜닝(DEV 40 기준)** — Q9/D-02(서민·실수요자 누락) 해소. Phase 2 본체.
+- **Extractor(문서 전체 추출) 튜닝** — Q9/D-02(서민·실수요자 누락). QA 평가에서는 재현되지
+  않으므로 **추출 태스크 전용 개선**이 필요하다(문서별 추출 후 union 등). Phase 2 본체.
+- **✍️ 골드셋 도메인 검수** — DEV 40부터. 현재 절대 수치는 초안 기준이다.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
 - ~~**Stitch UI를 엔진 실제 출력으로 교체**~~ — ✅ **완료(2026-08-18 3차).**
 - **골드셋 100~120 작성 착수 + metrics_spec 임계값 확정** (Phase 2 진입 조건).
@@ -179,6 +199,14 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (8차)** — ✅ **골드셋 QA 평가 하네스 + DEV 베이스라인.** `eval/qa.py`(프롬프트·
+  응답 검증기·결정적 채점기), `examples/run_goldset_eval.py`. DEV 40 실행 결과 정정 후
+  Fact Coverage 95.0% / Exact 92.5% / Citation 100% / Escalation Recall 100%.
+  **첫 채점의 실패 12건이 전부 채점기의 표현 차이였음을 답변 원문 대조로 확인**하고, 모델이 아니라
+  채점기를 고쳤다(표면 정규화 + `|` 동의 표현, 양방향 회귀 테스트로 고정). 같은 원인으로
+  **D-03(haiku 인용 환각 25%)을 철회** — 재채점 0%, 코어 모델 근거를 추출 완전성으로 교체.
+  provider 레이어가 RegChange 스키마에 welded 돼 있던 결함도 수정(검증기 주입 가능).
+  `docs/eval/GOLDSET_EVAL_REPORT.md` 신규. 테스트 158→184.
 - **2026-08-18 (7차)** — ✅ **골드 평가셋 115문항 작성.** `src/regimpact/eval/`(schema·goldset·validate),
   `docs/eval/gold/`(dev 40 / locked 40 / challenge 35 + README + SEAL_ACCESS_LOG),
   `tools/gold_*.py`(작성 도구), `examples/validate_goldset.py`. 튜닝 전에 세 셋을 모두 작성해

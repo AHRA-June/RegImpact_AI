@@ -121,3 +121,37 @@ def test_score_detects_missing_exception():
     g = score_against_gold(ext, GOLD)
     assert g.exception_recall == 0.0
     assert "first_home_buyer" in g.missed_exceptions
+
+
+# ---------- 인용 대조 정규화 (2026-08-18 정정) ----------
+
+def test_grounding_tolerates_pdf_line_breaks_inside_words():
+    """PDF 추출본은 단어 중간에서도 줄을 바꾼다 — 그것 때문에 실제 인용이 환각으로 잡혔었다."""
+    from regimpact.extractor import RegChangeExtraction, check_citation_grounding
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [],
+        "changes": [{
+            "category": "LTV", "summary": "s", "before": None, "after": None,
+            "citation": {"source_doc_id": "D1", "quote": "규제지역 내 3억원 초과 APT 취득"},
+            "confidence": 0.9,
+        }],
+    })
+    sources = {"D1": "전세대출 보유 차주의 규제\n지역 내 3억원 초과 APT 취득과"}
+    assert check_citation_grounding(ext, sources).citation_correctness == 1.0
+
+
+def test_grounding_still_catches_fabricated_wording():
+    """공백을 무시해도 **다른 단어를 지어낸 인용**은 걸려야 한다 — 환각 탐지력을 잃지 않았는가."""
+    from regimpact.extractor import RegChangeExtraction, check_citation_grounding
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [],
+        "changes": [{
+            "category": "LTV", "summary": "s", "before": None, "after": None,
+            "citation": {"source_doc_id": "D1", "quote": "규제지역 내 5억원 초과 APT 취득"},
+            "confidence": 0.9,
+        }],
+    })
+    sources = {"D1": "전세대출 보유 차주의 규제\n지역 내 3억원 초과 APT 취득과"}
+    assert check_citation_grounding(ext, sources).unsupported_claim_rate == 1.0

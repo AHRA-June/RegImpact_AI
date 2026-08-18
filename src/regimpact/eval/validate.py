@@ -11,6 +11,7 @@ import re
 from ..rule_engine import (
     LTV_BASELINE,  # noqa: F401 - 존재 확인용 import (모듈 로드 보증)
 )
+from .qa import fact_matches
 from .schema import Category, GoldItem, Split, ValidationReport
 
 # 룰엔진이 실제로 내보내는 rule_id (rule_engine._decided / _baseline_rule 호출부)
@@ -77,9 +78,9 @@ def validate_items(
                 )
 
         # gold_facts 는 정답 문장 안에서 확인 가능해야 한다(채점기가 찾을 수 없는 앵커 방지)
-        hay = _norm(f"{item.gold_answer} {item.question}")
+        hay = f"{item.gold_answer} {item.question}"
         for fact in item.gold_facts:
-            if _norm(fact) not in hay:
+            if not fact_matches(fact, hay):
                 rep.warnings.append(f"{tag} gold_fact가 gold_answer에 없음: {fact!r}")
 
         if item.category == Category.AMBIGUOUS and not item.expect_escalation:

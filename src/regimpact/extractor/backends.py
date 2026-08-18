@@ -23,7 +23,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 from .prompt import SYSTEM_PROMPT
 from .schema import CATEGORIES
@@ -34,6 +34,9 @@ CompletionFn = Callable[[str, str], dict]
 PROVIDERS = ("cli", "gemini", "manual", "replay", "anthropic")
 
 # 무과금 provider가 structured output을 보장하지 않으므로 형식을 프롬프트로 강제한다.
+#
+# 스키마는 **주입 가능**하다. 이 레이어는 provider를 추상화하는 곳이지 특정 출력 형식을
+# 강제하는 곳이 아니다. RegChange 추출과 골드셋 QA는 형식이 다르므로 각자의 지시문·검증기를 넘긴다.
 JSON_ONLY_INSTRUCTION = """
 [출력 형식 — 반드시 지킬 것]
 설명·머리말·코드펜스 없이 **JSON 객체 하나만** 출력하라. 최상위 키는 정확히 4개다:
@@ -127,19 +130,33 @@ def validate_regchange(obj: dict) -> list[str]:
     return errs
 
 
-def with_schema_retry(raw_call: Callable[[str, str], str], *, retries: int = 1) -> CompletionFn:
+# (obj) -> 위반 목록. 빈 리스트면 통과.
+Validator = Callable[[dict], list]
+
+
+def with_schema_retry(
+    raw_call: Callable[[str, str], str],
+    *,
+    retries: int = 1,
+    validator: Optional[Validator] = None,
+    instruction: Optional[str] = None,
+) -> CompletionFn:
     """텍스트를 돌려주는 호출을 감싸 JSON 파싱 + 스키마 검증 + 1회 교정 재시도를 붙인다.
 
+    validator/instruction을 주지 않으면 RegChange 추출 형식을 기본으로 쓴다.
     재시도 프롬프트에는 위반 사유만 덧붙인다(정답을 알려주지 않음 — 채점 오염 방지).
     """
+    check = validator or validate_regchange
+    guide = instruction if instruction is not None else JSON_ONLY_INSTRUCTION
+
     def _complete(system: str, user: str) -> dict:
-        sys_prompt = f"{system}\n{JSON_ONLY_INSTRUCTION}"
+        sys_prompt = f"{system}\n{guide}"
         attempt_user, last_err = user, ""
         for attempt in range(retries + 1):
             text = raw_call(sys_prompt, attempt_user)
             try:
                 obj = coerce_json(text)
-                errs = validate_regchange(obj)
+                errs = check(obj)
                 if not errs:
                     return obj
                 last_err = "; ".join(errs[:8])
@@ -162,6 +179,8 @@ def cli_completion(
     *,
     binary: str = "claude",
     timeout: int = 900,
+    validator: Optional[Validator] = None,
+    instruction: Optional[str] = None,
 ) -> CompletionFn:
     """**기본 무과금 경로.** 로컬 `claude` CLI를 1회성 프롬프트로 실행한다.
 
@@ -198,7 +217,7 @@ def cli_completion(
             raise LLMBackendError(f"CLI 오류 응답: {str(envelope.get('result'))[:300]}")
         return envelope.get("result", "")
 
-    return with_schema_retry(_raw)
+    return with_schema_retry(_raw, validator=validator, instruction=instruction)
 
 
 def gemini_completion(
@@ -206,6 +225,8 @@ def gemini_completion(
     *,
     api_key: str | None = None,
     timeout: int = 600,
+    validator: Optional[Validator] = None,
+    instruction: Optional[str] = None,
 ) -> CompletionFn:
     """Google AI Studio **무료 티어** 백엔드 (aistudio.google.com에서 키 무료 발급).
 
@@ -245,10 +266,15 @@ def gemini_completion(
         except (KeyError, IndexError) as e:
             raise LLMBackendError(f"Gemini 응답 형식 예상 밖: {str(payload)[:300]}") from e
 
-    return with_schema_retry(_raw)
+    return with_schema_retry(_raw, validator=validator, instruction=instruction)
 
 
-def manual_completion(workdir: str | Path) -> CompletionFn:
+def manual_completion(
+    workdir: str | Path,
+    *,
+    validator: Optional[Validator] = None,
+    instruction: Optional[str] = None,
+) -> CompletionFn:
     """키도 CLI도 없을 때의 **완전 무과금 경로**: 사람이 중계한다.
 
     프롬프트를 `prompt.txt`로 쓰고, 사람이 아무 챗 UI(무료 웹 Claude/Gemini 등)에
@@ -269,10 +295,12 @@ def manual_completion(workdir: str | Path) -> CompletionFn:
             )
         return resp_path.read_text(encoding="utf-8")
 
-    return with_schema_retry(_raw, retries=0)
+    return with_schema_retry(_raw, retries=0, validator=validator, instruction=instruction)
 
 
-def replay_completion(run_path: str | Path) -> CompletionFn:
+def replay_completion(
+    run_path: str | Path, *, validator: Optional[Validator] = None
+) -> CompletionFn:
     """저장된 실행 결과를 재생한다 — LLM 호출 0회, 완전 결정적.
 
     `run_extractor.py`가 남긴 run JSON(`extraction` 키) 또는 추출 dict 자체를 받는다.
@@ -281,8 +309,10 @@ def replay_completion(run_path: str | Path) -> CompletionFn:
     payload = json.loads(Path(run_path).read_text(encoding="utf-8"))
     extraction = payload.get("extraction", payload)
 
+    check = validator or validate_regchange
+
     def _complete(system: str, user: str) -> dict:  # noqa: ARG001 - 서명 호환용
-        errs = validate_regchange(extraction)
+        errs = check(extraction)
         if errs:
             raise LLMBackendError(f"저장된 결과가 스키마 위반: {'; '.join(errs[:5])}")
         return extraction
@@ -331,7 +361,14 @@ def available_providers() -> dict[str, bool]:
     }
 
 
-def resolve_completion(provider: str = "auto", *, model: str | None = None, **kwargs) -> CompletionFn:
+def resolve_completion(
+    provider: str = "auto",
+    *,
+    model: str | None = None,
+    validator: Optional[Validator] = None,
+    instruction: Optional[str] = None,
+    **kwargs,
+) -> CompletionFn:
     """provider 이름으로 CompletionFn을 만든다. "auto"는 무과금 경로를 우선한다.
 
     우선순위: cli(구독 포함) → gemini(무료 티어) → anthropic(과금) → manual.
@@ -345,14 +382,16 @@ def resolve_completion(provider: str = "auto", *, model: str | None = None, **kw
         else:
             provider = "manual"
 
+    shape = {"validator": validator, "instruction": instruction}
     if provider == "cli":
-        return cli_completion(**({"model": model} if model else {}), **kwargs)
+        return cli_completion(**({"model": model} if model else {}), **shape, **kwargs)
     if provider == "gemini":
-        return gemini_completion(**({"model": model} if model else {}), **kwargs)
+        return gemini_completion(**({"model": model} if model else {}), **shape, **kwargs)
     if provider == "anthropic":
+        # 유료 경로는 서버측 structured output을 쓰므로 프롬프트 지시문이 필요 없다
         return anthropic_completion(**({"model": model} if model else {}), **kwargs)
     if provider == "manual":
-        return manual_completion(kwargs.pop("workdir", "manual_run"), **kwargs)
+        return manual_completion(kwargs.pop("workdir", "manual_run"), **shape, **kwargs)
     if provider == "replay":
-        return replay_completion(kwargs.pop("run_path"), **kwargs)
+        return replay_completion(kwargs.pop("run_path"), validator=validator, **kwargs)
     raise LLMBackendError(f"알 수 없는 provider: {provider!r} (가능: {', '.join(PROVIDERS)})")

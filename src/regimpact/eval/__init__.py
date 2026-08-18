@@ -16,6 +16,19 @@ from .goldset import (
     split_path,
     split_stats,
 )
+from .qa import (
+    QA_JSON_SCHEMA,
+    QA_SYSTEM_PROMPT,
+    QAReport,
+    QAResponse,
+    answer_questions,
+    build_qa_prompt,
+    fact_matches,
+    format_qa_report,
+    score_qa,
+    validate_qa_response,
+    QA_JSON_INSTRUCTION,
+)
 from .schema import (
     HIGH_RISK_CATEGORIES,
     Category,
@@ -32,4 +45,7 @@ __all__ = [
     "SealedSplitError", "SEALED", "GOLD_DIR", "ACCESS_LOG",
     "GoldItem", "Citation", "Category", "Split", "ValidationReport",
     "HIGH_RISK_CATEGORIES", "validate_items", "KNOWN_RULE_IDS",
+    "answer_questions", "score_qa", "format_qa_report", "build_qa_prompt",
+    "QAReport", "QAResponse", "QA_SYSTEM_PROMPT", "QA_JSON_SCHEMA",
+    "validate_qa_response", "QA_JSON_INSTRUCTION", "fact_matches",
 ]

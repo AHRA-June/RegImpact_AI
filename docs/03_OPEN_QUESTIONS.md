@@ -44,8 +44,10 @@
 
 ## Q7. 기술 스택 (ADJUSTABLE) — `[🟡 부분 해결 2026-08-18]`
 - **✅ LLM 제공자/모델 확정: 무과금 경로.** 기본 `cli`(Claude Code 구독 포함, 유료 키 불필요),
-  보조 `gemini`(무료 티어)/`manual`/`replay`. 코어 실행 모델 = claude-sonnet-5 이상
-  (haiku-4-5는 인용 환각 25% 실측 → 코어 부적합). 상세 `docs/06_LLM_PROVIDER.md`.
+  보조 `gemini`(무료 티어)/`manual`/`replay`. 코어 실행 모델 = claude-sonnet-5.
+  🔺 **근거 정정(2026-08-18):** "haiku 인용 환각 25%"는 측정 오차였다(재채점 결과 0%).
+  sonnet-5를 쓰는 실제 근거는 **추출 완전성**이다 — 동일 프롬프트·원문에서 19건 vs 12건.
+  상세 `docs/06_LLM_PROVIDER.md`, `docs/eval/EXTRACTOR_RUN_REPORT.md` §2 D-03.
 - **미결:** RAG/Agent 프레임워크, Vector DB/저장소, 로컬 DB, UI(Streamlit 수준 권장).
 - 나머지는 해당 컴포넌트 착수 시점에 결정. 지금 확정 불필요.
 

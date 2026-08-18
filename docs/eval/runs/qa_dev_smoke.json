@@ -1,0 +1,173 @@
+{
+  "split": "DEV",
+  "provider": "cli",
+  "model": "claude-sonnet-5",
+  "batch_size": 5,
+  "item_count": 5,
+  "metrics": {
+    "fact_coverage": 0.7272727272727273,
+    "exact_rate": 0.6,
+    "citation_correctness": 0.9166666666666666,
+    "unsupported_claim_rate": 0.08333333333333337,
+    "escalation_precision": 1.0,
+    "escalation_recall": 1.0,
+    "by_category": {
+      "NORMAL": [
+        5,
+        0.7272727272727273,
+        0.6
+      ]
+    },
+    "failure_modes": {
+      "골드 사실 누락": 2,
+      "인용 환각(원문에 없는 인용)": 1
+    }
+  },
+  "scores": [
+    {
+      "item_id": "DEV-NOR-001",
+      "category": "NORMAL",
+      "facts_total": 2,
+      "facts_hit": 2,
+      "missed_facts": [],
+      "citations_total": 3,
+      "citations_grounded": 3,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-002",
+      "category": "NORMAL",
+      "facts_total": 1,
+      "facts_hit": 0,
+      "missed_facts": [
+        "旣 마련된 규정"
+      ],
+      "citations_total": 3,
+      "citations_grounded": 3,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-003",
+      "category": "NORMAL",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-004",
+      "category": "NORMAL",
+      "facts_total": 2,
+      "facts_hit": 0,
+      "missed_facts": [
+        "15억원 이하 6억원",
+        "25억원 초과 2억원"
+      ],
+      "citations_total": 2,
+      "citations_grounded": 1,
+      "escalation_expected": false,
+      "escalation_given": false
+    },
+    {
+      "item_id": "DEV-NOR-005",
+      "category": "NORMAL",
+      "facts_total": 3,
+      "facts_hit": 3,
+      "missed_facts": [],
+      "citations_total": 2,
+      "citations_grounded": 2,
+      "escalation_expected": false,
+      "escalation_given": false
+    }
+  ],
+  "responses": {
+    "DEV-NOR-001": {
+      "item_id": "DEV-NOR-001",
+      "answer": "규제지역(투기과열지구·조정대상지역)으로 지정되면 주택구입목적 주담대의 LTV는 비규제지역 70%에서 규제지역 40%로 강화된다(무주택자, 처분조건부 1주택자 포함 기준). 다만 유주택자는 LTV 0%가 적용되며, 생애최초 주택구입·정책모기지 등에는 완화된 LTV(60~70%)가 적용된다. 참고로 FAQ의 상세 비교표에서는 일반 무주택 차주 기준으로 조정대상지역 단독 지정시 50%, 투기과열지구 단독 지정시 40%로 구분해 제시하고 있으나, 이번에 지정된 3개 지역은 투기과열지구와 조정대상지역으로 동시 지정되며, 국토부의 규제효과 요약표(참고1)에서는 두 지역유형에 대해 구분 없이 'LTV : 무주택 40%, 유주택 0%'로 단일 제시하고 있다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "(주담대 LTV) 규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%)"
+        ],
+        [
+          "MOLIT_PRESS_20260630",
+          "LTV : 무주택(처분조건부 1주택 포함) 40%, 유주택 0%"
+        ],
+        [
+          "FAQ_20260630",
+          "조정대상지역(아파트 限) 50%\n투기과열지구 40%"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-002": {
+      "item_id": "DEV-NOR-002",
+      "answer": "새로 만든 규정이 아니다. 규제지역 지정에 따른 강화된 대출규제는 이미 마련되어 있던 감독규정에 따라 규제지역 지정과 동시에 자동으로 적용되는 것이며, FAQ에서도 각 규제별로 '25.9.7, '20.6.17, '20.11.16, '18.9.13, '19.12.16 등 기존 시행일이 명시되어 있어 기존에 도입된 규제가 그대로 적용되는 것임을 알 수 있다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "금번 조치로 규제지역으로 지정된 지역에 대해서는 旣 마련된 규정*에 따라 강화된 대출규제가 7.1일부터 즉시 적용된다."
+        ],
+        [
+          "FSC_PRESS_20260630",
+          "은행업감독규정, 보험업감독규정, 여신전문금융업감독규정, 상호저축은행업감독규정, \n상호금융업감독규정"
+        ],
+        [
+          "FAQ_20260630",
+          "규제지역 내 주담대 취급시 강화된 LTV(70→40%) 적용* ’25.9.7~"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-003": {
+      "item_id": "DEV-NOR-003",
+      "answer": "규제지역 내 주택구입목적 주담대는 최대한도 6억원으로 제한되고(중도금대출은 제외되며, 잔금대출로 전환시 6억원 한도가 적용), 대출 실행 후 6개월 이내 전입의무가 부과되며, 최대 만기는 30년 이내로 제한된다. 생애최초 구매자의 경우 LTV 70%가 적용되며 마찬가지로 6개월 이내 전입의무가 부과된다(다만 생애최초 디딤돌대출은 1개월 이내 전입의무 유지).",
+      "citations": [
+        [
+          "MOLIT_PRESS_20260630",
+          "최대한도 6억원 제한*, 6개월 이내 전입의무 부과, 최대 만기 30년이내"
+        ],
+        [
+          "MOLIT_PRESS_20260630",
+          "생애최초 LTV 70% + 전입의무(6개월 이내)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-004": {
+      "item_id": "DEV-NOR-004",
+      "answer": "규제지역 내 주담대(생애최초, 서민·실수요자 등 포함)에는 주택가격(시가) 구간별로 차등 적용되는 대출한도 규제가 적용되며, 구체적으로 주택가격 15억원 이하는 6억원, 15억원 초과~25억원 이하는 4억원, 25억원 초과는 2억원이 최대한도이다.",
+      "citations": [
+        [
+          "FAQ_20260630",
+          "다만, 주택가격별 대출한도 규제(15억원이하6억원, 15~25억원4억원, 25억원초과2억원)는 적용됨"
+        ],
+        [
+          "FAQ_20260630",
+          "최대한도\n15억원이하6·15~25억원4·25억원초과2억원2)"
+        ]
+      ],
+      "needs_human_review": false
+    },
+    "DEV-NOR-005": {
+      "item_id": "DEV-NOR-005",
+      "answer": "금융위원회 사무처장은 강화된 대출규제가 즉시 시행되어 현장 혼선이 없도록 각 협회와 금융회사에서 일선 창구 직원 교육, 전산 시스템 점검, 고객 안내 등에 만전을 기해줄 것을 요청하였다. 아울러 향후 관리목표를 지속적으로 미준수하는 금융회사 등에 대해서는 현장점검 등을 통한 적극적 대응을 강화할 계획이라고 밝혔다.",
+      "citations": [
+        [
+          "FSC_PRESS_20260630",
+          "각 협회와 금융회사에서 일선 창구 직원 \n교육, 전산 시스템 점검, 고객 안내 등에 만전을 기해달라"
+        ],
+        [
+          "FSC_PRESS_20260630",
+          "지속적으로 관리목표를 \n미준수하는 금융회사 등에 대한 현장점검\n실시 등 적극적 대응 강화"
+        ]
+      ],
+      "needs_human_review": false
+    }
+  }
+}
