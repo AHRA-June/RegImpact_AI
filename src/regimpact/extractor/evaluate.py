@@ -77,7 +77,8 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
     """사람이 확정한 골드 정답지와 비교해 완전성·재현율을 계산한다.
 
     gold 형식(docs/eval/regchange_gold_6_30.json):
-      required_changes: [{category, keywords:[...]}]  # keywords 중 하나라도 summary/after에 있으면 포착
+      required_changes: [{id, keywords:[...]}]            # keywords 중 하나라도 있으면 포착
+                          또는 [{id, transition:{before,after}}]  # 값 전이를 before/after 필드에 직접 대조
       exceptions: [{name, keywords:[...]}]
       effective_from: "YYYY-MM-DD"
       target_regions: [...]
@@ -86,6 +87,21 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
         _norm(f"{c.summary} {c.before or ''} {c.after or ''}").lower()
         for c in extraction.changes
     ]
+
+    def _transition_found(spec: dict) -> bool:
+        """값 전이(before→after)를 항목의 before/after 필드에 **직접** 대조한다.
+
+        키워드는 summary·before·after를 이어붙인 문자열을 훑기 때문에 "70%가 있다"까지만 볼 수
+        있고, 그 70%가 시행 전 값인지 생애최초 값인지 구분하지 못한다. 이 제품의 핵심 주장이
+        "무엇이 무엇으로 바뀌었는가"인 이상, 전이는 전이로 채점해야 한다.
+        """
+        want_b, want_a = _norm(spec.get("before", "")).lower(), _norm(spec.get("after", "")).lower()
+        for c in extraction.changes:
+            got_b, got_a = _norm(c.before or "").lower(), _norm(c.after or "").lower()
+            if (not want_b or want_b == got_b) and (not want_a or want_a == got_a):
+                if want_b or want_a:
+                    return True
+        return False
 
     def _found(keywords: list[str], categories: list[str] | None = None) -> bool:
         """키워드 중 **하나라도** 포착되면 히트. 여러 사실을 한 항목에 묶지 말고 별도 entry로 나눈다.
@@ -101,10 +117,17 @@ def score_against_gold(extraction: RegChangeExtraction, gold: dict) -> GoldRepor
 
     missed_changes, hit_changes = [], 0
     for req in gold.get("required_changes", []):
-        if _found(req["keywords"], req.get("categories")):
+        if "transition" in req:
+            hit = _transition_found(req["transition"])
+        else:
+            hit = _found(req["keywords"], req.get("categories"))
+        if hit:
             hit_changes += 1
         else:
-            missed_changes.append(req.get("id", req["keywords"][0]))
+            # dict.get의 기본값은 **먼저 평가**되므로 req["keywords"][0]를 그대로 쓰면
+            # keywords가 빈 entry(전이 전용)에서 IndexError가 난다.
+            kws = req.get("keywords") or []
+            missed_changes.append(req.get("id") or (kws[0] if kws else "?"))
     total_changes = len(gold.get("required_changes", [])) or 1
 
     missed_exc, hit_exc = [], 0

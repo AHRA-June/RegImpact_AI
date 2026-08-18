@@ -16,13 +16,41 @@ from regimpact import rule_engine as R  # noqa: E402
 REASON = "검수표 생성 — 확정 명세 대조용, 정답 출력 없음 (튜닝 아님)"
 gold = json.loads((REPO / "docs/eval/regchange_gold_6_30.json").read_text(encoding="utf-8"))
 
+# 채점 특이도 — 이 entry가 실제 추출 결과에서 몇 건에 걸리는가.
+# 너무 넓으면(=대부분에 걸리면) 사실상 항상 통과하는 무의미한 항목이고,
+# 0건이면 채점 자체가 불가능하다. 검수자가 "이 항목이 실제로 무언가를 재는가"를 볼 수 있게 싣는다.
+import re as _re  # noqa: E402
+from regimpact.extractor.schema import RegChangeExtraction  # noqa: E402
+
+_run = json.loads((REPO / "docs/eval/runs/run_perdoc_sonnet5.json").read_text(encoding="utf-8"))
+_items = RegChangeExtraction.from_dict(_run["extraction"]).changes
+
+
+def _n(x):
+    return _re.sub(r"\s+", "", (x or "")).lower()
+
+
+def specificity(entry):
+    if "transition" in entry:
+        t = entry["transition"]
+        n = sum(
+            1 for c in _items
+            if (not t.get("before") or _n(t["before"]) == _n(c.before))
+            and (not t.get("after") or _n(t["after"]) == _n(c.after))
+        )
+        return n, f"전이 대조 {t.get('before', '—')} → {t.get('after', '—')}"
+    hay = [_n(f"{c.summary}{c.before or ''}{c.after or ''}") for c in _items]
+    n = sum(1 for h in hay if any(_n(k) in h for k in entry["keywords"]))
+    return n, "키워드"
+
 items = []
 for sp in Split:
     items += load_split(sp, **({} if sp == Split.DEV else {"unseal_reason": REASON}))
 conf = check_gold_against_spec(items)
 by_id = {i.id: i for i in items}
 
-L = ["# 골드 v2 도메인 검수표", "",
+VER = gold["_version"].split()[0]
+L = [f"# 추출 골드 {VER} 도메인 검수표", "",
      "> 생성: `python tools/build_gold_review.py` · 전 항목 🤖 `ai_draft` — ✍️ 확정 대기",
      "> 확정한 항목은 `authored_by`를 `human_confirmed`로 바꾸고 이 표를 다시 생성하세요.", ""]
 
@@ -65,19 +93,24 @@ L += ["---", "", "## 2. 왜 이 충돌이 생겼나 — FAQ Q2 표 평탄화", "
       "이 결함 유형은 이제 `check_gold_against_spec()`이 자동으로 잡는다(`pytest -k consistency`).", ""]
 
 # ---------------------------------------------------------------- §3
-L += ["---", "", f"## 3. 추출 골드 v2 — 필수 변경 {len(gold['required_changes'])}건", "",
+L += ["---", "", f"## 3. 추출 골드 {VER} — 필수 변경 {len(gold['required_changes'])}건", "",
       "각 항목은 \"공문이 이것을 말하고 있다\"는 주장이다. 인용이 그 주장을 뒷받침하는지 확인한다.", ""]
 for r in gold["required_changes"]:
+    n, how = specificity(r)
     L += [f"#### ☐ `{r['id']}` — {r['claim']}",
-          f"- 채점 키워드: `{'`, `'.join(r['keywords'])}`"]
+          f"- 채점: {how} · 현재 추출 {len(_items)}건 중 **{n}건**에 매칭"
+          + ("  ⚠ 0건이면 채점 불가" if n == 0 else "")]
+    if "transition" not in r:
+        L.append(f"- 키워드: `{'`, `'.join(r['keywords'])}`")
     for cit in r["citations"]:
         L.append(f"  > [{cit['source_doc_id']}] {' '.join(cit['quote'].split())[:150]}")
     L.append("")
 
-L += ["---", "", f"## 4. 추출 골드 v2 — 예외 {len(gold['exceptions'])}건", ""]
+L += ["---", "", f"## 4. 추출 골드 {VER} — 예외 {len(gold['exceptions'])}건", ""]
 for e in gold["exceptions"]:
+    n, _ = specificity(e)
     L += [f"#### ☐ `{e['name']}` — {e['claim']}",
-          f"- 채점 키워드: `{'`, `'.join(e['keywords'])}`"]
+          f"- 채점: 키워드 `{'`, `'.join(e['keywords'])}` · 현재 추출 {len(_items)}건 중 **{n}건**에 매칭"]
     for cit in e["citations"]:
         L.append(f"  > [{cit['source_doc_id']}] {' '.join(cit['quote'].split())[:150]}")
     L.append("")
@@ -85,7 +118,7 @@ for e in gold["exceptions"]:
 # ---------------------------------------------------------------- §5
 L += ["---", "", "## 5. 검수 범위와 우선순위", "",
       "| 대상 | 규모 | 상태 | 비고 |", "|---|---:|---|---|",
-      f"| 추출 골드 v2 (이 문서 §3·§4) | {len(gold['required_changes'])}+{len(gold['exceptions'])} | 🤖 초안 | "
+      f"| 추출 골드 {VER} (이 문서 §3·§4) | {len(gold['required_changes'])}+{len(gold['exceptions'])} | 🤖 초안 | "
       "Extractor 지표(Completeness/Exception Recall)의 기준 |",
       f"| QA 골드 DEV | {len(load_split(Split.DEV))} | 🤖 초안 | 튜닝에 쓰는 유일한 셋 — 다음 우선순위 |",
       "| QA 골드 LOCKED / CHALLENGE | 40 / 35 | 🤖 초안 · 🔒 봉인 | 충돌 3건만 먼저 보고 나머지는 개봉 시 |", "",
@@ -171,14 +204,14 @@ def check_items(entries, key):
         <label class="check"><input type="checkbox" class="cb"><span></span></label>
         <div class="body">
           <div class="head"><code>{esc(e[key])}</code><span class="claim">{esc(e["claim"])}</span></div>
-          <div class="kw">{"".join(f'<kbd>{esc(k)}</kbd>' for k in e["keywords"])}</div>
+          <div class="kw">{"".join(f'<kbd>{esc(k)}</kbd>' for k in (e["keywords"] if "transition" not in e else [f'{e["transition"].get("before","—")} → {e["transition"].get("after","—")}']))}<span class="hits">{specificity(e)[0]}건 매칭</span></div>
           {quote_block(e["citations"])}
         </div>
       </li>""")
     return "".join(out)
 
 total_items = len(gold["required_changes"]) + len(gold["exceptions"])
-html = f"""<title>골드 v2 검수표</title>
+html = f"""<title>추출 골드 {VER} 검수표</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 :root {{
@@ -278,6 +311,7 @@ ol.items {{ list-style:none; margin:0; padding:0; display:flex; flex-direction:c
 .kw {{ display:flex; flex-wrap:wrap; gap:5px; }}
 kbd {{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-2);
   border:1px solid var(--line); border-radius:3px; padding:1px 6px; }}
+.hits {{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); }}
 
 .progress {{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:10;
   background:var(--navy); color:var(--ground); font-family:'JetBrains Mono',monospace; font-size:13px;
@@ -289,7 +323,7 @@ footer {{ color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); 
 
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:14px">
-    <h1>골드 v2 도메인 검수표</h1>
+    <h1>추출 골드 {VER} 검수표</h1>
     <p class="lede">6·30 RegChange 추출 골드 {total_items}항목. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim은 보장되지만,
     <strong>그 인용이 그 주장을 뒷받침하는지는 사람이 판단할 몫</strong>이다.</p>
     <div class="meta">
@@ -322,13 +356,13 @@ footer {{ color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); 
   </section>
 
   <section>
-    <h2>3. 추출 골드 — 필수 변경 {len(gold["required_changes"])}건</h2>
+    <h2>3. 필수 변경 {len(gold["required_changes"])}건</h2>
     <p class="lede">각 항목은 "공문이 이것을 말하고 있다"는 주장이다.</p>
     <ol class="items">{check_items(gold["required_changes"], "id")}</ol>
   </section>
 
   <section>
-    <h2>4. 추출 골드 — 예외 {len(gold["exceptions"])}건</h2>
+    <h2>4. 예외 {len(gold["exceptions"])}건</h2>
     <ol class="items">{check_items(gold["exceptions"], "name")}</ol>
   </section>
 

@@ -303,3 +303,54 @@ def test_merge_report_surfaces_effective_date_conflicts():
     _, rep = extract_per_document({"A": "x", "B": "y"}, complete=fake)
     assert rep.effective_from_conflict
     assert any("effective_from" in c for c in rep.conflicts)
+
+
+# ---------- 값 전이 채점 (골드 v3) ----------
+
+def test_transition_matching_checks_before_and_after_fields():
+    """'70%가 어딘가 있다'와 '70%에서 40%로 바뀌었다'는 다른 주장이다."""
+    sources = load_sources()
+    d = _fake_extraction_dict(sources)
+    ext = extract_regchange(sources, complete=lambda s, u: d)
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "40%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).change_completeness == 1.0
+
+
+def test_transition_matching_rejects_a_wrong_after_value():
+    sources = load_sources()
+    ext = extract_regchange(sources, complete=lambda s, u: _fake_extraction_dict(sources))
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "35%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).missed_changes == ["T"]
+
+
+def test_transition_matching_is_not_satisfied_by_the_value_appearing_in_prose():
+    """요약문에 70%·40%가 흩어져 있어도 before/after가 아니면 전이가 아니다."""
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [],
+        "changes": [{"category": "LTV", "summary": "70%와 40%가 언급된 문장",
+                     "before": None, "after": None,
+                     "citation": {"source_doc_id": "D", "quote": "q"}, "confidence": 0.9}],
+    })
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "40%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).change_completeness == 0.0
+
+
+def test_missed_change_label_survives_an_entry_without_keywords():
+    """전이 전용 entry는 keywords가 비어도 되는데, 라벨 계산이 그걸 못 견디면 채점이 죽는다."""
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    ext = RegChangeExtraction.from_dict({
+        "policy_id": "P", "effective_from": "2026-07-01", "target_regions": [], "changes": [],
+    })
+    gold = {"required_changes": [{"id": "T", "keywords": [],
+                                  "transition": {"before": "70%", "after": "40%"}}],
+            "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
+    assert score_against_gold(ext, gold).missed_changes == ["T"]

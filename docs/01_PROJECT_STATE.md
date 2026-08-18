@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (골드 검수 1차 완료 세션)
+- **갱신자:** Claude (골드 v3 측정 정비 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 205 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 209 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,18 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 10차)
+## ✅ 방금 완료 (2026-08-18 · 11차)
+- **★ 골드 v3 — 검수 중 측정 품질 정비.** 각 entry가 실제로 무엇을 재는지 측정해
+  ①이중 측정 3건 제거(required ↔ exceptions 키워드 동일) ②과잉 키워드 축소
+  (`SCOPE_JEONSE` 17건→5건 매칭) ③**`transition` 채점 신설** — before/after 필드를 직접 대조.
+- **엄격해진 뒤에도 100%/100% 유지** — 기존 100%가 느슨한 키워드 덕이 아니었다는 뜻.
+  단일 패스는 같은 기준에서 88%/50%이므로 개선폭도 유지된다. (required 19→16, 분모 변경)
+- **잠복 버그 발견** — `req.get("id", req["keywords"][0])`는 기본값이 먼저 평가돼
+  키워드가 빈 entry에서 `IndexError`. 회귀 테스트로 고정.
+- 검수표에 **채점 특이도**(추출 75건 중 몇 건에 매칭) 표시 — 그 항목이 실제로 무언가를 재는지 보이게.
+- 테스트 205 → **209**.
+
+## ✅ 이전 완료 (2026-08-18 · 10차)
 - **★ 골드 검수 1차 완료 — 충돌 3건 모두 "명세가 맞음"(사용자 판정).** 골드를 명세에 맞춰 정정.
   1. 非규제(수도권) 기준선 60%→**70%** 2. 규제지역 LTV **투기과열·조정 모두 40%**(40/50은 DTI)
   3. 서민·실수요자 **70%→60% 변경 있음** — 값만이 아니라 **분류가 틀려**
@@ -162,7 +173,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(205), `python examples/validate_goldset.py`(골드셋 무결성),
+- 실행: `python -m pytest`(209), `python examples/validate_goldset.py`(골드셋 무결성),
   `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
@@ -236,6 +247,11 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (12차)** — ✅ **골드 v3 측정 정비.** 23항목 검수 준비 중 각 entry의 채점 특이도를
+  측정해 이중 측정·과잉 키워드·전이 미측정 세 문제를 고쳤다. `transition` 채점 신설(before/after
+  직접 대조) — "70%가 어딘가 있다"와 "70%→40%로 바뀌었다"는 다른 주장이고 이 제품의 핵심은 후자다.
+  엄격해진 뒤에도 100%/100%가 유지돼 기존 수치가 느슨함의 산물이 아님이 확인됐다.
+  `dict.get` 기본값 조기 평가 버그도 발견·수정. 테스트 205→209.
 - **2026-08-18 (11차)** — ✅ **골드 검수 1차 완료.** 사용자 판정: 충돌 3건 모두 "명세가 맞음".
   골드를 명세에 맞춰 정정하고 `human_confirmed`로 전환(최초 확정 항목). 3번은 값만이 아니라
   분류가 틀려 NO_CHANGE→EXCEPTION으로 재작성하고 함정 방향을 뒤집었다. 05_RULE_SPEC에
