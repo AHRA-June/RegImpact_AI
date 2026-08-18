@@ -80,7 +80,35 @@ FAQ Q2 왼쪽 열. 이 3개 지역(동탄·기흥·구리)은 지정 전 수도�
 |---|---|---|---|---|
 | B1 | 무주택 일반/생애최초/서민실수요 | **0.70** | 0.60 (아파트) | `NONREG_STD_70` |
 | B2 | 정책·보금자리(아파트) | 0.70 | 0.60 | `NONREG_BOGEUM_70` |
+| B3 | **다주택(house_count≥2) · 수도권** | **0.00** | — | `MULTI_0` |
 > 주의: MOLIT 참고1의 "非규제(수도권 外) 유주택 60%"는 **수도권 외** 맥락 → 6·30 시나리오(수도권)에는 직접 해당 안 됨. 혼동 주의.
+
+#### C-2 보강 (2026-08-18) — 유주택 구간 정리 🤖 ✍️확정 대기
+
+FAQ Q2 표 **주1)** 이 "무주택자(처분조건부 1주택자 포함) 기준"이라고 명시하므로, C-2의 非규제(수도권)
+열에는 **유주택 값이 애초에 없다.** 그 빈칸을 다음과 같이 정리한다.
+
+| 차주 | 非규제(수도권) LTV | 근거 | 상태 |
+|---|---|---|---|
+| 무주택 / 처분조건부 1주택 | **0.70** | FAQ Q2 표 非규제(수도권) 열 | ✅ 확정 |
+| **다주택 (수도권)** | **0.00** | FSC p2 · FAQ Q1 ※ (아래 원문) | 🤖 초안 — ✍️ 확정 대기 |
+| **비처분 1주택 (수도권)** | **없음 → escalation** | 원문 어디에도 없음 | ⛔ **미결(Q10)** |
+| 다주택 (수도권 外) | 없음 → escalation | 수도권 규칙 적용 밖 | ⛔ 미결 |
+| 유주택 (수도권 外) | 0.60 (참고) | MOLIT 참고1 — 6·30 시나리오 밖 | 참고값 |
+
+**다주택 0%의 근거 (원문 verbatim):**
+> "다주택자는 수도권 內 주택구입시 **규제지역 여부와 무관하게** LTV 0% 적용"
+> — FSC 보도참고자료 p2, 동일 문장 FAQ Q1 ※
+
+**시점 무관인 근거 (원문 verbatim):**
+> "금번 조치로 규제지역으로 지정된 지역에 대해서는 **旣 마련된 규정**에 따라 강화된 대출규제가
+> 7.1일부터 즉시 적용된다." — FSC 보도참고자료 p2
+
+즉 6·30 지정은 **새 규칙을 만든 것이 아니라 기존 규칙을 그 지역에 발동시킨 것**이다. 수도권 다주택
+0%는 지정과 무관한 상시 규칙이므로 **6.30 이전에도 동일하게 0%**이고, 경과규정으로 되돌릴 종전값도 0%다.
+
+> ⚠️ **비처분 1주택은 여전히 미결(Q10)이다.** MOLIT의 유주택 60%는 수도권 外 값이므로 전용 금지.
+> 값을 추정하면 LOCKED §4 위반 → 엔진은 `OWNER_BASELINE_UNKNOWN`으로 escalate 한다.
 
 > ✅ **Q-값1/값2 해소(이미지 기준):** 생애최초 70%(좌동), 서민·실수요 60%, 유주택/다주택 0%, 정책대출 상품별.
 > 🔺 **재설정 포인트(이전 초안 교정):** ①DTI 추가(투기과열40/조정50) → `regulated_type` 필드 필요, ②최대한도 추가(가격구간별), ③기준선을 "수도권 외"→"非규제 수도권"으로 정정, ④보금자리론 비아파트 55%·DTI 50% 반영.
@@ -93,6 +121,7 @@ FAQ Q2 왼쪽 열. 이 3개 지역(동탄·기흥·구리)은 지정 전 수도�
 ✅ **알고리즘(H)에서 실제 방출되는 코드 (확정):**
 `LTV_REGULATED_40`, `EXCEPTION_FIRST_HOME`, `EXCEPTION_REAL_DEMAND`, `LTV_OWNER_0`, `LTV_MULTI_HOME_0`,
 `GRANDFATHERED_ACCEPTED_OR_CONTRACT`, `GRANDFATHERED_LAND_PERMIT`, `OWNER_BASELINE_UNKNOWN`,
+`MULTI_HOME_BASELINE_UNKNOWN`(🤖 2026-08-18 신설 — 비수도권 다주택 기준값 부재),
 `OUT_OF_SCOPE_PRODUCT`, `DISCOVERY_POLICY_LOAN`, `NEEDS_HUMAN_REVIEW`.
 > 각 판정은 최소 1개 reason_code + source_policy_id 방출.
 
@@ -105,6 +134,8 @@ FAQ Q2 왼쪽 열. 이 3개 지역(동탄·기흥·구리)은 지정 전 수도�
 ```
 P0.  loan_purpose != HOME_PURCHASE          → OUT_OF_SCOPE
 P0b. policy_mortgage_flag == true           → DISCOVERY (정책대출: 수동 검토, 코어 자동판정 제외)
+P0c. house_count>=2 AND 수도권               → 0% (MULTI_0), STOP   ★2026-08-18 추가
+     ("규제지역 여부와 무관" — 지역상태·시점·경과규정 모두 무관)
 P1.  경과규정 해당(F의 G1|G2|G3)             → 종전규정(非규제 수도권 LTV) 적용, STOP
 P2.  region_status == NON_REGULATED         → 기준선 표(C-2) 적용, STOP
      (이하 REGULATED 확정)
@@ -121,6 +152,10 @@ P7.  else (무주택 일반 / 처분조건부 1주택)    → 40% (R1/R4), STOP
 - **처분조건부 1주택 AND 생애최초:** P4 통과(처분조건부=무주택 기준) → P5에서 생애최초 70%.
 - **유주택 AND 생애최초:** 논리상 불가(생애최초=세대원 전원 무주택 이력). 데이터 충돌 시 → `NEEDS_HUMAN_REVIEW`.
 - **정책대출:** P0b에서 Discovery로 조기 분리 → 코어 LTV 자동판정 안 함.
+- **수도권 다주택 AND 경과규정:** P0c가 P1보다 **앞**이므로 0%. 이 순서는 필수다 — P1의 경과규정
+  분기는 유주택 전체를 '종전 기준값 부재'로 escalate 하므로, P0c를 뒤로 옮기면 경과규정에 해당하는
+  수도권 다주택이 0%를 받지 못하고 사람 검토로 샌다(변이 테스트로 확인, 회귀 `GF-MULTI-01`이 고정).
+- **비수도권 다주택:** P0c 미적용. 규제지역이면 P3에서 0%, 非규제면 기준값 부재 → escalation.
 
 ---
 
@@ -162,11 +197,16 @@ def evaluate_mortgage_ltv(inp) -> Result:
     if inp.policy_mortgage_flag:
         return Result(status="DISCOVERY", reasons=["DISCOVERY_POLICY_LOAN"])
 
-    # P1. 경과규정 (최우선) — F 참조. 경계 <= 2026-06-30
+    # P0c. 수도권 다주택 → 0% (규제 여부·시점·경과규정 무관) — C-2 B3, ★2026-08-18 추가
+    #      P1보다 앞이어야 한다(아래 P1이 유주택 전체를 escalate 하므로).
+    if inp.house_count >= 2 and is_capital_area(inp.region_code):
+        return Result(max_ltv=0.00, rule_id="MULTI_0", reasons=["LTV_MULTI_HOME_0"])
+
+    # P1. 경과규정 — F 참조. 경계 <= 2026-06-30
     if is_grandfathered(inp):          # G1 | G2 | G3
         if is_owner(inp):              # 유주택 & 非규제수도권 baseline 부재
             return Result(status="NEEDS_HUMAN_REVIEW",
-                          reasons=["GRANDFATHERED", "OWNER_BASELINE_UNKNOWN"])
+                          reasons=["GRANDFATHERED", baseline_gap_reason(inp)])
         return Result(max_ltv=0.70, grandfathering_applied=True,   # 非규제수도권 무주택
                       rule_id="NONREG_STD_70",
                       reasons=["GRANDFATHERED_ACCEPTED_OR_CONTRACT"])
@@ -191,7 +231,9 @@ def evaluate_mortgage_ltv(inp) -> Result:
         return Result(max_ltv=0.60, rule_id="REG_REALDEMAND", reasons=["EXCEPTION_REAL_DEMAND"])
     return Result(max_ltv=0.40, rule_id="REG_STD", reasons=["LTV_REGULATED_40"])
 ```
-> ✅ 확정. `is_grandfathered`(G1|G2|G3), `is_owner`, `baseline_rule`(C-2)는 하위함수. 이 알고리즘 그대로 deterministic 코드로 구현.
+> ✅ 확정. `is_grandfathered`(G1|G2|G3), `is_owner`, `is_capital_area`, `baseline_rule`(C-2),
+> `baseline_gap_reason`(다주택→`MULTI_HOME_BASELINE_UNKNOWN` / 그 외→`OWNER_BASELINE_UNKNOWN`)은
+> 하위함수. 이 알고리즘 그대로 deterministic 코드로 구현.
 
 ## G. 미결 질문 요약 (✍️ 사용자 입력 대기)
 

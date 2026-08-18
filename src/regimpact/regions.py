@@ -50,6 +50,32 @@ def resolve_region_status(
     return RegionStatus.NON_REGULATED, RegulatedType.NONE
 
 
+# --------------------------------------------------------------- 수도권 여부
+#
+# 왜 필요한가: 6·30 공문의 다주택 규칙은 **지역 규제상태가 아니라 수도권 여부**로 갈린다.
+#   FSC 보도참고자료 p2 / FAQ Q1 ※: "다주택자는 수도권 內 주택구입시 **규제지역 여부와 무관하게**
+#   LTV 0% 적용"
+# 따라서 REGULATED/NON_REGULATED 축만으로는 이 규칙을 표현할 수 없다.
+#
+# 수도권 = 서울·인천·경기 (｢수도권정비계획법｣ 제2조). 세종·청주 등은 수도권이 아니다.
+CAPITAL_AREA_REGIONS: frozenset[str] = frozenset({
+    "GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN",          # 6·30 신규 지정 3곳 (경기)
+    "SEOUL", "SEOUL_GANGNAM", "SEOUL_SEOCHO", "SEOUL_SONGPA",
+    "SEOUL_YONGSAN", "SEOUL_SEONGDONG", "SEOUL_MAPO",
+    "GWACHEON", "SEONGNAM_BUNDANG", "SUWON_YEONGTONG",
+    "ANYANG_DONGAN", "GWANGMYEONG", "HANAM",
+})
+
+
+def is_capital_area(region_code: str) -> bool:
+    """수도권(서울·인천·경기) 여부. 미등록 지역은 **수도권 아님**으로 간주한다.
+
+    보수적 기본값이다: 수도권으로 잘못 간주하면 0% 자동판정이 잘못 내려가지만,
+    수도권이 아니라고 보면 기준값 부재로 사람 검토(escalation)로 빠진다.
+    """
+    return region_code in CAPITAL_AREA_REGIONS
+
+
 # --------------------------------------------------------------- 명칭 → 코드 정규화
 #
 # LLM 추출기는 공문 원문의 **한글 지역명**("화성시 동탄구")을 내놓지만 룰엔진은

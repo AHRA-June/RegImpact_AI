@@ -145,13 +145,50 @@ def test_grandfathering_beats_new_regulation_priority():
     assert d.max_ltv == 0.70
 
 
-# ---------- 엣지: 유주택 grandfathered → escalation ----------
-def test_grandfathered_owner_needs_human_review():
-    d = evaluate(app(
-        house_count=2,
-        application_accepted_at=date(2026, 6, 20),
-    ))
+# ---------- P0c: 수도권 다주택 = 0% (규제 여부·시점·경과규정 무관) ----------
+# 근거: FSC p2 / FAQ Q1 ※ "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0% 적용"
+def test_capital_area_multi_home_is_zero_before_effective_date():
+    """시행 전(6.30, 非규제)에도 수도권 다주택은 0% — 旣 마련된 규정이므로 시점 무관."""
+    d = evaluate(app(house_count=2, evaluation_date=date(2026, 6, 30)))
+    assert d.status == EvaluationStatus.DECIDED
+    assert d.max_ltv == 0.00
+    assert "LTV_MULTI_HOME_0" in d.reason_codes
+
+
+def test_capital_area_multi_home_is_zero_after_effective_date():
+    d = evaluate(app(house_count=2, evaluation_date=date(2026, 7, 1)))
+    assert d.max_ltv == 0.00 and d.status == EvaluationStatus.DECIDED
+
+
+def test_grandfathering_does_not_change_capital_area_multi_home():
+    """경과규정은 '바뀐 것'으로부터 보호하는 장치 — 수도권 다주택은 바뀐 게 없어 0% 유지."""
+    d = evaluate(app(house_count=2, application_accepted_at=date(2026, 6, 20)))
+    assert d.status == EvaluationStatus.DECIDED
+    assert d.max_ltv == 0.00
+
+
+def test_non_capital_area_multi_home_still_escalates():
+    """수도권 규칙은 수도권 限. 비수도권 非규제 다주택은 기준값이 없어 사람 검토."""
+    d = evaluate(app(region_code="CHEONGJU", house_count=2, evaluation_date=date(2026, 7, 1)))
     assert d.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert "MULTI_HOME_BASELINE_UNKNOWN" in d.reason_codes
+
+
+# ---------- 잔여 명세 공백(Q10): 非규제 비처분 1주택 ----------
+def test_non_regulated_one_home_owner_still_needs_human_review():
+    """FAQ Q2 표 非규제(수도권) 열은 주1) '무주택자 기준' — 비처분 1주택 기준값이 없다.
+
+    추정하면 LOCKED §4 위반이므로 escalate한다. 이것이 Q10의 잔여 미결 항목이다.
+    """
+    d = evaluate(app(house_count=1, evaluation_date=date(2026, 6, 30)))
+    assert d.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert "OWNER_BASELINE_UNKNOWN" in d.reason_codes
+
+
+def test_grandfathered_one_home_owner_needs_human_review():
+    d = evaluate(app(house_count=1, application_accepted_at=date(2026, 6, 20)))
+    assert d.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert d.grandfathering_applied is True
     assert "OWNER_BASELINE_UNKNOWN" in d.reason_codes
 
 

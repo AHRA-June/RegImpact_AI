@@ -288,13 +288,17 @@ def build_impact_matrix(
             ),
             evidence=[],
             affected="비규제지역 유주택 신청건 등 명세에 기준값이 없는 구간",
-            deliverable="명세 공백 목록 + 도메인 확정 요청",
+            deliverable=(
+                f"명세 공백 목록 + 도메인 확정 요청 "
+                f"(해소 전 자동판정 상한 {1 - impact.human_review_count / n:.0%})"
+            ),
             priority=Priority.REQUIRED, phase=Phase.D_MINUS, owner=Owner.POLICY,
             approval_status=ApprovalStatus.PENDING_REVIEW,
             automatable=False,
             human_review_reason=(
                 "확정 명세(05_RULE_SPEC)에 해당 구간 기준값이 없다. 값을 추정하면 "
-                "LOCKED §4(룰 로직은 LLM이 생성하지 않는다) 위반이므로 도메인 확정이 선행돼야 한다."
+                "LOCKED §4(룰 로직은 LLM이 생성하지 않는다) 위반이므로 도메인 확정이 선행돼야 한다. "
+                f"이 공백이 남아 있는 한 코어 자동판정 상한은 {1 - impact.human_review_count / n:.0%}로 고정된다."
             ),
             metrics={"escalation_reasons": impact.escalation_reasons},
         ))

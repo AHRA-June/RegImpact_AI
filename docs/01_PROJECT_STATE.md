@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (UI 코드 생성 전환 세션)
+- **갱신자:** Claude (Q10 부분 해결 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 119 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 124 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,21 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 3차)
+## ✅ 방금 완료 (2026-08-18 · 4차)
+- **★ Q10 부분 해결 — 자동판정 불가 33.3% → 22.4%** (666건 → 447건).
+- **원인은 명세 공백이 아니라 구현 결함이었다.** 확정 사실 C06("다주택자는 수도권 內 주택구입시
+  **규제지역 여부와 무관하게** LTV 0%")이 이미 있었는데 엔진이 REGULATED 분기 **안에서만** 적용해
+  "무관"을 좁혀 구현하고 있었다 → `§E P0c` 신설, `regions.is_capital_area()` 추가.
+- **시점 무관 근거도 원문에 있었다(C14 신설)** — "旣 마련된 규정에 따라 ... 7.1일부터 즉시 적용"(FSC p2).
+  6·30 지정은 새 규칙 생성이 아니라 기존 규칙의 발동 → 시행 전(6.30)에도 수도권 다주택 0%.
+- **변이 테스트가 내 주석을 반증** — "P0c 순서 무관"이라고 적었으나 경과규정보다 뒤로 옮기면
+  escalation 447→480. 주석 정정 + 회귀 `GF-MULTI-01`로 순서 고정.
+- **잔여 미결(⛔ Q10):** 非규제 수도권 **비처분 1주택** 397건(19.9%) — FAQ Q2 주1)이 열 전체를
+  무주택 기준으로 한정하므로 값이 원문에 **없다**(C15). MOLIT 유주택 60%는 수도권 **外** 값이라 전용 불가.
+  추정 대신 escalation 유지 → **자동화율 상한 약 78%**를 문서·화면에 상시 노출.
+- 오라클도 독립 재유도(수도권 집합 별도 기입), TC 34케이스로 확대(Pass 100%). 테스트 119 → **124**.
+
+## ✅ 이전 완료 (2026-08-18 · 3차)
 - **★ Stitch UI 하드코딩 → 엔진 실제 출력으로 교체** — `src/regimpact/ui/`(theme·pages·site).
   5개 화면(규제 변경 분석 / 임팩트 매트릭스 / Rule 변경안 / 검증 / 고객·포트폴리오 영향)을
   **코드에서 렌더**한다. 산출물 `docs/ui/generated/`. 생성: `python examples/build_ui.py`(0원).
@@ -70,7 +84,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(119), `python examples/demo_impact_e2e.py`(**E2E 관통**),
+- 실행: `python -m pytest`(124), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
   `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
@@ -78,8 +92,11 @@
 ## 다음 액션 (NEXT)
 - ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-18 1차).
 - ~~**최소 Impact Matrix E2E**~~ — ✅ **완료(2026-08-18 2차). Phase 1 Walking Skeleton 관통.**
-- **Q10 도메인 확정** — 非규제 유주택 LTV 기준선. 자동화율 33%p가 여기에 걸려 있어 **현재 최우선**.
-  값이 확정되면 룰엔진·오라클·회귀·매트릭스가 함께 갱신된다.
+- **Q10 잔여분 결정(✍️ 사용자)** — 非규제 수도권 **비처분 1주택**(397건, 19.9%). 세 선택지:
+  ①감독규정 원문에서 확정값 발굴 ②코어 스코프에서 명시적 제외 ③현행 유지(자동화율 상한 78% 문서화).
+  추정값을 넣는 선택지는 없다(LOCKED §4). **현재 최우선.**
+- **Q10 해결분 도메인 검수(✍️ 사용자)** — P0c(수도권 다주택 0%, 시행 전 포함)가 실무와 일치하는지.
+  현재 🤖 초안 상태(`05_RULE_SPEC §C-2 보강`).
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
 - ~~**Stitch UI를 엔진 실제 출력으로 교체**~~ — ✅ **완료(2026-08-18 3차).**
 - **골드셋 100~120 작성 착수 + metrics_spec 임계값 확정** (Phase 2 진입 조건).
@@ -133,6 +150,13 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (4차)** — ✅ **Q10 부분 해결.** 원문 재검토 결과 다주택 구간은 **이미 확정 사실(C06)이었고
+  엔진이 범위를 좁게 구현**하고 있었다 — "규제지역 여부와 무관"인데 REGULATED 분기 안에서만 적용.
+  `§E P0c` 신설(수도권 다주택 → 0%, 경과규정보다 앞), `regions.is_capital_area()`, 오라클 독립 재유도,
+  TC 30→34. 시점 무관 근거 C14, 공백 확인 C15를 regulatory_facts에 신설. 자동판정 불가
+  33.3%→22.4%(666→447). **변이 테스트가 "P0c 순서 무관" 주석을 반증**해 정정(뒤로 옮기면 447→480,
+  `GF-MULTI-01`이 고정). 잔여 미결은 비처분 1주택 397건 — FAQ Q2 주1)이 열을 무주택 기준으로
+  한정하므로 원문에 값이 없다. 추정 대신 escalation 유지, 자동화율 상한 78%를 명시. 테스트 119→124.
 - **2026-08-18 (3차)** — ✅ **★ Stitch UI 하드코딩 → 엔진 실제 출력 교체.** `src/regimpact/ui/` 신규
   (theme: Stitch 토큰 verbatim + 정적 CSS 생성 / pages: 5개 화면, 리터럴 도메인 수치 금지 /
   site: 렌더·기록). `examples/build_ui.py` → `docs/ui/generated/`. **Stitch 재생성 대신 코드 생성**
