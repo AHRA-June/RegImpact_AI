@@ -136,16 +136,28 @@ API 키를 넣으면 바로 채워진다. 재현: `python examples/demo_impact_e
 - 실행: `python -m pytest`(80), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **[사용자] E2E 3단계(LLM 추출) 1회 실행** — 키 넣고 `python examples/demo_impact_e2e.py --llm`
-  (또는 Streamlit Extractor 탭). 그러면 **11/11 완결** + Citation Correctness·Change Completeness 실측이 채워지고,
-  매트릭스의 근거 출처가 "사람 확정(골드)"→"AI 추출(검증 대상)"으로 바뀐다.
-- **[사용자] Streamlit Cloud 배포** — `docs/ui/DEPLOY.md` 절차대로. 저장소 연결 + main file `app/streamlit_app.py`.
-- **[사용자] ANTHROPIC_API_KEY를 Secrets에 등록** → Extractor 탭에서 실제 LLM 1회 실행 → 첫 실측 Assurance 수치 확보.
-  (로컬로 하려면 `python examples/run_extractor.py`.)
-- ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
-  - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
-    ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
-- (병행) `regulatory_facts.md` URL 채우기, 골드셋 100~120 작성 착수, metrics_spec 임계값 확정.
+
+### 🔑 [사용자만 가능] — 다른 작업을 여는 열쇠
+- **E2E 3단계(LLM 추출) 1회 실행.** `ANTHROPIC_API_KEY` 필요.
+  ```bash
+  pip install anthropic
+  ANTHROPIC_API_KEY=sk-ant-... python examples/demo_impact_e2e.py --llm --out report.md
+  ```
+  결과: **E2E 11/11 완결** + Citation Correctness · Unsupported Claim Rate · Change Completeness ·
+  Exception Recall **첫 실측** + 임팩트 매트릭스의 근거 출처가 `사람 확정(골드)` → `AI 추출(검증 대상)` 으로 전환.
+  (Streamlit Extractor 탭에서도 동일. Cloud 배포 시 Secrets 에 키 등록.)
+  → **돌린 뒤 출력을 붙여 주면** 나머지(수치 문서화·보고서 갱신·웹 재배포)는 Claude 가 처리.
+- **Streamlit Cloud 배포** — `docs/ui/DEPLOY.md` §3. (정적 2종은 Vercel 배포 완료)
+- **Q5 / Q6 도메인 검수** — 6·30 수기 Impact 앵커 확인, `regulatory_facts.md` claim 원문 대조.
+
+### 🤖 [Claude 단독 가능] — 키 없이 진행되는 것
+1. **골드 평가셋 100~120 작성** (DEV 40 / LOCKED 40 / CHALLENGE 35) ← **다음 세션의 주 작업 후보**
+   - LOCKED §0-5 · 브리프 §11. `04_PLAN.md` Phase 2 의 남은 큰 항목이고 "자르면 안 되는 것" 목록에 있다.
+   - 현재 골드는 `docs/eval/regchange_gold_6_30.json` 1건뿐 — 실제 Assurance 측정의 분모가 없다.
+   - 주의: **LOCKED TEST / CHALLENGE 는 작성 후 freeze 하고 Phase 3 까지 열지 않는다**(누수 방지).
+2. **`metrics_spec.md` 임계값 확정** — 깊은 4 dimension 의 공식·분모·high-risk 정의. 🤖초안 → ✍️사람확정.
+3. **Q12 잔여** — 가계약금(계약 전 계약금 선납) 인정 범위 확정되면 입력 모순 2건 추가 검토.
+4. (스트레치) Model/System Card · AI Risk Register.
 
 ### (이전) Phase 0 기준선 항목
 
@@ -153,28 +165,37 @@ API 키를 넣으면 바로 채워진다. 재현: `python examples/demo_impact_e
 
 1. **`regulatory_facts.md` 확정** — 6·30 사실 claim(C01~C13) 원문 인용·URL·hash 검수. (사용자 도메인 검수 필요)
 2. **`metrics_spec.md` 확정** — 깊은 4 dimension 지표 공식/분모/임계/high-risk 정의.
-3. ✅ **룰엔진 규칙 명세 v1 확정** — `05_RULE_SPEC.md` (LTV·precedence·경과규정·알고리즘 H). 정책대출→Discovery, 코어=LTV만. **다음: 이 알고리즘을 deterministic 코드+테스트로 구현.**
+3. ✅ **룰엔진 규칙 명세 확정** — `05_RULE_SPEC.md` v1(2026-08-10) + **2026-08-18 개정 4건**
+   (P0c 입력 무결성 게이트 / 비규제 유주택 60% / 다주택 선판정 / 경과규정 종전규정 재판정).
+   구현·테스트 완료(회귀 60 케이스 100%).
 4. **6·30 수기 Impact 정답(앵커)** — 사용자 확인 (§24-4). Walking Skeleton의 E2E 테스트 케이스.
 - 이후 Phase 1(Walking Skeleton) 착수 → `04_PLAN.md` 참고.
 
-> ⚠️ **선행 조건: 원격 push 권한.** 아래 블로커 해결 전까지 새 계정 인계 불가.
 
 ---
 
 ## 대기 중 결정 (BLOCKED ON USER)
 
-`docs/03_OPEN_QUESTIONS.md`에 상세. 요약:
-- ~~골드셋 규모~~ — **✅ 해결(2026-08-10): 100~120 확정, split DEV40/LOCKED40/CHALLENGE35**
-- ~~Assurance 깊게 갈 4개 선택~~ — **✅ 해결(2026-08-10): 수를 줄임, 깊은 4 dimension + 로드맵**
-- ~~주차 계획 재배열 + 총 기간~~ — **✅ 해결(2026-08-10): 수직 슬라이스 우선, 총 9~10주 (`04_PLAN.md`)**
-- 룰엔진 규칙 명세(사용자 본인 작성 — LOCKED §4) — **미착수 (Phase 0)**
-- 6·30 수기 Impact 정답(사용자 확인 필요 — 브리프 §24-4) — **미착수 (Phase 0)**
+`docs/03_OPEN_QUESTIONS.md` 에 상세. **미해결은 3건뿐이다.**
+
+| Q | 내용 | 상태 |
+|---|---|---|
+| Q5 | 6·30 수기 Impact 정답(앵커) 확인 | 미착수 — 도메인 검수 |
+| Q6 | `regulatory_facts.md` claim 원문 대조 검수 | 대기 — 도메인 검수 |
+| Q12 잔여 | 가계약금 관련 입력 모순 2건 채택 여부 | 대기 — 실무 확인 |
+
+**해결됨:** Q1(골드셋 규모) · Q2(Assurance 4 dimension) · Q3(주차 계획) · Q4(룰 명세 v1, 이후 3차 개정) ·
+Q7(기술 스택) · Q8(입력 무결성 게이트) · Q9(비규제 유주택 60%) · Q10(다주택 선판정) ·
+Q11(경과규정 종전규정 해석) · Q12(입력 모순 3건).
 
 ---
 
 ## 블로커 / 리스크
 
-- **최대 리스크:** 6주·1인·LLM 첫 실무에 컴포넌트 11개 → E2E 관통 실패 위험. (수직 슬라이스로 완화)
+- ~~**최대 리스크:** E2E 관통 실패~~ — **해소(2026-08-18).** 6·30 시나리오가 11단계 중 10단계 실제 관통.
+  남은 1단계는 LLM 추출이며 API 키만 있으면 된다.
+- **현재 최대 리스크:** 골드 평가셋이 1건뿐이라 **Assurance 지표의 분모가 없다.** 지금은 Rule-regression 만
+  실측되고 Citation/Completeness 는 측정 자체가 불가하다. → 골드셋 100~120 작성이 다음 급소.
 - **계정 교체:** 2~3주 후 예정. 모든 상태는 저장소에 유지. 대화 메모리 의존 금지.
 
 ---
