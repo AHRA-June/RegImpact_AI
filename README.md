@@ -50,6 +50,7 @@
 | `docs/05_RULE_SPEC.md` | 룰엔진 규칙 명세 (LOCKED §4 — ✍️ 사용자 작성 / 🔧 스캐폴드 / 🤖 AI초안) |
 | `docs/06_LLM_PROVIDER.md` | **무과금 실행 정책** — 유료 API 키 없이 실측하는 방법 (provider 표) |
 | `docs/eval/EXTRACTOR_RUN_REPORT.md` | Extractor 첫 실측 리포트 + 확인된 결함 3건 |
+| `docs/eval/impact_matrix_6_30.md` | **6·30 임팩트 매트릭스 산출물** (E2E 실행 결과, §10 스키마) |
 | `docs/sources/` | 공문 원본 스냅샷 + 추출 텍스트 + 해시 (SOURCES.md 레지스트리) |
 | `docs/ui/stitch_prompts.md` | UI 목업용 Google Stitch 프롬프트 모음(5개 화면) |
 | `src/regimpact/` | **deterministic LTV 룰엔진** (알고리즘 H 구현, 검증 기준점) |

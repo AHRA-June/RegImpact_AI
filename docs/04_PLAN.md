@@ -35,7 +35,7 @@ LOCKED §0-5: **"평가셋을 개발보다 먼저 만들고, DEV / LOCKED TEST /
 - **6·30 수기 Impact 정답(앵커)** — 사용자 확인 (§24-4). Walking Skeleton의 유일한 E2E 테스트 케이스.
 - Temporal Policy / Region 최소 스키마
 
-### Phase 1 — Walking Skeleton (W2~W3) ★핵심 리스크 해소
+### Phase 1 — Walking Skeleton (W2~W3) ★핵심 리스크 해소 — **✅ 관통 완료 (2026-08-18)**
 목표: **6·30 1건이 끝까지 관통.** 각 노드 stub 허용.
 ```
 Source Snapshot(1건, 수동)
@@ -51,6 +51,9 @@ Source Snapshot(1건, 수동)
 ```
 - 골드셋: **DEV 일부(약 20~30)** 만 먼저 작성해 튜닝 착수 가능하게. (전체 freeze는 Phase 2 초입)
 - 산출: "관통되는 파이프라인" — 이후는 개선 게임.
+- **✅ 달성:** `examples/demo_impact_e2e.py`가 10단계를 전부 관통. 다만 각 노드가 stub이 아니라
+  실제 구현이다(룰엔진·Extractor·TC Generator·Impact Matrix 모두 정식 구현). 최대 리스크였던
+  "E2E 관통 실패"는 해소됐고, 남은 것은 각 노드의 심화(Phase 2)와 명세 공백 해소(Q10).
 
 ### Phase 2 — 노드 심화 (W4~W6)
 - **골드셋 100~120 완성 + DEV/LOCKED/CHALLENGE freeze** (split: DEV 40 / LOCKED 40 / CHALLENGE 35) — 실제 extractor 튜닝 전 완료.

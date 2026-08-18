@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (무과금 LLM provider + Extractor 첫 실측 세션)
+- **갱신자:** Claude (Impact Matrix E2E 관통 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor(**실측 완료**) + TC Generator/Rule-Regression (테스트 66 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 94 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,21 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18)
+## ✅ 방금 완료 (2026-08-18 · 2차)
+- **★ Impact Matrix E2E 관통** — `src/regimpact/impact/`(schema·portfolio·customer·builder·report).
+  `examples/demo_impact_e2e.py`가 브리프 §18 "코어 완성의 정의" 10단계를 **전부 ✅로 관통**한다
+  (LLM 호출 0회 — 저장된 추출 기록 재생, 비용 0원).
+- **§10 매트릭스 16행 생성** — Phase 3축(D-day 전 13 / 시행 후 2 / 별도 트리거 1) 유지.
+  자동처리 50%, Human Review 8행(전부 사유 명시). 산출물 `docs/eval/impact_matrix_6_30.md`.
+- **고객 영향 실계산** — 층화 합성 포트폴리오 2,000건을 6.30 vs 7.1 두 시점으로 룰엔진 평가.
+  한도 감소 638건(31.9%), 총 −1,549억원, 건당 평균 −2.43억원, 경과규정 보호 134건.
+- **⚠ E2E가 드러낸 명세 공백** — **포트폴리오의 33.3%(666건)가 자동 판정 불가**, 사유 전부
+  `OWNER_BASELINE_UNKNOWN`(非규제 유주택 기준선 부재). 유닛 테스트 30건에서는 "1케이스"였던 것이
+  포트폴리오 규모에서는 1/3이었다 → **Q10 신설(영향 큼)**. 자동화율 상한이 구조적으로 67%로 묶인다.
+- Stitch 하드코딩값 대체 준비 완료 — 매트릭스 모든 수치가 엔진·추출기·회귀의 실제 출력에서 나온다.
+- 테스트 66 → **94** (`tests/test_impact.py` 28개 추가).
+
+## ✅ 이전 완료 (2026-08-18 · 1차)
 - **무과금 LLM provider 레이어** — `src/regimpact/extractor/backends.py`. `cli`(Claude Code 구독 포함,
   유료 키 불필요·기본값) / `gemini`(무료 티어) / `manual`(사람 중계) / `replay`(호출 0회 재생) / `anthropic`(선택).
   서버측 structured output이 없는 경로를 위해 JSON 정규화 + 스키마 검증 + 1회 교정 재시도 구현.
@@ -43,14 +57,18 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(66), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
+- 실행: `python -m pytest`(94), `python examples/demo_impact_e2e.py`(**E2E 관통**),
+  `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
   `python examples/run_extractor.py --provider cli`(**API 키 불필요**) 또는 `--provider replay --run docs/eval/runs/run_cli_sonnet5_v2.json`(호출 0회).
 
 ## 다음 액션 (NEXT)
-- ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-18, 무과금 `cli` 경로). 첫 실측 지표 확보.
-- **최소 Impact Matrix E2E** — 정규화된 지역코드(`GURI` 등)를 룰엔진 입력으로 직결해 6·30 1건 관통.
-  Stitch 하드코딩값을 엔진 실제 출력으로 교체. (현재 최우선)
-- **D-02 대책 결정·구현**(Q9) — 예외 누락. 단 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
+- ~~**Extractor 실제 LLM 1회 실행**~~ — ✅ 완료(2026-08-18 1차).
+- ~~**최소 Impact Matrix E2E**~~ — ✅ **완료(2026-08-18 2차). Phase 1 Walking Skeleton 관통.**
+- **Q10 도메인 확정** — 非규제 유주택 LTV 기준선. 자동화율 33%p가 여기에 걸려 있어 **현재 최우선**.
+  값이 확정되면 룰엔진·오라클·회귀·매트릭스가 함께 갱신된다.
+- **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
+- **Stitch UI를 엔진 실제 출력으로 교체** — 매트릭스가 이제 실값을 내므로 목업 하드코딩 제거 가능.
+- **골드셋 100~120 작성 착수 + metrics_spec 임계값 확정** (Phase 2 진입 조건).
 - ~~**TC Generator**~~ — ✅ 완료(2026-08-10). Rule-regression Pass Rate 100%(30 케이스), mutation test 방어력 확인.
   - **후속(선택):** ①합성 포트폴리오(2,000~5,000) 층화 생성으로 케이스 수 확대 ②CFL-04(Q8) 도메인 확정 후 반영
     ③Boundary/Conflict Pass Rate를 metrics 리포트로 상시 노출(현재 `format_report`로 산출됨).
@@ -101,7 +119,17 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
-- **2026-08-18** — ✅ **무과금 LLM provider 레이어 + Extractor 첫 실측.** 사용자 제약("Anthropic API 키 발급
+- **2026-08-18 (2차)** — ✅ **★ Impact Matrix E2E 관통 (Phase 1 Walking Skeleton 완료).**
+  `src/regimpact/impact/` 신규 — `portfolio`(층화 합성 2,000건, 비율을 상수로 노출·시드 고정),
+  `customer`(같은 신청건을 6.30/7.1 두 시점으로 룰엔진 평가 → 6개 세그먼트 분류),
+  `builder`(§10 행/열 조립, 수치는 전부 실제 컴포넌트 출력에서), `report`(Phase별 마크다운/텍스트).
+  `demo_impact_e2e.py`가 브리프 §18 10단계를 전부 ✅ 관통(LLM 호출 0회, 0원).
+  매트릭스 16행 — Phase 3축 유지, 자동처리 50%, Human Review 8행(전부 사유 명시),
+  Discovery 4행은 표시만 하고 코어 룰엔진 미포함(§24-12). 고객영향: 한도 감소 638건(31.9%),
+  총 −1,549억원. **E2E가 명세 공백을 정량화**: 33.3%가 `OWNER_BASELINE_UNKNOWN`으로 자동판정 불가
+  → Q10 신설(자동화율 상한 67% 구조적 고정). `ImpactRow`는 사유 없는 비자동 행을 생성 시 거부.
+  산출물 `docs/eval/impact_matrix_6_30.md`. 테스트 66→94.
+- **2026-08-18 (1차)** — ✅ **무과금 LLM provider 레이어 + Extractor 첫 실측.** 사용자 제약("Anthropic API 키 발급
   어려움, 프로젝트에 비용 지출 안 함")을 설계로 흡수: `backends.py`에 `cli`/`gemini`/`manual`/`replay`/
   `anthropic` provider 추가, `resolve_completion("auto")`가 무과금 경로를 우선. structured output 부재는
   JSON 정규화+스키마 검증+1회 교정 재시도로 대체. 6·30 공문 3건 **실제 LLM 실행**(0원) — sonnet-5
