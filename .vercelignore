@@ -1,0 +1,16 @@
+# Vercel 은 web/dist/ 만 서빙한다(vercel.json outputDirectory). 나머지는 올릴 필요가 없다.
+# 배포 업로드 용량·시간을 줄이고, 원문 스냅샷(PDF/HWP) 같은 대용량 바이너리가
+# 정적 호스트로 새어 나가지 않게 한다.
+src/
+tests/
+tools/
+examples/
+app/
+.streamlit/
+docs/sources/original/
+docs/sources/raw/
+docs/ui/stitch_export/
+**/__pycache__/
+*.py
+requirements.txt
+pyproject.toml
