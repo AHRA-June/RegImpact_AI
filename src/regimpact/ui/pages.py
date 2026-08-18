@@ -418,13 +418,21 @@ def assurance_page(
             "Citation", f"원문 미확인 인용 — {u.summary}",
             "인용문이 원문에 verbatim으로 존재하지 않는다(환각 가능). 원문 직접 확인 필요.",
         ))
-    if impact.human_review_count:
-        top = next(iter(impact.escalation_reasons.items()), ("", 0))
+    if impact.undecidable_count:
         escalations.append((
             "Rule Coverage",
-            f"포트폴리오 {impact.human_review_count / len(impact.impacts):.1%}"
-            f"({impact.human_review_count:,}건) 자동판정 불가",
-            f"최다 사유 {top[0]} — 확정 명세에 기준값이 없다. 추정 금지(LOCKED §4), 도메인 확정 필요.",
+            f"시행일 LTV 판정 불가 {impact.undecidable_count:,}건 "
+            f"(심사 판정 커버리지 {impact.decision_coverage:.1%})",
+            "경과규정 해당 유주택·비수도권 유주택 등 종전 기준값이 원문에 없는 구간. "
+            "추정 금지(LOCKED §4) → 사람 판단 필요.",
+        ))
+    if impact.impact_unknown_count:
+        escalations.append((
+            "Impact Coverage",
+            f"판정은 됐으나 변화량 미상 {impact.impact_unknown_count:,}건 "
+            f"(영향 측정 커버리지 {impact.impact_coverage:.1%})",
+            "시행일 LTV는 확정(예: 규제지역 유주택 0%)이라 심사는 가능하다. 시행 전 非규제 "
+            "기준값이 없어 '얼마나 줄었는가'만 계산되지 않는다 (Q10).",
         ))
 
     esc_html = "".join(
@@ -475,6 +483,7 @@ def assurance_page(
 _SEGMENT_TONE = {
     Segment.REDUCED: "bad",
     Segment.NEEDS_HUMAN_REVIEW: "warn",
+    Segment.IMPACT_UNKNOWN: "warn",
     Segment.GRANDFATHERED: "secondary",
     Segment.DISCOVERY: "muted",
     Segment.OUT_OF_SCOPE: "muted",
@@ -494,8 +503,9 @@ def portfolio_page(impact: CustomerImpactReport) -> str:
                tone="bad", sub=f"건당 평균 {_won(impact.avg_limit_reduction)}")
         + stat("경과규정 보호", f"{impact.grandfathered_count:,}건",
                tone="good", sub="종전규정 유지 — 시행일 이후 신청해도 보호")
-        + stat("자동판정 불가", f"{impact.human_review_count:,}건",
-               tone="warn", sub=f"{impact.human_review_count / total:.1%} — 사람 검토 대상")
+        + stat("심사 판정 커버리지", f"{impact.decision_coverage:.1%}",
+               tone="good" if impact.decision_coverage >= 0.9 else "warn",
+               sub=f"판정 불가 {impact.undecidable_count:,}건 — 유주택자도 코어 스코프 안")
         + "</div>"
     )
 
@@ -530,8 +540,10 @@ def portfolio_page(impact: CustomerImpactReport) -> str:
             chip(i.region_code, tone="primary", mono=True),
             chip(i.segment.value, tone="bad" if i.segment == Segment.REDUCED else "neutral"),
             chip(_pct(i.before.max_ltv), mono=True),
-            chip(_pct(i.after.max_ltv), tone="bad" if i.limit_delta < 0 else "neutral", mono=True),
-            f'<span class="font-mono-data text-mono-data">{_won(i.limit_delta)}</span>',
+            chip(_pct(i.after.max_ltv),
+                 tone="bad" if (i.limit_delta or 0) < 0 else "neutral", mono=True),
+            f'<span class="font-mono-data text-mono-data">'
+            f'{"—(기준값 부재)" if i.limit_delta is None else _won(i.limit_delta)}</span>',
             " ".join(chip(rc, mono=True) for rc in i.after.reason_codes) or "—",
         ])
     samples = samples[:14]
@@ -559,6 +571,19 @@ def portfolio_page(impact: CustomerImpactReport) -> str:
           f"따라서 금액은 시장 추정치가 아니라 <b>이 조성에 확정 규칙을 적용한 계산 결과</b>이며, "
           f"seed={impact.seed} 로 완전히 재현됩니다.</div></div>"
         + cards
+        + card(
+            "커버리지 — 심사 판정 vs 영향 측정",
+            '<div class="flex flex-col gap-3">'
+            + bar("심사 판정 가능", int(round(impact.decision_coverage * 1000)), 1000,
+                  tone="secondary", caption="시행일 LTV 확정")
+            + bar("영향 측정 가능", int(round(impact.impact_coverage * 1000)), 1000,
+                  tone="primary", caption="before/after 모두 확정")
+            + "</div>",
+            note=(
+                f"둘의 차이 {impact.impact_unknown_count:,}건 = 심사는 되지만 시행 전 기준값이 "
+                "없어 변화량만 계산되지 않는 구간 (Q10)"
+            ),
+        )
         + card("고객 세그먼트 분포", f'<div class="flex flex-col gap-3">{seg_bars}</div>')
         + card("LTV 전이 (Before → After)", f'<div class="flex flex-col gap-3">{trans_bars}</div>',
                note="“—” = 자동판정이 성립하지 않은 구간")

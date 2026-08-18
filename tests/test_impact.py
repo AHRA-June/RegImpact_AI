@@ -131,13 +131,55 @@ def test_non_home_purchase_is_out_of_scope():
     assert rep.impacts[0].segment == Segment.OUT_OF_SCOPE
 
 
-def test_owner_without_baseline_escalates_to_human_review():
-    """비규제 유주택 기준선이 명세에 없다 → 자동판정 중단(추정 금지)."""
+def test_regulated_owner_is_decided_but_impact_unknown():
+    """규제지역 유주택: 시행일 LTV는 0%로 **확정**(심사 가능), 시행 전 기준값만 부재.
+
+    이 둘을 한 통에 담으면 "유주택 고객을 처리할 수 없다"는 잘못된 그림이 된다.
+    """
     rep = analyze_portfolio(_one(MortgageApplication(
         region_code="GURI", evaluation_date=AFTER_DATE, house_count=1,
     )))
-    assert rep.impacts[0].segment == Segment.NEEDS_HUMAN_REVIEW
+    i = rep.impacts[0]
+    assert i.segment == Segment.IMPACT_UNKNOWN
+    assert i.after.max_ltv == 0.00          # 오늘 심사할 수 있다
+    assert i.limit_delta is None            # 변화량만 계산 불가
     assert "OWNER_BASELINE_UNKNOWN" in rep.escalation_reasons
+
+
+def test_grandfathered_owner_is_truly_undecidable():
+    """경과규정 해당 유주택: 되돌릴 종전값이 없어 시행일 판정 자체가 안 된다."""
+    rep = analyze_portfolio(_one(MortgageApplication(
+        region_code="GURI", evaluation_date=AFTER_DATE, house_count=1,
+        application_accepted_at=date(2026, 6, 20),
+    )))
+    assert rep.impacts[0].segment == Segment.NEEDS_HUMAN_REVIEW
+    assert rep.impacts[0].after.max_ltv is None
+
+
+def test_missing_baseline_never_counts_as_zero_limit():
+    """미확정을 0원으로 대체하면 '한도가 늘었다' 같은 허구 수치가 집계에 섞인다."""
+    rep = analyze_portfolio(_one(MortgageApplication(
+        region_code="GURI", evaluation_date=AFTER_DATE, house_count=1,
+    )))
+    i = rep.impacts[0]
+    assert i.limit_before is None and i.limit_delta is None
+    assert all(x.limit_delta is not None and x.limit_delta < 0 for x in rep.reduced)
+
+
+def test_coverage_metrics_separate_decision_from_impact():
+    rep = analyze_portfolio(build_portfolio(size=600, seed=77), seed=77)
+    assert rep.decision_coverage >= rep.impact_coverage   # 판정이 측정보다 넓다
+    assert 0.0 <= rep.impact_coverage <= 1.0
+    assert rep.human_review_count == rep.undecidable_count + rep.impact_unknown_count
+
+
+def test_capital_area_multi_home_is_unaffected_not_escalated():
+    """수도권 다주택은 시행 전후 모두 0% → escalation이 아니라 '영향 없음'."""
+    rep = analyze_portfolio(_one(MortgageApplication(
+        region_code="GURI", evaluation_date=AFTER_DATE, house_count=2,
+    )))
+    assert rep.impacts[0].segment == Segment.UNAFFECTED
+    assert rep.impacts[0].limit_delta == 0
 
 
 def test_report_aggregates_are_consistent():

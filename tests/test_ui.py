@@ -127,9 +127,18 @@ def test_grandfathering_inequality_direction_is_correct(site):
 def test_portfolio_numbers_come_from_the_report(site):
     html, impact = site["pages"]["portfolio.html"], site["impact"]
     assert f"{len(impact.reduced):,}건" in html
-    assert f"{impact.human_review_count:,}건" in html
+    assert f"{impact.undecidable_count:,}건" in html
+    assert f"{impact.impact_unknown_count:,}건" in html
     assert f"{impact.grandfathered_count:,}건" in html
     assert f"seed={impact.seed}" in html
+
+
+def test_portfolio_page_separates_decision_from_impact_coverage(site):
+    """유주택 고객을 '처리 불가'로 묶어 보이게 하지 않는다 — 두 커버리지를 따로 보여준다."""
+    html, impact = site["pages"]["portfolio.html"], site["impact"]
+    assert f"{impact.decision_coverage:.1%}" in html
+    assert f"{impact.impact_coverage:.1%}" in html
+    assert "심사 판정" in html and "영향 측정" in html
 
 
 def test_regression_numbers_come_from_the_report(site):

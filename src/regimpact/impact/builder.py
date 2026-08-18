@@ -152,7 +152,10 @@ def build_impact_matrix(
         ),
         evidence=_evidence(extraction, ("LTV", "EXCEPTION"), grounding, limit=2),
         affected=" / ".join(f"{k} {v:,}건" for k, v in seg.items() if v),
-        deliverable="영향 고객군 세그먼트 + 예상 한도 변화 + 경과규정 대상 목록",
+        deliverable=(
+            "영향 고객군 세그먼트 + 예상 한도 변화 + 경과규정 대상 목록 "
+            f"(심사 판정 {impact.decision_coverage:.0%} / 영향 측정 {impact.impact_coverage:.0%})"
+        ),
         priority=Priority.REQUIRED, phase=Phase.D_MINUS, owner=Owner.POLICY,
         approval_status=ApprovalStatus.PENDING_REVIEW,
         automatable=True,
@@ -166,6 +169,8 @@ def build_impact_matrix(
                 "delta_won": worst.limit_delta,
             },
             "portfolio_seed": impact.seed,
+            "decision_coverage": impact.decision_coverage,
+            "impact_coverage": impact.impact_coverage,
         },
     ))
 
@@ -276,31 +281,45 @@ def build_impact_matrix(
         automatable=True,
     ))
 
-    # --- 명세 공백 해소 (실측에서 도출된 행) ---
+    # --- 명세 공백 (실측에서 도출된 행) ---
+    #
+    # "심사 판정이 되는가"와 "변화량을 잴 수 있는가"를 한 줄로 합치지 않는다.
+    # 규제지역 유주택자는 시행일 LTV가 0%로 확정되므로 **오늘 심사할 수 있고**,
+    # 못 하는 것은 시행 전 기준값 부재로 인한 변화량 비교뿐이다(Q10).
     if impact.human_review_count:
         top = next(iter(impact.escalation_reasons.items()), ("", 0))
         rows.append(ImpactRow(
             area="규정 해석 공백 해소",
             change=(
-                f"포트폴리오의 {impact.human_review_count / n:.1%}"
-                f"({impact.human_review_count:,}건)가 자동 판정 불가 — "
-                f"최다 사유 {top[0]} {top[1]:,}건"
+                f"심사 판정 커버리지 {impact.decision_coverage:.1%} / "
+                f"영향 측정 커버리지 {impact.impact_coverage:.1%} — "
+                f"판정 불가 {impact.undecidable_count:,}건, "
+                f"판정됐으나 변화량 미상 {impact.impact_unknown_count:,}건 "
+                f"(최다 사유 {top[0]} {top[1]:,}건)"
             ),
             evidence=[],
-            affected="비규제지역 유주택 신청건 등 명세에 기준값이 없는 구간",
-            deliverable=(
-                f"명세 공백 목록 + 도메인 확정 요청 "
-                f"(해소 전 자동판정 상한 {1 - impact.human_review_count / n:.0%})"
+            affected=(
+                "①非규제(수도권) 비처분 1주택 — 시행 전 기준값 부재 "
+                "②경과규정 해당 유주택 — 되돌릴 종전값 부재 ③비수도권 다주택"
             ),
+            deliverable="명세 공백 목록 + 도메인 확정 요청 (Q10)",
             priority=Priority.REQUIRED, phase=Phase.D_MINUS, owner=Owner.POLICY,
             approval_status=ApprovalStatus.PENDING_REVIEW,
             automatable=False,
             human_review_reason=(
-                "확정 명세(05_RULE_SPEC)에 해당 구간 기준값이 없다. 값을 추정하면 "
-                "LOCKED §4(룰 로직은 LLM이 생성하지 않는다) 위반이므로 도메인 확정이 선행돼야 한다. "
-                f"이 공백이 남아 있는 한 코어 자동판정 상한은 {1 - impact.human_review_count / n:.0%}로 고정된다."
+                "FAQ Q2 표 주1)이 非규제(수도권) 열을 '무주택자 기준'으로 한정해 비처분 1주택 "
+                "기준값이 원문에 없다. MOLIT의 유주택 60%는 수도권 外 값이라 전용 불가. "
+                "값을 추정하면 LOCKED §4 위반이므로 도메인 확정이 선행돼야 한다. "
+                f"공백이 남아 있는 한 영향 측정 커버리지 상한은 {impact.impact_coverage:.0%}로 고정된다 "
+                f"(심사 판정은 {impact.decision_coverage:.0%}까지 가능 — 유주택자도 코어 스코프 안이다)."
             ),
-            metrics={"escalation_reasons": impact.escalation_reasons},
+            metrics={
+                "escalation_reasons": impact.escalation_reasons,
+                "decision_coverage": impact.decision_coverage,
+                "impact_coverage": impact.impact_coverage,
+                "undecidable": impact.undecidable_count,
+                "impact_unknown": impact.impact_unknown_count,
+            },
         ))
 
     # --- Discovery Scope (브리프 §24-12: 매트릭스에만 표시, 코어 룰엔진에 넣지 않는다) ---
@@ -358,6 +377,8 @@ def build_impact_matrix(
             "extraction_changes": len(extraction.changes),
             "portfolio_size": impact.portfolio_size,
             "portfolio_seed": impact.seed,
+            "decision_coverage": impact.decision_coverage,
+            "impact_coverage": impact.impact_coverage,
             "regression_cases": None if regression is None else regression.total,
             "grounding_checked": grounding is not None,
         },
