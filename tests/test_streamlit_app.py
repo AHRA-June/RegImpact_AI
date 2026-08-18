@@ -78,6 +78,24 @@ def test_non_regulated_region_shows_baseline_70_in_app():
     assert _ltv(at) == "70%"
 
 
+def test_non_capital_non_regulated_owner_shows_60_in_app():
+    """Q9 확정 — 울산 남구 유주택 1 → 60% (예전엔 '사람 검토'였다)."""
+    at = _run()
+    next(sb for sb in at.selectbox if sb.label.startswith("지역")).set_value("ULSAN_NAM").run()
+    at.select_slider[0].set_value(1).run()
+    assert not at.exception, [str(e.value) for e in at.exception]
+    assert _ltv(at) == "60%"
+
+
+def test_capital_non_regulated_multi_home_shows_0_in_app():
+    """Q10 확정 — 인천 연수구 다주택 → 비규제여도 0%."""
+    at = _run()
+    next(sb for sb in at.selectbox if sb.label.startswith("지역")).set_value("INCHEON_YEONSU").run()
+    at.select_slider[0].set_value(2).run()
+    assert not at.exception
+    assert _ltv(at) == "0%"
+
+
 def test_region_selectbox_offers_whole_country():
     at = _run()
     region = next(sb for sb in at.selectbox if sb.label.startswith("지역"))

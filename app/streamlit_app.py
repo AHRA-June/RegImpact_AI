@@ -56,6 +56,7 @@ REASON_KO = {
     "LTV_OWNER_0": "유주택(비처분) 0%",
     "LTV_MULTI_HOME_0": "다주택 0%",
     "LTV_BASELINE_70": "非규제 기준선 70%",
+    "LTV_NONREG_OWNER_60": "非규제(수도권 外) 유주택 60%",
     "GRANDFATHERED_ACCEPTED_OR_CONTRACT": "경과규정 — 접수 또는 계약+계약금",
     "GRANDFATHERED_LAND_PERMIT": "경과규정 — 토지거래허가 신청",
     "OWNER_BASELINE_UNKNOWN": "유주택 기준값 명세 부재 → 사람 검토",
@@ -74,17 +75,18 @@ STATUS_KO = {
 STEPS = [
     ("P0", "스코프 — 주택구입목적인가"),
     ("P0b", "정책대출 → Discovery"),
-    ("P1", "경과규정 G1 / G2 / G3"),
-    ("P2", "지역 규제상태 해석 (평가일 기준)"),
-    ("P3", "다주택 (2주택 이상)"),
+    ("P1", "경과규정 G1 / G2 / G3 → 종전규정 시점으로 재판정"),
+    ("P2", "지역 규제상태 해석 (미등록 코드 검사)"),
+    ("P3", "다주택 — 규제지역 또는 수도권이면 0%"),
     ("P4", "유주택 (비처분 1주택)"),
+    ("P4b", "非규제 무주택 기준선 70%"),
     ("P5", "생애최초"),
     ("P6", "서민·실수요자"),
-    ("P7", "무주택 일반 / 처분조건부 1주택"),
+    ("P7", "규제지역 무주택 일반 40%"),
 ]
 
 
-def halting_step(decision) -> str:
+def halting_step(decision, house_count: int = 0) -> str:
     """판정이 어느 우선순위 단계에서 short-circuit 됐는지를 **엔진 출력에서 역으로 읽는다**.
 
     주의: 규칙을 다시 구현하는 것이 아니라 출력(reason_code·rule_id·status)을 단계 라벨로
@@ -95,18 +97,19 @@ def halting_step(decision) -> str:
         return "P0"
     if "UNKNOWN_REGION" in codes:
         return "P2"
+    if "OWNER_BASELINE_UNKNOWN" in codes:
+        return "P4"
     if "DISCOVERY_POLICY_LOAN" in codes:
         return "P0b"
-    if decision.grandfathering_applied:
-        return "P1"
     return {
         "MULTI_0": "P3",
         "REG_OWNER_0": "P4",
+        "NONREG_OWNER_60": "P3" if house_count >= 2 else "P4",
+        "NONREG_STD_70": "P4b",
         "REG_FIRSTHOME": "P5",
         "REG_REALDEMAND": "P6",
         "REG_STD": "P7",
-        "NONREG_STD_70": "P2",
-    }.get(decision.applicable_rule_id, "P2")   # rule_id 없는 escalation = 非규제 유주택(P2)
+    }.get(decision.applicable_rule_id, "P2")
 
 
 def build_app(f) -> MortgageApplication:
@@ -202,8 +205,10 @@ def tab_verdict() -> None:
                            f"**{price * decision.max_ltv:,.2f}억** "
                            "(LTV만 적용한 참고값 — DTI·차주별 한도 미반영)")
         elif decision.status is EvaluationStatus.NEEDS_HUMAN_REVIEW:
-            st.warning("자동 판정을 **거부**했다. 확정 명세에 해당 기준값이 없으므로 "
-                       "숫자를 지어내지 않고 사람에게 넘긴다.")
+            extra = ("수도권 비규제 유주택은 원문이 '非규제(수도권 外) 유주택 60%'만 명시해 근거가 없다. "
+                     if "OWNER_BASELINE_UNKNOWN" in decision.reason_codes else "")
+            st.warning("자동 판정을 **거부**했다. " + extra
+                       + "확정 명세에 해당 기준값이 없으므로 숫자를 지어내지 않고 사람에게 넘긴다.")
         elif decision.status is EvaluationStatus.DISCOVERY:
             st.info("정책대출은 코어 자동판정에서 **분리**되어 있다(Discovery). 다른 조건은 평가하지 않는다.")
         else:
@@ -216,8 +221,9 @@ def tab_verdict() -> None:
         status, reg_type = resolve_region_status(region, evaldate)
         st.caption(
             f"지역상태 `{status.value}` / 지정유형 `{reg_type.value}` · "
-            f"경과규정 {'적용' if decision.grandfathering_applied else '미적용'} · "
-            f"출처 {', '.join(decision.source_policy_ids) or '—'}"
+            + ("경과규정 적용 — 종전규정(2026-06-30 시점)으로 재판정 · "
+               if decision.grandfathering_applied else "경과규정 미적용 · ")
+            + f"출처 {', '.join(decision.source_policy_ids) or '—'}"
         )
 
         # 시행 전 대비 (Impact Matrix 1행의 원형)
@@ -239,7 +245,7 @@ def tab_verdict() -> None:
 
         st.divider()
         st.markdown("**우선순위 트레이스** — 어디서 short-circuit 됐는가")
-        halt = halting_step(decision)
+        halt = halting_step(decision, house_count)
         reached = True
         for sid, label in STEPS:
             if not reached:
@@ -395,8 +401,10 @@ st.caption(
     "조정대상지역 현황」 표에서 왔다. 서울 25개 자치구는 6·30과 무관하게 이미 전부 규제지역이며"
     "(강남4구 '16.11.3 조정 → '17.8.3 투기과열), 6·30이 더한 곳은 화성동탄·용인기흥·구리 3곳이다. "
     "레지스트리에 없는 코드는 非규제로 넘겨짚지 않고 사람 검토로 넘어간다. "
-    "한계 — 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리). "
-    "비규제 유주택 기준값은 확정 명세에 없어 escalation 된다(원문의 '非규제(수도권 外) 유주택 60%'는 "
-    "사람 확정 전이라 미채택 — Q9). `CFL-04`(유주택+생애최초)는 명세 §E와 §H가 상충하는 미결 항목으로 "
+    "2026-08-18 확정 — ①비규제 유주택 60%(MOLIT 참고1). 원문이 '수도권 外'를 명시하므로 수도권 비규제 "
+    "유주택은 근거 부재로 사람 검토에 남는다. ②다주택 판정이 지역 분기보다 앞(FSC p2: 수도권 內 규제 무관 0%) — "
+    "인천 다주택은 비규제여도 0%, 울산·제주 다주택은 유주택 기준 60%. ③경과규정의 종전규정은 70% 고정이 아니라 "
+    "컷오프 시점 규정으로 재판정 — 이미 규제지역이던 강남은 경과규정이 붙어도 40%. "
+    "한계 — 코어 판정은 LTV뿐이다. `CFL-04`(유주택+생애최초)는 §E와 §H가 상충하는 미결 항목으로 "
     "현재는 §H를 권위 기준으로 채택했다(Q8)."
 )

@@ -230,10 +230,42 @@ def grandfathering_cases() -> list[GeneratedCase]:
               _app(house_count=0, land_permit_target=True,
                    land_permit_applied_at=_CUTOFF,
                    contract_signed_at=date(2026, 7, 10))),
+        _case("GF-PRIOR-01", Category.GRANDFATHERING,
+              "이미 규제지역이던 강남 + 경과규정 → 종전규정도 40% (70% 아님)",
+              _app(region_code=_SEOUL_GANGNAM, house_count=0,
+                   application_accepted_at=date(2026, 6, 29))),
+        _case("GF-PRIOR-02", Category.GRANDFATHERING,
+              "6·30 신규지정 구리 + 경과규정 → 종전은 비규제였으므로 70%",
+              _app(house_count=0, application_accepted_at=date(2026, 6, 29))),
+        _case("GF-PRIOR-03", Category.GRANDFATHERING,
+              "비수도권 울산 + 경과규정 유주택 → 종전도 비규제 → 60%",
+              _app(region_code=_NONREG, house_count=1,
+                   application_accepted_at=date(2026, 6, 29))),
         _case("GF-G3-02", Category.GRANDFATHERING,
               "G3 토허제 대상 아님 → 신청일 있어도 경과규정 불인정",
               _app(house_count=0, land_permit_target=False,
                    land_permit_applied_at=_CUTOFF)),
+    ]
+
+
+def owner_baseline_cases() -> list[GeneratedCase]:
+    """비규제 유주택 계층 (Q9 확정 2026-08-18) — MOLIT 참고1 '非규제(수도권 外) 유주택 60%'."""
+    return [
+        _case("OWN-01", Category.EXCEPTION,
+              "비수도권 비규제(울산) 비처분 1주택 → 60%",
+              _app(region_code=_NONREG, house_count=1)),
+        _case("OWN-02", Category.EXCEPTION,
+              "비수도권 비규제(제주) 다주택 → 유주택 기준 60% (수도권이 아니므로 0% 아님)",
+              _app(region_code="JEJU_JEJU", house_count=3)),
+        _case("OWN-03", Category.EXCEPTION,
+              "비수도권 비규제(울산) 처분조건부 1주택 → 무주택 기준 70%",
+              _app(region_code=_NONREG, house_count=1, disposal_condition_flag=True)),
+        _case("OWN-04", Category.EXCEPTION,
+              "수도권 비규제(경기 파주) 다주택 → 규제 무관 0%",
+              _app(region_code="GYEONGGI_PAJU", house_count=2)),
+        _case("OWN-05", Category.EXCEPTION,
+              "수도권 비규제(경기 파주) 비처분 1주택 → 기준값 부재 → escalation",
+              _app(region_code="GYEONGGI_PAJU", house_count=1)),
     ]
 
 
@@ -259,29 +291,15 @@ def conflict_cases() -> list[GeneratedCase]:
                 "NEEDS_HUMAN_REVIEW'라 하나, §H(엔진 구현 기준) 의사코드는 P4에서 0%로 "
                 "short-circuit 한다. 여기서는 권위 기준(§H)을 채택. 03_OPEN_QUESTIONS 참조."),
         ),
-        _case(
-            "CFL-06", Category.CONFLICT,
-            "수도권 비규제(인천 연수) 다주택: §H는 escalation, 원문 C06은 0% — 미결",
-            _app(region_code="INCHEON_YEONSU", house_count=2),
-            spec_note=(
-                "알려진 명세 상충: FSC 보도자료 p2 원문은 '다주택자는 수도권 內 주택구입시 규제지역 "
-                "여부와 무관하게 LTV 0% 적용'이라 하고 05_RULE_SPEC §C-1b(R6)도 '다주택·수도권"
-                "(규제 무관) 0%'로 적고 있으나, §H(엔진 구현 기준) 의사코드는 P3(다주택)를 P2 지역분기 "
-                "**뒤**에 두어 비규제 경로에서는 도달하지 못한다. 전국 지역 레지스트리가 생기면서 "
-                "비로소 도달 가능해진 경로다. 권위 기준(§H)을 채택해 현재는 escalation. "
-                "03_OPEN_QUESTIONS Q10 참조."),
-        ),
-        _case(
-            "CFL-07", Category.CONFLICT,
-            "비수도권 비규제(울산) 유주택: §C-2에 기준값 없음 → escalation. 원문엔 60% 서술 — 미결",
-            _app(region_code="ULSAN_NAM", house_count=1),
-            spec_note=(
-                "알려진 명세 공백: MOLIT 보도자료 참고1 표에 '非규제지역(수도권 外) 무주택(처분조건부 "
-                "1주택) 70% / 유주택 60%'가 있으나, 05_RULE_SPEC §C-2는 무주택 70%만 확정했고 "
-                "'수도권 外 유주택 60%는 다른 맥락이니 혼동 금지'라고 명시적으로 유보했다. "
-                "LOCKED §4(규칙 값은 사람이 확정)에 따라 임의 채택하지 않고 escalation 유지. "
-                "03_OPEN_QUESTIONS Q9 참조."),
-        ),
+        _case("CFL-06", Category.CONFLICT,
+              "수도권 비규제(인천 연수) 다주택 → 규제 무관 0% (Q10 확정, P3가 지역분기보다 앞)",
+              _app(region_code="INCHEON_YEONSU", house_count=2)),
+        _case("CFL-07", Category.CONFLICT,
+              "비수도권 비규제(울산) 유주택 → 60% (Q9 확정)",
+              _app(region_code=_NONREG, house_count=1)),
+        _case("CFL-08", Category.CONFLICT,
+              "수도권 비규제(인천 연수) 유주택 1 → 원문은 '수도권 外'만 60% → escalation",
+              _app(region_code="INCHEON_YEONSU", house_count=1)),
         _case("CFL-05", Category.CONFLICT,
               "다주택 + 서민실수요 → 다주택(P3)이 우선 0%",
               _app(house_count=2, real_demand_flag=True)),
@@ -297,6 +315,7 @@ def generate_all() -> list[GeneratedCase]:
     cases += scope_cases()
     cases += baseline_cases()
     cases += region_cases()
+    cases += owner_baseline_cases()
     cases += exception_cases()
     cases += boundary_cases()
     cases += grandfathering_cases()

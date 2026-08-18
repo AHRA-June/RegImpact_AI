@@ -7,7 +7,7 @@
 - **마지막 갱신:** 2026-08-18
 - **갱신자:** Claude (온라인 테스트 환경 구축 세션)
 - **개발 브랜치:** `claude/online-testing-plan-8k0xmx`
-- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + 온라인 테스트 환경 2종 + **전국 지역 레지스트리**(테스트 71 통과)
+- **전체 단계:** 🟢 Phase 1~2 진행 — 룰엔진 v1 + Extractor + TC Generator/Rule-Regression + 온라인 테스트 환경 2종 + **전국 지역 레지스트리**(테스트 80 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 
 ---
@@ -21,7 +21,19 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18) — 지역 레지스트리 교체 (버그 수정)
+## ✅ 방금 완료 (2026-08-18) — Q9·Q10 확정 반영 + 경과규정 버그 수정
+- **Q9 확정 — 비규제 유주택 60%** (MOLIT 참고1). 원문이 "수도권 外"를 명시하므로 비수도권에만 적용,
+  수도권 비규제 유주택은 근거 부재로 escalation 유지. rule_id `NONREG_OWNER_60`.
+- **Q10 확정 — P3(다주택)을 지역 분기 앞으로** (FSC p2 C06). 다주택 AND (규제지역 OR 수도권) → 0%.
+  비수도권 비규제 다주택은 유주택 기준 60%로 수렴.
+- **Q11 (버그) — 경과규정의 '종전규정'을 70% 고정에서 컷오프 시점 재판정으로 수정.** 이미 규제지역이던
+  강남에 경과규정이 붙으면 70%가 나오던 오류. 종전규정은 지역마다 다르다.
+- **명세 개정:** `05_RULE_SPEC` §C-2(수도권/비수도권 2열)·§F 주석·§H 의사코드 전면 개정.
+- **오라클 재작성:** docstring이 주장하던 "선언적 표 + 범용 해석기"를 실제로 구현(`_RULE_TABLE`).
+  종전엔 엔진과 같은 명령형 분기여서 구조적 독립이 말뿐이었다.
+- **회귀 52 케이스 100%** (EXCEPTION 10 / GRANDFATHERING 9 / CONFLICT 8), pytest 80.
+
+## ✅ 같은 날 완료 (2026-08-18) — 지역 레지스트리 교체 (버그 수정)
 - **🐛 발견·수정: 서울 강남구가 LTV 70%로 판정되던 오류.** 지역 테이블에 6·30 신규 3곳만 있었고 나머지는
   조용히 `NON_REGULATED` 기본값이었다. 실제로는 **서울 25개 자치구와 경기 12곳이 6·30 이전부터 이미 규제지역**
   (MOLIT 참고2 현황표). 사용자 지적으로 발견.
@@ -29,8 +41,7 @@
   `capital_area` 플래그, 구 코드 별칭. 미등록 코드는 `UNKNOWN` → `NEEDS_HUMAN_REVIEW`(추측 금지).
 - **검증:** `tests/test_regions.py`가 **공문 원문의 지역 수**(추가지정 전 서울25·경기12 / 후 경기15)와 대조.
   회귀 `REGION` 분류 11건 신설 → 43 케이스 Pass 100%. 웹은 전국 241×7시점 프로브 표로 Python↔JS 대조.
-- **부수 발견 → Q9·Q10 신설** (룰 값은 임의 변경하지 않고 `CFL-06`·`CFL-07`로 고정 + 표면화):
-  Q9 비규제 유주택 60%(MOLIT 참고1), Q10 수도권 비규제 다주택 0%(FSC p2·§C-1b) vs §H의 P3 위치.
+- **부수 발견 → Q9·Q10 신설 → 같은 날 사용자 확정으로 해소** (위 항목 참고).
 
 ## ✅ 같은 날 완료 (2026-08-18) — 온라인 테스트 환경
 - **온라인 테스트 환경 2종 구축** — 사용자가 브라우저에서 직접 조건을 바꿔가며 판정을 확인할 수 있게 됨.
@@ -54,11 +65,9 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(39), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
+- 실행: `python -m pytest`(80), `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`, `python examples/run_extractor.py`(API 키 필요).
 
 ## 다음 액션 (NEXT)
-- **[사용자] Q9·Q10 도메인 판단** — 비규제 유주택 60% 채택 여부 / 수도권 비규제 다주택 0% 선판정 여부.
-  둘 다 원문 근거가 있으나 확정 명세가 유보하고 있어 엔진이 escalation 중이다.
 - **[사용자] Streamlit Cloud 배포** — `docs/ui/DEPLOY.md` 절차대로. 저장소 연결 + main file `app/streamlit_app.py`.
 - **[사용자] ANTHROPIC_API_KEY를 Secrets에 등록** → Extractor 탭에서 실제 LLM 1회 실행 → 첫 실측 Assurance 수치 확보.
   (로컬로 하려면 `python examples/run_extractor.py`.)
@@ -116,6 +125,7 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18** — ✅ **Q9·Q10 사용자 확정 반영 + 경과규정 버그(Q11) 수정.** 비규제 유주택 60%(비수도권 한정, 수도권은 근거 부재로 escalation 유지), 다주택 판정을 지역 분기 앞으로 이동(수도권이면 규제 무관 0%, 비수도권 비규제는 유주택 기준 60%). 반영 중 경과규정의 '종전규정'을 70%로 하드코딩한 버그 발견 — 이미 규제지역이던 강남에 경과규정이 붙으면 70%가 나왔다 → 컷오프 시점 재판정으로 정정. `05_RULE_SPEC` §C-2·§F·§H 개정. 오라클을 선언적 규칙표+범용 해석기로 재작성(구조적 독립 실현). 회귀 52 케이스 100%, pytest 80, JS 52/52 + 지역 241×7 일치.
 - **2026-08-18** — 🐛 **지역 판정 버그 수정 + 전국 레지스트리.** 사용자 지적("서울 강남은 원래 40 제한 걸려야 되는 거 아냐?")으로 발견 — 지역표에 6·30 신규 3곳만 있고 나머지는 조용히 非규제 기본값이라 이미 투기과열지구인 강남구가 70%로 판정됐다. MOLIT 참고2 현황표를 근거로 전국 241곳을 시점 버전과 함께 등록(`regions.py`), 미등록 코드는 `UNKNOWN`→사람 검토로 전환. 오라클 독립성 계약을 심볼 단위로 정밀화(데이터 공유·해석 로직 독립, `tests/test_regions.py`가 원문 지역 수와 대조). 웹은 241×7시점 프로브로 Python↔JS 대조. 회귀 REGION 11건 신설(43 케이스 100%), pytest 71 통과. 부수로 명세 상충 2건 발견 → Q9(비규제 유주택 60%)·Q10(수도권 비규제 다주택 0%) 신설, 룰 값은 임의 변경하지 않고 표면화.
 - **2026-08-18** — ✅ **온라인 테스트 환경 2종.** ①정적 샌드박스 `web/sandbox.html`(엔진 JS 포팅, 우선순위 트레이스 시각화, 회귀 30케이스 인터랙티브 표) + 빌드 파이프라인 `tools/export_fixtures.py`→`tools/build_sandbox.py`, 헤드리스 대조 `tools/verify_js_port.mjs`(30/30). 골든 기대값을 사람이 적지 않고 Python 엔진 실행으로 생성해 포팅 드리프트를 구조적으로 탐지. ②Streamlit 검증 콘솔 `app/streamlit_app.py`(실제 Python 엔진, 3탭) + AppTest 스모크 5개. 배포 가이드 `docs/ui/DEPLOY.md`. 테스트 44 통과.
 - **2026-08-10** — ✅ **TC Generator + Rule-Regression 구현.** `src/regimpact/tc_generator/`(oracle·generator·regression·README). 룰엔진을 **독립 명세 오라클**로 차등 검증(differential testing) — 엔진 출력을 스스로 채점하지 않고 명세(§H)에서 독립 유도한 challenger와 대조하여 회귀가 tautology가 되지 않게 함. 오라클은 rule_engine/regions/grandfathering 미import(구조적 독립). 30 케이스(6 카테고리) Pass Rate 100%. mutation test 2건으로 fixture 방어력 증명. 명세 내부 상충(§E vs §H, 유주택+생애최초) 발견 → `03_OPEN_QUESTIONS.md` Q8 신설. `examples/demo_tc_regression.py`. 테스트 11개(총 39) 통과.

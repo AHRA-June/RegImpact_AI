@@ -333,10 +333,16 @@ td.num{font-family:"IBM Plex Mono",monospace; text-align:right; white-space:nowr
     <p style="margin:0"><b>미등록 코드는 추측하지 않는다.</b> 레지스트리에 없는 지역코드는 非규제로 넘겨짚지 않고
     <code>UNKNOWN_REGION</code>으로 사람에게 넘긴다. 이전 버전은 조용히 非규제로 처리했고, 그 탓에 이미 투기과열지구인
     강남구가 비규제 기준선 70%로 판정됐다(2026-08-18 발견·수정). 위 <code>RGN-*</code> 케이스가 그 회귀선이다.</p>
+    <p style="margin:0"><b>2026-08-18 확정된 규칙 3건.</b>
+    ① <b>비규제 유주택 60%</b> — MOLIT 참고1 "非규제지역(수도권 外) 무주택 70% / 유주택 60%". 원문이 <b>수도권 外</b>를
+    명시하므로 수도권 비규제 유주택(인천·경기 대부분)은 근거가 없어 사람 검토로 남는다.
+    ② <b>다주택 판정이 지역 분기보다 앞</b> — FSC p2 "다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0%".
+    그래서 인천 연수구 다주택은 비규제여도 0%이고, 울산·제주 다주택은 수도권이 아니므로 유주택 기준 60%다.
+    ③ <b>경과규정의 '종전규정'은 70% 고정이 아니다</b> — 종전규정은 지역마다 다르다. 컷오프(2026-06-30) 시점 규정으로
+    다시 판정하므로, 이미 규제지역이던 강남은 경과규정이 붙어도 40%다.</p>
     <p style="margin:0"><b>한계.</b> 코어 판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출은 Discovery로 분리).
-    비규제 지역의 <b>유주택</b> 기준값은 확정 명세에 없어 사람 검토로 넘어간다 — 원문에 "非규제(수도권 外) 유주택 60%"가 있으나
-    사람 확정 전이라 채택하지 않았다(<code>Q9</code>). <code>CFL-04</code>(유주택+생애최초)는 명세 §E와 §H가 상충하는
-    알려진 미결 항목이며, 현재는 §H를 권위 기준으로 채택했다(<code>Q8</code>).</p>
+    <code>CFL-04</code>(유주택+생애최초)는 명세 §E와 §H가 상충하는 알려진 미결 항목이며, 현재는 §H를 권위 기준으로
+    채택했다(<code>Q8</code>).</p>
   </footer>
 </div>
 
@@ -353,19 +359,21 @@ const GF_CUTOFF = "2026-06-30";        // §F 경과규정 경계 (<= 포함)
 const REGION_BY_CODE = Object.fromEntries(FIXTURES.regions.map(r => [r.code, r]));
 const REGION_ALIASES = FIXTURES.region_aliases || {};
 const canonicalCode = c => REGION_ALIASES[c] || c;
-const LTV = {REGULATED_STD:0.40, FIRST_HOME:0.70, REAL_DEMAND:0.60, OWNER:0.00, MULTI:0.00, BASELINE:0.70};
+const LTV = {REGULATED_STD:0.40, FIRST_HOME:0.70, REAL_DEMAND:0.60, OWNER:0.00,
+             MULTI:0.00, BASELINE:0.70, NONREG_OWNER:0.60};
 const SOURCE_6_30 = ["FSC_20260630", "MOLIT_20260630"];
 
 const STEPS = [
   {id:"P0",  label:"스코프 — 주택구입목적인가"},
   {id:"P0b", label:"정책대출 → Discovery"},
-  {id:"P1",  label:"경과규정 G1 / G2 / G3"},
-  {id:"P2",  label:"지역 규제상태 해석 (평가일 기준)"},
-  {id:"P3",  label:"다주택 (2주택 이상)"},
+  {id:"P1",  label:"경과규정 G1 / G2 / G3 → 종전규정 시점으로 재판정"},
+  {id:"P2",  label:"지역 규제상태 해석 (미등록 코드 검사)"},
+  {id:"P3",  label:"다주택 — 규제지역 또는 수도권이면 0%"},
   {id:"P4",  label:"유주택 (비처분 1주택)"},
+  {id:"P4b", label:"非규제 무주택 기준선 70%"},
   {id:"P5",  label:"생애최초"},
   {id:"P6",  label:"서민·실수요자"},
-  {id:"P7",  label:"무주택 일반 / 처분조건부 1주택"},
+  {id:"P7",  label:"규제지역 무주택 일반 40%"},
 ];
 
 const REASON_KO = {
@@ -375,6 +383,7 @@ const REASON_KO = {
   LTV_OWNER_0:"유주택(비처분) 0%",
   LTV_MULTI_HOME_0:"다주택 0%",
   LTV_BASELINE_70:"非규제 기준선 70%",
+  LTV_NONREG_OWNER_60:"非규제(수도권 外) 유주택 60%",
   GRANDFATHERED_ACCEPTED_OR_CONTRACT:"경과규정 — 접수 또는 계약+계약금",
   GRANDFATHERED_LAND_PERMIT:"경과규정 — 토지거래허가 신청",
   OWNER_BASELINE_UNKNOWN:"유주택 기준값 명세 부재 → 사람 검토",
@@ -433,9 +442,13 @@ function evaluate(app){
     const trace = STEPS.map(s => ({...s, ...(by[s.id] || {state:"unreached", note:""})}));
     return {decision, trace};
   };
-  const decided = (ltv, ruleId, reason) => ({
+  const decided = (ltv, ruleId, reason, sources = true) => ({
     status:"DECIDED", max_ltv:ltv, applicable_rule_id:ruleId, grandfathering_applied:false,
-    reason_codes:[reason], source_policy_ids:[...SOURCE_6_30],
+    reason_codes:[reason], source_policy_ids: sources ? [...SOURCE_6_30] : [],
+  });
+  const escalate = (reason) => ({
+    status:"NEEDS_HUMAN_REVIEW", max_ltv:null, applicable_rule_id:null,
+    grandfathering_applied:false, reason_codes:[reason], source_policy_ids:[],
   });
 
   // P0. 스코프
@@ -454,57 +467,79 @@ function evaluate(app){
   }
   mark("P0b","pass","해당 없음");
 
-  // P1. 경과규정 — 최우선
+  /* P1. 경과규정 — 성립하면 '종전규정', 즉 컷오프(6.30) 시점 규정으로 이하를 판정한다.
+     70% 고정이 아니다. 서울 25구·경기 12곳은 6·30 이전에도 이미 규제지역이었다. */
   const gf = isGrandfathered(app);
+  const asOf = gf ? GF_CUTOFF : app.evaluation_date;
   if(gf){
-    mark("P1","halt", gf === "GRANDFATHERED_LAND_PERMIT" ? "G3 성립" : "G1/G2 성립");
-    if(isOwner(app)){
-      return finish({status:"NEEDS_HUMAN_REVIEW", max_ltv:null, applicable_rule_id:null,
-        grandfathering_applied:true, reason_codes:[gf,"OWNER_BASELINE_UNKNOWN"], source_policy_ids:[...SOURCE_6_30]});
-    }
-    return finish({status:"DECIDED", max_ltv:LTV.BASELINE, applicable_rule_id:"NONREG_STD_70",
-      grandfathering_applied:true, reason_codes:[gf], source_policy_ids:[...SOURCE_6_30]});
+    mark("P1","pass", (gf === "GRANDFATHERED_LAND_PERMIT" ? "G3" : "G1/G2") + " 성립 → 종전규정 " + GF_CUTOFF);
+  } else {
+    mark("P1","pass","미해당");
   }
-  mark("P1","pass","미해당");
+
+  const wrap = (d) => {
+    if(!gf || d.status === "OUT_OF_SCOPE" || d.status === "DISCOVERY") return d;
+    return {...d, grandfathering_applied:true, reason_codes:[gf, ...d.reason_codes],
+            source_policy_ids:[...new Set([...d.source_policy_ids, ...SOURCE_6_30])]};
+  };
 
   // P2. 지역 규제상태
-  const state = regionState(app.region_code, app.evaluation_date);
+  const state = regionState(app.region_code, asOf);
   if(state === "UNKNOWN"){
     mark("P2","halt","레지스트리 미등록 코드");
-    return finish({status:"NEEDS_HUMAN_REVIEW", max_ltv:null, applicable_rule_id:null,
-      grandfathering_applied:false, reason_codes:["UNKNOWN_REGION"], source_policy_ids:[]});
+    return finish(wrap(escalate("UNKNOWN_REGION")));
   }
-  if(state === "NON_REGULATED"){
-    mark("P2","halt","非규제 → 기준선 경로");
-    if(isOwner(app)){
-      return finish({status:"NEEDS_HUMAN_REVIEW", max_ltv:null, applicable_rule_id:null,
-        grandfathering_applied:false, reason_codes:["OWNER_BASELINE_UNKNOWN"], source_policy_ids:[]});
-    }
-    return finish({status:"DECIDED", max_ltv:LTV.BASELINE, applicable_rule_id:"NONREG_STD_70",
-      grandfathering_applied:false, reason_codes:["LTV_BASELINE_70"], source_policy_ids:[]});
-  }
-  mark("P2","pass", regionType(app.region_code, app.evaluation_date) === "ADJUSTMENT"
-        ? "규제지역(조정대상)" : "규제지역(투기과열)");
+  const regulated = state === "REGULATED";
+  const region = REGION_BY_CODE[canonicalCode(app.region_code)];
+  const capital = !!(region && region.capital_area);
+  mark("P2","pass", (regulated
+      ? (regionType(app.region_code, asOf) === "ADJUSTMENT" ? "규제(조정대상)" : "규제(투기과열)")
+      : "非규제") + (capital ? " · 수도권" : " · 비수도권"));
 
-  // P3. 다주택
-  if(app.house_count >= 2){ mark("P3","halt",`house_count=${app.house_count}`); return finish(decided(LTV.MULTI,"MULTI_0","LTV_MULTI_HOME_0")); }
+  // P3. 다주택 — 규제지역 또는 수도권이면 규제 여부 무관 0%
+  if(app.house_count >= 2){
+    if(regulated || capital){
+      mark("P3","halt", regulated ? "다주택·규제지역" : "다주택·수도권");
+      return finish(wrap(decided(LTV.MULTI,"MULTI_0","LTV_MULTI_HOME_0")));
+    }
+    mark("P3","halt","다주택·비수도권 비규제 → 유주택 기준");
+    return finish(wrap(decided(LTV.NONREG_OWNER,"NONREG_OWNER_60","LTV_NONREG_OWNER_60",false)));
+  }
   mark("P3","pass","해당 없음");
 
-  // P4. 유주택(비처분)
-  if(app.house_count >= 1 && !app.disposal_condition_flag){ mark("P4","halt","비처분 1주택"); return finish(decided(LTV.OWNER,"REG_OWNER_0","LTV_OWNER_0")); }
+  // P4. 유주택(비처분 1주택)
+  if(isOwner(app)){
+    if(regulated){
+      mark("P4","halt","비처분 1주택·규제지역");
+      return finish(wrap(decided(LTV.OWNER,"REG_OWNER_0","LTV_OWNER_0")));
+    }
+    if(!capital){
+      mark("P4","halt","비처분 1주택·비수도권 비규제");
+      return finish(wrap(decided(LTV.NONREG_OWNER,"NONREG_OWNER_60","LTV_NONREG_OWNER_60",false)));
+    }
+    mark("P4","halt","수도권 비규제 유주택 — 원문 근거 부재");
+    return finish(wrap(escalate("OWNER_BASELINE_UNKNOWN")));
+  }
   mark("P4","pass", app.disposal_condition_flag && app.house_count >= 1 ? "처분조건부 → 무주택 기준" : "무주택");
 
+  // P4b. 비규제 무주택 기준선
+  if(!regulated){
+    mark("P4b","halt","非규제 기준선");
+    return finish(wrap(decided(LTV.BASELINE,"NONREG_STD_70","LTV_BASELINE_70",false)));
+  }
+  mark("P4b","pass","규제지역이므로 통과");
+
   // P5. 생애최초
-  if(app.first_home_buyer){ mark("P5","halt","생애최초"); return finish(decided(LTV.FIRST_HOME,"REG_FIRSTHOME","EXCEPTION_FIRST_HOME")); }
+  if(app.first_home_buyer){ mark("P5","halt","생애최초"); return finish(wrap(decided(LTV.FIRST_HOME,"REG_FIRSTHOME","EXCEPTION_FIRST_HOME"))); }
   mark("P5","pass","해당 없음");
 
   // P6. 서민·실수요자
-  if(app.real_demand_flag){ mark("P6","halt","서민·실수요"); return finish(decided(LTV.REAL_DEMAND,"REG_REALDEMAND","EXCEPTION_REAL_DEMAND")); }
+  if(app.real_demand_flag){ mark("P6","halt","서민·실수요"); return finish(wrap(decided(LTV.REAL_DEMAND,"REG_REALDEMAND","EXCEPTION_REAL_DEMAND"))); }
   mark("P6","pass","해당 없음");
 
   // P7. 일반
   mark("P7","halt","기본 규칙");
-  return finish(decided(LTV.REGULATED_STD,"REG_STD","LTV_REGULATED_40"));
+  return finish(wrap(decided(LTV.REGULATED_STD,"REG_STD","LTV_REGULATED_40")));
 }
 
 /* ===================== 폼 상태 ===================== */
@@ -601,7 +636,7 @@ function render(){
   // 메타
   $("kv").innerHTML = [
     ["규칙 ID", decision.applicable_rule_id || "—"],
-    ["경과규정", decision.grandfathering_applied ? "적용" : "미적용"],
+    ["경과규정", decision.grandfathering_applied ? `적용 · 종전 ${GF_CUTOFF} 기준` : "미적용"],
     ["지역상태", regionState(state.region_code, state.evaluation_date)],
     ["지정유형", regionType(state.region_code, state.evaluation_date)],
     ["출처", decision.source_policy_ids.length ? decision.source_policy_ids.join(" · ") : "—"],

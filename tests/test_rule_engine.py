@@ -161,14 +161,62 @@ def test_grandfathering_beats_new_regulation_priority():
     assert d.max_ltv == 0.70
 
 
-# ---------- 엣지: 유주택 grandfathered → escalation ----------
-def test_grandfathered_owner_needs_human_review():
-    d = evaluate(app(
-        house_count=2,
-        application_accepted_at=date(2026, 6, 20),
-    ))
+# ---------- 경과규정 × 소유 상태 (종전규정도 지역에 따라 다르다) ----------
+def test_grandfathered_multi_home_in_capital_area_is_zero():
+    """구리는 종전에 비규제였지만 **수도권**이다 → 다주택은 규제 무관 0% (Q10 확정)."""
+    d = evaluate(app(house_count=2, application_accepted_at=date(2026, 6, 20)))
+    assert d.status == EvaluationStatus.DECIDED
+    assert d.max_ltv == 0.0
+    assert "LTV_MULTI_HOME_0" in d.reason_codes
+    assert d.grandfathering_applied is True
+
+
+def test_grandfathered_owner_in_capital_area_needs_human_review():
+    """수도권 비규제 유주택(비처분 1주택)은 원문 근거가 없다 → 사람 검토."""
+    d = evaluate(app(house_count=1, application_accepted_at=date(2026, 6, 20)))
     assert d.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
     assert "OWNER_BASELINE_UNKNOWN" in d.reason_codes
+
+
+def test_grandfathering_uses_regions_prior_status_not_fixed_70():
+    """종전규정은 70% 고정이 아니다 — 강남은 6·30 이전에도 이미 규제지역(40%)이었다."""
+    d = evaluate(app(region_code="SEOUL_GANGNAM", house_count=0,
+                     application_accepted_at=date(2026, 6, 29)))
+    assert d.max_ltv == 0.40
+    assert d.grandfathering_applied is True
+    assert "GRANDFATHERED_ACCEPTED_OR_CONTRACT" in d.reason_codes
+
+
+# ---------- 비규제 유주택 60% (Q9 확정 2026-08-18) ----------
+def test_non_capital_non_regulated_owner_60():
+    d = evaluate(app(region_code="ULSAN_NAM", house_count=1))
+    assert d.max_ltv == 0.60
+    assert d.applicable_rule_id == "NONREG_OWNER_60"
+    assert "LTV_NONREG_OWNER_60" in d.reason_codes
+
+
+def test_non_capital_non_regulated_multi_home_also_60():
+    """수도권이 아니면 다주택도 0%가 아니라 유주택 기준 60%다."""
+    d = evaluate(app(region_code="JEJU_JEJU", house_count=3))
+    assert d.max_ltv == 0.60
+
+
+def test_capital_non_regulated_multi_home_zero():
+    """수도권이면 비규제여도 다주택 0% (FSC p2 C06)."""
+    d = evaluate(app(region_code="INCHEON_YEONSU", house_count=2))
+    assert d.max_ltv == 0.0
+    assert "LTV_MULTI_HOME_0" in d.reason_codes
+
+
+def test_capital_non_regulated_owner_escalates():
+    d = evaluate(app(region_code="INCHEON_YEONSU", house_count=1))
+    assert d.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert "OWNER_BASELINE_UNKNOWN" in d.reason_codes
+
+
+def test_disposal_condition_still_counts_as_non_owner_in_non_regulated():
+    d = evaluate(app(region_code="ULSAN_NAM", house_count=1, disposal_condition_flag=True))
+    assert d.max_ltv == 0.70
 
 
 # ---------- brief §15 앵커 케이스 (확정 사실로 갱신) ----------

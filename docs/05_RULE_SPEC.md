@@ -80,19 +80,30 @@
 > `src/regimpact/regions.py`. 이전 구현이 "미등록 지역 → 非규제" 기본값을 쓴 탓에
 > 강남구가 70%로 판정되던 오류를 수정했다. 미등록 코드는 이제 `UNKNOWN` → 사람 검토.
 
-### C-2. 기준선 = 6.30 이전, 이 지역은 **非규제 수도권** (evaluation_date < 2026-07-01)
-FAQ Q2 왼쪽 열. 이 3개 지역(동탄·기흥·구리)은 지정 전 수도권 非규제였음.
-| # | 차주 | LTV 🤖 | DTI 🤖 | rule_id |
+### C-2. 비규제지역 기준선 ✅ (2026-08-18 Q9 확정으로 확장)
+FAQ Q2 왼쪽 열 + MOLIT 참고1. 지역이 전국으로 확장되면서 **수도권/비수도권 구분이 판정 분기**가 되었다.
+| # | 차주 | 수도권 비규제 | 비수도권 비규제 | rule_id |
 |---|---|---|---|---|
-| B1 | 무주택 일반/생애최초/서민실수요 | **0.70** | 0.60 (아파트) | `NONREG_STD_70` |
-| B2 | 정책·보금자리(아파트) | 0.70 | 0.60 | `NONREG_BOGEUM_70` |
-> 주의: MOLIT 참고1의 "非규제(수도권 外) 유주택 60%"는 **수도권 외** 맥락 → 6·30 시나리오(수도권)에는 직접 해당 안 됨. 혼동 주의.
+| B1 | 무주택 일반/생애최초/서민실수요 (처분조건부 1주택 포함) | **0.70** | **0.70** | `NONREG_STD_70` |
+| B2 | **유주택(비처분 1주택)** ✅Q9 | ⚠️ **근거 부재 → escalation** | **0.60** | `NONREG_OWNER_60` |
+| B3 | **다주택(2주택 이상)** ✅Q10 | **0.00** (수도권 규제 무관) | **0.60** (유주택 기준) | `MULTI_0` / `NONREG_OWNER_60` |
+| B4 | 정책·보금자리(아파트) | 0.70 | 0.70 | Discovery |
+
+> ✅ **Q9 확정(2026-08-18):** MOLIT 참고1 원문 `"非규제지역(수도권 外) 무주택(처분조건부 1주택) 70% / 유주택 60%"` 채택.
+> 원문이 **"수도권 外"** 를 명시하므로 **수도권 비규제 유주택은 근거가 없다** → `OWNER_BASELINE_UNKNOWN` escalation 유지.
+> ✅ **Q10 확정(2026-08-18):** FSC p2 `"다주택자는 수도권 內 주택구입시 규제지역 여부와 무관하게 LTV 0%"` (C06) 채택.
+> 다주택 판정을 지역 분기 **앞**으로 이동(§H 참고). 비수도권 비규제 다주택은 유주택 기준(60%)으로 수렴.
 
 > ✅ **Q-값1/값2 해소(이미지 기준):** 생애최초 70%(좌동), 서민·실수요 60%, 유주택/다주택 0%, 정책대출 상품별.
 > 🔺 **재설정 포인트(이전 초안 교정):** ①DTI 추가(투기과열40/조정50) → `regulated_type` 필드 필요, ②최대한도 추가(가격구간별), ③기준선을 "수도권 외"→"非규제 수도권"으로 정정, ④보금자리론 비아파트 55%·DTI 50% 반영.
 > ✅ **Q-스코프 확정(2026-08-10): LTV만 코어 판정.** DTI·최대한도는 참고값(`ref_*`)으로 기록만. regulated_type은 DTI 참고 표시용으로 보관(LTV 판정엔 REGULATED 2값이면 충분).
 
 ---
+
+> 🔺 **2026-08-18 경과규정 해석 정정.** §F의 "종전규정 적용"을 **70% 고정**으로 구현했던 것을 바로잡았다.
+> 종전규정은 지역마다 다르다 — 서울 25구·경기 12곳은 6·30 이전에도 이미 규제지역(40%)이었다.
+> 엔진은 이제 경과규정이 성립하면 **컷오프(2026-06-30) 시점의 지역상태로 이하 규칙을 다시 평가**한다.
+> (6·30 신규 3곳은 종전이 비규제 수도권이므로 결과는 종전과 같은 70%.)
 
 ## D. reason_codes 라벨 체계 🔧 (라벨은 스캐폴드, 어떤 코드가 실제 존재하는지는 ✍️ 확정)
 
@@ -157,9 +168,16 @@ G1|G2|G3 중 하나라도 만족 → grandfathering_applied=true. 아니면 신�
 
 ---
 
-## H. 통합 판정 알고리즘 — ✅ 확정 (2026-08-10) · 엔진 구현의 기준
+## H. 통합 판정 알고리즘 — ✅ 확정 (2026-08-10, **2026-08-18 개정**) · 엔진 구현의 기준
+
+> **2026-08-18 개정 3건.** ①경과규정의 '종전규정'을 70% 고정에서 **컷오프 시점 재판정**으로 정정
+> (종전규정은 지역마다 다르다). ②**P3 다주택을 지역 분기 앞으로 이동** (Q10 확정 — 수도권은 규제 무관 0%).
+> ③**비규제 유주택 60%** 분기 신설 (Q9 확정 — 원문이 '수도권 外'를 명시하므로 수도권은 escalation).
+> 개정 전 판본은 git 이력(`docs/02_DECISION_LOG.md` 2026-08-18 항목)으로 추적한다.
 
 ```python
+GF_CUTOFF = date(2026, 6, 30)     # §F 경과규정 경계
+
 def evaluate_mortgage_ltv(inp) -> Result:
     # P0. 스코프
     if inp.loan_purpose != "HOME_PURCHASE":
@@ -169,35 +187,54 @@ def evaluate_mortgage_ltv(inp) -> Result:
         return Result(status="DISCOVERY", reasons=["DISCOVERY_POLICY_LOAN"])
 
     # P1. 경과규정 (최우선) — F 참조. 경계 <= 2026-06-30
-    if is_grandfathered(inp):          # G1 | G2 | G3
-        if is_owner(inp):              # 유주택 & 非규제수도권 baseline 부재
-            return Result(status="NEEDS_HUMAN_REVIEW",
-                          reasons=["GRANDFATHERED", "OWNER_BASELINE_UNKNOWN"])
-        return Result(max_ltv=0.70, grandfathering_applied=True,   # 非규제수도권 무주택
-                      rule_id="NONREG_STD_70",
-                      reasons=["GRANDFATHERED_ACCEPTED_OR_CONTRACT"])
+    #     '종전규정 적용' = 컷오프 시점의 규정으로 이하를 판정한다. 70% 고정이 아니다:
+    #     서울 25구·경기 12곳은 6·30 이전에도 이미 규제지역(40%)이었다.
+    if is_grandfathered(inp):                      # G1 | G2 | G3
+        r = decide_by_region(inp, as_of=GF_CUTOFF)
+        return r.with_grandfathering(reasons=["GRANDFATHERED_…"] + r.reasons)
 
-    # P2. 지역상태
-    if inp.region_status_as_of == "NON_REGULATED":
-        return baseline_rule(inp)      # C-2
+    return decide_by_region(inp, as_of=inp.evaluation_date)
 
-    # --- 이하 REGULATED ---
-    # P3. 다주택
+
+def decide_by_region(inp, as_of) -> Result:
+    # P2. 지역상태 (전국 레지스트리, 시점 해석)
+    status = resolve_region_status(inp.region_code, as_of)
+    if status == "UNKNOWN":                        # 미등록 코드 → 넘겨짚지 않는다
+        return Result(status="NEEDS_HUMAN_REVIEW", reasons=["UNKNOWN_REGION"])
+    regulated = (status == "REGULATED")
+    capital   = is_capital_area(inp.region_code)   # 서울·경기·인천
+
+    # P3. 다주택 — 규제지역 **또는 수도권**이면 규제 여부 무관 0% (C06, §C-1b R6)
     if inp.house_count >= 2:
-        return Result(max_ltv=0.00, rule_id="MULTI_0", reasons=["LTV_MULTI_HOME_0"])
-    # P4. 유주택(비처분)
-    if inp.house_count >= 1 and not inp.disposal_condition_flag:
-        return Result(max_ltv=0.00, rule_id="REG_OWNER_0", reasons=["LTV_OWNER_0"])
-    # (처분조건부 1주택 = 무주택 기준으로 계속)
+        if regulated or capital:
+            return Result(max_ltv=0.00, rule_id="MULTI_0", reasons=["LTV_MULTI_HOME_0"])
+        return Result(max_ltv=0.60, rule_id="NONREG_OWNER_60",   # 비수도권 → 유주택 기준
+                      reasons=["LTV_NONREG_OWNER_60"])
 
-    # P5~P7. 무주택 기준 예외 계층
+    # P4. 유주택(비처분 1주택)
+    if inp.house_count >= 1 and not inp.disposal_condition_flag:
+        if regulated:
+            return Result(max_ltv=0.00, rule_id="REG_OWNER_0", reasons=["LTV_OWNER_0"])
+        if not capital:                            # 非규제(수도권 外) 유주택 — MOLIT 참고1
+            return Result(max_ltv=0.60, rule_id="NONREG_OWNER_60",
+                          reasons=["LTV_NONREG_OWNER_60"])
+        return Result(status="NEEDS_HUMAN_REVIEW", # 수도권 비규제 유주택 = 원문 근거 없음
+                      reasons=["OWNER_BASELINE_UNKNOWN"])
+
+    # --- 이하 무주택 (처분조건부 1주택 포함) ---
+    # P4b. 비규제 기준선 (C-2 B1)
+    if not regulated:
+        return Result(max_ltv=0.70, rule_id="NONREG_STD_70", reasons=["LTV_BASELINE_70"])
+
+    # P5~P7. 규제지역 무주택 예외 계층
     if inp.first_home_buyer:
         return Result(max_ltv=0.70, rule_id="REG_FIRSTHOME", reasons=["EXCEPTION_FIRST_HOME"])
     if inp.real_demand_flag:
         return Result(max_ltv=0.60, rule_id="REG_REALDEMAND", reasons=["EXCEPTION_REAL_DEMAND"])
     return Result(max_ltv=0.40, rule_id="REG_STD", reasons=["LTV_REGULATED_40"])
 ```
-> ✅ 확정. `is_grandfathered`(G1|G2|G3), `is_owner`, `baseline_rule`(C-2)는 하위함수. 이 알고리즘 그대로 deterministic 코드로 구현.
+> ✅ 확정. `is_grandfathered`(G1|G2|G3), `is_capital_area`, `resolve_region_status`(전국 레지스트리)는 하위함수.
+> 이 알고리즘 그대로 deterministic 코드로 구현 — `src/regimpact/rule_engine.py`.
 
 ## G. 미결 질문 요약 (✍️ 사용자 입력 대기)
 

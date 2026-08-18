@@ -29,7 +29,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Optional
+from typing import Callable, Optional
 
 from ..models import EvaluationStatus, LoanPurpose, MortgageApplication, RegionStatus
 from ..regions import REGISTRY, canonical_code   # 데이터만 공유 (해석 함수는 import 안 함)
@@ -43,6 +43,7 @@ _LTV_REAL_DEMAND = 0.60
 _LTV_OWNER = 0.00
 _LTV_MULTI = 0.00
 _LTV_BASELINE = 0.70
+_LTV_NONREG_OWNER = 0.60   # 非규제(수도권 外) 유주택 — MOLIT 참고1, Q9 확정
 
 
 @dataclass(frozen=True)
@@ -116,104 +117,116 @@ def _is_owner(app: MortgageApplication) -> bool:
 # ---------------------------------------------------------------------------
 # 오라클 판정 (§H 우선순위 P0~P7 — 선언적 재구현)
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# 선언적 규칙표 + 범용 해석기 (엔진의 명령형 분기와 **구조적으로** 다른 경로)
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class _Ctx:
+    """판정에 쓰이는 파생 사실. 규칙표는 이 컨텍스트만 본다."""
+    home_purchase: bool
+    policy_loan: bool
+    region: RegionStatus
+    capital_area: bool
+    multi: bool          # 2주택 이상
+    owner: bool          # 유주택(비처분 1주택 이상, 다주택 포함)
+    first_home: bool
+    real_demand: bool
+
+    @property
+    def regulated(self) -> bool:
+        return self.region is RegionStatus.REGULATED
+
+
+@dataclass(frozen=True)
+class _Rule:
+    rule_id: Optional[str]
+    cond: "Callable[[_Ctx], bool]"
+    status: EvaluationStatus
+    max_ltv: Optional[float] = None
+    reasons: tuple[str, ...] = ()
+
+
+# 위에서부터 첫 매치가 이긴다 = §E 우선순위. 조건은 순서에 기대지 않고 명시적으로 쓴다.
+_RULE_TABLE: tuple[_Rule, ...] = (
+    # P0 / P0b — 스코프
+    _Rule(None, lambda c: not c.home_purchase, EvaluationStatus.OUT_OF_SCOPE,
+          reasons=("OUT_OF_SCOPE_PRODUCT",)),
+    _Rule(None, lambda c: c.policy_loan, EvaluationStatus.DISCOVERY,
+          reasons=("DISCOVERY_POLICY_LOAN",)),
+    # P2 — 지역 미등록은 추측하지 않는다
+    _Rule(None, lambda c: c.region is RegionStatus.UNKNOWN,
+          EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("UNKNOWN_REGION",)),
+    # P3 — 다주택. 규제지역 또는 수도권이면 규제 여부 무관 0% (FSC p2 C06 / §C-1b R6)
+    _Rule("MULTI_0", lambda c: c.multi and (c.regulated or c.capital_area),
+          EvaluationStatus.DECIDED, _LTV_MULTI, ("LTV_MULTI_HOME_0",)),
+    _Rule("NONREG_OWNER_60", lambda c: c.multi and not c.regulated and not c.capital_area,
+          EvaluationStatus.DECIDED, _LTV_NONREG_OWNER, ("LTV_NONREG_OWNER_60",)),
+    # P4 — 유주택(비처분 1주택)
+    _Rule("REG_OWNER_0", lambda c: c.owner and c.regulated,
+          EvaluationStatus.DECIDED, _LTV_OWNER, ("LTV_OWNER_0",)),
+    _Rule("NONREG_OWNER_60", lambda c: c.owner and not c.regulated and not c.capital_area,
+          EvaluationStatus.DECIDED, _LTV_NONREG_OWNER, ("LTV_NONREG_OWNER_60",)),
+    # 수도권 비규제 유주택 — 원문은 '수도권 外'만 60%로 명시 → 근거 부재
+    _Rule(None, lambda c: c.owner and not c.regulated and c.capital_area,
+          EvaluationStatus.NEEDS_HUMAN_REVIEW, reasons=("OWNER_BASELINE_UNKNOWN",)),
+    # P4b — 무주택(처분조건부 1주택 포함) 비규제 기준선
+    _Rule("NONREG_STD_70", lambda c: not c.owner and not c.regulated,
+          EvaluationStatus.DECIDED, _LTV_BASELINE, ("LTV_BASELINE_70",)),
+    # P5~P7 — 규제지역 무주택 계층
+    _Rule("REG_FIRSTHOME", lambda c: c.first_home,
+          EvaluationStatus.DECIDED, _LTV_FIRST_HOME, ("EXCEPTION_FIRST_HOME",)),
+    _Rule("REG_REALDEMAND", lambda c: c.real_demand,
+          EvaluationStatus.DECIDED, _LTV_REAL_DEMAND, ("EXCEPTION_REAL_DEMAND",)),
+    _Rule("REG_STD", lambda c: True,
+          EvaluationStatus.DECIDED, _LTV_REGULATED_STD, ("LTV_REGULATED_40",)),
+)
+
+
+def _context(app: MortgageApplication, as_of: date) -> _Ctx:
+    region = _region_state(app.region_code, as_of)
+    entry = REGISTRY.get(canonical_code(app.region_code))
+    return _Ctx(
+        home_purchase=app.loan_purpose == LoanPurpose.HOME_PURCHASE,
+        policy_loan=app.policy_mortgage_flag,
+        region=region,
+        capital_area=bool(entry and entry.capital_area),
+        multi=app.house_count >= 2,
+        owner=_is_owner(app),
+        first_home=app.first_home_buyer,
+        real_demand=app.real_demand_flag,
+    )
+
+
+def _apply(ctx: _Ctx) -> _Rule:
+    """규칙표를 위에서부터 훑어 첫 매치를 고른다(범용 해석기)."""
+    for rule in _RULE_TABLE:
+        if rule.cond(ctx):
+            return rule
+    raise AssertionError("규칙표가 모든 경우를 덮지 못함 — 마지막 규칙은 항상 참이어야 한다")
+
+
 def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
-    """명세(05_RULE_SPEC §H)에서 유도한 기대 판정. rule_engine 을 import 하지 않는다."""
+    """명세(05_RULE_SPEC §H)에서 유도한 기대 판정. rule_engine 을 import 하지 않는다.
 
-    # P0. 스코프
-    if app.loan_purpose != LoanPurpose.HOME_PURCHASE:
-        return ExpectedOutcome(
-            status=EvaluationStatus.OUT_OF_SCOPE,
-            must_include_reasons=("OUT_OF_SCOPE_PRODUCT",),
-        )
-
-    # P0b. 정책대출 → Discovery
-    if app.policy_mortgage_flag:
-        return ExpectedOutcome(
-            status=EvaluationStatus.DISCOVERY,
-            must_include_reasons=("DISCOVERY_POLICY_LOAN",),
-        )
-
-    # P1. 경과규정 (최우선)
+    경과규정(§F)이 성립하면 **종전규정** — 즉 컷오프(2026-06-30) 시점의 지역상태로 —
+    같은 규칙표를 다시 평가한다. 종전규정을 70%로 고정하지 않는 이유는 지역마다 다르기 때문이다
+    (서울 25구·경기 12곳은 6·30 이전에도 이미 규제지역이었다).
+    """
     gf_reason = _is_grandfathered(app)
-    if gf_reason is not None:
-        if _is_owner(app):
-            # 非규제 수도권 유주택 기준선 부재 → escalation
-            return ExpectedOutcome(
-                status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
-                grandfathering_applied=True,
-                must_include_reasons=(gf_reason, "OWNER_BASELINE_UNKNOWN"),
-            )
-        return ExpectedOutcome(
-            status=EvaluationStatus.DECIDED,
-            max_ltv=_LTV_BASELINE,
-            applicable_rule_id="NONREG_STD_70",
-            grandfathering_applied=True,
-            must_include_reasons=(gf_reason,),
-        )
+    as_of = _GF_CUTOFF if gf_reason is not None else app.evaluation_date
 
-    # P2. 지역상태
-    state = _region_state(app.region_code, app.evaluation_date)
-    if state is RegionStatus.UNKNOWN:
-        return ExpectedOutcome(
-            status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
-            must_include_reasons=("UNKNOWN_REGION",),
-        )
-    if state is RegionStatus.NON_REGULATED:
-        # 기준선 표 C-2: 무주택 70%, 유주택 기준값 부재 → escalation
-        if _is_owner(app):
-            return ExpectedOutcome(
-                status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
-                must_include_reasons=("OWNER_BASELINE_UNKNOWN",),
-            )
-        return ExpectedOutcome(
-            status=EvaluationStatus.DECIDED,
-            max_ltv=_LTV_BASELINE,
-            applicable_rule_id="NONREG_STD_70",
-            must_include_reasons=("LTV_BASELINE_70",),
-        )
+    ctx = _context(app, as_of)
+    # 스코프·정책대출은 경과규정보다 앞선다(P0/P0b) — 규칙표 상단이 그 순서를 담고 있다.
+    rule = _apply(ctx)
 
-    # --- 이하 REGULATED ---
-    # P3. 다주택
-    if app.house_count >= 2:
-        return ExpectedOutcome(
-            status=EvaluationStatus.DECIDED,
-            max_ltv=_LTV_MULTI,
-            applicable_rule_id="MULTI_0",
-            must_include_reasons=("LTV_MULTI_HOME_0",),
-        )
+    grandfathered = gf_reason is not None and rule.status not in (
+        EvaluationStatus.OUT_OF_SCOPE, EvaluationStatus.DISCOVERY)
+    reasons = (gf_reason, *rule.reasons) if grandfathered else rule.reasons
 
-    # P4. 유주택(비처분 1주택 이상)
-    if app.house_count >= 1 and not app.disposal_condition_flag:
-        return ExpectedOutcome(
-            status=EvaluationStatus.DECIDED,
-            max_ltv=_LTV_OWNER,
-            applicable_rule_id="REG_OWNER_0",
-            must_include_reasons=("LTV_OWNER_0",),
-        )
-
-    # (처분조건부 1주택 = 무주택 기준으로 계속)
-    # P5. 생애최초
-    if app.first_home_buyer:
-        return ExpectedOutcome(
-            status=EvaluationStatus.DECIDED,
-            max_ltv=_LTV_FIRST_HOME,
-            applicable_rule_id="REG_FIRSTHOME",
-            must_include_reasons=("EXCEPTION_FIRST_HOME",),
-        )
-
-    # P6. 서민·실수요자
-    if app.real_demand_flag:
-        return ExpectedOutcome(
-            status=EvaluationStatus.DECIDED,
-            max_ltv=_LTV_REAL_DEMAND,
-            applicable_rule_id="REG_REALDEMAND",
-            must_include_reasons=("EXCEPTION_REAL_DEMAND",),
-        )
-
-    # P7. 무주택 일반 / 처분조건부 1주택
     return ExpectedOutcome(
-        status=EvaluationStatus.DECIDED,
-        max_ltv=_LTV_REGULATED_STD,
-        applicable_rule_id="REG_STD",
-        must_include_reasons=("LTV_REGULATED_40",),
+        status=rule.status,
+        max_ltv=rule.max_ltv,
+        applicable_rule_id=rule.rule_id,
+        grandfathering_applied=grandfathered,
+        must_include_reasons=tuple(reasons),
     )
