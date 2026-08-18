@@ -604,16 +604,9 @@ def tab_policy() -> None:
                 for i, f in enumerate(files)]
             result = draft_policy(policy_id=new_id, title=title, issuer=issuer,
                                   published_at=published_at, effective_from=effective_from,
-                                  sources=docs,
+                                  sources=docs, manual_region_codes=region_codes,
                                   supersedes_policy_id=cur.policy_id if cur else None)
-            policy = result.policy
-            policy.region_deltas = [
-                RegionDelta(region_code=c, region_name=REGISTRY[c].label,
-                            region_status=RegionStatus.REGULATED,
-                            effective_from=effective_from,
-                            regulated_type=RegulatedType.SPECULATIVE_OVERHEATED)
-                for c in region_codes]
-            st.session_state["policy_draft"] = policy
+            st.session_state["policy_draft"] = result.policy
             for w in result.warnings:
                 st.warning(w)
 
@@ -642,9 +635,9 @@ def tab_policy() -> None:
     for w in detect_overlaps(reg, draft):
         st.warning(f"중첩 — `{w.region_code}`: {w.detail}")
 
-    st.markdown("**확정 전후 비교** (시행일 기준, 확정하면 이렇게 바뀐다)")
-    if changes:
-        confirmed_preview = confirm(draft) if draft.region_deltas else None
+    if changes and draft.region_deltas:
+        st.markdown("**확정 전후 비교** (시행일 기준, 확정하면 이렇게 바뀐다)")
+        confirmed_preview = confirm(draft)
         rows = []
         for c_ in changes:
             after_status, after_type = resolve_region_with_policies(
@@ -703,6 +696,7 @@ st.caption(
     "유주택은 근거 부재로 사람 검토에 남는다. ②다주택 판정이 지역 분기보다 앞(FSC p2: 수도권 內 규제 무관 0%) — "
     "인천 다주택은 비규제여도 0%, 울산·제주 다주택은 유주택 기준 60%. ③경과규정의 종전규정은 70% 고정이 아니라 "
     "컷오프 시점 규정으로 재판정 — 이미 규제지역이던 강남은 경과규정이 붙어도 40%. "
-    "한계 — 코어 판정은 LTV뿐이다. `CFL-04`(유주택+생애최초)는 §E와 §H가 상충하는 미결 항목으로 "
-    "현재는 §H를 권위 기준으로 채택했다(Q8)."
+    "④입력 무결성 게이트(P0c) — 유주택+생애최초 같은 모순 입력은 0%(대출 거절)를 자동으로 내주지 않고 "
+    "사람 검토로 넘긴다. 틀린 쪽이 생애최초 플래그였다면 정답이 70%이기 때문이다(Q8·Q12). "
+    "한계 — 코어 자동판정은 LTV뿐이다(DTI·최대한도는 참고값, 정책대출·전세·신용대출은 Discovery)."
 )

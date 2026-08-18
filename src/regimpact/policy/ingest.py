@@ -81,8 +81,13 @@ def draft_policy(
     extraction: Optional[RegChangeExtraction] = None,
     supersedes_policy_id: Optional[str] = None,
     regulated_type: RegulatedType = RegulatedType.SPECULATIVE_OVERHEATED,
+    manual_region_codes: Sequence[str] = (),
 ) -> DraftResult:
-    """업로드 결과로 정책 버전 초안을 만든다. 항상 `DRAFT` 로 나온다."""
+    """업로드 결과로 정책 버전 초안을 만든다. 항상 `DRAFT` 로 나온다.
+
+    `manual_region_codes` 는 사람이 화면에서 직접 고른 지역이다. 추출 결과와 합쳐지며,
+    같은 코드가 겹치면 한 번만 들어간다.
+    """
     region_deltas: list[RegionDelta] = []
     rule_notes: list[RuleNote] = []
     unmapped: list[str] = []
@@ -110,8 +115,26 @@ def draft_policy(
             warnings.append(
                 f"추출된 시행일({extraction.effective_from})이 입력한 시행일({effective_from})과 다르다 "
                 "— 원문 대조 필요")
-    else:
-        warnings.append("LLM 추출 없이 만든 빈 초안 — 지역 delta·룰 메모를 사람이 채워야 한다")
+    # 사람이 화면에서 직접 고른 지역 (추출 결과와 합침, 중복 제거)
+    seen = {d.region_code for d in region_deltas}
+    for raw in manual_region_codes:
+        code = _map_region(raw)
+        if code is None:
+            unmapped.append(raw)
+            continue
+        if code in seen:
+            continue
+        seen.add(code)
+        region_deltas.append(RegionDelta(
+            region_code=code, region_name=REGISTRY[code].label,
+            region_status=RegionStatus.REGULATED,
+            effective_from=effective_from, regulated_type=regulated_type,
+        ))
+
+    if not region_deltas and not rule_notes:
+        warnings.append("지역 변경도 룰 메모도 없는 빈 초안 — 확정하려면 하나는 채워야 한다")
+    elif extraction is None:
+        warnings.append("LLM 추출 없이 사람이 직접 입력한 초안 — 원문과 대조해 확정해야 한다")
 
     if unmapped:
         warnings.append(
@@ -123,7 +146,7 @@ def draft_policy(
         published_at=published_at, effective_from=effective_from,
         supersedes_policy_id=supersedes_policy_id,
         status=PolicyStatus.DRAFT,
-        provenance=Provenance.AI_DRAFT if extraction is not None else Provenance.HUMAN_CONFIRMED,
+        provenance=Provenance.AI_DRAFT if extraction is not None else Provenance.HUMAN_INPUT,
         sources=list(sources), region_deltas=region_deltas, rule_notes=rule_notes,
     )
     return DraftResult(policy=policy, unmapped_regions=unmapped, warnings=warnings)

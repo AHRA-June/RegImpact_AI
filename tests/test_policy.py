@@ -190,6 +190,43 @@ def test_draft_is_always_draft_status():
     assert result.warnings
 
 
+def test_draft_provenance_never_claims_confirmation():
+    """'DRAFT / HUMAN_CONFIRMED' 같은 자기모순 표시가 나오면 안 된다 — 확정은 status 가 말한다."""
+    doc = snapshot_document(source_document_id="X", title="테스트", content=b"x")
+    manual = draft_policy(policy_id="P", title="t", issuer="i",
+                          published_at=date(2026, 8, 1), effective_from=date(2026, 8, 2),
+                          sources=[doc], manual_region_codes=["ULSAN_NAM"]).policy
+    assert manual.status is PolicyStatus.DRAFT
+    assert manual.provenance is Provenance.HUMAN_INPUT      # 확정 전
+    assert confirm(manual).provenance is Provenance.HUMAN_CONFIRMED
+
+
+def test_manual_region_codes_become_deltas():
+    doc = snapshot_document(source_document_id="X", title="테스트", content=b"x")
+    result = draft_policy(policy_id="P", title="t", issuer="i",
+                          published_at=date(2026, 8, 1), effective_from=date(2026, 8, 2),
+                          sources=[doc], manual_region_codes=["ULSAN_NAM", "JEJU_JEJU"])
+    assert {d.region_code for d in result.policy.region_deltas} == {"ULSAN_NAM", "JEJU_JEJU"}
+    assert all(d.effective_from == date(2026, 8, 2) for d in result.policy.region_deltas)
+    # 지역을 채웠으면 '빈 초안' 경고가 나오면 안 된다
+    assert not any("빈 초안" in w for w in result.warnings)
+
+
+def test_manual_and_extracted_regions_merge_without_duplicates():
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    doc = snapshot_document(source_document_id="X", title="테스트", content=b"x")
+    extraction = RegChangeExtraction(policy_id="P", target_regions=["GURI"],
+                                     effective_from="2026-08-02", changes=[])
+    result = draft_policy(policy_id="P", title="t", issuer="i",
+                          published_at=date(2026, 8, 1), effective_from=date(2026, 8, 2),
+                          sources=[doc], extraction=extraction,
+                          manual_region_codes=["GYEONGGI_GURI", "ULSAN_NAM"])
+    codes = [d.region_code for d in result.policy.region_deltas]
+    assert sorted(codes) == ["GYEONGGI_GURI", "ULSAN_NAM"]     # 별칭 중복 제거
+    assert result.policy.provenance is Provenance.AI_DRAFT
+
+
 def test_unmapped_region_names_are_reported_not_dropped():
     """넘겨짚어 채우면 근거 없는 규제상태가 만들어진다 — 못 매핑한 건 그대로 보고한다."""
     from regimpact.extractor.schema import RegChangeExtraction

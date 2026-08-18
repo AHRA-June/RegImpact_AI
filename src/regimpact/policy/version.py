@@ -36,7 +36,13 @@ class PolicyStatus(str, Enum):
 
 
 class Provenance(str, Enum):
-    HUMAN_CONFIRMED = "HUMAN_CONFIRMED"   # 사람이 원문 대조로 확정
+    """근거의 출처. **확정 여부는 `status` 가 말한다** — 둘을 섞지 않는다.
+
+    초안 단계에서 `HUMAN_CONFIRMED` 를 쓰면 "DRAFT / HUMAN_CONFIRMED" 처럼 자기모순인 표시가 나온다.
+    그래서 확정 전 사람 입력은 `HUMAN_INPUT` 이고, `confirm()` 을 거쳐야 `HUMAN_CONFIRMED` 가 된다.
+    """
+    HUMAN_CONFIRMED = "HUMAN_CONFIRMED"   # 사람이 원문 대조로 확정 (confirm() 이후)
+    HUMAN_INPUT = "HUMAN_INPUT"           # 사람이 직접 입력한 초안 — 확정 전
     AI_DRAFT = "AI_DRAFT"                 # LLM 추출 초안 — 확정 전
 
 
