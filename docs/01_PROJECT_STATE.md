@@ -5,9 +5,9 @@
 > 규칙: "지금 어디 / 다음 3개 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-18
-- **갱신자:** Claude (골드 v2 검수 준비 세션)
+- **갱신자:** Claude (골드 검수 1차 완료 세션)
 - **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f`
-- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 204 통과)
+- **전체 단계:** 🟢 **Phase 1 Walking Skeleton 관통 완료** — 6·30 1건이 Source→Impact Matrix→Assurance까지 E2E 연결 (테스트 205 통과)
 - (해결됨) 원격 푸시 권한 부여됨.
 - (해결됨) **유료 API 키 의존 제거** — 총 지출 0원으로 실행·재현 가능 (`docs/06_LLM_PROVIDER.md`).
 
@@ -22,7 +22,18 @@
 
 ---
 
-## ✅ 방금 완료 (2026-08-18 · 9차)
+## ✅ 방금 완료 (2026-08-18 · 10차)
+- **★ 골드 검수 1차 완료 — 충돌 3건 모두 "명세가 맞음"(사용자 판정).** 골드를 명세에 맞춰 정정.
+  1. 非규제(수도권) 기준선 60%→**70%** 2. 규제지역 LTV **투기과열·조정 모두 40%**(40/50은 DTI)
+  3. 서민·실수요자 **70%→60% 변경 있음** — 값만이 아니라 **분류가 틀려**
+  `CHALLENGE-NOC-001`(NO_CHANGE) → `CHALLENGE-EXC-009`(EXCEPTION)로 재작성, 함정 방향 반전.
+- **세 문항 `authored_by` = `human_confirmed`** — 골드셋 최초 확정 항목. 명세 대조 **충돌 0건**.
+- **05_RULE_SPEC에 재확인 기록** — 텍스트 추출본이 시사한 값 vs 확정값을 나란히 적고
+  "원문 텍스트만 보고 이 구간 값을 유도하지 말 것" 명시.
+- **검사기 보완** — 정정된 항목이 정정 때문에 다시 잡히던 오탐 수정(LTV/DTI를 명시 구분하면 통과).
+- 검수표를 **결정 기록**으로 전환(충돌 0건 시 정정 이력 표시). 테스트 204 → **205**.
+
+## ✅ 이전 완료 (2026-08-18 · 9차)
 - **★ 골드 v2 검수 준비 + 골드 결함 3건 발견.** 추출 골드에 `claim`·`citations` 추가(v2.1)해
   검수 가능하게 만들고, 검수표 생성(`GOLD_V2_REVIEW.md` + HTML).
 - **⚠️ 확정 명세와 모순되는 골드 3건** — `LOCKED-BOR-002`·`CHALLENGE-NOC-001`(非규제 기준선을
@@ -151,7 +162,7 @@
   버그 심으면 회귀가 실패로 잡음). 명세 내부 상충(유주택+생애최초) 발견 → Q8로 표면화. 테스트 11개(총 39) 통과.
 - **룰엔진 v1** — `src/regimpact/` 알고리즘 H, 테스트 23.
 - **RegChange Extractor + Citation Assurance** — `src/regimpact/extractor/` (schema·prompt·extractor·evaluate·sources). LLM 주입 가능(claude-opus-5, 오프라인 테스트 가능). Citation grounding으로 환각 탐지 실측. 골드 정답지 `docs/eval/regchange_gold_6_30.json`. 테스트 5개.
-- 실행: `python -m pytest`(204), `python examples/validate_goldset.py`(골드셋 무결성),
+- 실행: `python -m pytest`(205), `python examples/validate_goldset.py`(골드셋 무결성),
   `python examples/run_goldset_eval.py`(DEV QA 평가), `python examples/demo_impact_e2e.py`(**E2E 관통**),
   `python examples/build_ui.py`(**5개 화면 생성**),
   `python examples/demo_6_30.py`, `python examples/demo_tc_regression.py`,
@@ -167,8 +178,9 @@
   `human_confirmed`로 전환. DEV부터 검수하면 튜닝을 바로 시작할 수 있다.
 - **metrics_spec 임계값 확정** — 현재 대부분 TBD. DEV 실측치가 나오면 근거를 갖고 정할 수 있다.
 - ~~**Extractor 튜닝(D-02)**~~ — ✅ **완료(2026-08-18): 문서별 추출 + 병합, 100%/100%.**
-- **✍️ 골드 v2 검수(사용자) — 진행 중.** 충돌 3건 판정이 먼저, 그다음 23항목 확인.
-  검수표: `docs/eval/GOLD_V2_REVIEW.md`. 확정분은 `authored_by`를 `human_confirmed`로 전환.
+- **✍️ 골드 v2 검수 2차(사용자)** — 충돌 3건은 ✅ 완료. 남은 것은 추출 골드 23항목 확인
+  (검수표 §3·§4). 각 항목의 인용이 그 주장을 뒷받침하는지 판단.
+- **✍️ QA 골드 DEV 40 검수** — 그다음 우선순위. 확정되면 QA 지표가 절대값으로도 신뢰 가능해진다.
 - **LOCKED/CHALLENGE 실행 시점 판단** — 코어 완성 후 1회. 지금은 봉인 유지.
 - **✍️ 골드셋 도메인 검수** — DEV 40부터. 현재 절대 수치는 초안 기준이다.
 - **Q9 / D-02 대책** — Extractor 예외 누락(서민·실수요자). 앵커 1건이 아니라 DEV 40건 기준으로. Phase 2.
@@ -224,6 +236,11 @@
 
 ## 작업 로그 (append-only, 최신이 위)
 
+- **2026-08-18 (11차)** — ✅ **골드 검수 1차 완료.** 사용자 판정: 충돌 3건 모두 "명세가 맞음".
+  골드를 명세에 맞춰 정정하고 `human_confirmed`로 전환(최초 확정 항목). 3번은 값만이 아니라
+  분류가 틀려 NO_CHANGE→EXCEPTION으로 재작성하고 함정 방향을 뒤집었다. 05_RULE_SPEC에
+  재확인 기록을 남겨 같은 오독이 반복될 지점을 못박았다. 정정된 항목이 검사기에 다시 걸리던
+  오탐도 수정 — 검수로 고친 것이 검사에 걸리면 사람을 되돌려 보낸다. 명세 대조 충돌 0건. 테스트 204→205.
 - **2026-08-18 (10차)** — ✅ **골드 v2 검수 준비.** 추출 골드에 인용 추가(v2.1)해 검수 가능하게 만들고
   검수표(MD+HTML) 생성. **검수 준비 중 골드 결함 3건 발견** — FAQ HWP 표의 LTV/DTI 열이 텍스트
   추출에서 뭉개져 DTI 값을 LTV로 읽은 문항들. `check_gold_against_spec()`로 자동 검사화했고,

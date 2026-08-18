@@ -645,26 +645,31 @@
       "note": "특례 조건(증액 없음)을 무시하는지"
     },
     {
-      "id": "CHALLENGE-NOC-001",
+      "id": "CHALLENGE-EXC-009",
       "split": "CHALLENGE",
-      "category": "NO_CHANGE",
-      "question": "규제지역 지정으로 서민·실수요자의 LTV도 낮아졌는가?",
-      "gold_answer": "표상 서민·실수요자는 60%로 좌동이다. 6.30 이전 非규제(수도권)에서도 60%였다.",
+      "category": "EXCEPTION",
+      "question": "서민·실수요자는 완화 대상이므로 규제지역 지정으로 LTV가 낮아지지 않는가?",
+      "gold_answer": "낮아진다. 서민·실수요자도 70%에서 60%로 강화된다. 완화 대상이라는 것은 일반 차주(40%)보다 높은 비율을 받는다는 뜻이지 변화가 없다는 뜻이 아니다.",
       "gold_facts": [
+        "70%",
         "60%",
-        "좌동"
+        "낮아진다"
       ],
       "citations": [
         {
-          "source_doc_id": "FAQ_20260630",
-          "quote": "서민· 실수요자5) 60%(아파트 限) (좌동) 최대한도 15억원이하6·15~25억원4·25억원초과2억원2) 정책성 대출 디딤돌 대출 (좌동) 최대한도 일반차주2"
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "※ 생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용 다주택자는 수도권 內 주택"
+        },
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기"
         }
       ],
       "expect_escalation": false,
       "policy_version": "FSC_20260630",
       "rule_id": "REG_REALDEMAND",
-      "authored_by": "ai_draft",
-      "note": "'모든 값이 강화됐다'는 과잉 일반화 유도"
+      "authored_by": "human_confirmed",
+      "note": "✅2026-08-18 검수: 초안은 FAQ Q2 표를 잘못 읽어 '좌동(변화 없음)'이라 했으나 실제로는 70%→60% 변경이다. 따라서 NO_CHANGE가 아니라 EXCEPTION. 함정 방향이 뒤집혔다 — '완화 대상 = 안 바뀜'이라는 가정을 친다."
     },
     {
       "id": "CHALLENGE-NOC-002",

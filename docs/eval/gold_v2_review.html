@@ -65,6 +65,10 @@ section { display:flex; flex-direction:column; gap:18px; }
 .verdict legend { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); padding:0 6px; }
 .verdict label { display:flex; align-items:center; gap:7px; font-size:14px; cursor:pointer; }
 
+.conflict.resolved { border-left-color:var(--ok); }
+.id.ok { color:var(--panel); background:var(--ok); }
+.tag.done { border-color:var(--ok); color:var(--ok); }
+.why { font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--ok); padding-left:12px; }
 .q { margin:0; border-left:3px solid var(--line); padding-left:12px; }
 .q figcaption { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); margin-bottom:3px; }
 .q blockquote { margin:0; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.65;
@@ -106,96 +110,53 @@ footer { color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); p
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:14px">
     <h1>골드 v2 도메인 검수표</h1>
-    <p class="lede">6·30 RegChange 추출 골드 23항목과, 확정 명세(<code>05_RULE_SPEC</code>)와
-    어긋나는 QA 골드 3건. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim은 보장되지만,
+    <p class="lede">6·30 RegChange 추출 골드 23항목. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim은 보장되지만,
     <strong>그 인용이 그 주장을 뒷받침하는지는 사람이 판단할 몫</strong>이다.</p>
     <div class="meta">
-      <span>전 항목 ai_draft</span><span>충돌 3건</span>
+      <span>검수 완료 3건</span><span>충돌 0건</span>
       <span>필수 변경 19</span><span>예외 4</span>
     </div>
   </header>
 
   <section>
-    <h2>1. 확정 명세와 충돌 — 먼저 판단이 필요한 3건</h2>
-    <p class="lede">둘 중 하나는 틀렸다. 고치기 전까지 이 항목들이 만드는 수치는 의미를 잃는다.</p>
+    <h2>1. 검수 완료 — 정정된 3건</h2>
+    <p class="lede">명세 대조에서 걸린 항목이 없다. 아래는 검수로 정정된 항목의 기록이다.</p>
     
-    <article class="conflict">
+    <article class="conflict resolved">
       <header>
-        <span class="id">LOCKED-BOR-002</span>
+        <span class="id ok">LOCKED-BOR-002</span>
         <span class="tag">BORROWER_TYPE</span>
         <span class="tag seal">LOCKED</span>
+        <span class="tag done">확정</span>
       </header>
       <p class="ask">6.30 이전 非규제지역(수도권)에서 일반 차주의 LTV는 얼마였는가?</p>
-      <div class="face-off">
-        <div class="side gold">
-          <span class="side-label">골드 초안이 말하는 것</span>
-          <p>60%였으며 아파트에 한한다.</p>
-        </div>
-        <div class="versus" aria-hidden="true">vs</div>
-        <div class="side spec">
-          <span class="side-label">확정 명세가 말하는 것</span>
-          <p>확정 명세는 70%. FAQ Q2 표의 DTI 열을 LTV로 읽었을 가능성</p>
-        </div>
-      </div>
-      <figure class="q"><figcaption>FAQ_20260630</figcaption><blockquote>일반 차주 60%(아파트 限) 조정대상지역(아파트 限) 50% 투기과열지구 40% 최대한도 15억원이하6·15~25억원4·25억원초과2억원2) 생애최초 구매자4)</blockquote></figure>
-      <fieldset class="verdict">
-        <legend>판정</legend>
-        <label><input type="radio" name="v-LOCKED-BOR-002"> 골드가 틀림 — 골드 수정</label>
-        <label><input type="radio" name="v-LOCKED-BOR-002"> 명세가 틀림 — 명세 수정</label>
-        <label><input type="radio" name="v-LOCKED-BOR-002"> 둘 다 맞음 — 문맥이 다름</label>
-      </fieldset>
+      <div class="side spec"><span class="side-label">확정된 답</span><p>70%였다. 규제지역 지정으로 40%로 강화된다.</p></div>
+      <p class="why">✅2026-08-18 검수: 초안은 FAQ Q2 표의 &#x27;60%&#x27;를 LTV로 읽었으나 그 60%는 DTI다. 명세(05_RULE_SPEC C-2 B1) 70%가 맞음을 사용자가 확정.</p>
+      <figure class="q"><figcaption>FSC_PRESS_20260630</figcaption><blockquote>규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기</blockquote></figure>
     </article>
-    <article class="conflict">
+    <article class="conflict resolved">
       <header>
-        <span class="id">LOCKED-BOR-003</span>
+        <span class="id ok">LOCKED-BOR-003</span>
         <span class="tag">BORROWER_TYPE</span>
         <span class="tag seal">LOCKED</span>
+        <span class="tag done">확정</span>
       </header>
       <p class="ask">조정대상지역과 투기과열지구의 일반 차주 LTV는 각각 얼마인가?</p>
-      <div class="face-off">
-        <div class="side gold">
-          <span class="side-label">골드 초안이 말하는 것</span>
-          <p>조정대상지역 50%, 투기과열지구 40%이며 아파트에 한한다.</p>
-        </div>
-        <div class="versus" aria-hidden="true">vs</div>
-        <div class="side spec">
-          <span class="side-label">확정 명세가 말하는 것</span>
-          <p>확정 명세는 투기과열·조정 모두 40%이고, 종류별로 갈리는 것은 DTI다</p>
-        </div>
-      </div>
-      <figure class="q"><figcaption>FAQ_20260630</figcaption><blockquote>조정대상지역(아파트 限) 50% 투기과열지구 40% 최대한도 15억원이하6·15~25억원4·25억원초과2억원2) 생애최초 구매자4) (좌동) 60%(아파트 限)</blockquote></figure>
-      <fieldset class="verdict">
-        <legend>판정</legend>
-        <label><input type="radio" name="v-LOCKED-BOR-003"> 골드가 틀림 — 골드 수정</label>
-        <label><input type="radio" name="v-LOCKED-BOR-003"> 명세가 틀림 — 명세 수정</label>
-        <label><input type="radio" name="v-LOCKED-BOR-003"> 둘 다 맞음 — 문맥이 다름</label>
-      </fieldset>
+      <div class="side spec"><span class="side-label">확정된 답</span><p>둘 다 40%로 같다. 지역 종류별로 갈리는 40%/50%는 LTV가 아니라 DTI다.</p></div>
+      <p class="why">✅2026-08-18 검수: 초안은 FAQ Q2 표의 40/50을 LTV로 읽었으나 그것은 DTI 열이다. 평탄화된 텍스트에서는 LTV 열과 구분되지 않으므로 원본 표를 봐야 한다.</p>
+      <figure class="q"><figcaption>MOLIT_PRESS_20260630</figcaption><blockquote>LTV : 무주택(처분조건부 1주택 포함) 40%, 유주택 0% * 非규제지역(수도권 외)</blockquote></figure>
     </article>
-    <article class="conflict">
+    <article class="conflict resolved">
       <header>
-        <span class="id">CHALLENGE-NOC-001</span>
-        <span class="tag">NO_CHANGE</span>
+        <span class="id ok">CHALLENGE-EXC-009</span>
+        <span class="tag">EXCEPTION</span>
         <span class="tag seal">CHALLENGE</span>
+        <span class="tag done">확정</span>
       </header>
-      <p class="ask">규제지역 지정으로 서민·실수요자의 LTV도 낮아졌는가?</p>
-      <div class="face-off">
-        <div class="side gold">
-          <span class="side-label">골드 초안이 말하는 것</span>
-          <p>표상 서민·실수요자는 60%로 좌동이다. 6.30 이전 非규제(수도권)에서도 60%였다.</p>
-        </div>
-        <div class="versus" aria-hidden="true">vs</div>
-        <div class="side spec">
-          <span class="side-label">확정 명세가 말하는 것</span>
-          <p>확정 명세는 70%. FAQ Q2 표의 DTI 열을 LTV로 읽었을 가능성</p>
-        </div>
-      </div>
-      <figure class="q"><figcaption>FAQ_20260630</figcaption><blockquote>서민· 실수요자5) 60%(아파트 限) (좌동) 최대한도 15억원이하6·15~25억원4·25억원초과2억원2) 정책성 대출 디딤돌 대출 (좌동) 최대한도 일반차주2</blockquote></figure>
-      <fieldset class="verdict">
-        <legend>판정</legend>
-        <label><input type="radio" name="v-CHALLENGE-NOC-001"> 골드가 틀림 — 골드 수정</label>
-        <label><input type="radio" name="v-CHALLENGE-NOC-001"> 명세가 틀림 — 명세 수정</label>
-        <label><input type="radio" name="v-CHALLENGE-NOC-001"> 둘 다 맞음 — 문맥이 다름</label>
-      </fieldset>
+      <p class="ask">서민·실수요자는 완화 대상이므로 규제지역 지정으로 LTV가 낮아지지 않는가?</p>
+      <div class="side spec"><span class="side-label">확정된 답</span><p>낮아진다. 서민·실수요자도 70%에서 60%로 강화된다. 완화 대상이라는 것은 일반 차주(40%)보다 높은 비율을 받는다는 뜻이지 변화가 없다는 뜻이 아니다.</p></div>
+      <p class="why">✅2026-08-18 검수: 초안은 FAQ Q2 표를 잘못 읽어 &#x27;좌동(변화 없음)&#x27;이라 했으나 실제로는 70%→60% 변경이다. 따라서 NO_CHANGE가 아니라 EXCEPTION. 함정 방향이 뒤집혔다 — &#x27;완화 대상 = 안 바뀜&#x27;이라는 가정을 친다.</p>
+      <figure class="q"><figcaption>FSC_PRESS_20260630</figcaption><blockquote>※ 생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용 다주택자는 수도권 內 주택</blockquote></figure><figure class="q"><figcaption>FSC_PRESS_20260630</figcaption><blockquote>규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기</blockquote></figure>
     </article>
   </section>
 

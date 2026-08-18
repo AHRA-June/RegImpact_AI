@@ -70,6 +70,10 @@ def _check_regulated_by_type(item: GoldItem, text: str, pcts: set[str]) -> str |
     others = pcts - {expected}
     if not others:
         return None
+    # 답이 "LTV는 같고 갈리는 값은 DTI다"라고 **명시적으로 구분**하면 이 결함의 반대다.
+    # (검수로 정정된 문항이 정정 때문에 다시 잡히면 검사가 사람을 되돌려 보낸다.)
+    if "dti" in text.lower() and expected in pcts:
+        return None
     return (f"[{item.id}] 규제지역 LTV가 지역 종류별로 다르다고 주장({sorted(pcts)}) — "
             f"확정 명세는 투기과열·조정 모두 {expected}이고, 종류별로 갈리는 것은 DTI다")
 

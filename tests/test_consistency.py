@@ -47,6 +47,13 @@ def test_flags_regulated_ltv_that_differs_by_region_type():
     assert not check_gold_against_spec([item]).ok
 
 
+def test_does_not_flag_an_answer_that_explicitly_separates_ltv_from_dti():
+    """정정된 문항이 정정 때문에 다시 잡히면 검사가 사람을 되돌려 보낸다."""
+    item = _item("조정대상지역과 투기과열지구의 LTV는?",
+                 "둘 다 40%로 같다. 갈리는 40%/50%는 LTV가 아니라 DTI다.")
+    assert check_gold_against_spec([item]).ok
+
+
 # ------------------------------------------------------- 놔둬야 하는 것 (오탐 방지)
 
 @pytest.mark.parametrize("q,a", [
@@ -72,14 +79,14 @@ def test_spec_conforming_baseline_passes():
 
 # ------------------------------------------------------- 실제 골드셋 상태
 
-def test_known_conflicts_are_exactly_the_three_documented_items():
-    """검수 대기 중인 충돌은 3건이며 검수표(GOLD_V2_REVIEW.md)에 기록돼 있다.
+def test_no_unresolved_conflicts_remain():
+    """2026-08-18 검수로 3건 모두 해소됐다(전부 '명세가 맞음').
 
-    검수로 고쳐지면 이 테스트가 실패한다 — 그때 기대값을 줄이는 것이 정상 흐름이다.
+    새 충돌이 생기면 여기서 잡힌다 — 그때는 검수표를 다시 만들고 사람 판단을 받는다.
     """
     rep = check_gold_against_spec(_all_items())
     flagged = {c.split("]")[0].strip("[ ") for c in rep.conflicts}
-    assert flagged == {"LOCKED-BOR-002", "LOCKED-BOR-003", "CHALLENGE-NOC-001"}
+    assert flagged == set()
 
 
 def test_precision_is_high_on_the_real_goldset():

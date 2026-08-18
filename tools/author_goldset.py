@@ -48,11 +48,12 @@ def item(
     id_: str, split: Split, category: C, question: str, answer: str,
     facts: list[str], cites: list[Citation], *,
     escalate: bool = False, rule_id: str | None = None, note: str = "",
+    authored_by: str = "ai_draft",
 ) -> GoldItem:
     return GoldItem(
         id=id_, split=split, category=category, question=question, gold_answer=answer,
         gold_facts=tuple(facts), citations=tuple(cites), expect_escalation=escalate,
-        policy_version=POLICY, rule_id=rule_id, authored_by="ai_draft", note=note,
+        policy_version=POLICY, rule_id=rule_id, authored_by=authored_by, note=note,
     )
 
 

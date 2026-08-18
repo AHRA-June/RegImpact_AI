@@ -679,44 +679,44 @@
       "split": "LOCKED",
       "category": "BORROWER_TYPE",
       "question": "6.30 이전 非규제지역(수도권)에서 일반 차주의 LTV는 얼마였는가?",
-      "gold_answer": "60%였으며 아파트에 한한다.",
+      "gold_answer": "70%였다. 규제지역 지정으로 40%로 강화된다.",
       "gold_facts": [
-        "60%",
-        "아파트에 한한다"
+        "70%",
+        "40%"
       ],
       "citations": [
         {
-          "source_doc_id": "FAQ_20260630",
-          "quote": "일반 차주 60%(아파트 限) 조정대상지역(아파트 限) 50% 투기과열지구 40% 최대한도 15억원이하6·15~25억원4·25억원초과2억원2) 생애최초 구매자4)"
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기"
         }
       ],
       "expect_escalation": false,
       "policy_version": "FSC_20260630",
-      "rule_id": null,
-      "authored_by": "ai_draft",
-      "note": ""
+      "rule_id": "NONREG_STD_70",
+      "authored_by": "human_confirmed",
+      "note": "✅2026-08-18 검수: 초안은 FAQ Q2 표의 '60%'를 LTV로 읽었으나 그 60%는 DTI다. 명세(05_RULE_SPEC C-2 B1) 70%가 맞음을 사용자가 확정."
     },
     {
       "id": "LOCKED-BOR-003",
       "split": "LOCKED",
       "category": "BORROWER_TYPE",
       "question": "조정대상지역과 투기과열지구의 일반 차주 LTV는 각각 얼마인가?",
-      "gold_answer": "조정대상지역 50%, 투기과열지구 40%이며 아파트에 한한다.",
+      "gold_answer": "둘 다 40%로 같다. 지역 종류별로 갈리는 40%/50%는 LTV가 아니라 DTI다.",
       "gold_facts": [
-        "조정대상지역 50%",
-        "투기과열지구 40%"
+        "둘 다 40%",
+        "DTI"
       ],
       "citations": [
         {
-          "source_doc_id": "FAQ_20260630",
-          "quote": "조정대상지역(아파트 限) 50% 투기과열지구 40% 최대한도 15억원이하6·15~25억원4·25억원초과2억원2) 생애최초 구매자4) (좌동) 60%(아파트 限)"
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "LTV : 무주택(처분조건부 1주택 포함) 40%, 유주택 0% * 非규제지역(수도권 외)"
         }
       ],
       "expect_escalation": false,
       "policy_version": "FSC_20260630",
       "rule_id": "REG_STD",
-      "authored_by": "ai_draft",
-      "note": ""
+      "authored_by": "human_confirmed",
+      "note": "✅2026-08-18 검수: 초안은 FAQ Q2 표의 40/50을 LTV로 읽었으나 그것은 DTI 열이다. 평탄화된 텍스트에서는 LTV 열과 구분되지 않으므로 원본 표를 봐야 한다."
     },
     {
       "id": "LOCKED-BOR-004",

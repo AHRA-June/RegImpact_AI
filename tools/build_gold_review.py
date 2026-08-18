@@ -27,9 +27,20 @@ L = ["# 골드 v2 도메인 검수표", "",
      "> 확정한 항목은 `authored_by`를 `human_confirmed`로 바꾸고 이 표를 다시 생성하세요.", ""]
 
 # ---------------------------------------------------------------- §1
-L += ["---", "", f"## 1. ⚠️ 우선 검토 — 확정 명세와 충돌 {len(conf.conflicts)}건", "",
-      "아래는 **골드가 `05_RULE_SPEC`(사용자 확정)과 어긋나는** 항목이다. 둘 중 하나는 틀렸고,",
-      "고치기 전까지는 이 항목들이 만드는 모든 수치가 의미를 잃는다. **가장 먼저 판단이 필요하다.**", ""]
+resolved = [i for i in items if i.authored_by == "human_confirmed"]
+
+if conf.conflicts:
+    L += ["---", "", f"## 1. ⚠️ 우선 검토 — 확정 명세와 충돌 {len(conf.conflicts)}건", "",
+          "아래는 **골드가 `05_RULE_SPEC`(사용자 확정)과 어긋나는** 항목이다. 둘 중 하나는 틀렸고,",
+          "고치기 전까지는 이 항목들이 만드는 모든 수치가 의미를 잃는다. **가장 먼저 판단이 필요하다.**", ""]
+else:
+    L += ["---", "", f"## 1. ✅ 확정 명세와 충돌 없음 (검수 완료 {len(resolved)}건)", "",
+          "명세 대조에서 걸린 항목이 없다. 아래는 검수로 **정정된** 항목의 기록이다.", ""]
+    for it in resolved:
+        L += [f"#### `{it.id}` — {it.category.value} · {it.split.value}",
+              f"- **질문:** {it.question}",
+              f"- **확정 답:** {it.gold_answer}",
+              f"- **정정 사유:** {it.note}", ""]
 for c in conf.conflicts:
     gid = c.split("]")[0].strip("[ ")
     it = by_id[gid]
@@ -135,6 +146,23 @@ for c in conf.conflicts:
       </fieldset>
     </article>""")
 
+resolved_cards = []
+for it in resolved:
+    resolved_cards.append(f"""
+    <article class="conflict resolved">
+      <header>
+        <span class="id ok">{esc(it.id)}</span>
+        <span class="tag">{esc(it.category.value)}</span>
+        <span class="tag seal">{esc(it.split.value)}</span>
+        <span class="tag done">확정</span>
+      </header>
+      <p class="ask">{esc(it.question)}</p>
+      <div class="side spec"><span class="side-label">확정된 답</span><p>{esc(it.gold_answer)}</p></div>
+      <p class="why">{esc(it.note)}</p>
+      {quote_block(it.citations)}
+    </article>""")
+
+
 def check_items(entries, key):
     out = []
     for e in entries:
@@ -217,6 +245,10 @@ section {{ display:flex; flex-direction:column; gap:18px; }}
 .verdict legend {{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); padding:0 6px; }}
 .verdict label {{ display:flex; align-items:center; gap:7px; font-size:14px; cursor:pointer; }}
 
+.conflict.resolved {{ border-left-color:var(--ok); }}
+.id.ok {{ color:var(--panel); background:var(--ok); }}
+.tag.done {{ border-color:var(--ok); color:var(--ok); }}
+.why {{ font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--ok); padding-left:12px; }}
 .q {{ margin:0; border-left:3px solid var(--line); padding-left:12px; }}
 .q figcaption {{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); margin-bottom:3px; }}
 .q blockquote {{ margin:0; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.65;
@@ -258,19 +290,18 @@ footer {{ color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); 
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:14px">
     <h1>골드 v2 도메인 검수표</h1>
-    <p class="lede">6·30 RegChange 추출 골드 {total_items}항목과, 확정 명세(<code>05_RULE_SPEC</code>)와
-    어긋나는 QA 골드 {len(conf.conflicts)}건. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim은 보장되지만,
+    <p class="lede">6·30 RegChange 추출 골드 {total_items}항목. 인용은 원문에서 기계적으로 잘라 왔으므로 verbatim은 보장되지만,
     <strong>그 인용이 그 주장을 뒷받침하는지는 사람이 판단할 몫</strong>이다.</p>
     <div class="meta">
-      <span>전 항목 ai_draft</span><span>충돌 {len(conf.conflicts)}건</span>
+      <span>검수 완료 {len(resolved)}건</span><span>충돌 {len(conf.conflicts)}건</span>
       <span>필수 변경 {len(gold["required_changes"])}</span><span>예외 {len(gold["exceptions"])}</span>
     </div>
   </header>
 
   <section>
-    <h2>1. 확정 명세와 충돌 — 먼저 판단이 필요한 {len(conf.conflicts)}건</h2>
-    <p class="lede">둘 중 하나는 틀렸다. 고치기 전까지 이 항목들이 만드는 수치는 의미를 잃는다.</p>
-    {"".join(conflict_cards)}
+    <h2>{"1. 확정 명세와 충돌 — 먼저 판단이 필요한 " + str(len(conf.conflicts)) + "건" if conf.conflicts else "1. 검수 완료 — 정정된 " + str(len(resolved)) + "건"}</h2>
+    <p class="lede">{"둘 중 하나는 틀렸다. 고치기 전까지 이 항목들이 만드는 수치는 의미를 잃는다." if conf.conflicts else "명세 대조에서 걸린 항목이 없다. 아래는 검수로 정정된 항목의 기록이다."}</p>
+    {"".join(conflict_cards) if conf.conflicts else "".join(resolved_cards)}
   </section>
 
   <section>
