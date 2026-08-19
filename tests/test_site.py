@@ -370,6 +370,32 @@ def test_signal_shows_what_calculators_cannot(site):
     assert "오늘의 <b>상태</b>" in html and "사건" in html  # 상태 vs 사건 프레임
 
 
+def test_signal_qa_answers_in_plain_language_backed_by_full_source(site):
+    """원문 발췌만 주면 일반인은 벽을 만난다(2026-08-19 사용자 리뷰) — 쉬운 요약이 먼저,
+    그 아래 원문 발췌, 누르면 공문 전체(해당 문장 강조)가 열려야 한다. 요약은 LLM 생성이
+    아니라 **미리 작성해 사람이 검수하는 안내문**이고, 인용·규칙 값은 전부 검증된 재료에서 온다."""
+    import json as _json
+    import re as _re
+
+    from regimpact.extractor.sources import load_corpus
+    from regimpact.report import collect
+    from regimpact.ui.signal import _rule_quotes, easy_answers
+
+    html = site["signal.html"]
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    ev = collect(generated_at="x")
+    norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
+    answers = easy_answers(_rule_quotes(ev.extraction), fx["constants"], norm)
+    assert len(answers) >= 4                      # 프리셋 질문 전부 커버
+    for a in answers:
+        assert a["easy"] in html, f"{a['id']}: 안내문이 화면에 없다"
+        for c in a["cites"]:
+            assert c["quote"] in norm[c["doc"]], f"{a['id']}: 인용이 원문에 없다"
+    assert "미리 검수된 안내" in html             # 생성이 아니라 사전 작성임을 정직하게 표기
+    assert 'id="modal"' in html                   # 원문 전체 모달
+    assert "원문 전체" in html                    # 발췌 → 전체로 가는 길
+
+
 def test_signal_is_honest_with_customers(site):
     """고객 화면일수록 한계를 숨기면 안 된다 — 금융사고가 되는 지점이다."""
     html = site["signal.html"]
