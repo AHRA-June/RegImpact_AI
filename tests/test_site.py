@@ -32,6 +32,7 @@ EXPECTED = {
     "assurance.html", "portfolio.html", "sources.html",
     "validation_report.html", "validation_summary.html",
     "model_system_card.html", "ai_risk_register.html",
+    "graph.html", "search.html",
 }
 
 
@@ -115,6 +116,47 @@ def test_summary_shows_gaps_not_only_scores(site):
     assert "미개봉" in html                      # LOCKED/CHALLENGE 미평가
     assert "독립 벤치마크가 아니다" in html       # 골드셋 한계
     assert "미측정" in html                      # 측정 불가 지표를 통과로 치지 않는다
+
+
+def test_graph_page_carries_provenance(site):
+    """그래프 화면의 관계마다 출처가 실려 있어야 한다 — 없으면 LLM 그래프와 구분이 안 된다."""
+    html = site["graph.html"]
+    for prov in ("정책 버전 DB", "룰엔진 상수 diff", "고객 영향 실측", "독립 명세 오라클"):
+        assert prov in html, f"그래프에 출처 '{prov}' 가 없다"
+
+
+def test_search_page_shows_measured_recall_and_misses(site):
+    """검색 화면은 recall 실측과 **못 찾은 인용**을 함께 싣는다 — 좋은 숫자만 실으면 과장."""
+    from regimpact.extractor.sources import load_sources
+    from regimpact.retrieval import BM25Index, chunk_sources, citation_recall
+    src = load_sources()
+    rep = citation_recall(BM25Index(chunk_sources(src)), src)
+    html = site["search.html"]
+    for k in rep.ks:
+        assert f"recall@{k}" in html
+    assert f"{rep.recall(5):.0%}" in html
+    assert f"못 찾은 인용 {len(rep.misses_at_max_k)}건" in html
+    for m in rep.misses_at_max_k:
+        assert m.item_id in html, f"미적중 {m.item_id} 이 화면에 없다"
+
+
+def test_search_js_port_matches_python(site):
+    """검색 JS 포팅본 ↔ Python 대조 — 룰엔진 포팅 대조와 같은 통제."""
+    if shutil.which("node") is None:
+        pytest.skip("node 없음 — CI 에서는 반드시 돈다")
+    r = subprocess.run(
+        ["node", str(REPO / "tools" / "verify_search_port.mjs"),
+         str(site["_dir"] / "search_fixtures.json")],
+        cwd=REPO, capture_output=True, text=True,
+    )
+    assert r.returncode == 0, r.stderr or r.stdout
+
+
+def test_search_page_does_not_pretend_to_be_full_rag(site):
+    """생성(LLM)은 정적 페이지에서 실행되지 않는다 — 실행하는 척 금지."""
+    html = site["search.html"]
+    assert "검색 절반" in html
+    assert "run_retrieval_eval" in html
 
 
 def test_sources_page_does_not_pretend_to_extract(site):

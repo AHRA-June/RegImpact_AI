@@ -34,11 +34,16 @@ def _load_fixture_builder():
 
 build_fixtures = _load_fixture_builder()
 
+from regimpact.extractor.sources import load_sources             # noqa: E402
 from regimpact.governance import render_card, render_register    # noqa: E402
+from regimpact.graph import build_graph                          # noqa: E402
 from regimpact.report import collect                             # noqa: E402
+from regimpact.retrieval import BM25Index, chunk_sources, citation_recall  # noqa: E402
 from regimpact.report.validation_report import render as render_report  # noqa: E402
 from regimpact.ui.docrender import markdown_to_html              # noqa: E402
+from regimpact.ui.graphview import render as render_graph        # noqa: E402
 from regimpact.ui.intake import render as render_intake          # noqa: E402
+from regimpact.ui.searchpage import render as render_search      # noqa: E402
 from regimpact.ui.landing import render as render_landing        # noqa: E402
 from regimpact.ui.playground import render as render_playground  # noqa: E402
 from regimpact.ui.site import render_site                        # noqa: E402
@@ -123,6 +128,39 @@ def main() -> int:
     # 3b. 규제 문서 등록 — 스냅샷 해시·정책 타임라인은 저장소 실데이터에서 계산
     (out / "sources.html").write_text(
         render_intake(ev.extraction), encoding="utf-8")
+
+    # 3d. 영향 지식그래프 — 검증된 산출물에서 결정적으로 조립
+    g = build_graph(ev.extraction, ev.impact, ev.regression, registry=ev.registry)
+    (out / "graph.html").write_text(
+        render_graph(g, portfolio_size=len(ev.impact.impacts)), encoding="utf-8")
+
+    # 3e. 규제 원문 검색 — BM25 색인 + recall@k 실측 + JS 포팅 대조
+    sources = load_sources()
+    index = BM25Index(chunk_sources(sources))
+    reports = {flag: citation_recall(index, sources, expand=flag) for flag in (False, True)}
+    for flag in (False, True):
+        print(f"  검색 {'확장 ON ' if flag else '확장 OFF'}: {reports[flag].summary()}")
+    export = index.export()
+    probes = []
+    from regimpact.eval import Split as _Split, load_split as _load_split
+    for item in _load_split(_Split.DEV):
+        for flag in (False, True):
+            top = index.search(item.question, k=10, expand=flag)
+            probes.append({"query": item.question, "expand": flag,
+                           "expected": [{"id": s.chunk.id, "score": s.score} for s in top]})
+    search_fx = out / "search_fixtures.json"
+    search_fx.write_text(json.dumps({"index": export, "probes": probes},
+                                    ensure_ascii=False) + "\n", encoding="utf-8")
+    if shutil.which("node") is not None:
+        r = subprocess.run(["node", str(REPO / "tools" / "verify_search_port.mjs"),
+                            str(search_fx)], cwd=REPO, capture_output=True, text=True)
+        print("  " + (r.stdout or r.stderr).strip().splitlines()[0])
+        if r.returncode != 0:
+            raise SystemExit("검색 JS 포팅본이 Python 과 어긋난다 — 배포 중단")
+    else:
+        print("  ⚠ node 없음 — 검색 포팅 대조를 건너뛴다")
+    (out / "search.html").write_text(
+        render_search(export, reports), encoding="utf-8")
 
     # 3c. 검증 요약 — 보고서의 1페이지 요약. QA 골드 검수 진행률도 실데이터에서.
     from regimpact.eval import Split, load_split

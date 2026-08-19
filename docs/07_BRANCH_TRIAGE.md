@@ -106,7 +106,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 | S-10 | 내규 영향도 맵 (`rule_catalog`) | fmo0g8 |
 | S-11 | 민감도(sensitivity)·익스포저(exposure) 분석 | fmo0g8 |
 | S-12 | 라이브파이어 예행연습 + 증거 패키지 | fmo0g8 |
-| S-13 | RAG/retrieval (BM25 + recall@k) | d2et38 |
+| S-13 | ~~RAG/retrieval (BM25 + recall@k)~~ | 🟡 검색 절반 완료 (2026-08-19, `retrieval/` — d2et38 코드 대신 새로 작성). 생성(LLM) 절반과 전체문맥 vs RAG 비교는 과거 정책 원문 확보 후 |
 | S-14 | 입력 무결성 게이트 (`validation.py`) | 8k0xmx |
 | S-15 | TC Generator 조합 격자 3,200건 + Proposal→TC 연결 | d2et38 · sp37fd |
 
