@@ -177,14 +177,16 @@ def render(ev: ValidationEvidence, *, qa_confirmed: int = 0, qa_total: int = 0) 
         if qa_total else "QA 골드는 검수 진행 중 — 확정 전까지 QA 지표는 상대 비교용"
     )
     lacks = [
-        f"단일 정책(6·30) 코퍼스 — {', '.join(_METRIC_KO.get(m, m) for m in unmeasured) or '일부 지표'}"
-        "은 측정 자체가 불가해 미측정으로 남겼다",
+        f"{', '.join(_METRIC_KO.get(m, m) for m in unmeasured) or '일부 지표'}은 "
+        "미측정으로 남겼다 — 미측정은 통과가 아니다 "
+        "(시점·정책 버전 일관성은 시점 질의 골드 12문항이 🤖 초안이라 검수 후 측정 가동)",
         f"영향 측정 커버리지 {im.impact_coverage:.1%} 상한 — 원문에 없는 기준값(Q10)을 "
         "추정하지 않는 대가다. 지어내면 즉시 100%가 된다",
         "골드 정답지 작성자 = 개발자 — 독립 벤치마크가 아니다 (추출 골드는 사람 확정 완료, "
         + qa_line + ")",
         "봉인 평가셋(LOCKED/CHALLENGE) 미개봉 — 최종 성능은 아직 평가 전이다",
-        "임계값 일부 미확정(TBD) — 사용자 확정 대기",
+        "Policy-version Consistency 임계 미정(TBD) — 시점 질의 측정 가동 전 "
+        "(나머지 임계값은 2026-08-19 사용자 확정)",
     ]
     two_col = (
         '<div class="grid grid-cols-2 gap-6">'

@@ -6,6 +6,39 @@
 
 ---
 
+## 2026-08-19 — 시점 질의 골드 TEMPORAL 12문항 신설 🤖 (검수 대기)
+
+- **무엇:** `docs/eval/gold/temporal.json` — Policy-version Consistency 가동용 별도 셋
+  (`tools/gold_temporal.py`). §0-A의 115문항(DEV/LOCKED/CHALLENGE)과 분리 — DEV/LOCKED
+  분포 규율을 건드리지 않는다. 비봉인(DEV처럼 튜닝·검수용). LOCKED 대응 시점 셋은
+  코퍼스 확장(2016/2017 원문) 후 설계.
+- **구성 (실패모드에서 역산):** ① 시점→유효 정책 5문항(resolver 대조 가능, 발표일≠시행일
+  하루 차이 경계쌍 포함) ② 문서가 말하는 효력일 2문항(한 문서 안의 두 효력일 6.19/6.23 함정
+  포함) ③ 경과규정 시점 컷오프 2문항 ④ 2025↔2026 동형 문구 판별 1문항(recall 급락의 원인 쌍)
+  ⑤ **해제일 미상이라 escalation이 정답인** 2문항(2020 6·17 DRAFT의 한계를 골드에 새김).
+- **새 장치 — `as_of` 필드 + `eval/temporal.py`:** as_of가 있는 문항의 policy_version은
+  "그 시점 유효 최신 정책"이라는 주장이므로 Temporal Policy Resolver와 대조한다. 골드·정책 DB
+  어느 쪽이 틀려도 드러난다. escalation 문항은 반대 방향 — **DB가 답할 수 있게 되는 순간**
+  (해제 원문 확보 → confirm()) 검사가 "답변형으로 갱신하라"고 지목한다. 한계를 골드에
+  새겼으면 한계가 풀릴 때 골드도 함께 풀려야 한다. 변이 테스트 2건으로 검사기 방어력 확인.
+- **곁가지 정비:** ① KNOWN_POLICY_VERSIONS 를 손 목록에서 정책 DB 유도로 전환(갈라짐 방지)
+  ② 골드 인용 대조를 코퍼스 전체(7건)로 확장(6·30 문항은 상위집합이라 결과 불변)
+  ③ "단일 정책이라 측정 불가" 문구를 실상("골드 🤖 초안이라 검수 후 가동")으로 정정 —
+  scorecard·thresholds·요약 페이지·metrics_spec.
+- 상태: 🤖 ai_draft — ✍️ 검수 대기. 검수 후 측정 가동 + 임계 제안. 테스트 521→530.
+
+## 2026-08-19 — metrics_spec 임계값 확정 (사용자)
+
+- **확정(사용자):** 2026-08-18 🤖 제안 임계값 전체를 그대로 채택.
+  - **100% 요구:** Exception Recall / Grandfathering Recall / Effective-date Accuracy /
+    Escalation Recall / Rule-regression 계열 전부 / Source Contradiction Rate(0%).
+  - **여유 구간:** Change Completeness ≥95% · Citation Correctness ≥98% ·
+    Unsupported Claim ≤2% · Escalation Precision ≥70% (근거는 `metrics_spec.md` §1 참고).
+  - **TBD 유지:** Policy-version Consistency — 시점 질의 골드가 아직 없어 미측정.
+    측정 가동 후(시점 질의 골드 초안 → 검수 → 측정) 임계를 별도 제안한다.
+- **효력:** 스코어카드의 합격/불합격 판정 기준이 사람 확정 근거를 갖는다.
+  코드(`assurance/thresholds.py`)는 이미 같은 값이라 변경 없음 — 문서 상태 표기만 🤖→✅.
+
 ## 2026-08-19 — 2020 6·17 지역 이관 검수 확정: Q1-A·Q2-A·Q3-A (사용자)
 
 - **확정(사용자):** 검수표(`docs/policies/REGION_REVIEW_20200617.md`)의 권고안 전부 채택.

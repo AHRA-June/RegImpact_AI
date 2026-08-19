@@ -107,8 +107,9 @@ THRESHOLDS: tuple[Threshold, ...] = (
     ),
     Threshold(
         "Policy-version Consistency", Dimension.POLICY_VERSION, None, Direction.AT_LEAST,
-        "6·30 단일 시나리오만 있어 시점 질의를 통계적으로 측정할 수 없다. "
-        "측정할 수 없는 지표에 임계를 먼저 적지 않는다 — 정책 사례가 늘면 정한다.",
+        "시점 질의 골드가 🤖 초안(TEMPORAL 12문항, 사람 검수 전)이라 아직 확정 수치로 "
+        "측정할 수 없다. 측정할 수 없는 지표에 임계를 먼저 적지 않는다 — "
+        "검수 완료 후 측정을 가동하며 임계를 정한다(2026-08-19 결정).",
     ),
     # ④ Rule · Test
     Threshold(

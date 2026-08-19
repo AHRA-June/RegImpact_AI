@@ -134,7 +134,7 @@ def score(ev: ValidationEvidence, *, js_port_agreement: Optional[float] = None) 
             1.0 if ev.drift.ok else 0.0,
             f"정책 {len(ev.registry.policies)}건 ↔ 지역 기준선 {ev.baseline_region_count}곳 양방향"),
         "Policy-version Consistency": (
-            None, "6·30 단일 시나리오 — 시점 질의를 통계적으로 측정할 수 없다"),
+            None, "시점 질의 골드(TEMPORAL 12문항)가 🤖 초안 — 사람 검수 후 측정 가동"),
         "Rule-regression Pass Rate": (
             r.pass_rate, f"독립 명세 오라클 대조 {r.passed}/{r.total}"),
         "Boundary-case Pass Rate": (

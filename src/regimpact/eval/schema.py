@@ -33,6 +33,7 @@ class Split(str, Enum):
     DEV = "DEV"                # 튜닝에 쓰는 유일한 셋
     LOCKED = "LOCKED"          # 최종 성능평가 — 개발 중 열람 금지
     CHALLENGE = "CHALLENGE"    # 적대적 평가 — 마지막에 1회
+    TEMPORAL = "TEMPORAL"      # 시점 질의 — Policy-version Consistency 가동용 (DEV처럼 비봉인)
 
 
 # 브리프 §11 "설계 철학": 예외·경과규정·시행일·충돌을 놓치는 것이 가장 무섭다.
@@ -62,6 +63,10 @@ class GoldItem:
     rule_id: Optional[str] = None       # 관련 rule_id (룰엔진 경로 밖이면 None)
     authored_by: str = "ai_draft"       # ai_draft(🤖) → human_confirmed(✅)
     note: str = ""
+    # 시점 질의 전용: 문항이 상정하는 조회 시점(YYYY-MM-DD). 있으면 Temporal Policy
+    # Resolver의 답(current_policy)과 policy_version이 정합해야 한다(eval/temporal.py).
+    # 문서 사실을 묻는 문항(시행일이 언제인가 등)은 조회 시점이 없으므로 None.
+    as_of: Optional[str] = None
 
     @property
     def is_high_risk(self) -> bool:
@@ -90,6 +95,7 @@ class GoldItem:
             rule_id=d.get("rule_id"),
             authored_by=d.get("authored_by", "ai_draft"),
             note=d.get("note", ""),
+            as_of=d.get("as_of"),
         )
 
 
