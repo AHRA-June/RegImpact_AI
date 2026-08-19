@@ -34,7 +34,9 @@ ENGINE_JS = Path(__file__).resolve().parent / "static" / "engine.js"
 SEARCH_JS = Path(__file__).resolve().parent / "static" / "search.js"
 
 _SIGNAL_CSS = """
+html{scroll-behavior:smooth}
 body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)}
+.dlink{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .dock{display:flex;justify-content:center;align-items:flex-start;gap:44px;
   padding:0;min-height:100vh}
 .pitch{display:none}
@@ -96,7 +98,8 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
   box-shadow:0 0 0 1px var(--primary) inset}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;margin-bottom:9px;cursor:pointer}
 .chk small{display:block;color:var(--on-surface-variant);font-size:11px;line-height:15px}
-.gfbox{border-top:1px dashed var(--outline-variant);margin-top:13px;padding-top:13px}
+.gfbox{border-top:1px dashed var(--outline-variant);margin-top:13px;padding-top:13px;
+  scroll-margin-top:74px}  /* 앵커 점프 시 고정 헤더에 가리지 않게 */
 .gfbox .hint{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .gfbox .hint button{padding:5px 10px;font-size:11.5px;border-radius:99px;font-family:inherit;
   border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);cursor:pointer}
@@ -237,6 +240,9 @@ _RULE_KO = {
 
 # 판정 근거 인용 매핑 — 규칙별로 어떤 원문 문장을 보여줄지. 인용 자체는 아래
 # `_rule_quotes` 가 추출 결과(원문 대조 75/75 통과)에서 verbatim 으로 뽑는다.
+# 담당자 연락처 블록 식별 — 02-2100-1690, 044-201-3317 같은 형식
+_PHONE = re.compile(r"0\d{1,2}-\d{3,4}-\d{4}")
+
 _QUOTE_PATTERNS = {
     "REG_STD": r"비규제지역70% → 규제지역40%",
     "NONREG_STD_70": r"비규제지역70% → 규제지역40%",
@@ -284,6 +290,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]
     p_base = f"{constants['LTV_BASELINE']:.0%}"
     p_std = f"{constants['LTV_REGULATED_STANDARD']:.0%}"
     p_first = f"{constants['LTV_FIRST_HOME']:.0%}"
+    p_multi = f"{constants['LTV_MULTI']:.0%}"
     molit, faq = "MOLIT_PRESS_20260630", "FAQ_20260630"
     return [
         {"id": "gf-timing",
@@ -316,6 +323,17 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]
          "cites": [_corpus_cut(norm_corpus, faq,
                                "3억원 초과 APT를 취득한 자의 전세대출 제한의 예외사유는?", 60),
                    _corpus_cut(norm_corpus, faq, "불가피한 실수요 등*에 대해서는 적용 예외를 인정", 160)]},
+        {"id": "non-regulated",
+         # "수도권 규제 외 지역은 어때?" 같은 질문 (2026-08-19 폰 리뷰에서 요약 부재 확인)
+         "keys": ["규제 외", "비규제", "규제가 아닌", "규제지역이 아닌", "지정 안 된",
+                  "지정되지 않", "지방", "수도권 외"],
+         "easy": f"이번에 새로 지정된 지역이 아니라면 대부분 그대로예요 — 무주택 기준은 "
+                 f"지금처럼 LTV {p_base}가 유지됩니다. 다만 두 가지는 주의하세요. "
+                 f"수도권에서 2주택 이상을 사는 경우는 규제지역이 아니어도 이번 규제"
+                 f"(LTV {p_multi})가 적용되고, 유주택자의 일부 조건은 공문에 기준값이 "
+                 "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. 위 ① 지역 선택에서 "
+                 "내 지역을 골라 직접 확인해 보세요.",
+         "cites": [quotes["MULTI_0"], quotes["REG_STD"]]},
     ]
 
 
@@ -347,6 +365,15 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     easy = easy_answers(quotes, fixtures["constants"], norm_corpus)
     docs_full = {d: norm_corpus[d] for d in docs_630}
 
+    # 고객 화면 색인에서 담당자 연락처 구간(실명·전화번호 블록)을 제외한다 — 공개 자료이긴
+    # 하지만 고객 질문의 답변 재료가 아니고, 검색 결과에 사람 이름·전화가 떠서 강조되는 것은
+    # UX·개인정보 감수성 문제다(2026-08-19 폰 실사용 리뷰). '공문 전체 보기'에는 원문
+    # 그대로 남는다 — 문서를 편집하는 것이 아니라 검색 재료만 고르는 것이다.
+    customer_export = dict(search_export)
+    customer_export["chunks"] = [
+        ch for ch in search_export["chunks"] if not _PHONE.search(ch["text"])
+    ]
+
     region_opts = "".join(
         f'<option value="{esc(code)}"{" selected" if code == "GURI" else ""}>'
         f'{esc(meta["label"])}</option>'
@@ -358,6 +385,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
         "생애최초인데 한도가 줄어드나요",
         "계약금을 냈으면 종전 규정을 적용받나요",
         "전세대출도 영향이 있나요",
+        "규제 외 지역인데 저도 영향 있나요",
     ]
     preset_btns = "".join(
         f'<button type="button" data-q="{esc(q)}">{esc(q)}</button>' for q in presets_qa)
@@ -445,7 +473,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <div class="f"><label for="price">주택 가격 (억원)</label>
         <input type="number" id="price" min="1" max="50" step="0.5" value="8"></div>
 
-      <div class="gfbox">
+      <div class="gfbox" id="gf">
         <div class="f" style="margin-bottom:8px"><label>③ 경과규정 체크 — 규제 발표 전에 이미 진행 중이었나요?</label>
           <div class="hint">
             <button type="button" id="gf-yes">시행 전에 계약했어요</button>
@@ -640,7 +668,8 @@ function run() {
     if (diff > 0) {
       dl.className = "delta bad";
       dl.innerHTML = `<b>한도가 약 ${won(diff)} 줄어요</b> (LTV ${pct(b.max_ltv)} → ${pct(a.max_ltv)}). `
-        + `계약·접수 시점에 따라 경과규정 대상일 수 있으니 아래 ③을 확인하세요.`;
+        + `계약·접수 시점에 따라 경과규정 대상일 수 있어요 — `
+        + `<a class="dlink" href="#gf">위 ③ 경과규정 체크</a>에 날짜를 넣어 확인하세요.`;
     } else if (diff === 0) {
       dl.className = "delta good";
       dl.innerHTML = `<b>이번 변경으로 한도가 달라지지 않아요</b> (LTV ${pct(a.max_ltv)} 유지).`;
@@ -723,6 +752,19 @@ run();
 // ---- ④ 근거 우선 Q&A — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
 //      요약은 질문 의도 매칭으로 고르는 사전 작성 안내문이지, 답을 생성하는 LLM이 아니다.
 const INDEX = buildIndex(IDX_EXPORT);
+// 발췌는 질문어가 처음 나오는 근처부터 보여준다 — 구간이 목차·표 꼬리에서 시작하면
+// 첫 네 줄이 질문과 무관해 보인다(2026-08-19 폰 리뷰). 원문 전체 보기는 구간 전체를 강조.
+function excerpt(text, q) {
+  const t = clean(text);
+  const terms = q.replace(/[?.,!]/g, " ").split(/\s+/).filter((w) => w.length >= 2);
+  let first = -1;
+  for (const w of terms) {
+    const j = t.indexOf(w);
+    if (j >= 0 && (first < 0 || j < first)) first = j;
+  }
+  if (first <= 40) return t;
+  return "… " + t.slice(Math.max(0, first - 30));
+}
 function matchEasy(q) {
   let best = null, bestN = 0;
   for (const e of EASY) {
@@ -749,7 +791,7 @@ function ask(q) {
           const d = DOCL[h.chunk.doc_id] ?? {};
           return `<button type="button" class="hit-c" data-t="${tgt(h.chunk.doc_id, h.chunk.text)}">`
             + `<div class="meta">${d.issuer ?? ""} · ${d.title ?? h.chunk.doc_id}</div>`
-            + `<div class="tx">${clean(h.chunk.text)}</div>`
+            + `<div class="tx">${excerpt(h.chunk.text, q)}</div>`
             + `<span class="open">원문 전체에서 보기 →</span></button>`;
         }).join("");
   }
@@ -779,7 +821,7 @@ document.querySelectorAll(".qa .preset button").forEach((b) =>
         .replace("__DEMO__", json.dumps(demo, ensure_ascii=False))
         .replace("__EASY__", json.dumps(easy, ensure_ascii=False))
         .replace("__DOCS_FULL__", json.dumps(docs_full, ensure_ascii=False))
-        .replace("__IDX__", json.dumps(search_export, ensure_ascii=False, separators=(",", ":")))
+        .replace("__IDX__", json.dumps(customer_export, ensure_ascii=False, separators=(",", ":")))
         .replace("__QUOTES__", json.dumps(quotes, ensure_ascii=False))
         .replace("__DOCL__", json.dumps(doc_labels, ensure_ascii=False))
         .replace("__DOCS_NOW__", json.dumps(docs_630, ensure_ascii=False))
