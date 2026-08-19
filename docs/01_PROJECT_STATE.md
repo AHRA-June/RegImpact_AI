@@ -60,9 +60,14 @@
    대조 실패 시 CI 가 배포를 막는다. 규칙 값은 JS 에 없다(픽스처에서 읽음) — 리터럴이 있으면
    대조가 실패한다. 화면은 값만이 아니라 **어느 규칙에서 멈췄는지(trace)** 를 보여준다.
 
-**다음**: Day 3 — S-07 Assurance 스코어카드 / README 리크루터-first / 최종 배포.
-   ✍️ **Settings → Pages → Source = GitHub Actions** 가 아직 안 돼 있어 deploy 잡이 실패한다
-   (build·테스트는 통과).
+✅ **Day 3** — S-07 Assurance 스코어카드(`assurance/`) + README 리크루터-first 재작성.
+   임계는 `thresholds.py` 에 근거와 함께 등록하며 근거 없이는 코드가 거부한다.
+   **미측정은 통과가 아니다** — JS 포팅 대조를 안 돌리면 NOT_MEASURED 로 남는다.
+   metrics_spec 과 코드가 갈라지면 테스트가 실패한다.
+
+🔴 **남은 것은 하나뿐** — ✍️ **Settings → Pages → Source = "GitHub Actions"**.
+   build·테스트·사이트 빌드·JS 대조는 CI 에서 전부 통과하고 deploy 잡만 실패한다.
+   설정 후 워크플로우 re-run 하면 `https://ahra-june.github.io/RegImpact_AI/` 가 뜬다.
    S-16 플레이그라운드는 룰엔진 JS 재구현이 들어 있어 S-17 포팅 대조 하네스와 묶어야 한다.
    ✍️ `kus0w7`·`71qh9m`·`o2geks` 3개는 이식할 것이 없어 **삭제 승인만** 받으면 된다(PR #3 동반 종료).
 

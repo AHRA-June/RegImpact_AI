@@ -68,6 +68,11 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 | Citation Correctness | 인용이 실제 원문에 verbatim 존재하는 비율 | 생성 인용 수 | 정확 인용 수 | **≥ 98%** | 중 | **100%** |
 | Policy-version Consistency | 특정 시점 유효 버전을 일관되게 반환하는 비율 | 시점 질의 수 | 정확 반환 수 | TBD | ★ 높음 | 미측정(단일 정책) |
 
+> ✅ **임계값은 이제 코드로도 존재한다** — `src/regimpact/assurance/thresholds.py`.
+> 각 임계는 근거 없이 등록할 수 없고(코드가 거부), 이 문서와 갈라지면 테스트가 실패한다
+> (`tests/test_assurance.py::test_thresholds_match_metrics_spec`).
+> 실측 대조 판정은 검증보고서 §3.1 스코어카드에서 볼 수 있다.
+
 #### 임계값 근거 (2026-08-18 🤖 제안 — ✍️ 확정 대기)
 
 **임계값은 "우리가 받은 점수"가 아니라 "이 실패가 얼마나 위험한가"에서 정한다.** 실측치는
@@ -110,12 +115,12 @@ Assurance 체크를 전부 동일 깊이로 만들지 않는다. 깊이 태그:
 > ✅ **구현: `src/regimpact/tc_generator/`** — 룰엔진을 **독립 명세 오라클(challenger)** 로 차등 검증.
 > 기대값을 엔진 자신이 아니라 명세(§H)에서 독립 유도 → 회귀가 tautology가 되지 않음.
 > `run_regression()` 이 아래 지표를 카테고리별로 산출(`report.pass_rate_by_category()`).
-> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 34 케이스 전 항목 100%.
+> mutation test로 fixture 방어력 확인(엔진 버그 주입 시 회귀 실패). 현재 36 케이스 전 항목 100%.
 
 | 지표 | 정의(초안) | 분모 | 분자 | 임계 | 현재값 |
 |---|---|---|---|---|---|
-| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | **100%** | 34/34 (100%) |
-| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | **100%** | 34/34 |
+| Rule-regression Pass Rate | 회귀 fixture 중 룰엔진 통과 비율 | 회귀 TC 수 | 통과 수 | **100%** | 36/36 (100%) |
+| Expected vs Actual Match Rate | TC의 기대결과와 실제 판정 일치율 | 전체 TC | 일치 TC | **100%** | 36/36 |
 | Boundary-case Pass Rate | 경계 케이스 통과율 | 경계 TC | 통과 | **100%** | 8/8 |
 | Conflict-case Pass Rate | 충돌 케이스에서 올바르게 escalate/판정한 비율 | 충돌 TC | 정답 | **100%** | 5/5 |
 

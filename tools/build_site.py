@@ -50,6 +50,23 @@ DOCS = {
 }
 
 
+def _verify_js_port(fixtures_path: Path) -> float | None:
+    """JS 포팅본을 Python 엔진과 대조한다. node 가 없으면 None(미측정).
+
+    통과를 1.0, 불일치를 0.0 으로 돌린다 — 부분 점수를 주지 않는 이유는 임계가 100% 라서,
+    한 건이라도 어긋나면 화면이 이미 거짓말을 하고 있기 때문이다.
+    """
+    if shutil.which("node") is None:
+        print("  ⚠ node 없음 — JS 포팅 대조를 건너뛴다 (스코어카드에서 미측정으로 남는다)")
+        return None
+    r = subprocess.run(
+        ["node", str(REPO / "tools" / "verify_js_port.mjs"), str(fixtures_path)],
+        cwd=REPO, capture_output=True, text=True,
+    )
+    print("  " + (r.stdout or r.stderr).strip().splitlines()[0])
+    return 1.0 if r.returncode == 0 else 0.0
+
+
 def _commit() -> str:
     try:
         return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
@@ -70,7 +87,17 @@ def main() -> int:
     out.mkdir(parents=True)
 
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    ev = collect(generated_at=stamp)
+
+    # 픽스처를 먼저 만들고 JS 포팅 대조를 돌린다. 그 결과가 스코어카드의
+    # "JS Port Agreement" 실측치가 된다 — 대조를 안 돌리면 통과가 아니라 미측정으로 남는다.
+    fixtures = build_fixtures()
+    out.mkdir(parents=True, exist_ok=True)
+    fixtures_path = out / "fixtures.json"
+    fixtures_path.write_text(
+        json.dumps(fixtures, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    agreement = _verify_js_port(fixtures_path)
+
+    ev = collect(generated_at=stamp, js_port_agreement=agreement)
 
     # 1. 화면 5종 — 같은 evidence 로 렌더한다.
     #    화면과 문서가 각자 파이프라인을 돌리면 seed 는 같아도 수치 서술이 갈라질 수 있다.
@@ -87,11 +114,7 @@ def main() -> int:
         (out / filename).write_text(
             markdown_to_html(md, title=title), encoding="utf-8")
 
-    # 3. 플레이그라운드 + 대조용 픽스처
-    #    픽스처는 화면에 인라인되지만 파일로도 남긴다 — verify_js_port.mjs 가 읽는다.
-    fixtures = build_fixtures()
-    (out / "fixtures.json").write_text(
-        json.dumps(fixtures, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    # 3. 플레이그라운드 (픽스처는 위에서 이미 썼다)
     (out / "playground.html").write_text(
         render_playground(ev, fixtures), encoding="utf-8")
 
