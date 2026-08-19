@@ -50,7 +50,12 @@
    "운영 중"이라 적고 근거가 없는 것이 리스크 레지스터가 무력해지는 가장 흔한 경로다.
    리스크 18건 / 5범주, 실제 발생 이력 5건 표시.
 
-**다음**: `docs/08_RELEASE_PLAN.md` — 3일 내 배포 계획.
+✅ **Day 1 배포** — `tools/build_site.py` 가 파이프라인 1회 실행으로 9쪽 정적 사이트를 굽는다
+   (화면 5 + 문서 3 + 랜딩). md→HTML 렌더러(`ui/docrender.py`)와 랜딩(`ui/landing.py`) 신설.
+   GitHub Actions 워크플로우가 **테스트 통과 후에만** 배포한다 — 깨진 수치를 올리지 않는다.
+   ✍️ 최초 1회만: Settings → Pages → Source = **GitHub Actions**.
+
+**다음**: `docs/08_RELEASE_PLAN.md` Day 2 — 엔진 픽스처 export + JS 포팅 대조 + 플레이그라운드.
    S-16 플레이그라운드는 룰엔진 JS 재구현이 들어 있어 S-17 포팅 대조 하네스와 묶어야 한다.
    ✍️ `kus0w7`·`71qh9m`·`o2geks` 3개는 이식할 것이 없어 **삭제 승인만** 받으면 된다(PR #3 동반 종료).
 
