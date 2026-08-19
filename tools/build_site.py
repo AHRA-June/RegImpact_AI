@@ -45,6 +45,7 @@ from regimpact.ui.docrender import markdown_to_html              # noqa: E402
 from regimpact.ui.graphview import render as render_graph        # noqa: E402
 from regimpact.ui.intake import render as render_intake          # noqa: E402
 from regimpact.ui.searchpage import render as render_search      # noqa: E402
+from regimpact.ui.signal import render as render_signal          # noqa: E402
 from regimpact.ui.landing import render as render_landing        # noqa: E402
 from regimpact.ui.playground import render as render_playground  # noqa: E402
 from regimpact.ui.site import render_site                        # noqa: E402
@@ -191,6 +192,11 @@ def main() -> int:
         print("  ⚠ node 없음 — 검색 포팅 대조를 건너뛴다")
     (out / "search.html").write_text(
         render_search(export, report_rows), encoding="utf-8")
+
+    # 3f. 내 한도 시그널 — 고객용 개인화 시뮬레이터 (Tomorrow Challenge 제안 화면).
+    #     같은 엔진 포팅본 + 같은 검색 색인을 쓰므로 고객 화면도 본편과 갈라질 수 없다.
+    (out / "signal.html").write_text(
+        render_signal(ev, fixtures, export), encoding="utf-8")
 
     # 3c. 검증 요약 — 보고서의 1페이지 요약. QA 골드 검수 진행률도 실데이터에서.
     from regimpact.eval import Split, load_split
