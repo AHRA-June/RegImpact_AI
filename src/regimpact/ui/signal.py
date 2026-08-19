@@ -120,6 +120,32 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .delta b{font-weight:700}
 .gfbadge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;
   background:var(--primary-fixed,#dbe1ff);color:var(--on-primary-fixed,#00174b);margin-right:6px}
+/* 두 사람 비교 — 계산기가 구조적으로 답 못 하는 질문을 10초 안에 보여준다 */
+.duo-wrap{padding:12px 14px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc{border:1px solid var(--outline-variant);border-radius:12px;padding:12px;
+  background:var(--surface-container-low)}
+.pc .who{font-size:12px;font-weight:700;word-break:keep-all}
+.pc .cond{font-size:11px;color:var(--on-surface-variant);margin-top:3px;line-height:1.45;
+  word-break:keep-all}
+.pc .ltv{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:24px;font-weight:700;
+  margin-top:8px}
+.pc .ltv.zero{color:var(--error)}
+.pc .ltv.review{font-size:14px;color:var(--on-tertiary-fixed-variant)}
+.pc .amt{font-size:12.5px;font-weight:600;margin-top:4px}
+.duo-note{margin-top:11px;font-size:12.5px;line-height:1.55;word-break:keep-all;
+  padding:10px 12px;border-radius:10px;background:var(--surface-container-low);
+  border:1px solid var(--outline-variant)}
+.duo-note b{color:var(--on-surface)}
+/* 피치 패널 비교표 */
+.cmp-t{width:100%;border-collapse:collapse;margin-top:18px;font-size:11.5px;line-height:1.45}
+.cmp-t caption{text-align:left;font-size:12px;font-weight:700;padding-bottom:7px;
+  color:var(--on-surface)}
+.cmp-t th,.cmp-t td{border:1px solid var(--outline-variant);padding:7px 8px;text-align:left;
+  vertical-align:top;word-break:keep-all}
+.cmp-t th{background:var(--surface-container-low);font-weight:700;font-size:11px}
+.cmp-t td:first-child{color:var(--on-surface-variant);white-space:nowrap;font-size:11px}
+.cmp-t td:last-child{background:color-mix(in srgb,var(--primary) 5%,var(--surface-container-lowest))}
 details.more{border:1px solid var(--outline-variant);border-radius:12px;
   background:var(--surface-container-lowest)}
 details.more summary{padding:11px 14px;font-size:13px;cursor:pointer;color:var(--on-surface-variant)}
@@ -260,6 +286,20 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     <li><b>③</b><span><b>경과규정 체크</b> — 계약·계약금·접수 일자로 종전 규정 적용 여부</span></li>
     <li><b>④</b><span><b>근거 우선 Q&A</b> — 원문을 검색해 근거 문단을 보여주고, 없으면 지어내지 않고 상담 안내</span></li>
   </ul>
+  <table class="cmp-t">
+    <caption>일반 대출한도 계산기와 뭐가 다른가요?</caption>
+    <thead><tr><th></th><th>한도 계산기 (토스 등)</th><th>내 한도 시그널</th></tr></thead>
+    <tbody>
+      <tr><td>답하는 질문</td><td>지금 얼마 빌릴 수 있나 — 오늘의 <b>상태</b></td>
+        <td>규제가 바뀌면 나는 뭐가 달라지나 — 변경이라는 <b>사건</b></td></tr>
+      <tr><td>시점</td><td>현재 규칙 하나</td>
+        <td>변경 전/후 두 시점 비교 + 경과규정·생애최초 등 경계 조건 판정</td></tr>
+      <tr><td>답의 근거</td><td>숫자만 (출처 없음)</td>
+        <td>공문 원문 인용 — 인용이 원문에 실재하는지 기계 대조</td></tr>
+      <tr><td>틀리면</td><td>"단순 참고용" 고지</td>
+        <td>독립 오라클 대조·회귀 테스트·감사로그가 배포 조건 — 은행이 자기 이름으로 내보낼 수 있는 수준</td></tr>
+    </tbody>
+  </table>
   <div class="vbadge"><b>AI가 판정하지 않는 AI 서비스.</b> LLM은 공문에서 사실만 추출하고
   판정은 결정적 룰엔진이 합니다. 이 화면의 엔진은 원본과 판정 {n_cases}건 + 지역 조회
   {n_probe}건 자동 대조 후에만 배포되며, 서버 호출 없이 브라우저 안에서 돌아
@@ -328,6 +368,15 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     </div>
     <div class="delta" id="delta"></div>
 
+    <details class="more" open><summary>⚡ 같은 날 계약한 두 사람 — 왜 한도가 다른가요?</summary>
+      <div class="duo-wrap">
+        <div class="duo">
+          <div class="pc" id="duo-a"></div>
+          <div class="pc" id="duo-b"></div>
+        </div>
+        <div class="duo-note" id="duo-note"></div>
+      </div></details>
+
     <details class="more"><summary>이 판정, 어떻게 나왔나요? (판정 경로)</summary>
       <div class="trace" id="trace"></div></details>
     <details class="more" open><summary>근거 조문 (공문 원문 그대로)</summary>
@@ -358,6 +407,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     script_tpl = """
 <script type="module">
 const FX = __FX__;
+const DEMO = __DEMO__;
 const IDX_EXPORT = __IDX__;
 const QUOTES = __QUOTES__;
 const DOCL = __DOCL__;
@@ -471,6 +521,40 @@ function run() {
     else fallback = "이 판정은 종전부터 있던 기준선이라, 이번 공문이 출처가 아니에요.";
   }
   cite($("#evi"), keys, fallback);
+
+  // ── 같은 날 계약한 두 사람 — 계산기가 구조적으로 답 못 하는 질문을 엔진으로 보여준다.
+  //    조건 차이는 '계약금 납부 증명' 하나뿐이고, 판정은 전부 엔진이 한다(수치 하드코딩 없음).
+  const duoBase = {
+    region_code: DEMO.code, evaluation_date: C.REG_EFFECTIVE, house_count: 0,
+    disposal_condition_flag: false, first_home_buyer: false, real_demand_flag: false,
+    policy_mortgage_flag: false, loan_purpose: "HOME_PURCHASE",
+    application_accepted_at: null, contract_signed_at: DEMO.contract,
+    downpayment_paid_at: null, land_permit_target: false, land_permit_applied_at: null,
+  };
+  const pa = evaluate(FX, { ...duoBase, downpayment_paid_at: DEMO.contract }).decision;
+  const pb = evaluate(FX, duoBase).decision;
+  const pcCard = (el, who, d) => {
+    el.innerHTML = `<div class="who">${who}</div>`
+      + `<div class="cond">${DEMO.contract} 계약 · ${DEMO.label} · 무주택</div>`
+      + (d.status === "DECIDED"
+        ? `<div class="ltv${d.max_ltv === 0 ? " zero" : ""}">LTV ${pct(d.max_ltv)}</div>`
+          + `<div class="amt">${d.max_ltv === 0 ? "대출 불가" : "약 " + won(Math.floor(price * d.max_ltv))}</div>`
+          + (d.grandfathering_applied
+             ? '<div style="margin-top:5px"><span class="gfbadge">경과규정</span></div>' : "")
+        : `<div class="ltv review">전문 상담 필요</div>`);
+  };
+  pcCard($("#duo-a"), "A — 계약금 납부 증명 있음", pa);
+  pcCard($("#duo-b"), "B — 계약금 증빙 없음", pb);
+  const dn = $("#duo-note");
+  if (pa.status === "DECIDED" && pb.status === "DECIDED") {
+    const gap = Math.abs(Math.floor(price * pa.max_ltv) - Math.floor(price * pb.max_ltv));
+    dn.innerHTML = `같은 날, 같은 가격(${won(price)})의 아파트를 계약한 두 사람의 한도가 `
+      + `<b>약 ${won(gap)}</b> 다릅니다 — A는 경과규정으로 종전 기준을 유지하기 때문이에요. `
+      + `<b>일반 한도 계산기는 '오늘 규칙' 하나만 알기 때문에 이 두 사람에게 같은 숫자를 `
+      + `보여줍니다.</b> 변경 전/후와 경계 조건을 판정하는 것이 내 한도 시그널의 차이입니다.`;
+  } else {
+    dn.textContent = "이 조건에서는 자동 비교가 어려워 상담으로 안내합니다.";
+  }
 }
 
 // ---- 조작 ----
@@ -512,9 +596,16 @@ document.querySelectorAll(".qa .preset button").forEach((b) =>
   b.addEventListener("click", () => ask(b.dataset.q)));
 </script>"""
 
+    demo_region = "GURI" if "GURI" in regions else regions[0]
+    demo = {
+        "code": demo_region,
+        "label": fixtures["regions"][demo_region]["label"],
+        "contract": before_cut,
+    }
     script = (
         script_tpl
         .replace("__FX__", json.dumps(fixtures, ensure_ascii=False, separators=(",", ":")))
+        .replace("__DEMO__", json.dumps(demo, ensure_ascii=False))
         .replace("__IDX__", json.dumps(search_export, ensure_ascii=False, separators=(",", ":")))
         .replace("__QUOTES__", json.dumps(quotes, ensure_ascii=False))
         .replace("__DOCL__", json.dumps(doc_labels, ensure_ascii=False))

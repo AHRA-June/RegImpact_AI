@@ -361,6 +361,15 @@ def test_signal_quotes_are_verbatim_from_the_corpus(site):
         assert q["quote"] in html, f"{key}: 인용이 화면에 실리지 않았다"
 
 
+def test_signal_shows_what_calculators_cannot(site):
+    """차별점이 말이 아니라 화면이어야 한다 — 두 사람 비교(경과규정)와 계산기 대비표."""
+    html = site["signal.html"]
+    assert "같은 날 계약한 두 사람" in html          # 원탭 비교 (모바일에서도 보임)
+    assert '<div class="pc" id="duo-a"></div>' in html  # 값은 엔진이 그린다 (하드코딩 금지)
+    assert "일반 대출한도 계산기와 뭐가 다른가요?" in html  # 피치 패널 비교표
+    assert "오늘의 <b>상태</b>" in html and "사건" in html  # 상태 vs 사건 프레임
+
+
 def test_signal_is_honest_with_customers(site):
     """고객 화면일수록 한계를 숨기면 안 된다 — 금융사고가 되는 지점이다."""
     html = site["signal.html"]
