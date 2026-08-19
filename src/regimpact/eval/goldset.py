@@ -90,19 +90,41 @@ def split_stats(split: Split, gold_dir: Optional[Path] = None) -> dict:
 
 
 def _record_access(split: Split, reason: str, log_path: Optional[Path]) -> None:
-    """봉인 해제를 append-only로 기록한다. 지우면 diff에 남는다."""
+    """봉인 해제를 append-only로 기록한다. 지우면 diff에 남는다.
+
+    같은 날 · 같은 split · 같은 사유가 반복되면 새 행을 쌓는 대신 **횟수만 올린다**.
+    테스트 스위트가 매 실행마다 정합성 검사로 LOCKED/CHALLENGE 를 열기 때문에, 행을
+    그대로 쌓으면 수십 행이 금방 붙어 정작 사람이 튜닝 목적으로 연 기록이 파묻힌다.
+    감사로그의 값어치는 이상한 접근이 **눈에 띄는 것**에 있으므로, 반복은 접고 종류는 남긴다.
+    (횟수는 유지되므로 '몇 번 열었나'는 그대로 추적된다.)
+    """
     path = Path(log_path or ACCESS_LOG)
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         path.write_text(
             "# 봉인 해제 기록 (append-only)\n\n"
             "> LOCKED / CHALLENGE 셋을 연 이력. 브리프 §12 규율의 증빙이다.\n"
-            "> 이 파일이 비어 있는 동안에는 두 셋이 튜닝에 쓰이지 않았다는 뜻이다.\n\n"
-            "| 날짜 | split | 사유 |\n|---|---|---|\n",
+            "> 이 파일이 비어 있는 동안에는 두 셋이 튜닝에 쓰이지 않았다는 뜻이다.\n"
+            "> 같은 날·같은 split·같은 사유의 반복 접근은 마지막 행의 횟수(×N)로 접힌다.\n\n"
+            "| 날짜 | split | 사유 | 횟수 |\n|---|---|---|---|\n",
             encoding="utf-8",
         )
+
+    today = date.today().isoformat()
+    prefix = f"| {today} | {split.value} | {reason} |"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for i in range(len(lines) - 1, -1, -1):
+        if not lines[i].startswith(f"| {today} |"):
+            break                                # 오늘 기록 구간을 벗어남
+        if lines[i].startswith(prefix):          # 오늘 같은 사유가 이미 있음 → 횟수만 증가
+            tail = lines[i][len(prefix):].strip(" |")
+            count = int(tail[1:]) if tail.startswith("×") else 1
+            lines[i] = f"{prefix} ×{count + 1} |"
+            path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            return
+
     with path.open("a", encoding="utf-8") as f:
-        f.write(f"| {date.today().isoformat()} | {split.value} | {reason} |\n")
+        f.write(f"{prefix} ×1 |\n")
 
 
 def save_split(items: list[GoldItem], split: Split, gold_dir: Optional[Path] = None) -> Path:

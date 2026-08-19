@@ -98,11 +98,15 @@ def baseline_cases() -> list[GeneratedCase]:
               "시행 전(6.15) 규제지역 코드 → 아직 非규제, 무주택 70%",
               _app(evaluation_date=_BEFORE, house_count=0)),
         _case("BASE-02", Category.BASELINE,
-              "미등록 지역 → 非규제 기준선 70%",
-              _app(region_code="SEOUL_GANGNAM", house_count=0)),
+              "레지스트리 미등록 지역 → 판정 불가 → NEEDS_HUMAN_REVIEW",
+              _app(region_code="BUSAN_HAEUNDAE", house_count=0),
+              spec_note="이전 판(v1)은 이 자리에 SEOUL_GANGNAM 을 '미등록 지역' 예시로 두고 "
+                        "70%를 기대했다. 강남은 '17.8.3 투기과열지구다(참고2 현황표). "
+                        "엔진과 오라클이 같은 오해를 공유해 일치율 100%가 나왔다. "
+                        "미등록은 非규제가 아니라 '모름'이다."),
         _case("BASE-03", Category.BASELINE,
-              "非규제 비처분 1주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
-              _app(region_code="SEOUL_GANGNAM", house_count=1),
+              "非규제(시행 전 수도권) 비처분 1주택 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
+              _app(evaluation_date=_BEFORE, house_count=1),
               spec_note="Q10 잔여 미결: FAQ Q2 非규제(수도권) 열은 주1) 무주택 기준이라 "
                         "비처분 1주택 값이 없다. 추정 금지(LOCKED §4) → escalation."),
         _case("BASE-04", Category.BASELINE,
@@ -110,6 +114,16 @@ def baseline_cases() -> list[GeneratedCase]:
               _app(evaluation_date=_BEFORE, house_count=2),
               spec_note="FSC p2 / FAQ Q1 ※ '다주택자는 수도권 內 주택구입시 규제지역 여부와 "
                         "무관하게 LTV 0% 적용'. 旣 마련된 규정이라 시행 전에도 동일."),
+        _case("BASE-06", Category.BASELINE,
+              "기존 규제지역(강남) 무주택 → 투기과열 기준 40%",
+              _app(region_code="SEOUL_GANGNAM", house_count=0),
+              spec_note="참고2 현황표: 강남은 '17.8.3 투기과열지구. 6·30 신규지정 3곳만 "
+                        "레지스트리에 있던 시절엔 여기서 70%가 나왔다(결함 R-01)."),
+        _case("BASE-07", Category.BASELINE,
+              "기존 규제지역(강남) 지정 前(2016-01-01) → 非규제 기준선 70%",
+              _app(region_code="SEOUL_GANGNAM", evaluation_date=date(2016, 1, 1),
+                   house_count=0),
+              spec_note="시간축이 살아있는지 확인한다. 지역은 상태가 아니라 버전 데이터다."),
         _case("BASE-05", Category.BASELINE,
               "비수도권 다주택 · 非규제 → 기준값 부재 → NEEDS_HUMAN_REVIEW",
               _app(region_code="CHEONGJU", house_count=2),

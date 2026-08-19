@@ -19,6 +19,7 @@ class LoanPurpose(str, Enum):
 class RegionStatus(str, Enum):
     REGULATED = "REGULATED"              # 규제지역
     NON_REGULATED = "NON_REGULATED"      # 비규제지역
+    UNKNOWN = "UNKNOWN"                  # 레지스트리 미등록 → 판정 불가(사람 검토)
 
 
 class RegulatedType(str, Enum):
@@ -47,6 +48,7 @@ class ReasonCode(str, Enum):
     GRANDFATHERED_LAND_PERMIT = "GRANDFATHERED_LAND_PERMIT"
     OWNER_BASELINE_UNKNOWN = "OWNER_BASELINE_UNKNOWN"
     MULTI_HOME_BASELINE_UNKNOWN = "MULTI_HOME_BASELINE_UNKNOWN"
+    REGION_UNKNOWN = "REGION_UNKNOWN"
     OUT_OF_SCOPE_PRODUCT = "OUT_OF_SCOPE_PRODUCT"
     DISCOVERY_POLICY_LOAN = "DISCOVERY_POLICY_LOAN"
 

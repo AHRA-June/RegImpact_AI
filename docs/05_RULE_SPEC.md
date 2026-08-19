@@ -151,7 +151,7 @@ FAQ Q2 표 **주1)** 이 "무주택자(처분조건부 1주택자 포함) 기준
 
 ---
 
-## E. 예외 우선순위 (precedence) — ✅ 확정 (2026-08-10, P0c 2026-08-18 추가·확정)
+## E. 예외 우선순위 (precedence) — ✅ 확정 (2026-08-10, P0c 2026-08-18 / P0d 2026-08-19 추가·확정)
 
 한 차주가 여러 조건을 동시에 만족할 때 **위에서부터 먼저 매칭되는 규칙이 이김**(short-circuit).
 
@@ -160,6 +160,8 @@ P0.  loan_purpose != HOME_PURCHASE          → OUT_OF_SCOPE
 P0b. policy_mortgage_flag == true           → DISCOVERY (정책대출: 수동 검토, 코어 자동판정 제외)
 P0c. house_count>=2 AND 수도권               → 0% (MULTI_0), STOP   ✅2026-08-18 확정
      ("규제지역 여부와 무관" — 지역상태·시점·경과규정 모두 무관)
+P0d. region_code가 레지스트리에 없음          → NEEDS_HUMAN_REVIEW (REGION_UNKNOWN), STOP  ✅2026-08-19 확정
+     (미등록 = "모름". 非규제로 간주하면 데이터 누락이 관대한 판정으로 샌다)
 P1.  경과규정 해당(F의 G1|G2|G3)             → 종전규정(非규제 수도권 LTV) 적용, STOP
 P2.  region_status == NON_REGULATED         → 기준선 표(C-2) 적용, STOP
      (이하 REGULATED 확정)
@@ -180,6 +182,12 @@ P7.  else (무주택 일반 / 처분조건부 1주택)    → 40% (R1/R4), STOP
   분기는 유주택 전체를 '종전 기준값 부재'로 escalate 하므로, P0c를 뒤로 옮기면 경과규정에 해당하는
   수도권 다주택이 0%를 받지 못하고 사람 검토로 샌다(변이 테스트로 확인, 회귀 `GF-MULTI-01`이 고정).
 - **비수도권 다주택:** P0c 미적용. 규제지역이면 P3에서 0%, 非규제면 기준값 부재 → escalation.
+- **지역 미상 AND 수도권 다주택:** P0d가 P0c보다 **뒤**이므로 0%로 확정된다. 수도권 다주택은
+  "규제지역 여부와 무관"하므로 시군구 규제상태를 몰라도 판정이 선다 — 예: 광역까지만 아는
+  `SEOUL` 입력. 반대로 P0d를 P0c 앞에 두면 이 케이스가 불필요하게 사람 검토로 샌다.
+- **지역 미상 AND 경과규정:** P0d가 P1보다 **앞**이다. 경과규정은 6·30 지정으로 *바뀐 것*으로부터
+  보호하는 장치인데, 지역을 모르면 무엇이 바뀌었는지도 알 수 없다.
+- **지역 레지스트리 근거:** C16 (MOLIT p5 참고2 현황표). 서울 25곳 + 경기 15곳 + 비규제 확인 2곳.
 
 ---
 
@@ -210,7 +218,7 @@ G1|G2|G3 중 하나라도 만족 → grandfathering_applied=true. 아니면 신�
 
 ---
 
-## H. 통합 판정 알고리즘 — ✅ 확정 (2026-08-10) · 엔진 구현의 기준
+## H. 통합 판정 알고리즘 — ✅ 확정 (2026-08-10, P0d 2026-08-19 추가) · 엔진 구현의 기준
 
 ```python
 def evaluate_mortgage_ltv(inp) -> Result:
@@ -226,6 +234,12 @@ def evaluate_mortgage_ltv(inp) -> Result:
     if inp.house_count >= 2 and is_capital_area(inp.region_code):
         return Result(max_ltv=0.00, rule_id="MULTI_0", reasons=["LTV_MULTI_HOME_0"])
 
+    # P0d. 지역 미상 → 사람 검토 — C16, ✅2026-08-19 확정
+    #      P0c 뒤(수도권 다주택은 시군구를 몰라도 판정 가능) / P1 앞(모르면 무엇이 바뀌었는지도 모름).
+    region_status = resolve_region_status(inp.region_code, inp.evaluation_date)
+    if region_status == "UNKNOWN":
+        return Result(status="NEEDS_HUMAN_REVIEW", reasons=["REGION_UNKNOWN"])
+
     # P1. 경과규정 — F 참조. 경계 <= 2026-06-30
     if is_grandfathered(inp):          # G1 | G2 | G3
         if is_owner(inp):              # 유주택 & 非규제수도권 baseline 부재
@@ -235,8 +249,8 @@ def evaluate_mortgage_ltv(inp) -> Result:
                       rule_id="NONREG_STD_70",
                       reasons=["GRANDFATHERED_ACCEPTED_OR_CONTRACT"])
 
-    # P2. 지역상태
-    if inp.region_status_as_of == "NON_REGULATED":
+    # P2. 지역상태 (P0d에서 이미 해석 — UNKNOWN 은 도달하지 않는다)
+    if region_status == "NON_REGULATED":
         return baseline_rule(inp)      # C-2
 
     # --- 이하 REGULATED ---

@@ -242,3 +242,45 @@ def test_save_and_load_roundtrip(tmp_path):
     save_split(items, Split.DEV, gold_dir=tmp_path)
     assert split_path(Split.DEV, tmp_path).exists()
     assert load_split(Split.DEV, gold_dir=tmp_path)[0].to_dict() == items[0].to_dict()
+
+
+# ---------- 봉인 접근 로그: 반복은 접고 종류는 남긴다 ----------
+def test_access_log_collapses_repeat_but_keeps_count(tmp_path):
+    """같은 날·같은 사유의 반복 접근은 행을 쌓지 않고 횟수만 올린다.
+
+    테스트 스위트가 매 실행마다 정합성 검사로 LOCKED/CHALLENGE 를 여는데, 행을 그대로
+    쌓으면 수십 행이 붙어 정작 사람이 튜닝 목적으로 연 기록이 파묻힌다. 이상한 접근이
+    눈에 띄어야 감사로그다.
+    """
+    from regimpact.eval.goldset import _record_access
+    log = tmp_path / "log.md"
+    for _ in range(5):
+        _record_access(Split.LOCKED, "정합성 검사 — 반복", log)
+    rows = [ln for ln in log.read_text(encoding="utf-8").splitlines()
+            if ln.startswith("| 20")]
+    assert len(rows) == 1
+    assert rows[0].endswith("×5 |")
+
+
+def test_access_log_keeps_distinct_reasons_as_separate_rows():
+    """사유가 다르면 접지 않는다 — 접는 것은 노이즈지 이력이 아니다.
+
+    접기는 같은 날 안에서만 일어나고, 같은 사유는 위치를 유지한 채 횟수만 오른다.
+    즉 **하루 안의 순서는 보존되지 않는다.** 날짜 단위 기록이라 원래 시각 정보가 없고,
+    감사 질문("LOCKED가 튜닝 목적으로 열렸나")은 그 사유의 행이 존재하느냐로 답해진다.
+    """
+    import tempfile
+    from pathlib import Path
+
+    from regimpact.eval.goldset import _record_access
+    with tempfile.TemporaryDirectory() as d:
+        log = Path(d) / "log.md"
+        _record_access(Split.LOCKED, "정합성 검사", log)
+        _record_access(Split.LOCKED, "Phase 3 최초 개봉 — 코어 완성 측정", log)
+        _record_access(Split.LOCKED, "정합성 검사", log)
+        rows = [ln for ln in log.read_text(encoding="utf-8").splitlines()
+                if ln.startswith("| 20")]
+    assert len(rows) == 2, "사유가 다르면 별도 행"
+    assert any("Phase 3 최초 개봉" in r and r.endswith("×1 |") for r in rows), \
+        "사람이 연 기록은 루틴 검사에 섞여 사라지면 안 된다"
+    assert any("정합성 검사" in r and r.endswith("×2 |") for r in rows)
