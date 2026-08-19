@@ -34,7 +34,13 @@ from regimpact.impact import (  # noqa: E402
     format_matrix_markdown,
     format_matrix_text,
 )
+from regimpact.impact.builder import derive_rule_diff  # noqa: E402
 from regimpact.impact.portfolio import DEFAULT_SEED, DEFAULT_SIZE  # noqa: E402
+from regimpact.proposal import (  # noqa: E402
+    apply_consistency_status,
+    build_proposal_from_extraction,
+    check_proposal_consistency,
+)
 from regimpact.tc_generator import run_regression  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
@@ -119,14 +125,35 @@ def main() -> None:
     for cat, (p, t, rate) in regression.pass_rate_by_category().items():
         print(f"    {cat:<16} {p}/{t} ({rate:.0%})")
 
-    # 7 — Impact Matrix 조립
+    # 7 — Rule Change Proposal (LLM 추출 → 구조화 변경안 → 엔진 교차검증)
+    head("Rule Change Proposal — 구조화 변경안 + 엔진 일치 검증")
+    proposal = build_proposal_from_extraction(extraction)
+    consistency = check_proposal_consistency(proposal, rule_diff=derive_rule_diff())
+    proposal = apply_consistency_status(proposal, consistency)
+    print(f"  세그먼트별 LTV(after): {proposal.after.ltv_by_segment}")
+    print(f"  신규지정 {len(proposal.after.target_regions)}곳 · 시행 {proposal.after.effective_from}"
+          f" · 경과규정 컷오프 {proposal.grandfathering.cutoff_date if proposal.grandfathering else '—'}")
+    print(f"  근거 인용 {len(proposal.sources)}건")
+    print(f"  엔진 대조 {consistency.summary()['passed']}/{consistency.summary()['total']} 통과")
+    for c in consistency.failed:
+        if isinstance(c.actual, list):
+            continue          # 아래 ⤷ 목록에서 항목별로 보여준다
+        print(f"    ⚠ {c.name} — 기대 {c.expected} / 실제 {c.actual}")
+    for x in proposal.conflicts:
+        print(f"    ⤷ 충돌: {x}")
+    for x in proposal.unmapped:
+        print(f"    ⤷ LTV 아님(별도 룰 필요): {x}")
+    print(f"  승인 상태: {proposal.status.value}"
+          + ("  ← 사람 검토 후 registry 반영" if proposal.status.value != "APPROVED" else ""))
+
+    # 8 — Impact Matrix 조립
     head("Impact Matrix 조립 (§10)")
     matrix = build_impact_matrix(
         extraction, impact, grounding=grounding, regression=regression
     )
     print(format_matrix_text(matrix))
 
-    # 8 — Assurance 종합
+    # 9 — Assurance 종합
     head("Assurance Evaluation")
     print(f"  Citation Correctness   {grounding.citation_correctness:.0%}")
     print(f"  Unsupported Claim Rate {grounding.unsupported_claim_rate:.0%}")
@@ -136,10 +163,12 @@ def main() -> None:
     print(f"  Effective-date         {'OK' if scored.effective_date_correct else 'MISS'}")
     print(f"  Regions                {'OK' if scored.regions_correct else 'MISS'}")
     print(f"  Rule Regression        {regression.pass_rate:.0%}")
+    print(f"  Proposal Consistency   {consistency.summary()['passed']}/{consistency.summary()['total']}"
+          f"  (변경안 {proposal.status.value})")
     print(f"  자동처리 가능 비율      {matrix.automation_rate:.0%} "
           f"(Human Review {len(matrix.human_review_rows)}행)")
 
-    # 9 — E2E 관통 확인
+    # 10 — E2E 관통 확인
     head("E2E 관통 확인 (브리프 §18 코어 완성의 정의)")
     checks = [
         ("Source Snapshot", bool(sources)),
@@ -147,7 +176,8 @@ def main() -> None:
         ("Before/After 추출", bool(extraction.changes)),
         ("Impact Matrix", bool(matrix.rows)),
         ("Customer Impact", bool(impact.impacts)),
-        ("Structured Rule Proposal", any(r.metrics.get("rule_diff") for r in matrix.rows)),
+        ("Structured Rule Proposal", bool(proposal.sources) and proposal.after.max_ltv is not None),
+        ("Proposal ↔ Engine Consistency", bool(consistency.checks)),
         ("Test Cases", regression.total > 0),
         ("Deterministic Rule Regression", regression.pass_rate == 1.0),
         ("Assurance Evaluation", grounding.total > 0),
