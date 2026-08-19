@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 **이 파일부터** 읽는다.
 > 규칙: "지금 어디 / 다음 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-18 (세션 종료 · 인계 정리)
-- **개발 브랜치:** `claude/anthropic-api-key-issue-itk27f` (원격 푸시됨, PR 미생성)
-- **전체 단계:** 🟢 **Phase 2 진행 중** — Walking Skeleton 관통 완료, 골드셋 구축·추출 튜닝 완료
-- **테스트:** 217개 통과 · **비용: 0원** (유료 API 키 미사용)
+- **마지막 갱신:** 2026-08-19 (QA 골드 DEV 40 검수표 준비)
+- **개발 브랜치:** `claude/remaining-work-zwayt7`
+- **전체 단계:** 🟢 **Phase 2 마무리** — 배포 완료, 남은 것은 사용자 확정 2건과 Phase 3 진입
+- **테스트:** 484개 통과(1 skipped) · **비용: 0원** (유료 API 키 미사용)
 
 ---
 
@@ -136,7 +136,7 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 | **QA 골드 115문항** | 🤖 초안 | `docs/eval/gold/`, `examples/run_goldset_eval.py` | DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35 |
 | **QA 평가 하네스** | ✅ | `eval/qa.py` | DEV 실측: Fact 95.0% · Exact 92.5% · **Escalation Recall 100%** |
 | **metrics_spec 임계값** | 🤖 제안 | `docs/metrics_spec.md` | TBD 1개만 남음(측정 불가한 것) |
-| 검증보고서 | ⬜ 미착수 | — | Phase 3 |
+| 검증보고서 | ✅ (S-06) | `report/`, `docs/validation/VALIDATION_REPORT.md` | 602줄, 라이브 수치 조립 |
 
 ---
 
@@ -148,8 +148,10 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
   Completeness 95% / Citation 98% / Escalation Precision 70%.
 - 확정하면 표의 🤖를 ✅로 바꾸고 `02_DECISION_LOG.md`에 기록.
 
-### 2. ✍️ QA 골드 DEV 40 검수
-- 검수표 생성: `python tools/build_gold_review.py` (현재는 추출 골드만 다룸 → **DEV 40으로 확장 필요**)
+### 2. ✍️ QA 골드 DEV 40 검수 — **검수표 준비 완료 (2026-08-19)**
+- 검수표: `docs/eval/QA_GOLD_REVIEW.md` + `qa_gold_review.html` (`python tools/build_qa_review.py`로 재생성)
+- 검수 주의 신호를 먼저 올려 뒀다: 명세 충돌 0건 · **인용만으로 확인 불가 4문항**(원본 대조 필요) ·
+  베이스라인이 놓친 앵커 3문항(앵커가 과한 것인지 모델이 틀린 것인지 함께 볼 것).
 - 확정되면 `tools/gold_dev.py`에서 `authored_by="human_confirmed"` 지정 후 재생성.
 - 확정 후에야 QA 지표(Fact Coverage 95.0% 등)가 절대값이 된다. 지금은 상대 비교용.
 
@@ -206,6 +208,15 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 ---
 
 ## 작업 로그 (append-only, 최신이 위)
+
+- **2026-08-19(검수표)** — ✅ **QA 골드 DEV 40 검수표** (`tools/build_qa_review.py` →
+  `docs/eval/QA_GOLD_REVIEW.md` + `qa_gold_review.html`). 상태판 "다음 작업 2"의 전제를 해소 —
+  검수는 사람의 일이지만 검수 가능하게 만드는 것은 기계의 일(LOCKED §4). 문항마다 골드 답·채점
+  앵커·원문 인용·replay 베이스라인 실측을 한 화면에 붙이고, 주의 신호를 먼저 올렸다:
+  **인용만으로 확인 불가 4문항**(앵커가 실린 인용 안에 없음 — 원본 대조 필요), 베이스라인이 놓친
+  앵커 3문항. 모델 답변 원문은 싣지 않았다(검수자 앵커링 방지). 검수표 CSS·인용 블록은
+  `tools/review_theme.py`로 추출해 추출 골드 검수표와 공유(HTML 산출물 바이트 동일 확인).
+  LOCKED/CHALLENGE는 열지 않음(DEV만). 테스트 484 유지.
 
 - **2026-08-18(4)** — 사업계획서 v1.2: **산출물 2층 구조** 반영 — 규제 층(전 기관 공통, 한 번 만들어 N번 재판매, 한계비용≈0)과 기관 층(룰 명세 온보딩, 락인) 분리. 표준 리포트 구독(Tier 1b, 연 300~500만원 저가·lead-gen) 신설, 플랫폼화를 기관 층 온보딩과 통합, 공통 리포트 복제·무단 유통 리스크 추가. 팀 전제 확정: 솔로프리너(코호트는 지분·고용 없는 피드백 그룹).
 
