@@ -90,7 +90,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 | # | 능력 | 출처 | 왜 |
 |---|---|---|---|
 | ~~S-01~~ | ~~지역 레지스트리 + UNKNOWN 에스컬레이션~~ | — | ✅ 2026-08-19 완료 (원문 참고2에서 직접 이관) |
-| S-02 | **판별력(negative control) + `VALIDATION_LIMITS.md`** | dq1gtz | "왜 계속 100%인가"에 답하는 문서. 지표를 믿지 말라는 이 프로젝트의 핵심 태도와 정확히 같은 것 |
+| ~~S-02~~ | ~~판별력(negative control) + `VALIDATION_LIMITS.md`~~ | dq1gtz | ✅ 2026-08-19 완료 (문서는 main 실측으로 재작성) |
 | S-03 | **해시 체인 감사로그 (audit trail)** | d2et38 | 변조 탐지. Model Risk 직무 포트폴리오에서 가장 직관적으로 먹히는 산출물 |
 | ~~S-04~~ | ~~Rule Change Proposal (`proposal/`)~~ | sp37fd | ✅ 2026-08-19 완료 (실제 추출에 배선하며 빌더 결함 2건 수정) |
 | S-05 | **Policy Version DB + Temporal Policy Resolver** | 8k0xmx | 정책의 시간축을 데이터로 관리 (§0-7 Phase 시간축 원칙과 직결) |
@@ -131,7 +131,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 1. ~~**S-01** 지역 레지스트리~~ ✅ 완료
 2. ~~**S-22** 사업계획서~~ ✅ 완료
 3. ~~**S-04** Rule Change Proposal~~ ✅ 완료
-4. **S-02 → S-03 → S-05** 티어 A 나머지 (판별력 → 감사로그 → 정책 버전 DB)
+4. ~~**S-02** 판별력~~ ✅ 완료 → **S-03 감사로그 → S-05 정책 버전 DB**
 5. **S-16 + S-17** 은 묶어서 — 플레이그라운드의 JS 룰엔진은 `export_fixtures.py` +
    `verify_js_port.mjs` 대조 하네스 없이 들이면 하드코딩이 되살아난다
 5. 티어 B는 검증보고서(S-06)를 축으로 필요한 것만
