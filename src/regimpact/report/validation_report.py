@@ -146,7 +146,42 @@ def _s3_method(ev: ValidationEvidence) -> str:
 | 검증 하니스 자체 | — | **판별력(negative control)** — 오류 주입 후 지표 반응 측정 | 정상값 대비 |
 
 마지막 행이 핵심이다. 정상 데이터에서 100%가 나오는 것만으로는 하니스가 오류에 반응하는지
-알 수 없다. **항상 100%인 검증 시스템은 그 자체가 red flag다.**"""
+알 수 없다. **항상 100%인 검증 시스템은 그 자체가 red flag다.**
+
+### 3.1 Assurance 스코어카드 — 임계 대조 판정
+
+지표를 나열하는 것과 통과 여부를 **판정하는 것**은 다르다. 판정이 없으면 숫자를 본 사람이
+각자 기준으로 해석하게 된다.
+
+**임계는 "우리가 받은 점수"가 아니라 "이 실패가 얼마나 위험한가"에서 정한다.** 실측치는
+그 임계가 달성 가능함을 보이는 증거일 뿐 임계의 근거가 아니다 — 달성치를 그대로 임계로
+삼으면 곡선에 맞춰 채점하는 것이 된다. 각 임계는 근거 없이 등록할 수 없다(코드가 거부한다).
+
+{_scorecard_table(ev)}
+
+**미측정은 통과가 아니다.** 측정할 수 없는 지표에는 임계를 먼저 적지 않고, 판정에서도
+통과로 세지 않는다 — 모르는 것을 통과로 처리하는 것이 R-01 의 실패 양상이었다."""
+
+
+def _scorecard_table(ev: ValidationEvidence) -> str:
+    sc = getattr(ev, "scorecard", None)
+    if sc is None:
+        return "_(스코어카드 미생성)_"
+    mark = {"PASS": "✅", "FAIL": "❌", "NOT_MEASURED": "⚪ 미측정"}
+    rows = []
+    for d in sc.dimensions:
+        rows.append(f"| **{d.dimension.value}** | | | **{mark[d.verdict.value]}** | |")
+        for m in d.metrics:
+            risk = "★" if m.threshold.high_risk else ""
+            rows.append(
+                f"| &nbsp;&nbsp;{m.threshold.metric} | {m.threshold.display} | "
+                f"{m.display} | {mark[m.verdict.value]} | {risk} |")
+    s = sc.summary()
+    head = (f"종합 **{mark[s['verdict']]}** — {s['passed']}/{s['total']} 통과 · "
+            f"미달 {s['failed']} · 미측정 {s['not_measured']}"
+            + (f" · **고위험 미달 {s['high_risk_failed']}**" if s["high_risk_failed"] else ""))
+    return (head + "\n\n| 지표 | 임계 | 실측 | 판정 | 고위험 |\n|---|---|---|---|---|\n"
+            + "\n".join(rows))
 
 
 def _s4_system(ev: ValidationEvidence) -> str:

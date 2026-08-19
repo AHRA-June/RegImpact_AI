@@ -93,6 +93,7 @@ class ValidationEvidence:
 
     split_stats: list
     audit: AuditLog
+    scorecard: object = None
 
     baseline_region_count: int = 0
     notes: list[str] = field(default_factory=list)
@@ -105,6 +106,7 @@ def collect(
     size: int = DEFAULT_SIZE,
     seed: int = DEFAULT_SEED,
     generated_at: Optional[str] = None,
+    js_port_agreement: Optional[float] = None,
 ) -> ValidationEvidence:
     """파이프라인을 한 번 관통 실행하고 근거를 모은다."""
     run = Path(run_path or DEFAULT_RUN)
@@ -166,7 +168,7 @@ def collect(
     # 8. 판별력 (오류 주입 후 재측정)
     discrimination = discriminate_pipeline(extraction, sources, gold, rule_diff=rule_diff)
 
-    return ValidationEvidence(
+    evidence = ValidationEvidence(
         generated_at=generated_at or "",
         provider=provider,
         run_path=str(run.relative_to(REPO)) if run.is_relative_to(REPO) else str(run),
@@ -197,6 +199,13 @@ def collect(
         audit=audit,
         baseline_region_count=len(REGION_VERSIONS),
     )
+
+    # Assurance 스코어카드 — 실측을 임계와 대조한다.
+    # js_port_agreement 는 별도 도구(node)가 필요하므로 여기서는 넣지 않는다.
+    # 대조를 돌리지 않았으면 통과가 아니라 **미측정**으로 남는 것이 맞다.
+    from ..assurance.scorecard import score as _score
+    evidence.scorecard = _score(evidence, js_port_agreement=js_port_agreement)
+    return evidence
 
 
 def _source_table() -> str:

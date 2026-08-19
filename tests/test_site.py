@@ -163,3 +163,32 @@ def test_playground_shows_the_rule_trace(site):
     html = site["playground.html"]
     for rule_id in ("P0c", "P0d", "P1", "P7"):
         assert rule_id in html
+
+
+# ---------- README 의 문서 지도가 실재하는가 ----------
+def test_readme_paths_exist():
+    """문서 지도에 없는 파일을 적어두면 처음 오는 사람이 거기서 막힌다."""
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    missing = [
+        p for p in re.findall(r"`((?:docs|src|tests|tools|examples)/[^`]*)`", readme)
+        if not (REPO / p).exists()
+    ]
+    assert not missing, f"README 가 가리키는 경로가 없다: {sorted(set(missing))}"
+
+
+def test_readme_commands_exist():
+    """실행 예시가 없는 파일을 가리키면 첫 2분에서 실패한다."""
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    scripts = re.findall(r"python ((?:examples|tools)/[\w_]+\.py)", readme)
+    assert scripts, "실행 예시를 찾지 못했다 — 테스트가 무력화됐는지 확인"
+    missing = [s for s in scripts if not (REPO / s).exists()]
+    assert not missing, f"README 실행 예시의 스크립트가 없다: {missing}"
+
+
+def test_readme_site_links_match_built_pages(site):
+    """랜딩에서 링크한 페이지를 README 도 가리킨다 — 배포 후 404 가 나면 안 된다."""
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    linked = set(re.findall(r"github\.io/RegImpact_AI/([\w_]+\.html)", readme))
+    assert linked, "README 에 사이트 링크가 없다"
+    missing = linked - set(site) - {"_dir"}
+    assert not missing, f"README 가 가리키는 페이지가 빌드되지 않는다: {missing}"

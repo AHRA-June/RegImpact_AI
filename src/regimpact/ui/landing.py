@@ -59,6 +59,15 @@ def _stat(value: str, label: str) -> str:
     return f'<div class="stat"><div class="v">{esc(value)}</div><div class="l">{esc(label)}</div></div>'
 
 
+def _scorecard_meta(ev: ValidationEvidence) -> str:
+    sc = getattr(ev, "scorecard", None)
+    if sc is None:
+        return ""
+    s = sc.summary()
+    tail = f" · 미측정 {s['not_measured']}" if s["not_measured"] else ""
+    return f"스코어카드 {s['verdict']} — {s['passed']}/{s['total']} 통과{tail}"
+
+
 def _tile(href: str, title: str, desc: str, meta: str = "") -> str:
     m = f'<div class="m">{esc(meta)}</div>' if meta else ""
     return (f'<a class="tile" href="{esc(href)}"><div class="t">{esc(title)}</div>'
@@ -85,8 +94,9 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
               "확정 명세의 결정적 구현. 화면의 모든 LTV 값이 엔진 상수와 대조된다.",
               "P0~P7 우선순위"),
         _tile("assurance.html", "Assurance",
-              "인용 정확성·완전성·회귀·판별력을 한 화면에.",
-              f"룰 회귀 {r.pass_rate:.0%} ({r.passed}/{r.total})"),
+              "인용 정확성·완전성·회귀·판별력을 한 화면에. 지표를 나열만 하지 않고 "
+              "확정 임계와 대조해 판정한다.",
+              _scorecard_meta(ev) or f"룰 회귀 {r.pass_rate:.0%} ({r.passed}/{r.total})"),
     ])
     if playground:
         screens += _tile("playground.html", "인터랙티브 플레이그라운드",

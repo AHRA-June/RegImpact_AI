@@ -100,7 +100,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 | # | 능력 | 출처 |
 |---|---|---|
 | ~~S-06~~ | ~~검증보고서 15~20p~~ | ✅ 2026-08-19 완료 — fmo0g8 구조 + dq1gtz 생성기 방식, 수치는 main 실측 |
-| S-07 | Assurance 스코어카드 4 dimension + 임계값 | d2et38 · sp37fd |
+| ~~S-07~~ | ~~Assurance 스코어카드 4 dimension + 임계값~~ | ✅ 2026-08-19 완료 — 임계는 근거 없이 등록 불가, 미측정은 통과 아님 |
 | ~~S-08~~ | ~~Model/System Card + AI Risk Register~~ | ✅ 2026-08-19 완료 (통제 근거 실재 검증 신설) |
 | S-09 | 스트레스 테스트 (극단·경계·대량·적대적 입력) | fmo0g8 |
 | S-10 | 내규 영향도 맵 (`rule_catalog`) | fmo0g8 |
