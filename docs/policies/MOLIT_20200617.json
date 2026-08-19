@@ -1,0 +1,37 @@
+{
+  "policy_id": "MOLIT_20200617",
+  "title": "주택시장 안정을 위한 관리방안 (6·17 대책) — 조정대상지역·투기과열지구 대폭 확대",
+  "issuer": "관계부처 합동",
+  "published_at": "2020-06-17",
+  "effective_from": "2020-06-19",
+  "effective_to": null,
+  "supersedes_policy_id": null,
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "DRAFT",
+  "provenance": "HUMAN_INPUT",
+  "sources": [
+    {
+      "source_document_id": "MOLIT_PRESS_20200617",
+      "title": "주택시장 안정을 위한 관리방안 (보도자료)",
+      "source_hash": "67070527922c671c7db7a81750d3a8ae0508f488a9cbe3c7d1e239634b99b04f",
+      "retrieved_at": "2026-08-19",
+      "source_url": null,
+      "filename": "molit_press_20200617.pdf",
+      "byte_size": 2077369
+    },
+    {
+      "source_document_id": "QNA_20200617",
+      "title": "주택시장 안정을 위한 관리방안 외부용 Q&A",
+      "source_hash": "0eaa30c203a4beb82e5756e93acabed9a1a8b084180934efd752f3122c82a356",
+      "retrieved_at": "2026-08-19",
+      "source_url": null,
+      "filename": "qna_20200617.pdf",
+      "byte_size": 481161
+    }
+  ],
+  "region_deltas": [],
+  "rule_notes": [],
+  "notes": "AI 초안(2026-08-19, 사용자 제공 원문). 효력일 6.19은 원문 명시. 지역 이관(투기과열 48곳·조정대상 69곳, p14 참고2 현황표)은 사람 검수 후 — 값을 지어내지 않기 위해 비워 둠. supersedes 연결도 확정 시 함께."
+}

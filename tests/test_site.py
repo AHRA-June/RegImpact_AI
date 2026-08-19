@@ -136,17 +136,23 @@ def test_graph_page_carries_provenance(site):
 
 
 def test_search_page_shows_measured_recall_and_misses(site):
-    """검색 화면은 recall 실측과 **못 찾은 인용**을 함께 싣는다 — 좋은 숫자만 실으면 과장."""
-    from regimpact.extractor.sources import load_sources
+    """검색 화면은 recall 실측과 **못 찾은 인용**을 함께 싣는다 — 좋은 숫자만 실으면 과장.
+
+    코퍼스 확장(과거 정책 원문) 이후에는 전체 코퍼스와 시점 필터 두 수치가 모두 실려야 한다 —
+    떨어진 수치(전체)를 숨기고 회복된 수치(필터)만 싣는 것도 과장이다."""
+    from regimpact.extractor.sources import SOURCE_FILES, load_corpus
     from regimpact.retrieval import BM25Index, chunk_sources, citation_recall
-    src = load_sources()
-    rep = citation_recall(BM25Index(chunk_sources(src)), src)
+    corpus = load_corpus()
+    idx = BM25Index(chunk_sources(corpus))
+    r_full = citation_recall(idx, corpus)
+    r_filtered = citation_recall(idx, corpus, doc_ids=set(SOURCE_FILES))
     html = site["search.html"]
-    for k in rep.ks:
+    for k in r_full.ks:
         assert f"recall@{k}" in html
-    assert f"{rep.recall(5):.0%}" in html
-    assert f"못 찾은 인용 {len(rep.misses_at_max_k)}건" in html
-    for m in rep.misses_at_max_k:
+    assert f"{r_full.recall(5):.0%}" in html, "전체 코퍼스 수치(떨어진 쪽)가 없다"
+    assert f"{r_filtered.recall(5):.0%}" in html, "시점 필터 수치가 없다"
+    assert f"못 찾은 인용 {len(r_filtered.misses_at_max_k)}건" in html
+    for m in r_filtered.misses_at_max_k:
         assert m.item_id in html, f"미적중 {m.item_id} 이 화면에 없다"
 
 
