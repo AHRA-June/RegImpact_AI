@@ -14,6 +14,7 @@
 """
 import argparse
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -35,6 +36,13 @@ from regimpact.impact import (  # noqa: E402
     format_matrix_text,
 )
 from regimpact.audit import Action, AuditLog  # noqa: E402
+from regimpact.policy import (  # noqa: E402
+    check_registry_matches_baseline,
+    load_registry,
+    preview_region_impact,
+    previous_policy,
+    timeline,
+)
 from regimpact.impact.builder import derive_rule_diff  # noqa: E402
 from regimpact.impact.portfolio import DEFAULT_SEED, DEFAULT_SIZE  # noqa: E402
 from regimpact.proposal import (  # noqa: E402
@@ -93,14 +101,36 @@ def main() -> None:
     import json
     gold = json.loads(gold_path.read_text(encoding="utf-8"))
 
-    # 3 — 지역코드 정규화 (경계 변환, 결정적)
-    head("Policy Version Resolution — 지역명 → 룰엔진 지역코드")
+    # 3 — Temporal Policy Resolver (§7)
+    head("Policy Version Resolution — 직전 정책 대비 무엇이 달라졌나")
     norm = normalize_regions(extraction)
     for name, code in norm.mapping.items():
         print(f"  {name} → {code}")
     for name in norm.unmapped:
         print(f"  ⚠ 코드 미확인: {name}")
     extraction = norm.normalized
+
+    registry = load_registry()
+    as_of = date.fromisoformat(extraction.effective_from or "2026-07-01")
+    print(f"\n  정책 타임라인 ({as_of} 기준)")
+    for e in timeline(registry, as_of):
+        print(f"    {e.policy.effective_from}  {e.state:<8} {e.policy.policy_id:<16}"
+              f" ← {e.predecessor_id or '—'}")
+    this_policy = registry.get(extraction.policy_id)
+    if this_policy is not None:
+        prev = previous_policy(registry, this_policy)
+        print(f"\n  이번 정책 {this_policy.policy_id} 의 직전 유효 정책: "
+              f"{prev.policy_id if prev else '없음'}")
+        print("  이번 정책이 바꾸는 지역:")
+        for c in preview_region_impact(this_policy):
+            print(f"    {c.region_name:<10} {c.before.value:<14} → {c.after.value}")
+    drift = check_registry_matches_baseline(registry)
+    print(f"\n  정책 DB ↔ 엔진 기준선 정합성: {'OK' if drift.ok else 'DRIFT'}"
+          f" ({drift.summary()})")
+    for d in drift.all[:5]:
+        print(f"    ⚠ {d.region_code} · {d.policy_id} — {d.detail}")
+    audit.record(Action.POLICY_RESOLVED, "policy_registry",
+                 {"policies": len(registry.policies), "baseline_drift_ok": drift.ok})
 
     scored = score_against_gold(extraction, gold)
 
@@ -191,7 +221,8 @@ def main() -> None:
     head("E2E 관통 확인 (브리프 §18 코어 완성의 정의)")
     checks = [
         ("Source Snapshot", bool(sources)),
-        ("Policy Version Resolution", bool(norm.mapping) and not norm.unmapped),
+        ("Policy Version Resolution", bool(norm.mapping) and not norm.unmapped
+         and drift.ok and this_policy is not None),
         ("Before/After 추출", bool(extraction.changes)),
         ("Impact Matrix", bool(matrix.rows)),
         ("Customer Impact", bool(impact.impacts)),

@@ -85,7 +85,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 
 없는 것 → 아래가 전부다.
 
-### 티어 A — 이 프로젝트의 성격상 가장 값어치 있는 것
+### 티어 A — 이 프로젝트의 성격상 가장 값어치 있는 것 · ✅ 2026-08-19 전량 완료
 
 | # | 능력 | 출처 | 왜 |
 |---|---|---|---|
@@ -93,7 +93,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 | ~~S-02~~ | ~~판별력(negative control) + `VALIDATION_LIMITS.md`~~ | dq1gtz | ✅ 2026-08-19 완료 (문서는 main 실측으로 재작성) |
 | ~~S-03~~ | ~~해시 체인 감사로그 (audit trail)~~ | d2et38 | ✅ 2026-08-19 완료 (절단 탐지용 expected_head 추가) |
 | ~~S-04~~ | ~~Rule Change Proposal (`proposal/`)~~ | sp37fd | ✅ 2026-08-19 완료 (실제 추출에 배선하며 빌더 결함 2건 수정) |
-| S-05 | **Policy Version DB + Temporal Policy Resolver** | 8k0xmx | 정책의 시간축을 데이터로 관리 (§0-7 Phase 시간축 원칙과 직결) |
+| ~~S-05~~ | ~~Policy Version DB + Temporal Policy Resolver~~ | 8k0xmx | ✅ 2026-08-19 완료 — **티어 A 전부 완료** |
 
 ### 티어 B — 완성도·설득력
 
@@ -131,7 +131,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 1. ~~**S-01** 지역 레지스트리~~ ✅ 완료
 2. ~~**S-22** 사업계획서~~ ✅ 완료
 3. ~~**S-04** Rule Change Proposal~~ ✅ 완료
-4. ~~**S-02** 판별력~~ ~~**S-03** 감사로그~~ ✅ 완료 → **S-05 정책 버전 DB**
+4. ~~**S-02** 판별력~~ ~~**S-03** 감사로그~~ ~~**S-05** 정책 버전 DB~~ ✅ **티어 A 완료**
 5. **S-16 + S-17** 은 묶어서 — 플레이그라운드의 JS 룰엔진은 `export_fixtures.py` +
    `verify_js_port.mjs` 대조 하네스 없이 들이면 하드코딩이 되살아난다
 5. 티어 B는 검증보고서(S-06)를 축으로 필요한 것만

@@ -1,0 +1,61 @@
+{
+  "policy_id": "MOLIT_20161103",
+  "title": "강남·서초·송파·용산 조정대상지역 지정",
+  "issuer": "국토교통부",
+  "published_at": "2016-11-03",
+  "effective_from": "2016-11-03",
+  "effective_to": null,
+  "supersedes_policy_id": null,
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "CONFIRMED",
+  "provenance": "HUMAN_CONFIRMED",
+  "sources": [
+    {
+      "source_document_id": "MOLIT_PRESS_20260630",
+      "title": "투기과열지구 및 조정대상지역 추가 지정 (보도참고자료)",
+      "source_hash": "6115271bf81d487e752ccc1315585018e89ed6c5d4137f7ecca271cb66c11edd",
+      "retrieved_at": "2026-08-10",
+      "source_url": null,
+      "filename": "molit_press_20260630.pdf",
+      "byte_size": null
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "SEOUL_GANGNAM",
+      "region_name": "강남구",
+      "region_status": "REGULATED",
+      "effective_from": "2016-11-03",
+      "effective_to": "2017-08-02",
+      "regulated_type": "ADJUSTMENT"
+    },
+    {
+      "region_code": "SEOUL_SEOCHO",
+      "region_name": "서초구",
+      "region_status": "REGULATED",
+      "effective_from": "2016-11-03",
+      "effective_to": "2017-08-02",
+      "regulated_type": "ADJUSTMENT"
+    },
+    {
+      "region_code": "SEOUL_SONGPA",
+      "region_name": "송파구",
+      "region_status": "REGULATED",
+      "effective_from": "2016-11-03",
+      "effective_to": "2017-08-02",
+      "regulated_type": "ADJUSTMENT"
+    },
+    {
+      "region_code": "SEOUL_YONGSAN",
+      "region_name": "용산구",
+      "region_status": "REGULATED",
+      "effective_from": "2016-11-03",
+      "effective_to": "2017-08-02",
+      "regulated_type": "ADJUSTMENT"
+    }
+  ],
+  "rule_notes": [],
+  "notes": "regions.REGION_VERSIONS 에서 생성 (tools/seed_policies.py). 근거: regulatory_facts C16 — MOLIT p5 참고2 현황표."
+}

@@ -238,3 +238,37 @@ def normalize_region_name(name: str) -> Optional[str]:
         if alias in cleaned:
             return REGION_ALIASES[alias]
     return None
+
+
+# --------------------------------------------------------------- 코드 정규화 · 표기
+def canonical_code(name_or_code: str) -> str:
+    """지역 표기를 코드로 정규화한다. 알 수 없으면 **입력을 그대로 돌려준다**.
+
+    `normalize_region_name` 은 모르면 None 을 주지만(호출측이 escalate 하도록),
+    여기서는 코드 자리에 쓸 문자열이 필요한 경우를 위해 통과시킨다. 정규화 실패는
+    `resolve_region_status` 가 UNKNOWN 으로 잡으므로 관대해지지 않는다.
+    """
+    return normalize_region_name(name_or_code) or name_or_code
+
+
+def _build_labels() -> dict[str, str]:
+    """코드 → 한글 표기. 별칭표를 뒤집되 행정 표기('강남구'·'과천시')를 우선한다."""
+    out: dict[str, str] = {}
+    for alias, code in REGION_ALIASES.items():
+        cur = out.get(code)
+        better = (
+            cur is None
+            or (alias.endswith(("구", "시")) and not cur.endswith(("구", "시")))
+            or (alias.endswith(("구", "시")) == cur.endswith(("구", "시")) and len(alias) > len(cur))
+        )
+        if better:
+            out[code] = alias
+    return out
+
+
+REGION_LABELS: dict[str, str] = _build_labels()
+
+
+def region_label(region_code: str) -> str:
+    """코드의 한글 표기. 모르는 코드는 코드 그대로."""
+    return REGION_LABELS.get(canonical_code(region_code), region_code)
