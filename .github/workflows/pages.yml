@@ -2,6 +2,10 @@
 #
 # 사이트는 빌드 시점에 파이프라인을 한 번 실행하고 그 결과를 HTML 로 굽는다.
 # 배포된 페이지는 서버도 API 키도 필요 없다 (provider=replay, LLM 호출 0회).
+#
+# 잡을 둘로 나눈 이유: 모바일 검사는 브라우저가 필요해서 느리다(설치 포함 수 분).
+# 빌드와 **병렬로** 돌리면 배포까지의 시간이 브라우저 설치에 끌려가지 않으면서도,
+# 모바일이 깨지면 여전히 배포가 막힌다(deploy 가 두 잡 모두에 의존).
 name: Deploy site to GitHub Pages
 
 on:
@@ -32,16 +36,7 @@ jobs:
         run: pip install -e ".[dev]"
 
       # 사이트를 굽기 전에 테스트를 통과해야 한다 — 깨진 수치를 배포하지 않는다.
-      # 브라우저 검사(모바일 가로 스크롤)는 느려서 로컬 기본 스위트에서 빠져 있다.
-      # 배포 직전에는 반드시 돈다 — 폰에서 깨진 화면을 올리지 않기 위해서다.
-      - name: Install browser
-        run: |
-          pip install playwright
-          python -m playwright install --with-deps chromium
-
       - name: Test
-        env:
-          REGIMPACT_BROWSER_TESTS: "1"
         run: python -m pytest -q
 
       - name: Build site
@@ -55,8 +50,38 @@ jobs:
         with:
           path: site
 
+  mobile:
+    # 폰에서 깨진 화면을 올리지 않기 위한 검사. build 와 병렬로 돈다.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install -e ".[dev]" playwright
+
+      # 브라우저 바이너리를 캐시한다. --with-deps 는 쓰지 않는다 —
+      # ubuntu-latest 에 필요한 라이브러리가 대부분 있고, apt 설치가 10분 넘게 걸린다.
+      - name: Cache browser
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}
+
+      - name: Install chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: python -m playwright install chromium
+
+      - name: Mobile layout check
+        env:
+          REGIMPACT_BROWSER_TESTS: "1"
+        run: python -m pytest tests/test_site.py -q
+
   deploy:
-    needs: build
+    needs: [build, mobile]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
