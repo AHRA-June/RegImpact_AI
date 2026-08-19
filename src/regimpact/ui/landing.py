@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from ..extractor.sources import SOURCE_FILES
 from ..report.evidence import ValidationEvidence
 from .theme import CSS, FONTS, esc
 
@@ -81,6 +82,9 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
     cs = ev.consistency.summary()
 
     screens = "".join([
+        _tile("sources.html", "규제 문서 등록",
+              "새 공문이 들어오는 입구. 원문 스냅샷 해시·정책 버전 타임라인·새 문서 등록.",
+              f"원문 스냅샷 {len(SOURCE_FILES)}건 · 정책 버전 타임라인"),
         _tile("regchange.html", "규제 변경 분석",
               "공문에서 추출한 변경과 인용 근거. 각 항목이 원문 어디에서 왔는지 대조된다.",
               f"변경 {len(ev.extraction.changes)}건 · 인용 검증 {g.citation_correctness:.0%}"),
@@ -93,13 +97,13 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
         _tile("rule.html", "룰 판정 로직",
               "확정 명세의 결정적 구현. 화면의 모든 LTV 값이 엔진 상수와 대조된다.",
               "P0~P7 우선순위"),
-        _tile("assurance.html", "Assurance",
+        _tile("assurance.html", "검증 (Assurance)",
               "인용 정확성·완전성·회귀·판별력을 한 화면에. 지표를 나열만 하지 않고 "
               "확정 임계와 대조해 판정한다.",
               _scorecard_meta(ev) or f"룰 회귀 {r.pass_rate:.0%} ({r.passed}/{r.total})"),
     ])
     if playground:
-        screens += _tile("playground.html", "인터랙티브 플레이그라운드",
+        screens += _tile("playground.html", "판정 플레이그라운드",
                          "차주 조건을 바꾸면 즉시 판정이 바뀐다. JS 포팅본은 Python 엔진과 전 케이스 대조된다.",
                          "직접 만져보기")
 
@@ -108,10 +112,10 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
               "개념적 건전성 · 구현 정확성 · 성과 검증 · 거버넌스 · 한계 · 발견사항. "
               "모든 수치가 파이프라인 실행에서 나온다.",
               f"자체 발견 결함 10건 기록"),
-        _tile("model_system_card.html", "Model & System Card",
+        _tile("model_system_card.html", "모델·시스템 카드",
               "사용 목적과 **범위 외·오용 방지**. LLM 이 무엇을 하고 무엇을 하지 않는지.",
               "Model Card 관례"),
-        _tile("ai_risk_register.html", "AI Risk Register",
+        _tile("ai_risk_register.html", "AI 리스크 레지스터",
               "리스크 18건 / 5범주. 통제가 실재하는 코드를 가리키는지 테스트가 강제한다.",
               "잔여 High 1건 (의도적)"),
     ])
@@ -129,7 +133,7 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
 </head><body>
 <div class="wrap">
   <header class="hero">
-    <div class="kicker">Financial Regulation Impact &amp; Assurance</div>
+    <div class="kicker">금융규제 영향분석 · 검증 시스템</div>
     <h1>규제가 바뀌면, 무엇을 고쳐야 하는지 증명까지 함께 낸다</h1>
     <p class="lede">
       {esc(ev.extraction.policy_id)} 규제지역 추가 지정을 공문 원문에서 읽어

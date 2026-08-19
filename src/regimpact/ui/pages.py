@@ -19,6 +19,7 @@ from .theme import (
     card,
     chip,
     esc,
+    glance,
     icon,
     page,
     page_title,
@@ -56,14 +57,27 @@ def regchange_page(
 ) -> str:
     ungrounded = _grounded_set(grounding)
 
+    n_docs = len({c.citation.source_doc_id for c in extraction.changes})
+    top = glance(
+        f"공문 {n_docs}건에서 변경 {len(extraction.changes)}건을 추출했다 — "
+        f"인용 {grounding.citation_correctness:.0%}가 원문에서 그대로 확인됐고, "
+        f"시행일은 {extraction.effective_from}이다.",
+        [chip(f"변경 {len(extraction.changes)}건", tone="primary"),
+         chip(f"인용 원문 확인 {grounding.citation_correctness:.0%}",
+              tone="good" if grounding.citation_correctness == 1.0 else "warn"),
+         chip(f"예외 재현율 {scored.exception_recall:.0%}",
+              tone="good" if scored.exception_recall == 1.0 else "bad"),
+         chip(f"신규 규제지역 {len(extraction.target_regions)}곳")],
+    )
+
     stats = (
         '<div class="grid grid-cols-4 gap-4">'
         + stat("추출된 변경", f"{len(extraction.changes)}건",
                sub=f"시행일 {extraction.effective_from}")
-        + stat("Citation Correctness", f"{grounding.citation_correctness:.0%}",
+        + stat("인용 정확성", f"{grounding.citation_correctness:.0%}",
                tone="good" if grounding.citation_correctness == 1.0 else "warn",
-               sub=f"{grounding.grounded}/{grounding.total} 원문 verbatim 확인")
-        + stat("Unsupported Claim Rate", f"{grounding.unsupported_claim_rate:.0%}",
+               sub=f"{grounding.grounded}/{grounding.total} 원문 그대로 확인")
+        + stat("근거 없는 주장", f"{grounding.unsupported_claim_rate:.0%}",
                tone="good" if grounding.unsupported_claim_rate == 0 else "bad",
                sub="원문에 없는 인용 = 환각 신호")
         + stat("신규 규제지역", f"{len(extraction.target_regions)}곳",
@@ -93,31 +107,31 @@ def regchange_page(
         ])
 
     gold_rows = [
-        ["Change Completeness", f"{scored.change_completeness:.0%}",
+        ["변경 완전성", f"{scored.change_completeness:.0%}",
          ", ".join(scored.missed_changes) or "—"],
-        ["Exception Recall", f"{scored.exception_recall:.0%}",
+        ["예외 재현율", f"{scored.exception_recall:.0%}",
          ", ".join(scored.missed_exceptions) or "—"],
-        ["Effective-date", "OK" if scored.effective_date_correct else "MISS", "—"],
-        ["Regions", "OK" if scored.regions_correct else "MISS", "—"],
+        ["시행일", "일치" if scored.effective_date_correct else "불일치", "—"],
+        ["지역", "일치" if scored.regions_correct else "불일치", "—"],
     ]
 
     body = (
         page_title(
             "규제 변경 분석",
-            "공문 원문에서 추출한 Before/After 변경사항과 그 근거 인용. "
-            "모든 인용은 원문 verbatim 대조를 거쳤고, 대조에 실패한 인용은 ⚠로 표시된다.",
+            "공문에서 추출한 변경 전→후와 근거 인용. ⚠ 표시는 원문 대조에 실패한 인용이다.",
         )
+        + top
         + stats
         + card(
             "추출된 변경사항",
-            table(["카테고리", "변경 내용", "Before → After", "근거 (원문 인용)", "신뢰도"], rows),
+            table(["카테고리", "변경 내용", "변경 전 → 후", "근거 (원문 인용)", "신뢰도"], rows),
             note="근거 열의 ✓ = 원문에서 그대로 확인됨 / ⚠ = 원문 미확인",
         )
         + card(
             "골드 정답지 대조",
             table(
                 ["지표", "값", "놓친 항목"],
-                [[esc(a), chip(b, tone="good" if b in ("OK", "100%") else "warn"), esc(c)]
+                [[esc(a), chip(b, tone="good" if b in ("일치", "100%") else "warn"), esc(c)]
                  for a, b, c in gold_rows],
             ),
             note="사람이 확정한 골드 정답지(docs/eval/regchange_gold_6_30.json) 기준",
@@ -134,6 +148,15 @@ _PRIORITY_TONE = {"필수": "bad", "회귀": "warn", "검토": "neutral"}
 
 
 def impact_matrix_page(matrix: ImpactMatrix) -> str:
+    top = glance(
+        f"규제 변경이 실무 조치 {len(matrix.rows)}행으로 전개된다 — "
+        f"코어 {len(matrix.core_rows)}행 중 {matrix.automation_rate:.0%}는 자동처리, "
+        f"사람 검토 {len(matrix.human_review_rows)}행은 전부 사유가 명시돼 있다.",
+        [chip(f"{len(matrix.rows)}행", tone="primary"),
+         chip(f"자동처리 {matrix.automation_rate:.0%}", tone="good"),
+         chip(f"사람 검토 {len(matrix.human_review_rows)}행", tone="warn"),
+         chip(f"시행일 {matrix.effective_from}")],
+    )
     stats = (
         '<div class="grid grid-cols-4 gap-4">'
         + stat("매트릭스 행", f"{len(matrix.rows)}행",
@@ -171,7 +194,7 @@ def impact_matrix_page(matrix: ImpactMatrix) -> str:
                 '<div class="mt-6 border-t border-outline-variant/40 pt-6">'
                 '<div class="flex items-center gap-2 mb-3">'
                 + icon("travel_explore", 18)
-                + '<span class="font-h3 text-h3 text-on-background">Discovery Scope</span>'
+                + '<span class="font-h3 text-h3 text-on-background">Discovery 범위 (수동 검토)</span>'
                 '<span class="text-body-sm text-on-surface-variant">'
                 "영향은 표시하되 코어 룰엔진에서 자동판정하지 않는다 (브리프 §24-12)</span></div>"
                 + table(["항목", "변경 내용", "근거", "영향 대상", "처리"],
@@ -193,19 +216,20 @@ def impact_matrix_page(matrix: ImpactMatrix) -> str:
     body = (
         page_title(
             "임팩트 매트릭스",
-            "규제 변경을 업무영역별로 전개한다. 시간축(Phase)이 이 매트릭스의 핵심 — "
-            "일은 시행일 전 / 시행 후 / 별도 트리거 세 물결로 온다.",
+            "규제 변경을 업무영역별 조치로 전개한다. 일은 시행일 전 / 시행 후 / 별도 트리거 "
+            "세 물결로 온다 — 탭이 그 시간축이다.",
         )
+        + top
         + stats
         + '<div class="flex gap-4">' + "".join(tabs) + "</div>"
         + "".join(panels)
         + card(
-            f"Human Review 필요 ({len(matrix.human_review_rows)}행)",
+            f"사람 검토 필요 ({len(matrix.human_review_rows)}행)",
             f'<ul class="flex flex-col">{hr_list}</ul>',
             note="자동처리 불가 행은 사유가 반드시 명시된다",
         )
         + f'<div class="text-body-sm text-on-surface-variant font-mono-label text-mono-label">'
-          f"generated_from: {esc(matrix.generated_from)}</div>"
+          f"생성 근거: {esc(matrix.generated_from)}</div>"
     )
     script = (
         "<script>document.querySelectorAll('.phase-tab').forEach(function(t){"
@@ -335,9 +359,17 @@ def rule_page(extraction: RegChangeExtraction, regression: RegressionReport) -> 
 
     body = (
         page_title(
-            "Rule 변경안",
-            "규제 변경을 여신 심사 룰의 구조화된 diff로 전개한다. "
-            "값은 확정 명세의 구현(룰엔진 상수)에서 읽어오므로, 명세가 바뀌면 이 화면도 따라간다.",
+            "룰 변경안",
+            "규제 변경을 여신 심사 룰의 구조화된 변경 내역으로 전개한다. "
+            "값은 확정 명세의 구현(룰엔진 상수)에서 읽어온다.",
+        )
+        + glance(
+            f"여신 심사 룰 {len(diff)}건 중 {len(changed)}건이 바뀐다 — "
+            f"독립 오라클 회귀 {regression.total}케이스가 {regression.pass_rate:.0%} 일치한다.",
+            [chip(f"변경 {len(changed)}건 / 전체 {len(diff)}건", tone="primary"),
+             chip(f"회귀 일치 {regression.pass_rate:.0%}",
+                  tone="good" if regression.pass_rate == 1.0 else "bad"),
+             chip("값 출처: 확정 명세 → 엔진 상수", tone="neutral")],
         )
         + banner
         + '<div class="grid grid-cols-3 gap-4">'
@@ -347,10 +379,10 @@ def rule_page(extraction: RegChangeExtraction, regression: RegressionReport) -> 
                tone="good" if regression.pass_rate == 1.0 else "bad",
                sub=f"{regression.total}케이스 · 실패 {len(regression.failures)}건")
         + "</div>"
-        + card("Rule diff", table(["rule_id", "적용 조건", "Before", "After", ""], rows,
+        + card("룰 변경 내역", table(["rule_id", "적용 조건", "변경 전", "변경 후", ""], rows,
                                   align_center=(2, 3, 4)))
         + card(
-            "적용 후 판정 로직 (AFTER)",
+            "적용 후 판정 로직",
             '<pre class="bg-inverse-surface text-inverse-on-surface rounded-xl p-5 '
             'overflow-x-auto font-mono-data text-mono-data leading-6">'
             f"{esc(code)}</pre>",
@@ -358,7 +390,7 @@ def rule_page(extraction: RegChangeExtraction, regression: RegressionReport) -> 
         )
         + card("승인 절차", stepper, note="현재 단계: AI 초안 생성 완료 → 사람 검토 대기")
     )
-    return page(title="Rule 변경안", active="rule.html", scenario=SCENARIO,
+    return page(title="룰 변경안", active="rule.html", scenario=SCENARIO,
                 status="승인 대기", body=body)
 
 
@@ -373,33 +405,33 @@ def assurance_page(
 ) -> str:
     cards = (
         '<div class="grid grid-cols-4 gap-4">'
-        + stat("Citation Correctness", f"{grounding.citation_correctness:.0%}",
+        + stat("인용 정확성", f"{grounding.citation_correctness:.0%}",
                tone="good" if grounding.citation_correctness == 1.0 else "warn",
-               sub="인용의 원문 verbatim 일치율")
-        + stat("Unsupported Claim Rate", f"{grounding.unsupported_claim_rate:.0%}",
+               sub="인용의 원문 그대로 일치율")
+        + stat("근거 없는 주장", f"{grounding.unsupported_claim_rate:.0%}",
                tone="good" if grounding.unsupported_claim_rate == 0 else "bad",
                sub="원문 근거 없는 주장 비율")
-        + stat("Exception Recall", f"{scored.exception_recall:.0%}",
+        + stat("예외 재현율", f"{scored.exception_recall:.0%}",
                tone="good" if scored.exception_recall == 1.0 else "bad",
-               sub="★ high-risk — 예외 누락은 오판정으로 직결")
-        + stat("Rule-regression", f"{regression.pass_rate:.0%}",
+               sub="★ 고위험 — 예외 누락은 오판정으로 직결")
+        + stat("룰 회귀", f"{regression.pass_rate:.0%}",
                tone="good" if regression.pass_rate == 1.0 else "bad",
                sub=f"{regression.total}케이스 · 독립 오라클 대조")
         + "</div>"
     )
 
     metric_rows = [
-        ["Citation Correctness", f"{grounding.citation_correctness:.0%}", "TBD", "중",
+        ["인용 정확성 (Citation Correctness)", f"{grounding.citation_correctness:.0%}", "TBD", "중",
          f"{grounding.grounded}/{grounding.total} 인용 원문 확인"],
-        ["Unsupported Claim Rate", f"{grounding.unsupported_claim_rate:.0%}", "TBD", "중",
+        ["근거 없는 주장 (Unsupported Claim)", f"{grounding.unsupported_claim_rate:.0%}", "TBD", "중",
          f"미확인 인용 {len(grounding.ungrounded)}건"],
-        ["Change Completeness", f"{scored.change_completeness:.0%}", "TBD", "놓침=위험",
+        ["변경 완전성 (Completeness)", f"{scored.change_completeness:.0%}", "TBD", "놓침=위험",
          ", ".join(scored.missed_changes) or "놓친 변경 없음"],
-        ["Exception Recall", f"{scored.exception_recall:.0%}", "TBD", "★ 높음",
+        ["예외 재현율 (Exception Recall)", f"{scored.exception_recall:.0%}", "TBD", "★ 높음",
          f"놓친 예외: {', '.join(scored.missed_exceptions) or '없음'}"],
-        ["Effective-date Accuracy", "OK" if scored.effective_date_correct else "MISS",
-         "TBD", "★ 높음", "골드 시행일과 일치" if scored.effective_date_correct else "불일치"],
-        ["Rule-regression Pass Rate", f"{regression.pass_rate:.0%}", "100% 목표", "★ 높음",
+        ["시행일 정확성", "일치" if scored.effective_date_correct else "불일치",
+         "TBD", "★ 높음", "골드 시행일 기준"],
+        ["룰 회귀 통과율", f"{regression.pass_rate:.0%}", "100% 목표", "★ 높음",
          f"실패 {len(regression.failures)}건"],
     ]
     cat_rows = [
@@ -446,20 +478,30 @@ def assurance_page(
     body = (
         page_title(
             "검증 (Assurance)",
-            "AI 출력이 틀리지 않았음을 증명하는 층. 지표는 LLM 자기채점이 아니라 "
-            "원문 verbatim 대조·사람 확정 골드·독립 명세 오라클로 산출된다.",
+            "지표는 LLM 자기채점이 아니라 원문 대조·사람 확정 골드·독립 명세 오라클로 산출된다.",
+        )
+        + glance(
+            f"인용·완전성·회귀를 독립 기준과 대조했다 — 자동으로 넘기지 않은 "
+            f"{len(escalations)}건은 사유와 함께 사람에게 올렸다.",
+            [chip(f"인용 확인 {grounding.citation_correctness:.0%}",
+                  tone="good" if grounding.citation_correctness == 1.0 else "warn"),
+             chip(f"예외 재현율 {scored.exception_recall:.0%}",
+                  tone="good" if scored.exception_recall == 1.0 else "bad"),
+             chip(f"룰 회귀 {regression.pass_rate:.0%}",
+                  tone="good" if regression.pass_rate == 1.0 else "bad"),
+             chip(f"사람에게 올림 {len(escalations)}건", tone="warn")],
         )
         + cards
         + card(
             "지표 현황",
-            table(["지표", "실측값", "임계", "high-risk", "비고"],
-                  [[esc(a), chip(b, tone="good" if b in ("OK", "100%", "0%") else "warn"),
+            table(["지표", "실측값", "임계", "위험도", "비고"],
+                  [[esc(a), chip(b, tone="good" if b in ("일치", "100%", "0%") else "warn"),
                     chip(c, tone="warn" if c == "TBD" else "neutral"), esc(d), esc(e)]
                    for a, b, c, d, e in metric_rows],
                   align_center=(1, 2, 3)),
             note="임계값 TBD = docs/metrics_spec.md 미확정 — 정직하게 비워 둔다",
         )
-        + card("Rule-regression 카테고리별", table(["카테고리", "통과/전체", "비율"], cat_rows,
+        + card("룰 회귀 카테고리별", table(["카테고리", "통과/전체", "비율"], cat_rows,
                                                 align_center=(1, 2)))
         + card(f"Escalation ({len(escalations)}건)", esc_html,
                note="자동으로 넘기지 않고 사람에게 올린 항목")
@@ -560,8 +602,17 @@ def portfolio_page(impact: CustomerImpactReport) -> str:
     body = (
         page_title(
             "고객·포트폴리오 영향",
-            f"합성 포트폴리오 {total:,}건을 시행 전일({impact.before_date})과 "
-            f"시행일({impact.after_date}) 두 시점으로 deterministic 룰엔진에 태워 차이를 계산한 결과.",
+            f"같은 포트폴리오를 시행 전일({impact.before_date})과 시행일({impact.after_date}) "
+            "두 시점으로 룰엔진에 태워 차이를 계산한 결과.",
+        )
+        + glance(
+            f"합성 {total:,}건 중 {len(impact.reduced):,}건({impact.affected_rate:.1%})의 한도가 "
+            f"줄어든다 — 총 {_won(impact.total_limit_reduction)}. "
+            f"경과규정이 {impact.grandfathered_count:,}건을 보호한다.",
+            [chip(f"한도 감소 {len(impact.reduced):,}건", tone="bad"),
+             chip(f"총 {_won(impact.total_limit_reduction)}", tone="bad"),
+             chip(f"경과규정 보호 {impact.grandfathered_count:,}건", tone="good"),
+             chip(f"심사 판정 {impact.decision_coverage:.1%} · 영향 측정 {impact.impact_coverage:.1%}")],
         )
         + '<div class="flex items-start gap-3 bg-tertiary-fixed/30 border border-tertiary-fixed '
           'rounded-xl p-4">'
@@ -585,7 +636,7 @@ def portfolio_page(impact: CustomerImpactReport) -> str:
             ),
         )
         + card("고객 세그먼트 분포", f'<div class="flex flex-col gap-3">{seg_bars}</div>')
-        + card("LTV 전이 (Before → After)", f'<div class="flex flex-col gap-3">{trans_bars}</div>',
+        + card("LTV 전이 (변경 전 → 후)", f'<div class="flex flex-col gap-3">{trans_bars}</div>',
                note="“—” = 자동판정이 성립하지 않은 구간")
         + card("최대 영향 케이스", worst_html)
         + card(
@@ -595,7 +646,7 @@ def portfolio_page(impact: CustomerImpactReport) -> str:
         )
         + card(
             "대표 케이스 (판정근거 조합별 실제 1건)",
-            table(["고객", "지역", "세그먼트", "Before LTV", "After LTV", "한도 변화", "reason_codes"],
+            table(["고객", "지역", "세그먼트", "변경 전 LTV", "변경 후 LTV", "한도 변화", "판정 근거"],
                   samples, align_center=(3, 4)),
             note="포트폴리오에서 실제로 뽑은 건 — 예시용으로 지어낸 행이 아니다",
         )

@@ -121,6 +121,8 @@ button{font:inherit;border:0;cursor:pointer}
 .py-3{padding-top:12px;padding-bottom:12px}.py-4{padding-top:16px;padding-bottom:16px}
 .py-8{padding-top:32px;padding-bottom:32px}
 .pl-6{padding-left:24px}.pl-72{padding-left:288px}.pt-16{padding-top:64px}.pt-6{padding-top:24px}
+.pt-4{padding-top:16px}.pb-1{padding-bottom:4px}
+.glance{scroll-margin-top:80px}
 .mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mt-6{margin-top:24px}
 .fixed{position:absolute}.top-0{top:0}.left-0{left:0}.right-0{right:0}.left-72{left:288px}
 .z-40{z-index:40}.z-50{z-index:50}
@@ -171,6 +173,7 @@ _MOBILE_CSS = """
   aside.fixed nav{display:flex;flex-direction:row;gap:4px;overflow-x:auto;overflow-y:hidden;
     padding:0 12px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   aside.fixed nav::-webkit-scrollbar{display:none}
+  aside.fixed nav .nav-sec{display:none}   /* 섹션 라벨은 가로 탭바에서 자리만 차지한다 */
   aside.fixed nav > a{flex:0 0 auto;white-space:nowrap;padding:7px 12px;font-size:13px}
   aside.fixed > div:last-child{display:none}       /* 하단 캡션은 좁은 화면에서 생략 */
   header.fixed{position:static;left:0;height:auto;padding:10px 16px;flex-wrap:wrap;gap:8px;
@@ -219,6 +222,8 @@ _ICON_PATHS = {
     "gavel": "M6 18h8M4 14l6-6M8 4l6 6M11 3l4 4M7 7l4 4",
     "science": "M9 3v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M8 3h8M7 15h10",
     "dashboard": "M4 4h6v6H4zM14 4h6v4h-6zM14 12h6v8h-6zM4 14h6v6H4z",
+    "home": "M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10",
+    "upload_file": "M12 16V5M8 9l4-4 4 4M4 19h16",
 }
 
 FONTS = (
@@ -226,14 +231,31 @@ FONTS = (
     '&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>'
 )
 
-# (파일명, 라벨, 아이콘) — Stitch 사이드바 순서 유지
-NAV = (
-    ("regchange.html", "규제 변경 분석", "rule_folder"),
-    ("impact_matrix.html", "임팩트 매트릭스", "grid_view"),
-    ("rule.html", "Rule 변경안", "edit_document"),
-    ("assurance.html", "검증 (Assurance)", "verified_user"),
-    ("portfolio.html", "고객·포트폴리오 영향", "account_balance_wallet"),
+# 전역 내비게이션 — **모든 페이지가 같은 메뉴를 쓴다** (랜딩 제외: 랜딩이 곧 홈이다).
+# 화면마다 메뉴가 달라 길을 잃는 문제(2026-08-19 사용자 리뷰)를 이 단일 정의로 해소한다.
+# (섹션 라벨, ((파일명, 라벨, 아이콘), ...))
+NAV_SECTIONS = (
+    (None, (
+        ("index.html", "홈", "home"),
+    )),
+    ("파이프라인", (
+        ("sources.html", "규제 문서 등록", "upload_file"),
+        ("regchange.html", "규제 변경 분석", "rule_folder"),
+        ("impact_matrix.html", "임팩트 매트릭스", "grid_view"),
+        ("rule.html", "룰 변경안", "edit_document"),
+        ("portfolio.html", "고객·포트폴리오 영향", "account_balance_wallet"),
+        ("assurance.html", "검증", "verified_user"),
+        ("playground.html", "판정 플레이그라운드", "science"),
+    )),
+    ("검증 문서", (
+        ("validation_report.html", "검증보고서", "gavel"),
+        ("model_system_card.html", "모델·시스템 카드", "person"),
+        ("ai_risk_register.html", "AI 리스크 레지스터", "shield_lock"),
+    )),
 )
+
+# 평탄화된 목록 — 기존 사용처(테스트 포함) 호환
+NAV = tuple(item for _, items in NAV_SECTIONS for item in items)
 
 
 def esc(value) -> str:
@@ -252,26 +274,32 @@ def icon(name: str, size: int = 20) -> str:
 
 def _sidebar(active: str) -> str:
     items = []
-    for href, label, ico in NAV:
-        if href == active:
-            cls = ("flex items-center gap-3 px-4 py-2.5 rounded transition-all "
-                   "bg-secondary-container text-on-secondary font-semibold")
-            aria = ' aria-current="page"'
-        else:
-            cls = ("flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant "
-                   "transition-all")
-            aria = ""
-        items.append(f'<a class="{cls}"{aria} href="{href}">{icon(ico)}<span>{label}</span></a>')
+    for section, entries in NAV_SECTIONS:
+        if section:
+            items.append(
+                f'<div class="nav-sec px-4 pt-4 pb-1 font-mono-label text-mono-label '
+                f'uppercase text-on-surface-variant">{esc(section)}</div>'
+            )
+        for href, label, ico in entries:
+            if href == active:
+                cls = ("flex items-center gap-3 px-4 py-2.5 rounded transition-all "
+                       "bg-secondary-container text-on-secondary font-semibold")
+                aria = ' aria-current="page"'
+            else:
+                cls = ("flex items-center gap-3 px-4 py-2.5 rounded text-on-surface-variant "
+                       "transition-all")
+                aria = ""
+            items.append(
+                f'<a class="{cls}"{aria} href="{href}">{icon(ico)}<span>{label}</span></a>')
     return (
         '<aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest '
         'border-r border-outline-variant/30 z-50 flex flex-col">'
-        '<div class="h-16 flex items-center px-6 gap-3">'
+        '<a class="h-16 flex items-center px-6 gap-3" href="index.html" title="홈으로">'
         + icon("shield_lock", 22)
-        + '<span class="font-h3 text-h3 text-primary tracking-tight">RegImpact AI</span></div>'
+        + '<span class="font-h3 text-h3 text-primary tracking-tight">RegImpact AI</span></a>'
         '<nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">' + "".join(items) + "</nav>"
         '<div class="px-6 py-4 border-t border-outline-variant/30 text-body-sm '
-        'text-on-surface-variant">엔진 실제 출력으로 생성됨<br/>'
-        '<span class="font-mono-label text-mono-label">generated, not mocked</span></div>'
+        'text-on-surface-variant">모든 수치는 엔진 실제 출력에서 생성됨</div>'
         "</aside>"
     )
 
@@ -298,14 +326,15 @@ def _header(scenario: str, status: str) -> str:
 
 
 def page(
-    *, title: str, active: str, scenario: str, status: str, body: str, extra_script: str = ""
+    *, title: str, active: str, scenario: str, status: str, body: str,
+    extra_script: str = "", extra_css: str = ""
 ) -> str:
     """Stitch 셸(사이드바 + 헤더) 안에 본문을 넣어 **자기완결적** HTML 문서를 만든다."""
     return (
         '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/>'
         '<meta content="width=device-width, initial-scale=1.0" name="viewport"/>'
         f"<title>{esc(title)} · RegImpact AI</title>"
-        f"{FONTS}<style>{CSS}</style></head>"
+        f"{FONTS}<style>{CSS}{extra_css}</style></head>"
         '<body class="bg-background font-body-md text-body-md text-on-surface">'
         f"{_sidebar(active)}"
         '<div class="pl-72">'
@@ -316,6 +345,20 @@ def page(
         "</div></main></div>"
         f"{extra_script}"
         "</body></html>"
+    )
+
+
+def glance(headline: str, chips: list[str]) -> str:
+    """페이지 최상단 '한눈에' 밴드 — 결론 한 문장 + 핵심 수치 칩.
+
+    구구절절한 본문을 다 읽지 않아도 이 화면이 말하는 것을 3초 안에 알 수 있게 한다
+    (2026-08-19 사용자 리뷰). headline 의 수치는 호출측이 실제 객체에서 뽑아 넣는다.
+    """
+    return (
+        '<div class="glance flex flex-col gap-3 bg-primary-fixed/60 border '
+        'border-primary-fixed rounded-xl p-5">'
+        f'<div class="font-h3 text-h3 text-on-primary-fixed">{esc(headline)}</div>'
+        '<div class="flex flex-wrap gap-2">' + "".join(chips) + "</div></div>"
     )
 
 

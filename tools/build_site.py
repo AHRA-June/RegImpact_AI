@@ -38,6 +38,7 @@ from regimpact.governance import render_card, render_register    # noqa: E402
 from regimpact.report import collect                             # noqa: E402
 from regimpact.report.validation_report import render as render_report  # noqa: E402
 from regimpact.ui.docrender import markdown_to_html              # noqa: E402
+from regimpact.ui.intake import render as render_intake          # noqa: E402
 from regimpact.ui.landing import render as render_landing        # noqa: E402
 from regimpact.ui.playground import render as render_playground  # noqa: E402
 from regimpact.ui.site import render_site                        # noqa: E402
@@ -45,8 +46,8 @@ from regimpact.ui.site import render_site                        # noqa: E402
 # 마크다운 문서 → 사이트 파일명
 DOCS = {
     "validation_report.html": ("검증보고서", render_report),
-    "model_system_card.html": ("Model & System Card", render_card),
-    "ai_risk_register.html": ("AI Risk Register", render_register),
+    "model_system_card.html": ("모델·시스템 카드", render_card),
+    "ai_risk_register.html": ("AI 리스크 레지스터", render_register),
 }
 
 
@@ -108,15 +109,19 @@ def main() -> int:
     for name, html in pages.items():
         (out / name).write_text(html, encoding="utf-8")
 
-    # 2. 문서 3종 — 마크다운 렌더러로 같은 디자인 언어로
+    # 2. 문서 3종 — 마크다운 렌더러로, 화면과 같은 셸(사이드바) 안에
     for filename, (title, renderer) in DOCS.items():
         md = renderer(ev)
         (out / filename).write_text(
-            markdown_to_html(md, title=title), encoding="utf-8")
+            markdown_to_html(md, title=title, active=filename), encoding="utf-8")
 
     # 3. 플레이그라운드 (픽스처는 위에서 이미 썼다)
     (out / "playground.html").write_text(
         render_playground(ev, fixtures), encoding="utf-8")
+
+    # 3b. 규제 문서 등록 — 스냅샷 해시·정책 타임라인은 저장소 실데이터에서 계산
+    (out / "sources.html").write_text(
+        render_intake(ev.extraction), encoding="utf-8")
 
     # 4. 랜딩 — 진입점
     (out / "index.html").write_text(
