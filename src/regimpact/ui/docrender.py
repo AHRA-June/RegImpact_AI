@@ -218,7 +218,9 @@ body{background:var(--background);color:var(--on-surface)}
 .doc-toc a{display:block;padding:3px 12px 3px 0;font-size:12px;line-height:17px;color:var(--on-surface-variant);text-decoration:none;border-left:2px solid transparent}
 .doc-toc a:hover{color:var(--primary);border-left-color:var(--primary)}
 .doc-toc .toc-3{padding-left:12px;font-size:11px;opacity:.8}
-.doc-body{min-width:0;padding-top:8px}
+.doc-body{min-width:0;padding-top:8px;overflow-wrap:break-word}
+/* 파일 경로 같은 긴 인라인 코드는 끊을 곳이 없어 좁은 화면에서 문단을 밀어낸다 */
+.doc-body code{overflow-wrap:anywhere}
 .doc-body h1{font-size:30px;line-height:38px;font-weight:700;letter-spacing:-.02em;margin:24px 0 8px}
 .doc-body h2{font-size:22px;line-height:30px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--outline-variant)}
 .doc-body h3{font-size:17px;line-height:24px;font-weight:600;margin:28px 0 8px}

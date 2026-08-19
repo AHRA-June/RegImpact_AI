@@ -158,9 +158,48 @@ stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 """
 
 
+_MOBILE_CSS = """
+/* ------------------------------------------------------------------ 모바일
+ * Stitch 목업은 데스크톱 전용이라 사이드바가 fixed w-72(288px)이고 본문에 pl-72 가 걸려 있다.
+ * 390px 화면에서는 본문에 102px 밖에 남지 않아 글자가 통째로 무너진다.
+ * 좁은 화면에서는 사이드바를 가로 스크롤 탭바로 눕히고 본문 패딩을 되돌린다.
+ */
+@media (max-width: 1023px){
+  aside.fixed{position:static;width:100%;height:auto;border-right:0;
+    border-bottom:1px solid var(--outline-variant);flex-direction:column}
+  aside.fixed > div:first-child{height:auto;padding:12px 16px}
+  aside.fixed nav{display:flex;flex-direction:row;gap:4px;overflow-x:auto;overflow-y:hidden;
+    padding:0 12px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  aside.fixed nav::-webkit-scrollbar{display:none}
+  aside.fixed nav > a{flex:0 0 auto;white-space:nowrap;padding:7px 12px;font-size:13px}
+  aside.fixed > div:last-child{display:none}       /* 하단 캡션은 좁은 화면에서 생략 */
+  header.fixed{position:static;left:0;height:auto;padding:10px 16px;flex-wrap:wrap;gap:8px;
+    backdrop-filter:none}
+  .pl-72{padding-left:0}
+  .pt-16{padding-top:0}
+  main{padding-left:16px !important;padding-right:16px !important}
+  main table{display:block;width:100%;overflow-x:auto;white-space:nowrap}
+  main pre{overflow-x:auto}
+  /* 고정폭 열(w-40 등)이 좁은 화면에서 줄어들지 않아 페이지를 밀어낸다 */
+  main .shrink-0{flex-shrink:1;min-width:0}
+  main .w-40{width:auto;max-width:40%}
+  /* 고정 열수 그리드가 안 접혀서 칸이 78px 이 되고 글자가 칸 밖으로 나간다 */
+  main .grid-cols-4,main .grid-cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  main .grid-cols-2{grid-template-columns:minmax(0,1fr)}
+  main .grid > *{min-width:0}
+  /* 카드 제목과 우측 주석이 한 줄을 나눠 가지면 제목이 두 줄로 쪼개진다 */
+  main .items-baseline.justify-between{flex-direction:column;align-items:flex-start;gap:2px}
+  /* 지표 숫자가 카드 폭을 넘겨 단위만 다음 줄로 떨어지는 것을 막는다 */
+  main .text-h1{font-size:24px;line-height:32px}
+  main .text-h2{font-size:20px;line-height:28px}
+  main .p-5,main .p-6{padding:14px}
+}
+"""
+
+
 def build_css() -> str:
     """디자인 토큰에서 정적 CSS를 만든다 — 외부 CDN 없이 동일한 화면."""
-    return _css_vars() + _LAYOUT_CSS + _color_rules() + _type_rules()
+    return _css_vars() + _LAYOUT_CSS + _color_rules() + _type_rules() + _MOBILE_CSS
 
 
 CSS = build_css()
