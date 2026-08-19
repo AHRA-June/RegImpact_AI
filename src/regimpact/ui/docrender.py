@@ -14,7 +14,7 @@ import html
 import re
 from typing import Optional
 
-from .theme import CSS, FONTS, esc
+from .theme import esc, page
 
 _BOLD = re.compile(r"\*\*([^*]+)\*\*")
 _CODE = re.compile(r"`([^`]+)`")
@@ -210,11 +210,10 @@ def _toc(md: str) -> str:
 
 
 _DOC_CSS = """
-body{background:var(--background);color:var(--on-surface)}
-.doc-shell{display:grid;grid-template-columns:minmax(0,1fr);gap:0;max-width:1180px;margin:0 auto;padding:0 24px 96px}
+.doc-shell{display:grid;grid-template-columns:minmax(0,1fr);gap:0;max-width:1120px;margin:0 auto;padding-bottom:64px}
 @media(min-width:1024px){.doc-shell{grid-template-columns:240px minmax(0,1fr);gap:40px}}
 .doc-toc{display:none}
-@media(min-width:1024px){.doc-toc{display:block;position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;padding:16px 0;border-right:1px solid var(--outline-variant)}}
+@media(min-width:1024px){.doc-toc{display:block;position:sticky;top:88px;align-self:start;max-height:calc(100vh - 112px);overflow:auto;padding:16px 0;border-right:1px solid var(--outline-variant)}}
 .doc-toc a{display:block;padding:3px 12px 3px 0;font-size:12px;line-height:17px;color:var(--on-surface-variant);text-decoration:none;border-left:2px solid transparent}
 .doc-toc a:hover{color:var(--primary);border-left-color:var(--primary)}
 .doc-toc .toc-3{padding-left:12px;font-size:11px;opacity:.8}
@@ -239,17 +238,17 @@ body{background:var(--background);color:var(--on-surface)}
 .doc-body th{text-align:left;padding:9px 12px;background:var(--surface-container);font-weight:600;white-space:nowrap;border-bottom:1px solid var(--outline-variant)}
 .doc-body td{padding:9px 12px;border-bottom:1px solid var(--outline-variant);vertical-align:top}
 .doc-body tr:last-child td{border-bottom:0}
-.doc-nav{display:flex;align-items:center;gap:12px;max-width:1180px;margin:0 auto;padding:16px 24px}
-.doc-nav a{font-size:13px;color:var(--primary);text-decoration:none;font-weight:500}
-.doc-nav a:hover{text-decoration:underline}
-.doc-kicker{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--on-surface-variant);text-transform:uppercase}
-@media print{.doc-toc,.doc-nav{display:none}.doc-shell{grid-template-columns:1fr}}
+@media print{.doc-toc,aside.fixed,header.fixed{display:none}.doc-shell{grid-template-columns:1fr}.pl-72{padding-left:0}}
 """
 
 
 def markdown_to_html(md: str, *, title: Optional[str] = None,
-                     kicker: str = "RegImpact AI", home: str = "index.html") -> str:
-    """마크다운 문자열을 자체완결 HTML 문서로 렌더한다."""
+                     active: str = "", status: str = "실측 생성") -> str:
+    """마크다운 문자열을 공통 셸(사이드바 + 헤더) 안의 자체완결 HTML 문서로 렌더한다.
+
+    문서도 화면과 같은 메뉴를 쓴다 — 페이지마다 내비게이션이 다르면 길을 잃는다
+    (2026-08-19 사용자 리뷰). `active` 는 사이드바에서 강조할 파일명.
+    """
     doc_title = title
     if doc_title is None:
         for ln in md.split("\n"):
@@ -259,18 +258,11 @@ def markdown_to_html(md: str, *, title: Optional[str] = None,
                 break
         doc_title = doc_title or "문서"
 
-    return f"""<!DOCTYPE html>
-<html lang="ko"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{esc(doc_title)} — RegImpact AI</title>
-{FONTS}
-<style>{CSS}{_DOC_CSS}</style>
-</head><body>
-<nav class="doc-nav"><a href="{esc(home)}">← 홈</a><span class="doc-kicker">{esc(kicker)}</span></nav>
-<div class="doc-shell">
-  <aside class="doc-toc">{_toc(md)}</aside>
-  <main class="doc-body">{_render_blocks(md)}</main>
-</div>
-</body></html>
-"""
+    body = (
+        '<div class="doc-shell">'
+        f'<div class="doc-toc">{_toc(md)}</div>'
+        f'<div class="doc-body">{_render_blocks(md)}</div>'
+        "</div>"
+    )
+    return page(title=doc_title, active=active, scenario=doc_title, status=status,
+                body=body, extra_css=_DOC_CSS)

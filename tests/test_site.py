@@ -29,7 +29,7 @@ def site(tmp_path_factory):
 
 EXPECTED = {
     "index.html", "regchange.html", "impact_matrix.html", "rule.html",
-    "assurance.html", "portfolio.html",
+    "assurance.html", "portfolio.html", "sources.html",
     "validation_report.html", "model_system_card.html", "ai_risk_register.html",
 }
 
@@ -64,6 +64,40 @@ def test_docs_link_back_home(site):
     for name in ("validation_report.html", "model_system_card.html",
                  "ai_risk_register.html"):
         assert 'href="index.html"' in site[name], f"{name} 에 홈 링크가 없다"
+
+
+def test_every_page_has_the_same_global_nav(site):
+    """홈 버튼이 없고 메뉴가 화면마다 다르다는 리뷰(2026-08-19)를 고정한다.
+
+    랜딩(=홈)을 제외한 모든 페이지는 같은 사이드바를 쓴다 — 홈 링크와
+    전 화면·전 문서 링크가 어느 페이지에서든 보여야 한다.
+    """
+    from regimpact.ui.theme import NAV
+    for name, html in site.items():
+        if name in ("_dir", "index.html"):
+            continue
+        for href, label, _ in NAV:
+            assert f'href="{href}"' in html, f"{name} 의 메뉴에 {href} 가 없다"
+        assert 'href="index.html"' in html, f"{name} 에 홈 버튼이 없다"
+
+
+def test_sources_page_hashes_come_from_real_files(site):
+    """문서 등록 화면의 스냅샷 해시는 손으로 적은 값이 아니라 실제 파일에서 계산된다."""
+    import hashlib
+    html = site["sources.html"]
+    originals = REPO / "docs" / "sources" / "original"
+    files = list(originals.iterdir())
+    assert files, "원본 스냅샷 파일이 없다"
+    for f in files:
+        digest = hashlib.sha256(f.read_bytes()).hexdigest()
+        assert digest in html, f"{f.name} 의 실제 SHA-256 이 화면에 없다"
+
+
+def test_sources_page_does_not_pretend_to_extract(site):
+    """정적 페이지가 추출(LLM)·확정(사람)을 실행하는 척하면 그게 곧 환각이다."""
+    html = site["sources.html"]
+    assert "run_extractor" in html, "다음 단계 CLI 안내가 없다"
+    assert "LOCKED" in html, "사람 확정(LOCKED §4) 안내가 없다"
 
 
 # ---------- 외부 의존이 없는가 ----------

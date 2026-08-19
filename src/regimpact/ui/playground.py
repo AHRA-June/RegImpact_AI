@@ -13,19 +13,12 @@ import json
 from pathlib import Path
 
 from ..report.evidence import ValidationEvidence
-from .theme import CSS, FONTS, esc
+from .theme import esc, page, page_title
 
 ENGINE_JS = Path(__file__).resolve().parent / "static" / "engine.js"
 
 _PG_CSS = """
-body{background:var(--background);color:var(--on-surface)}
-.wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
-.nav{display:flex;align-items:center;gap:12px;padding:16px 0}
-.nav a{font-size:13px;color:var(--primary);font-weight:500}
-.nav a:hover{text-decoration:underline}
-h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:16px 0 6px}
-.lede{font-size:14px;line-height:22px;color:var(--on-surface-variant);max-width:70ch;margin:0 0 8px}
-.cols{display:grid;grid-template-columns:1fr;gap:20px;margin-top:24px}
+.cols{display:grid;grid-template-columns:1fr;gap:20px;margin-top:8px}
 /* 모바일에서는 판정 결과를 폼보다 위에 둔다. 아래에 두면 입력을 바꿔도 결과가
    화면 밖이라 "즉시 바뀐다"는 것 자체가 안 보인다. */
 .cols > .result{order:-1}
@@ -102,20 +95,9 @@ def render(ev: ValidationEvidence, fixtures: dict) -> str:
     n_cases = len(fixtures["cases"])
     n_probe = sum(len(v) for v in fixtures["region_probe"].values())
 
-    return f"""<!DOCTYPE html>
-<html lang="ko"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>플레이그라운드 — RegImpact AI</title>
-{FONTS}<style>{CSS}{_PG_CSS}</style>
-</head><body>
-<div class="wrap">
-  <nav class="nav"><a href="index.html">← 홈</a></nav>
-  <h1>판정 플레이그라운드</h1>
-  <p class="lede">차주 조건을 바꾸면 즉시 판정이 바뀐다. 값만이 아니라
-    <strong>어느 규칙에서 멈췄는지</strong>를 함께 보여준다 — 검증 시스템의 화면이라면
-    "왜 이 값인가"를 보여줘야 한다.</p>
-
+    body = f"""{page_title(
+        "판정 플레이그라운드",
+        "차주 조건을 바꾸면 즉시 판정이 바뀐다 — 값만이 아니라 어느 규칙에서 멈췄는지(trace)까지.")}
   <div class="cols">
     <form class="panel" id="f">
       <h2>차주 조건</h2>
@@ -157,10 +139,9 @@ def render(ev: ValidationEvidence, fixtures: dict) -> str:
         규칙 <strong>값</strong>은 JS 에 없다 — 픽스처에서 읽는다.
       </div>
     </div>
-  </div>
-</div>
+  </div>"""
 
-<script type="module">
+    script = f"""<script type="module">
 const FX = {fx_json};
 {engine}
 
@@ -220,6 +201,10 @@ document.querySelectorAll("[data-preset]").forEach((b) => {{
   }});
 }});
 run();
-</script>
-</body></html>
-"""
+</script>"""
+
+    return page(
+        title="판정 플레이그라운드", active="playground.html",
+        scenario="판정 플레이그라운드", status="JS ↔ Python 전 케이스 대조",
+        body=body, extra_script=script, extra_css=_PG_CSS,
+    )

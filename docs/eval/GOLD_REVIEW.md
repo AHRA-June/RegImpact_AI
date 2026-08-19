@@ -158,7 +158,7 @@ FAQ 원문은 HWP다. 텍스트로 추출하면 표의 **LTV 열과 DTI 열이 �
 | 대상 | 규모 | 상태 | 비고 |
 |---|---:|---|---|
 | 추출 골드 v3 (이 문서 §3·§4) | 16+4 | 🤖 초안 | Extractor 지표(Completeness/Exception Recall)의 기준 |
-| QA 골드 DEV | 40 | 🤖 초안 | 튜닝에 쓰는 유일한 셋 — 다음 우선순위 |
+| QA 골드 DEV | 40 | 🤖 초안 | 튜닝에 쓰는 유일한 셋 — 검수표는 `QA_GOLD_REVIEW.md` (`python tools/build_qa_review.py`) |
 | QA 골드 LOCKED / CHALLENGE | 40 / 35 | 🤖 초안 · 🔒 봉인 | 충돌 3건만 먼저 보고 나머지는 개봉 시 |
 
 > 봉인된 셋의 충돌 항목을 이 문서에 옮겨 적은 것은 **정답 전체를 여는 것이 아니라** 명세와
