@@ -1,0 +1,213 @@
+{
+  "policy_id": "MOLIT_20200617",
+  "title": "주택시장 안정을 위한 관리방안 (6·17 대책) — 조정대상지역·투기과열지구 대폭 확대",
+  "issuer": "관계부처 합동",
+  "published_at": "2020-06-17",
+  "effective_from": "2020-06-19",
+  "effective_to": null,
+  "supersedes_policy_id": null,
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "DRAFT",
+  "provenance": "HUMAN_INPUT",
+  "sources": [
+    {
+      "source_document_id": "MOLIT_PRESS_20200617",
+      "title": "주택시장 안정을 위한 관리방안 (보도자료)",
+      "source_hash": "67070527922c671c7db7a81750d3a8ae0508f488a9cbe3c7d1e239634b99b04f",
+      "retrieved_at": "2026-08-19",
+      "source_url": null,
+      "filename": "molit_press_20200617.pdf",
+      "byte_size": 2077369
+    },
+    {
+      "source_document_id": "QNA_20200617",
+      "title": "주택시장 안정을 위한 관리방안 외부용 Q&A",
+      "source_hash": "0eaa30c203a4beb82e5756e93acabed9a1a8b084180934efd752f3122c82a356",
+      "retrieved_at": "2026-08-19",
+      "source_url": null,
+      "filename": "qna_20200617.pdf",
+      "byte_size": 481161
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "SEONGNAM_SUJEONG",
+      "region_name": "성남시 수정구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_JANGAN",
+      "region_name": "수원시 장안구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_PALDAL",
+      "region_name": "수원시 팔달구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_YEONGTONG",
+      "region_name": "수원시 영통구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_GWONSEON",
+      "region_name": "수원시 권선구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "ANYANG_DONGAN",
+      "region_name": "안양시 동안구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "ANYANG_MANAN",
+      "region_name": "안양시 만안구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "ANSAN_DANWON",
+      "region_name": "안산시 단원구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GURI",
+      "region_name": "구리시",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GUNPO",
+      "region_name": "군포시",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "UIWANG",
+      "region_name": "의왕시",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "YONGIN_SUJI",
+      "region_name": "용인시 수지구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "YONGIN_GIHEUNG",
+      "region_name": "용인시 기흥구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "HWASEONG_DONGTAN",
+      "region_name": "화성시 동탄구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "INCHEON_YEONSU",
+      "region_name": "인천 연수구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "INCHEON_NAMDONG",
+      "region_name": "인천 남동구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "INCHEON_SEO",
+      "region_name": "인천 서구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "DAEJEON_DONG",
+      "region_name": "대전 동구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "DAEJEON_JUNG",
+      "region_name": "대전 중구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "DAEJEON_SEO",
+      "region_name": "대전 서구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "DAEJEON_YUSEONG",
+      "region_name": "대전 유성구",
+      "region_status": "REGULATED",
+      "effective_from": "2020-06-19",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    }
+  ],
+  "rule_notes": [
+    {
+      "field": "조정대상지역_신규_범위(열거가 아닌 범위 서술 — 원문 그대로 보존, Q1-A)",
+      "before": null,
+      "after": "경기 全 지역(일부 제외) · 인천 全 지역(강화·옹진 제외) · 세종(행복도시) · 대전 · 청주(동 지역, 오창·오송읍)",
+      "citation": "(서울) 全 지역 (경기) 全 지역(일부 지역* 제외) * 김포, 파주, 연천, 동두천, 포천, 가평, 양평, 여주, 이천, 용인처인(포곡읍, 모현·백암·양지면, … (인천) 全 지역(강화·옹진 제외) (지방) 세종(행복도시 예정지역만 지정), 대전, 청주(동 지역, 오창·오송읍만 지정) (서울) 全 지역 (경기) 과천, 성남분당·수정, 광명, 하남, 수원, 안양, 안산단원, 구"
+    }
+  ],
+  "notes": "검수 확정 반영(2026-08-19, Q1-A·Q2-A·Q3-A): 신규 투기과열 17곳(원문 열거)을 구 단위 21개 코드로 이관 — 수원(4구)·안양(2구)은 '시 전체' 표기의 구 단위 전개, 화성은 원문이 '동탄2만'이라 HWASEONG_DONGTAN(2026 행정구) 경계와 다름을 주석. 조정대상지역 '全 지역-제외' 서술은 열거하지 않고 rule_note 로 원문 보존. 해제일 미상(effective_to=None) — 이 문서는 지정만 말한다. 해제 보도자료 확보 후 구간을 닫으면서 confirm() 예정이라 DRAFT 유지(Q3-A). 원본 근거: p12 개선표, 본문 '경기10·인천3·대전4' 개수 교차 일치."
+}

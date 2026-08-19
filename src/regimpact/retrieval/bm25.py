@@ -14,6 +14,7 @@ import math
 import re
 from dataclasses import dataclass
 
+from ..extractor.sources import CORPUS_EVENTS
 from ..regions import REGION_ALIASES, REGION_LABELS
 from .chunker import Chunk
 
@@ -84,12 +85,21 @@ class BM25Index:
         self._len = [sum(tf.values()) for tf in self._tf]
         self._avg = (sum(self._len) / n) if n else 0.0
 
-    def search(self, query: str, k: int = 5, *, expand: bool = False) -> list[Scored]:
+    def search(self, query: str, k: int = 5, *, expand: bool = False,
+               doc_ids: set[str] | None = None) -> list[Scored]:
+        """doc_ids 를 주면 그 문서들만 검색한다 — **시점 필터**의 기반.
+
+        규제 FAQ 는 대책마다 거의 같은 문구로 다시 나오므로(2025 ↔ 2026 실측),
+        시점 없이 검색하면 어느 해의 문서인지 구분하지 못한다. 어느 시점의 규제를
+        묻는지는 검색이 아니라 호출자(사람 또는 시점 해석기)가 아는 정보다.
+        """
         if expand:
             query = expand_query(query)
         q_terms = sorted(set(tokenize(query)))
         scored: list[Scored] = []
         for i, c in enumerate(self.chunks):
+            if doc_ids is not None and c.doc_id not in doc_ids:
+                continue
             tf, dl = self._tf[i], self._len[i]
             s = 0.0
             for t in q_terms:
@@ -110,4 +120,6 @@ class BM25Index:
             "params": {"k1": self.k1, "b": self.b},
             "chunks": [c.to_dict() for c in self.chunks],
             "region_names": {k: sorted(v) for k, v in sorted(_REGION_NAMES.items())},
+            "doc_events": {d: {"published": p, "event": e}
+                           for d, (p, e) in sorted(CORPUS_EVENTS.items())},
         }

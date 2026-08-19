@@ -20,6 +20,24 @@
       "source_url": null,
       "filename": "molit_press_20260630.pdf",
       "byte_size": null
+    },
+    {
+      "source_document_id": "FSC_PRESS_20251015",
+      "title": "주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)",
+      "source_hash": "4a7d1f8c5c90f8b4c2a01669f5d668d127eb9119194905ab27c2134f4bc51374",
+      "retrieved_at": "2026-08-19",
+      "source_url": null,
+      "filename": "fsc_press_20251015.pdf",
+      "byte_size": 345182
+    },
+    {
+      "source_document_id": "FAQ_20251015",
+      "title": "대출수요 관리 방안 FAQ (관계기관 합동)",
+      "source_hash": "26a826fcaea1dcaecabcc4ee79b991bfa5522cdf15b3a053893c78d0e6f24613",
+      "retrieved_at": "2026-08-19",
+      "source_url": null,
+      "filename": "faq_20251015.pdf",
+      "byte_size": 4890259
     }
   ],
   "region_deltas": [
@@ -289,5 +307,5 @@
     }
   ],
   "rule_notes": [],
-  "notes": "regions.REGION_VERSIONS 에서 생성 (tools/seed_policies.py). 근거: regulatory_facts C16 — MOLIT p5 참고2 현황표."
+  "notes": "regions.REGION_VERSIONS 에서 생성 (tools/seed_policies.py). 근거: regulatory_facts C16 — MOLIT p5 참고2 현황표. | 2026-08-19: 당시 원문 2건(FSC_PRESS_20251015·FAQ_20251015) 연결 — 원문이 시행일 10.16을 명시(FAQ '규제지역 효력 발생일 전일(10.15일)')하여 기존 등록과 교차 일치."
 }

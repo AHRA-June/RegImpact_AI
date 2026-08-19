@@ -9,19 +9,26 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from regimpact.extractor.sources import load_sources           # noqa: E402
+from regimpact.extractor.sources import load_corpus            # noqa: E402
 from regimpact.retrieval import BM25Index, chunk_sources, citation_recall  # noqa: E402
 
-sources = load_sources()
-chunks = chunk_sources(sources)
+corpus = load_corpus()
+chunks = chunk_sources(corpus)
 index = BM25Index(chunks)
-print(f"색인: 문서 {len(sources)}건 → 청크 {len(chunks)}개\n")
+print(f"색인: 코퍼스 {len(corpus)}건 → 청크 {len(chunks)}개 "
+      "(6·30 스냅샷 3건 + 과거 정책 원문)\n")
 
-for expand in (False, True):
-    rep = citation_recall(index, sources, expand=expand)
-    print(("지역 별칭 확장 ON " if expand else "기본 BM25       ") + "— " + rep.summary())
+from regimpact.extractor.sources import SOURCE_FILES  # noqa: E402
 
-rep = citation_recall(index, sources, expand=False)
+for label, kw in (
+    ("기본 BM25 (전체 코퍼스)      ", {}),
+    ("지역 별칭 확장 ON            ", {"expand": True}),
+    ("시점 필터 (6·30 문서로 한정) ", {"doc_ids": set(SOURCE_FILES)}),
+):
+    rep = citation_recall(index, corpus, **kw)
+    print(label + "— " + rep.summary())
+
+rep = citation_recall(index, corpus, doc_ids=set(SOURCE_FILES))
 if rep.misses_at_max_k:
     print(f"\ntop-{max(rep.ks)} 에도 못 찾은 인용 {len(rep.misses_at_max_k)}건:")
     for m in rep.misses_at_max_k:

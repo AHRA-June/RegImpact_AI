@@ -18,7 +18,7 @@ const index = buildIndex(fx.index);
 let failures = 0;
 for (const probe of fx.probes) {
   const got = search(index, probe.query, probe.expected.length || 10,
-                     { expand: probe.expand });
+                     { expand: probe.expand, docIds: probe.doc_ids ?? null });
   const exp = probe.expected;
   if (got.length !== exp.length) {
     failures++;

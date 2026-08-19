@@ -34,7 +34,7 @@ def _load_fixture_builder():
 
 build_fixtures = _load_fixture_builder()
 
-from regimpact.extractor.sources import load_sources             # noqa: E402
+from regimpact.extractor.sources import load_corpus, load_sources  # noqa: E402
 from regimpact.governance import render_card, render_register    # noqa: E402
 from regimpact.graph import build_graph                          # noqa: E402
 from regimpact.report import collect                             # noqa: E402
@@ -149,19 +149,29 @@ def main() -> int:
     (out / "graph.html").write_text(
         render_graph(g, portfolio_size=len(ev.impact.impacts)), encoding="utf-8")
 
-    # 3e. 규제 원문 검색 — BM25 색인 + recall@k 실측 + JS 포팅 대조
-    sources = load_sources()
-    index = BM25Index(chunk_sources(sources))
-    reports = {flag: citation_recall(index, sources, expand=flag) for flag in (False, True)}
-    for flag in (False, True):
-        print(f"  검색 {'확장 ON ' if flag else '확장 OFF'}: {reports[flag].summary()}")
+    # 3e. 규제 원문 검색 — 코퍼스(과거 정책 포함) BM25 색인 + recall@k 실측 + JS 포팅 대조
+    # recall 의 정답 인용은 6·30 문서에 있다. 코퍼스가 커지면 시점만 다른 유사 문서가
+    # 방해가 되므로(2025 FAQ ↔ 2026 FAQ 실측), ①전체 ②확장 ③시점 필터 세 방식을 잰다.
+    from regimpact.extractor.sources import SOURCE_FILES
+    corpus = load_corpus()
+    index = BM25Index(chunk_sources(corpus))
+    docs_630 = set(SOURCE_FILES)
+    report_rows = [
+        ("BM25 (전체 코퍼스)", citation_recall(index, corpus)),
+        ("BM25 + 지역 별칭 확장", citation_recall(index, corpus, expand=True)),
+        ("BM25 + 시점 필터 (질의 대책의 문서로 한정)",
+         citation_recall(index, corpus, doc_ids=docs_630)),
+    ]
+    for label, rep in report_rows:
+        print(f"  검색 [{label}] {rep.summary()}")
     export = index.export()
     probes = []
     from regimpact.eval import Split as _Split, load_split as _load_split
     for item in _load_split(_Split.DEV):
-        for flag in (False, True):
-            top = index.search(item.question, k=10, expand=flag)
-            probes.append({"query": item.question, "expand": flag,
+        for flag, doc_ids in ((False, None), (True, None), (False, sorted(docs_630))):
+            top = index.search(item.question, k=10, expand=flag,
+                               doc_ids=set(doc_ids) if doc_ids else None)
+            probes.append({"query": item.question, "expand": flag, "doc_ids": doc_ids,
                            "expected": [{"id": s.chunk.id, "score": s.score} for s in top]})
     search_fx = out / "search_fixtures.json"
     search_fx.write_text(json.dumps({"index": export, "probes": probes},
@@ -175,7 +185,7 @@ def main() -> int:
     else:
         print("  ⚠ node 없음 — 검색 포팅 대조를 건너뛴다")
     (out / "search.html").write_text(
-        render_search(export, reports), encoding="utf-8")
+        render_search(export, report_rows), encoding="utf-8")
 
     # 3c. 검증 요약 — 보고서의 1페이지 요약. QA 골드 검수 진행률도 실데이터에서.
     from regimpact.eval import Split, load_split
