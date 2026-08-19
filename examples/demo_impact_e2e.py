@@ -34,6 +34,7 @@ from regimpact.impact import (  # noqa: E402
     format_matrix_markdown,
     format_matrix_text,
 )
+from regimpact.audit import Action, AuditLog  # noqa: E402
 from regimpact.impact.builder import derive_rule_diff  # noqa: E402
 from regimpact.impact.portfolio import DEFAULT_SEED, DEFAULT_SIZE  # noqa: E402
 from regimpact.proposal import (  # noqa: E402
@@ -68,11 +69,14 @@ def main() -> None:
         step += 1
         print(f"\n{'=' * 72}\n[{step}] {title}\n{'=' * 72}")
 
+    audit = AuditLog()
+
     # 1 — Source Snapshot
     head("Source Snapshot — 공문 원문 로드")
     sources = load_sources()
     for doc_id, text in sources.items():
         print(f"  {doc_id}: {len(text):,}자")
+        audit.record(Action.SOURCE_INGESTED, doc_id, {"chars": len(text)})
 
     # 2 — Before/After 추출 (LLM) + Citation Assurance
     head(f"RegChange 추출 (provider={a.provider})")
@@ -80,6 +84,9 @@ def main() -> None:
     complete = resolve_completion(a.provider, model=a.model, **kwargs)
     extraction = extract_regchange(sources, complete=complete)
     print(f"  변경 {len(extraction.changes)}건 · 시행일 {extraction.effective_from}")
+    audit.record(Action.EXTRACTION, extraction.policy_id,
+                 {"provider": a.provider, "changes": len(extraction.changes),
+                  "effective_from": extraction.effective_from})
 
     grounding = check_citation_grounding(extraction, sources)
     gold_path = REPO / "docs" / "eval" / "regchange_gold_6_30.json"
@@ -113,6 +120,10 @@ def main() -> None:
             print(f"  {seg:<18} {cnt:>6,}건 ({cnt / len(impact.impacts):>5.1%})")
     print(f"  ── 총 한도 감소 {impact.total_limit_reduction / 1e8:,.0f}억원 "
           f"(건당 평균 {impact.avg_limit_reduction / 1e8:.2f}억원)")
+    audit.record(Action.IMPACT_ANALYZED, extraction.policy_id,
+                 {"portfolio": a.size, "seed": a.seed,
+                  "decision_coverage": round(impact.decision_coverage, 4),
+                  "impact_coverage": round(impact.impact_coverage, 4)})
     print("  LTV 전이:", impact.ltv_transitions)
     if impact.escalation_reasons:
         print("  자동판정 중단 사유:", impact.escalation_reasons)
@@ -124,6 +135,9 @@ def main() -> None:
           f"· 실패 {len(regression.failures)}건")
     for cat, (p, t, rate) in regression.pass_rate_by_category().items():
         print(f"    {cat:<16} {p}/{t} ({rate:.0%})")
+    audit.record(Action.REGRESSION_RUN, "tc_generator",
+                 {"total": regression.total, "pass_rate": regression.pass_rate,
+                  "failures": len(regression.failures)})
 
     # 7 — Rule Change Proposal (LLM 추출 → 구조화 변경안 → 엔진 교차검증)
     head("Rule Change Proposal — 구조화 변경안 + 엔진 일치 검증")
@@ -143,6 +157,11 @@ def main() -> None:
         print(f"    ⤷ 충돌: {x}")
     for x in proposal.unmapped:
         print(f"    ⤷ LTV 아님(별도 룰 필요): {x}")
+    audit.record(Action.PROPOSAL_CREATED, proposal.rule_id,
+                 {"status": proposal.status.value,
+                  "consistency": consistency.summary(),
+                  "conflicts": len(proposal.conflicts),
+                  "unmapped": len(proposal.unmapped)})
     print(f"  승인 상태: {proposal.status.value}"
           + ("  ← 사람 검토 후 registry 반영" if proposal.status.value != "APPROVED" else ""))
 
@@ -186,6 +205,25 @@ def main() -> None:
     for name, ok in checks:
         print(f"  {'✅' if ok else '❌'} {name}")
     print(f"\n  → {'관통 성공' if all(ok for _, ok in checks) else '미관통 — 위 ❌ 항목 확인'}")
+
+    # 11 — Audit Trail
+    audit.record(Action.ASSURANCE_SCORED, extraction.policy_id, {
+        "citation_correctness": grounding.citation_correctness,
+        "change_completeness": scored.change_completeness,
+        "exception_recall": scored.exception_recall,
+        "automation_rate": round(matrix.automation_rate, 4),
+    })
+    head("Audit Trail — 해시 체인 감사로그")
+    verdict = audit.verify()
+    for e in audit.events:
+        print(f"  #{e.seq} {e.action:<18} {e.target:<32} {e.entry_hash[:12]}…")
+    print(f"\n  체인 무결성: {'OK' if verdict.ok else 'BROKEN'} · {len(audit)}건")
+    print(f"  head 해시: {audit.head_hash}")
+    print("  ⤷ 이 해시를 로그 바깥(커밋·리포트)에 남겨야 끝에서 잘라낸 것도 잡힌다.")
+    if a.write:
+        out = REPO / "docs" / "eval" / "audit_6_30.jsonl"
+        audit.write_jsonl(out)
+        print(f"  기록: {out.relative_to(REPO)}")
 
     if a.write:
         OUT_MD.write_text(format_matrix_markdown(matrix), encoding="utf-8")
