@@ -99,7 +99,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 
 | # | 능력 | 출처 |
 |---|---|---|
-| S-06 | 검증보고서 15~20p (`docs/validation/`) — 4개 브랜치에 각각 버전 존재, 가장 나은 것 고를 것 | fmo0g8 / d2et38 / 4ujipo / dq1gtz |
+| ~~S-06~~ | ~~검증보고서 15~20p~~ | ✅ 2026-08-19 완료 — fmo0g8 구조 + dq1gtz 생성기 방식, 수치는 main 실측 |
 | S-07 | Assurance 스코어카드 4 dimension + 임계값 | d2et38 · sp37fd |
 | S-08 | Model/System Card + AI Risk Register | d2et38 |
 | S-09 | 스트레스 테스트 (극단·경계·대량·적대적 입력) | fmo0g8 |
@@ -134,7 +134,8 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 4. ~~**S-02** 판별력~~ ~~**S-03** 감사로그~~ ~~**S-05** 정책 버전 DB~~ ✅ **티어 A 완료**
 5. **S-16 + S-17** 은 묶어서 — 플레이그라운드의 JS 룰엔진은 `export_fixtures.py` +
    `verify_js_port.mjs` 대조 하네스 없이 들이면 하드코딩이 되살아난다
-5. 티어 B는 검증보고서(S-06)를 축으로 필요한 것만
+5. ~~티어 B는 검증보고서(S-06)를 축으로~~ — S-06 완료. 남은 티어 B는 S-07 Assurance 스코어카드,
+   S-08 Model/System Card·AI Risk Register, S-09 스트레스 테스트, S-13 RAG/retrieval 등
 6. 각 항목 이식이 끝나면 **출처 브랜치 삭제**
 
 `kus0w7` · `71qh9m` · `o2geks` 3개는 이식할 것이 없으므로 **지금 지워도 된다** (✍️ 승인 필요).

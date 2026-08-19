@@ -145,3 +145,47 @@ def discriminate_extraction(
         Discrimination("Regions Correct",
                        float(s_clean.regions_correct), float(s_bad.regions_correct)),
     ])
+
+
+def discriminate_pipeline(
+    extraction: RegChangeExtraction,
+    sources: dict,
+    gold: dict,
+    *,
+    rule_diff: Optional[list] = None,
+) -> DiscriminationReport:
+    """추출 지표 + 룰 회귀 + 변경안 일치검증까지 판별력을 한 번에 잰다.
+
+    데모(`examples/demo_discrimination.py`)와 검증보고서가 같은 함수를 쓴다 —
+    두 곳에서 따로 계산하면 보고서 수치와 데모 수치가 갈라진다.
+    """
+    from . import rule_engine
+    from .proposal import build_proposal_from_extraction, check_proposal_consistency
+    from .tc_generator import run_regression
+
+    results = list(discriminate_extraction(extraction, sources, gold).results)
+
+    clean_rate = run_regression().pass_rate
+    for constant, mutated, label in (
+        ("LTV_REGULATED_STANDARD", 0.50, "LTV 40%→50% 변조"),
+        ("LTV_BASELINE", 0.65, "기준선 70%→65% 변조"),
+    ):
+        original = getattr(rule_engine, constant)
+        setattr(rule_engine, constant, mutated)
+        try:
+            results.append(Discrimination(
+                f"Rule Regression ({label})", clean_rate, run_regression().pass_rate))
+        finally:
+            setattr(rule_engine, constant, original)
+
+    def _consistency_rate(ex) -> float:
+        rep = check_proposal_consistency(
+            build_proposal_from_extraction(ex), rule_diff=rule_diff)
+        s = rep.summary()
+        return s["passed"] / s["total"]
+
+    results.append(Discrimination(
+        "Proposal Consistency",
+        _consistency_rate(extraction), _consistency_rate(corrupt_extraction(extraction)),
+    ))
+    return DiscriminationReport(results)

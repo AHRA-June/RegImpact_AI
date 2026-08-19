@@ -39,7 +39,13 @@
 
 → **티어 A(S-01~S-05) 전량 완료.**
 
-**다음**: 티어 B — S-06 검증보고서 15~20p 를 축으로. `docs/07_BRANCH_TRIAGE.md` §3 참조.
+✅ **S-06 검증보고서** — `src/regimpact/report/` + `docs/validation/VALIDATION_REPORT.md`(602줄).
+   구조는 fmo0g8(모델검증 관례), 방식은 dq1gtz(라이브 수치 조립), 수치는 main 실측.
+   렌더러에 도메인 수치 리터럴이 없도록 **절 단위**로 검사한다 — 실측 절은 금지, 서술 절은
+   과거 값 인용이 정상(§12 발견사항). 변이 테스트로 데이터 흐름 확인.
+
+**다음**: 티어 B 나머지 — S-07 Assurance 스코어카드 / S-08 Model·System Card + AI Risk
+   Register / S-09 스트레스 테스트 / S-13 RAG·retrieval. `docs/07_BRANCH_TRIAGE.md` §3.
    S-16 플레이그라운드는 룰엔진 JS 재구현이 들어 있어 S-17 포팅 대조 하네스와 묶어야 한다.
    ✍️ `kus0w7`·`71qh9m`·`o2geks` 3개는 이식할 것이 없어 **삭제 승인만** 받으면 된다(PR #3 동반 종료).
 
