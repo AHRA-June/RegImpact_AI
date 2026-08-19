@@ -45,14 +45,18 @@ export function buildIndex(exported) {
   const lens = tfs.map((tf) => [...tf.values()].reduce((a, b) => a + b, 0));
   const avg = n ? lens.reduce((a, b) => a + b, 0) / n : 0;
   return { chunks, tfs, idf, lens, avg, k1: params.k1, b: params.b,
-           regionNames: exported.region_names };
+           regionNames: exported.region_names, doc_events: exported.doc_events ?? {} };
 }
 
-export function search(index, query, k, { expand = false } = {}) {
+export function search(index, query, k, { expand = false, docIds = null } = {}) {
+  // docIds: 시점 필터 — 대책마다 거의 같은 문구의 FAQ 가 다시 나오므로(2025↔2026),
+  // 어느 시점의 문서를 볼지는 검색이 아니라 호출자가 지정한다.
   if (expand) query = expandQuery(query, index.regionNames);
+  const allow = docIds ? new Set(docIds) : null;
   const qTerms = [...new Set(tokenize(query))].sort();
   const scored = [];
   for (let i = 0; i < index.chunks.length; i++) {
+    if (allow && !allow.has(index.chunks[i].doc_id)) continue;
     const tf = index.tfs[i], dl = index.lens[i];
     let s = 0;
     for (const t of qTerms) {

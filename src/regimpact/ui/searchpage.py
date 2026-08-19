@@ -26,27 +26,35 @@ _PRESETS = [
 ]
 
 
-def render(index_export: dict, reports: dict[bool, RetrievalReport]) -> str:
-    r_off, r_on = reports[False], reports[True]
+def render(index_export: dict, rows: list[tuple[str, RetrievalReport]]) -> str:
+    """rows: (라벨, 리포트) — 첫 행이 화면의 대표 수치(전체 코퍼스), 마지막 행이 시점 필터."""
+    r_full = rows[0][1]
+    r_filtered = rows[-1][1]
     idx_json = json.dumps(index_export, ensure_ascii=False, separators=(",", ":"))
     engine = SEARCH_JS.read_text(encoding="utf-8")
     n_chunks = len(index_export["chunks"])
     n_docs = len({c["doc_id"] for c in index_export["chunks"]})
 
     top = glance(
-        f"원문 {n_docs}건을 {n_chunks}개 구간으로 색인했다 — 이 화면의 검색은 "
-        f"브라우저에서 실제로 실행되고, 품질은 사람 확정 인용 기준으로 "
-        f"recall@5 {r_off.recall(5):.0%} / recall@10 {r_off.recall(10):.0%} 실측이다.",
-        [chip(f"색인 {n_chunks}구간 · 문서 {n_docs}건", tone="primary"),
-         chip(f"recall@5 {r_off.recall(5):.0%}",
-              tone="good" if r_off.recall(5) >= 0.8 else "warn"),
-         chip(f"못 찾은 인용 {len(r_off.misses_at_max_k)}건 (정직하게 표기)", tone="warn"),
+        f"원문 {n_docs}건({n_chunks}구간)에서 브라우저가 실제로 검색한다. 대책마다 거의 같은 "
+        f"문구의 문서가 다시 나와서 시점 필터 없이는 recall@5 {r_full.recall(5):.0%}, "
+        f"질의 시점의 대책으로 한정하면 {r_filtered.recall(5):.0%}다 — 코퍼스가 커지는 순간 "
+        "문제는 검색이 아니라 시점 판별이 된다.",
+        [chip(f"색인 {n_chunks}구간 · 문서 {n_docs}건 (대책 3개 시점)", tone="primary"),
+         chip(f"recall@5: 필터 없이 {r_full.recall(5):.0%} → 시점 필터 {r_filtered.recall(5):.0%}",
+              tone="good" if r_filtered.recall(5) >= 0.8 else "warn"),
+         chip(f"못 찾은 인용 {len(r_filtered.misses_at_max_k)}건 (정직하게 표기)", tone="warn"),
          chip("BM25 · 외부 의존 0 · 무과금", tone="neutral")],
     )
 
     presets = "".join(
         f'<button type="button" class="preset-q" data-q="{esc(q)}">{esc(q)}</button>'
         for q in _PRESETS)
+
+    events = sorted({v["event"] for v in index_export["doc_events"].values()}, reverse=True)
+    event_chips = '<button type="button" class="ev-chip on" data-ev="">전체 시점</button>' + "".join(
+        f'<button type="button" class="ev-chip" data-ev="{esc(e)}">{esc(e)}</button>'
+        for e in events)
 
     search_ui = (
         '<div class="flex flex-col gap-3">'
@@ -56,12 +64,13 @@ def render(index_export: dict, reports: dict[bool, RetrievalReport]) -> str:
         'autocomplete="off">'
         '<label class="flex items-center gap-2 text-body-sm" style="cursor:pointer">'
         '<input type="checkbox" id="expand" checked> 지역 별칭 확장</label></div>'
+        f'<div class="flex gap-2 flex-wrap" id="evs">{event_chips}</div>'
         f'<div class="flex gap-2 flex-wrap">{presets}</div>'
         '<div id="hits" class="flex flex-col gap-3"></div></div>'
     )
 
     recall_rows = []
-    for label, rep in (("BM25", r_off), ("BM25 + 지역 별칭 확장", r_on)):
+    for label, rep in rows:
         recall_rows.append(
             [esc(label)]
             + [chip(f"{rep.recall(k):.0%}", mono=True,
@@ -71,7 +80,7 @@ def render(index_export: dict, reports: dict[bool, RetrievalReport]) -> str:
         f'<li class="flex gap-2 text-body-sm" style="line-height:20px">'
         f'{chip(m.item_id, mono=True)}<span class="text-on-surface-variant">'
         f'[{esc(m.doc_id)}] “{esc(m.quote_head)}…”</span></li>'
-        for m in r_off.misses_at_max_k)
+        for m in r_filtered.misses_at_max_k)
 
     rag_note = (
         '<ol class="flex flex-col gap-2" style="list-style:decimal;padding-left:20px;line-height:24px">'
@@ -105,14 +114,22 @@ def render(index_export: dict, reports: dict[bool, RetrievalReport]) -> str:
                     "지역 별칭 확장: '동탄' ↔ '화성시 동탄구' 같은 표기 차이를 별칭 테이블(D-01)로 잇는다")
         + card(
             "검색 품질 실측 — 사람 확정 인용 기준",
-            table(["방식"] + [f"recall@{k}" for k in r_off.ks], recall_rows,
-                  align_center=tuple(range(1, len(r_off.ks) + 1)))
+            table(["방식"] + [f"recall@{k}" for k in r_full.ks], recall_rows,
+                  align_center=tuple(range(1, len(r_full.ks) + 1)))
+            + '<div class="mt-6 note-find text-body-sm text-on-surface-variant" '
+            'style="line-height:21px;max-width:74ch">'
+            "규제 FAQ는 대책마다 거의 같은 문구로 다시 나온다 — 과거 정책 원문을 코퍼스에 "
+            "넣자 recall이 크게 떨어졌고, 질의가 어느 대책에 대한 것인지(시점)를 알려주면 "
+            "회복된다. <b>코퍼스가 커지는 순간 검색의 병목은 어휘가 아니라 시점 판별이다.</b> "
+            "시점을 자동으로 붙이는 것은 정책 버전 해석기(Temporal Policy Resolver)의 일이고, "
+            "다음 단계다.</div>"
             + '<div class="mt-6"><div class="font-medium mb-2">'
-            f"top-10에도 못 찾은 인용 {len(r_off.misses_at_max_k)}건</div>"
+            f"시점 필터 적용에도 top-10에 못 찾은 인용 {len(r_filtered.misses_at_max_k)}건</div>"
             f'<ul class="flex flex-col gap-1">{miss_list}</ul></div>',
             note=f"측정 정의: 골드 문항의 질문으로 검색해 top-k 가 그 문항 인용 구간의 "
-                 f"60% 이상을 덮으면 적중. DEV {r_off.n_items}문항 · 인용 {r_off.n_citations}건 "
-                 "(봉인 셋은 열지 않음)",
+                 f"60% 이상을 덮으면 적중. DEV {r_full.n_items}문항 · 인용 {r_full.n_citations}건 "
+                 "(봉인 셋은 열지 않음). DEV 질문은 전부 6·30 대책에 대한 것이므로 시점 필터 행이 "
+                 "\"질의 시점을 아는 시스템\"의 성능이다",
         )
         + card("이것이 RAG 의 어디까지인가 (정직하게)", rag_note,
                note="검색이 안 되는 걸 LLM 이 메꾸면 그게 곧 환각이다 — 그래서 검색부터 측정한다")
@@ -123,6 +140,17 @@ def render(index_export: dict, reports: dict[bool, RetrievalReport]) -> str:
 const INDEX = buildIndex({idx_json});
 const $q = document.getElementById("q"), $hits = document.getElementById("hits"),
       $ex = document.getElementById("expand");
+let curEvent = "";
+function docIdsFor(ev) {{
+  if (!ev) return null;
+  return Object.entries(INDEX.doc_events ?? {{}})
+    .filter(([, m]) => m.event === ev).map(([d]) => d);
+}}
+document.querySelectorAll(".ev-chip").forEach(b => b.addEventListener("click", () => {{
+  curEvent = b.dataset.ev;
+  document.querySelectorAll(".ev-chip").forEach(x => x.classList.toggle("on", x === b));
+  run();
+}}));
 function esc(s) {{ const d = document.createElement("span"); d.textContent = s; return d.innerHTML; }}
 function hl(text, query) {{
   let out = esc(text);
@@ -135,7 +163,7 @@ function hl(text, query) {{
 function run() {{
   const query = $q.value.trim();
   if (!query) {{ $hits.innerHTML = ""; return; }}
-  const res = search(INDEX, query, 8, {{ expand: $ex.checked }});
+  const res = search(INDEX, query, 8, {{ expand: $ex.checked, docIds: docIdsFor(curEvent) }});
   if (!res.length) {{
     $hits.innerHTML = '<div class="text-body-sm text-on-surface-variant">' +
       '일치하는 구간이 없다 — 이 코퍼스(공문 3건)에 없는 주제일 수 있다. ' +
@@ -147,6 +175,7 @@ function run() {{
     `<div class="flex gap-2 items-center flex-wrap">` +
     `<span class="font-mono-data text-mono-data text-secondary">${{r.score.toFixed(2)}}</span>` +
     `<span class="doc-chip">${{esc(r.chunk.doc_id)}}</span>` +
+    `<span class="ev-tag">${{esc((INDEX.doc_events?.[r.chunk.doc_id] ?? {{}}).event ?? "")}}</span>` +
     `<span class="font-mono-label text-mono-label text-on-surface-variant">${{esc(r.chunk.id)}}</span></div>` +
     `<div class="text-body-md" style="line-height:23px">${{hl(r.chunk.text, $q.value)}}</div></div>`
   ).join("");
@@ -162,6 +191,12 @@ document.querySelectorAll(".preset-q").forEach(b =>
   border:1px solid var(--outline-variant);border-radius:99px;background:transparent;
   color:var(--on-surface-variant)}
 .preset-q:hover{border-color:var(--primary);color:var(--primary)}
+.ev-chip{padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;
+  border:1px solid var(--outline-variant);border-radius:99px;background:transparent;
+  color:var(--on-surface-variant)}
+.ev-chip.on{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.ev-tag{font-size:11px;color:var(--secondary);border:1px solid var(--secondary);
+  border-radius:99px;padding:1px 8px}
 #q{background:var(--surface-container-lowest);color:var(--on-surface);font-size:14px}
 .hit mark{background:var(--primary-fixed);color:var(--on-primary-fixed);border-radius:2px;padding:0 1px}
 .doc-chip{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;

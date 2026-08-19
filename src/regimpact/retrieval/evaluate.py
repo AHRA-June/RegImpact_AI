@@ -41,6 +41,7 @@ class RetrievalReport:
     n_citations: int
     hits: dict[int, int] = field(default_factory=dict)
     misses_at_max_k: list[Miss] = field(default_factory=list)
+    doc_filtered: bool = False
 
     def recall(self, k: int) -> float:
         return self.hits[k] / self.n_citations if self.n_citations else 0.0
@@ -49,7 +50,8 @@ class RetrievalReport:
         parts = [f"recall@{k} {self.recall(k):.0%}" for k in self.ks]
         return (f"DEV {self.n_items}문항 · 인용 {self.n_citations}건 · "
                 + " / ".join(parts)
-                + (" · 지역 별칭 확장 ON" if self.expanded else ""))
+                + (" · 지역 별칭 확장 ON" if self.expanded else "")
+                + (" · 시점 필터 ON" if self.doc_filtered else ""))
 
 
 def _covered(citation_span: tuple[int, int], chunk_start: int, chunk_end: int) -> bool:
@@ -67,7 +69,11 @@ def citation_recall(
     items: list[GoldItem] | None = None,
     ks: tuple[int, ...] = DEFAULT_KS,
     expand: bool = False,
+    doc_ids: set[str] | None = None,
 ) -> RetrievalReport:
+    """doc_ids: 시점 필터 — DEV 질문은 전부 6·30 대책에 대한 것이므로, 6·30 문서로
+    한정한 측정은 "질의 시점을 아는 시스템"의 성능이다(부풀리기가 아니라 올바른 동작 —
+    어느 시점의 규제를 묻는지는 Temporal Policy Resolver 계열이 아는 정보다)."""
     if items is None:
         items = load_split(Split.DEV)
     norm_sources = {d: normalize(t) for d, t in sources.items()}
@@ -75,9 +81,10 @@ def citation_recall(
     max_k = max(ks)
     rep = RetrievalReport(ks=tuple(ks), expanded=expand,
                           n_items=len(items), n_citations=0,
-                          hits={k: 0 for k in ks})
+                          hits={k: 0 for k in ks},
+                          doc_filtered=doc_ids is not None)
     for item in items:
-        top = index.search(item.question, k=max_k, expand=expand)
+        top = index.search(item.question, k=max_k, expand=expand, doc_ids=doc_ids)
         for cit in item.citations:
             src = norm_sources.get(cit.source_doc_id, "")
             pos = src.find(normalize(cit.quote))

@@ -126,6 +126,8 @@ def build_graph(
                             f"{policies[-2].effective_from.year} 지정 {prior_total}곳",
                         value=prior_total))
     for p in policies[:-1]:
+        if not p.region_deltas:
+            continue   # 지역 이관 전 DRAFT (예: 6·17 소급 등록) — 없는 지정을 그리지 않는다
         g.edges.append(Edge(source=p.policy_id, target=prior_id, kind="designates",
                             label=f"{len(p.region_deltas)}곳 지정",
                             weight=len(p.region_deltas),

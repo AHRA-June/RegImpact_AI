@@ -102,7 +102,7 @@ def render(extraction: RegChangeExtraction) -> str:
                f'style="word-break:break-all">{esc(h)}</span>' if h
                else '<span class="text-error text-body-sm">파일 없음</span>')
             + "</div>",
-            chip(f"변경 {s['changes']}건 추출" if s["changes"] else "인용 근거로 사용",
+            chip(f"변경 {s['changes']}건 추출" if s["changes"] else "검색 코퍼스 (추출 대기)",
                  tone="good" if s["changes"] else "neutral"),
         ])
 

@@ -78,6 +78,58 @@ def test_expansion_connects_colloquial_region_names(index):
     assert any("동탄" in s.chunk.text for s in hits)
 
 
+# ---------------------------------------------------------------- 코퍼스·시점 필터
+
+def test_corpus_loads_every_registered_doc():
+    from regimpact.extractor.sources import CORPUS_FILES, load_corpus
+    corpus = load_corpus()
+    assert set(corpus) == set(CORPUS_FILES), "raw 텍스트가 없는 코퍼스 문서가 있다"
+    for doc_id, text in corpus.items():
+        assert len(text) > 1000, f"{doc_id}: 추출 텍스트가 비정상적으로 짧다"
+
+
+def test_corpus_events_match_sources_registry():
+    """CORPUS_EVENTS 의 발표일은 SOURCES.md 레지스트리와 같아야 한다 — 두 곳에 사는 사실."""
+    import re
+    from pathlib import Path
+    from regimpact.extractor.sources import CORPUS_EVENTS
+    md = (Path(__file__).resolve().parents[1] / "docs/sources/SOURCES.md").read_text(
+        encoding="utf-8")
+    registry = dict(re.findall(
+        r"^\|\s*(\w+)\s*\|[^|]+\|[^|]+\|\s*([\d-]+)\s*\|", md, re.M))
+    for doc_id, (published, _event) in CORPUS_EVENTS.items():
+        assert registry.get(doc_id) == published, \
+            f"{doc_id}: CORPUS_EVENTS {published} ≠ SOURCES.md {registry.get(doc_id)}"
+
+
+def test_corpus_chunks_keep_offset_contract():
+    """새 문서(과거 정책)에서도 (start, end) ↔ 원문 위치 계약이 유지된다."""
+    from regimpact.extractor.sources import load_corpus
+    corpus = load_corpus()
+    for c in chunk_sources(corpus):
+        assert normalize(corpus[c.doc_id])[c.start:c.end] == c.text
+
+
+def test_doc_filter_restricts_results():
+    from regimpact.extractor.sources import SOURCE_FILES, load_corpus
+    idx = BM25Index(chunk_sources(load_corpus()))
+    hits = idx.search("규제지역 LTV", k=10, doc_ids=set(SOURCE_FILES))
+    assert hits and all(s.chunk.doc_id in SOURCE_FILES for s in hits)
+
+
+def test_time_filter_recovers_recall_lost_to_lookalike_docs():
+    """핵심 발견의 회귀 고정 — 시점만 다른 유사 문서(2025 FAQ ↔ 2026 FAQ)가 코퍼스에
+    들어오면 recall 이 떨어지고, 질의 대책의 문서로 한정하면 회복된다.
+    이 관계가 사라지면(=필터가 이득이 없으면) 시점 필터의 존재 이유부터 다시 물어야 한다."""
+    from regimpact.extractor.sources import SOURCE_FILES, load_corpus
+    corpus = load_corpus()
+    idx = BM25Index(chunk_sources(corpus))
+    full = citation_recall(idx, corpus)
+    filtered = citation_recall(idx, corpus, doc_ids=set(SOURCE_FILES))
+    assert filtered.recall(5) > full.recall(5)
+    assert filtered.recall(5) >= 0.75
+
+
 # ---------------------------------------------------------------- recall 측정
 
 def test_recall_is_monotonic_in_k(index, sources):

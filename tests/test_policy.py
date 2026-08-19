@@ -57,11 +57,17 @@ def _policy(pid="TEST_2027", *, status=PolicyStatus.DRAFT, deltas=None,
 
 
 # ---------- 시드된 레지스트리 ----------
-def test_seeded_registry_has_the_four_designation_policies(registry):
+def test_seeded_registry_has_the_designation_policies(registry):
+    """확정 4건 + DRAFT 1건(2020 6·17 — 소급 등록, 지역 이관은 사람 검수 대기)."""
     assert {p.policy_id for p in registry.policies} == {
         "MOLIT_20161103", "MOLIT_20170803", "MOLIT_20251016", "FSC_20260630",
+        "MOLIT_20200617",
     }
     assert len(registry.confirmed()) == 4
+    draft = registry.get("MOLIT_20200617")
+    assert draft.status.value == "DRAFT"
+    assert not draft.region_deltas, "지역 이관은 사람 검수 전 — 값을 지어내면 안 된다"
+    assert draft.sources, "DRAFT 라도 원문 스냅샷은 연결돼 있어야 한다"
 
 
 def test_registry_agrees_with_engine_baseline(registry):

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from ..extractor.sources import SOURCE_FILES
+from ..extractor.sources import CORPUS_FILES
 from ..report.evidence import ValidationEvidence
 from .theme import CSS, FONTS, esc
 
@@ -84,7 +84,7 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
     screens = "".join([
         _tile("sources.html", "규제 문서 등록",
               "새 공문이 들어오는 입구. 원문 스냅샷 해시·정책 버전 타임라인·새 문서 등록.",
-              f"원문 스냅샷 {len(SOURCE_FILES)}건 · 정책 버전 타임라인"),
+              f"원문 스냅샷 {len(CORPUS_FILES)}건 · 정책 버전 타임라인"),
         _tile("regchange.html", "규제 변경 분석",
               "공문에서 추출한 변경과 인용 근거. 각 항목이 원문 어디에서 왔는지 대조된다.",
               f"변경 {len(ev.extraction.changes)}건 · 인용 검증 {g.citation_correctness:.0%}"),
