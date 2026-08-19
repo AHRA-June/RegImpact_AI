@@ -26,7 +26,10 @@ body{background:var(--background);color:var(--on-surface)}
 h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:16px 0 6px}
 .lede{font-size:14px;line-height:22px;color:var(--on-surface-variant);max-width:70ch;margin:0 0 8px}
 .cols{display:grid;grid-template-columns:1fr;gap:20px;margin-top:24px}
-@media(min-width:940px){.cols{grid-template-columns:340px minmax(0,1fr)}}
+/* 모바일에서는 판정 결과를 폼보다 위에 둔다. 아래에 두면 입력을 바꿔도 결과가
+   화면 밖이라 "즉시 바뀐다"는 것 자체가 안 보인다. */
+.cols > .result{order:-1}
+@media(min-width:940px){.cols{grid-template-columns:340px minmax(0,1fr)}.cols > .result{order:0}}
 .panel{background:var(--surface-container-lowest);border:1px solid var(--outline-variant);
   border-radius:8px;padding:18px}
 .panel h2{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
@@ -142,7 +145,7 @@ def render(ev: ValidationEvidence, fixtures: dict) -> str:
         <span>계약금 납부 증명<small>계약일과 함께 있어야 인정</small></span></label>
     </form>
 
-    <div>
+    <div class="result">
       <div class="verdict" id="verdict"><div class="ltv">—</div><div class="st"></div></div>
       <div class="rule" id="rule"></div>
       <div class="trace" id="trace"></div>
