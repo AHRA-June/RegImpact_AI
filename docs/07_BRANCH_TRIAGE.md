@@ -114,7 +114,7 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 
 | # | 능력 | 출처 |
 |---|---|---|
-| S-16 | 인터랙티브 임팩트 플레이그라운드 | 5fow5g — ⚠ **단독 이식 불가**. 룰엔진 JS 재구현이 들어 있어 S-17의 포팅 대조 하네스와 묶어야 한다 |
+| ~~S-16~~ | ~~인터랙티브 플레이그라운드~~ | ✅ 2026-08-19 완료 — 5fow5g 의 HTML 대신 **포팅 대조 하네스와 함께** 새로 만들었다 |
 | S-17 | ~~정적 배포~~ + Streamlit 검증 콘솔 | 🟡 배포는 GitHub Pages 로 완료(2026-08-19). Streamlit 은 보류 |
 | ~~S-18~~ | ~~랜딩 허브 + md→HTML 렌더러~~ | ✅ 2026-08-19 완료 (랜딩·docrender 는 main 실측 기준으로 재작성) |
 | S-19 | PRD (as-built) | fmo0g8 · d2et38 |

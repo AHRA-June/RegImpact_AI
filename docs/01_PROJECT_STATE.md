@@ -55,7 +55,14 @@
    GitHub Actions 워크플로우가 **테스트 통과 후에만** 배포한다 — 깨진 수치를 올리지 않는다.
    ✍️ 최초 1회만: Settings → Pages → Source = **GitHub Actions**.
 
-**다음**: `docs/08_RELEASE_PLAN.md` Day 2 — 엔진 픽스처 export + JS 포팅 대조 + 플레이그라운드.
+✅ **Day 2 플레이그라운드 + JS 포팅 대조** — `tools/export_fixtures.py` 가 Python 엔진 판정을
+   픽스처로 뽑고, `tools/verify_js_port.mjs` 가 판정 36건 + 지역×시점 450건을 대조한다.
+   대조 실패 시 CI 가 배포를 막는다. 규칙 값은 JS 에 없다(픽스처에서 읽음) — 리터럴이 있으면
+   대조가 실패한다. 화면은 값만이 아니라 **어느 규칙에서 멈췄는지(trace)** 를 보여준다.
+
+**다음**: Day 3 — S-07 Assurance 스코어카드 / README 리크루터-first / 최종 배포.
+   ✍️ **Settings → Pages → Source = GitHub Actions** 가 아직 안 돼 있어 deploy 잡이 실패한다
+   (build·테스트는 통과).
    S-16 플레이그라운드는 룰엔진 JS 재구현이 들어 있어 S-17 포팅 대조 하네스와 묶어야 한다.
    ✍️ `kus0w7`·`71qh9m`·`o2geks` 3개는 이식할 것이 없어 **삭제 승인만** 받으면 된다(PR #3 동반 종료).
 

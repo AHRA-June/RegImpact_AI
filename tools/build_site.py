@@ -11,6 +11,8 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -20,11 +22,24 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
+
+def _load_fixture_builder():
+    """export_fixtures.py 의 build() 를 재사용한다 (픽스처 정의를 두 곳에 두지 않는다)."""
+    spec = importlib.util.spec_from_file_location(
+        "_export_fixtures", REPO / "tools" / "export_fixtures.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.build
+
+
+build_fixtures = _load_fixture_builder()
+
 from regimpact.governance import render_card, render_register    # noqa: E402
 from regimpact.report import collect                             # noqa: E402
 from regimpact.report.validation_report import render as render_report  # noqa: E402
 from regimpact.ui.docrender import markdown_to_html              # noqa: E402
 from regimpact.ui.landing import render as render_landing        # noqa: E402
+from regimpact.ui.playground import render as render_playground  # noqa: E402
 from regimpact.ui.site import render_site                        # noqa: E402
 
 # 마크다운 문서 → 사이트 파일명
@@ -72,11 +87,19 @@ def main() -> int:
         (out / filename).write_text(
             markdown_to_html(md, title=title), encoding="utf-8")
 
-    # 3. 랜딩 — 진입점
-    (out / "index.html").write_text(
-        render_landing(ev, commit=_commit()), encoding="utf-8")
+    # 3. 플레이그라운드 + 대조용 픽스처
+    #    픽스처는 화면에 인라인되지만 파일로도 남긴다 — verify_js_port.mjs 가 읽는다.
+    fixtures = build_fixtures()
+    (out / "fixtures.json").write_text(
+        json.dumps(fixtures, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    (out / "playground.html").write_text(
+        render_playground(ev, fixtures), encoding="utf-8")
 
-    # 4. Jekyll 처리 비활성화 (GitHub Pages 는 기본으로 Jekyll 을 돌린다)
+    # 4. 랜딩 — 진입점
+    (out / "index.html").write_text(
+        render_landing(ev, commit=_commit(), playground=True), encoding="utf-8")
+
+    # 5. Jekyll 처리 비활성화 (GitHub Pages 는 기본으로 Jekyll 을 돌린다)
     (out / ".nojekyll").write_text("", encoding="utf-8")
 
     total = sum(f.stat().st_size for f in out.iterdir() if f.is_file())
