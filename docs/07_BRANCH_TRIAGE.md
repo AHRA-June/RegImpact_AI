@@ -115,8 +115,8 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 | # | 능력 | 출처 |
 |---|---|---|
 | S-16 | 인터랙티브 임팩트 플레이그라운드 | 5fow5g — ⚠ **단독 이식 불가**. 룰엔진 JS 재구현이 들어 있어 S-17의 포팅 대조 하네스와 묶어야 한다 |
-| S-17 | Vercel 정적 배포 + Streamlit 검증 콘솔 | 8k0xmx |
-| S-18 | 랜딩 허브 `docs/index.html` + `PORTFOLIO.md` + md→HTML 렌더러 | fmo0g8 |
+| S-17 | ~~정적 배포~~ + Streamlit 검증 콘솔 | 🟡 배포는 GitHub Pages 로 완료(2026-08-19). Streamlit 은 보류 |
+| ~~S-18~~ | ~~랜딩 허브 + md→HTML 렌더러~~ | ✅ 2026-08-19 완료 (랜딩·docrender 는 main 실측 기준으로 재작성) |
 | S-19 | PRD (as-built) | fmo0g8 · d2et38 |
 | S-20 | `docs/features/` 기능단위 버전관리 체계 | d2et38 |
 | S-21 | Ollama / OpenAI 호환 백엔드 (backends.py 확장) | sp37fd |

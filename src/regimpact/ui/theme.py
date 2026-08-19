@@ -40,6 +40,17 @@ def _rgba(name: str, alpha: int) -> str:
     return f"rgba({r},{g},{b},{alpha / 100:.2f})"
 
 
+def _css_vars() -> str:
+    """같은 토큰을 CSS 변수로도 낸다.
+
+    유틸리티 클래스(`.bg-primary`)는 Stitch 목업을 그대로 옮기는 데 쓰고, 장문 문서·랜딩은
+    직접 쓴 CSS 라 변수(`var(--primary)`)가 필요하다. **출처는 하나(_COLORS)** 여야
+    두 표현이 갈라지지 않는다.
+    """
+    body = "".join(f"--{name}:{hexv};" for name, hexv in _COLORS.items())
+    return f":root{{{body}}}"
+
+
 def _color_rules() -> str:
     out = []
     for name, hexv in _COLORS.items():
@@ -149,7 +160,7 @@ stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 def build_css() -> str:
     """디자인 토큰에서 정적 CSS를 만든다 — 외부 CDN 없이 동일한 화면."""
-    return _LAYOUT_CSS + _color_rules() + _type_rules()
+    return _css_vars() + _LAYOUT_CSS + _color_rules() + _type_rules()
 
 
 CSS = build_css()

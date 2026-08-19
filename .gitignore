@@ -15,3 +15,6 @@ docs/eval/runs/manual/
 
 # 문서별 추출 캐시 (원문 해시 키 — 재실행 비용 절감용, 실행 기록만 커밋)
 docs/eval/runs/perdoc_cache/
+
+# 빌드 산출 (CI 에서 생성)
+/site/
