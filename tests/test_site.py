@@ -30,7 +30,8 @@ def site(tmp_path_factory):
 EXPECTED = {
     "index.html", "regchange.html", "impact_matrix.html", "rule.html",
     "assurance.html", "portfolio.html", "sources.html",
-    "validation_report.html", "model_system_card.html", "ai_risk_register.html",
+    "validation_report.html", "validation_summary.html",
+    "model_system_card.html", "ai_risk_register.html",
 }
 
 
@@ -91,6 +92,29 @@ def test_sources_page_hashes_come_from_real_files(site):
     for f in files:
         digest = hashlib.sha256(f.read_bytes()).hexdigest()
         assert digest in html, f"{f.name} 의 실제 SHA-256 이 화면에 없다"
+
+
+def test_summary_numbers_come_from_the_pipeline(site):
+    """1페이지 요약도 본문 보고서와 같은 규칙 — 수치는 전부 evidence 에서."""
+    from regimpact.report import collect
+    # 사이트 빌드와 같은 조건으로 — node 가 있으면 JS 포팅 대조가 측정돼 통과 수가 달라진다
+    agreement = 1.0 if shutil.which("node") else None
+    ev = collect(generated_at="x", js_port_agreement=agreement)
+    html = site["validation_summary.html"]
+    s = ev.scorecard.summary()
+    assert f"{s['passed']}/{s['total']}" in html
+    assert f"{len(ev.impact.reduced):,}건" in html
+    assert f"{ev.impact.impact_coverage:.1%}" in html
+    assert f"{ev.regression.total}케이스" in html
+
+
+def test_summary_shows_gaps_not_only_scores(site):
+    """요약이 좋은 것만 추리면 요약이 곧 과장이다 — 한계가 점수와 함께 실려야 한다."""
+    html = site["validation_summary.html"]
+    assert "부족한 것" in html
+    assert "미개봉" in html                      # LOCKED/CHALLENGE 미평가
+    assert "독립 벤치마크가 아니다" in html       # 골드셋 한계
+    assert "미측정" in html                      # 측정 불가 지표를 통과로 치지 않는다
 
 
 def test_sources_page_does_not_pretend_to_extract(site):

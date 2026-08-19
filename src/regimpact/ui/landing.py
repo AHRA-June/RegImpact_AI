@@ -108,6 +108,9 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
                          "직접 만져보기")
 
     docs = "".join([
+        _tile("validation_summary.html", "검증 요약 (1페이지)",
+              "목적·수행 내용·점수·영향도·한계를 한 화면에. 길게 읽기 전에 여기부터.",
+              _scorecard_meta(ev) or "임계 대조 요약"),
         _tile("validation_report.html", "시스템 검증보고서",
               "개념적 건전성 · 구현 정확성 · 성과 검증 · 거버넌스 · 한계 · 발견사항. "
               "모든 수치가 파이프라인 실행에서 나온다.",
