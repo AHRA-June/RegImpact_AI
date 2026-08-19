@@ -53,7 +53,7 @@
 ✅ **Day 1 배포** — `tools/build_site.py` 가 파이프라인 1회 실행으로 9쪽 정적 사이트를 굽는다
    (화면 5 + 문서 3 + 랜딩). md→HTML 렌더러(`ui/docrender.py`)와 랜딩(`ui/landing.py`) 신설.
    GitHub Actions 워크플로우가 **테스트 통과 후에만** 배포한다 — 깨진 수치를 올리지 않는다.
-   ✍️ 최초 1회만: Settings → Pages → Source = **GitHub Actions**.
+   Pages 활성화(Settings → Pages → Source = GitHub Actions)는 2026-08-19 완료.
 
 ✅ **Day 2 플레이그라운드 + JS 포팅 대조** — `tools/export_fixtures.py` 가 Python 엔진 판정을
    픽스처로 뽑고, `tools/verify_js_port.mjs` 가 판정 36건 + 지역×시점 450건을 대조한다.
@@ -70,11 +70,37 @@
    처음 분류가 부분적으로 틀렸던 이유: merge-base 기준 diff 를 봐서 경로가 다른 고유 기능을
    놓쳤다 — main 현재 트리와 직접 비교해야 한다.
 
-🔴 **남은 것은 하나뿐** — ✍️ **Settings → Pages → Source = "GitHub Actions"**.
-   build·테스트·사이트 빌드·JS 대조는 CI 에서 전부 통과하고 deploy 잡만 실패한다.
-   설정 후 워크플로우 re-run 하면 `https://ahra-june.github.io/RegImpact_AI/` 가 뜬다.
-   S-16 플레이그라운드는 룰엔진 JS 재구현이 들어 있어 S-17 포팅 대조 하네스와 묶어야 한다.
-   ✍️ `kus0w7`·`71qh9m`·`o2geks` 3개는 이식할 것이 없어 **삭제 승인만** 받으면 된다(PR #3 동반 종료).
+✅ **배포 완료 (2026-08-19)** — **https://ahra-june.github.io/RegImpact_AI/**
+   푸시할 때마다 GitHub Actions 가 `build`(테스트 → 사이트 빌드 → JS 포팅 대조)와
+   `mobile`(390px 가로 스크롤 검사)을 **병렬로** 돌리고, 둘 다 통과해야 배포된다.
+
+### ⚠️ 배포 확인의 함정 세 가지 (전부 실제로 밟았다)
+
+**① 라이브 URL 을 열 수 없다.** 이 실행 환경의 egress 프록시가 `github.io` 를 막는다
+(curl·WebFetch 모두 403). "배포됐다"는 GitHub deployment status 로, "화면이 멀쩡하다"는
+**같은 커밋을 로컬에서 렌더해** 확인한다 — 둘은 다른 증거다.
+
+배포 상태는 반드시 `?environment=github-pages` 로 거른다. 그냥 최신 1건을 집으면 엉뚱한
+환경이 잡힌다 — 실제로 Vercel Preview 주소를 라이브 URL 로 잘못 보고했다.
+(그 Vercel 연동은 2026-08-19 프로젝트 삭제로 정리했다. **배포 경로는 GitHub Pages 하나뿐이다.**)
+
+**② 뷰포트를 나눠서 재야 한다.** 데스크톱만 재고 "10쪽 전부 정상"이라 보고했는데
+폰에서 화면 5종이 무너져 있었고 사용자가 발견했다. Stitch 목업이 데스크톱 전용이라
+사이드바 288px 가 390px 화면에서 본문을 **102px** 로 만들고 있었다.
+`scrollWidth` 비교로는 못 잡는다 — 그 값은 스크롤 컨테이너 안의 넓은 표에도 반응한다.
+실제로 `window.scrollTo(900,0)` 하고 `scrollX` 가 0인지 봐야 한다.
+
+    REGIMPACT_BROWSER_TESTS=1 python -m pytest tests/test_site.py -k horizontal
+
+  로컬은 약 2분(샌드박스가 느리다), CI 는 30초. 기본 스위트에서는 빠져 있다.
+
+**③ 브랜치를 기본 브랜치로 리셋하기 전에 미병합 커밋이 있는지 볼 것.**
+`git checkout -B <branch> origin/<default>` 를 습관적으로 치다가 **커밋해 둔 문서 갱신을
+두 번 날렸다.** 리셋 전에 확인한다:
+
+    git log --oneline origin/claude/portfolio-project-planning-9sip11..HEAD
+
+  비어 있지 않으면 먼저 PR 을 만들어 병합하거나, 리셋 대신 `git merge` 로 최신을 받는다.
 
 ## 🚀 새 세션 시작 절차 (2분)
 
