@@ -42,6 +42,7 @@ from regimpact.ui.intake import render as render_intake          # noqa: E402
 from regimpact.ui.landing import render as render_landing        # noqa: E402
 from regimpact.ui.playground import render as render_playground  # noqa: E402
 from regimpact.ui.site import render_site                        # noqa: E402
+from regimpact.ui.summary import render as render_summary        # noqa: E402
 
 # 마크다운 문서 → 사이트 파일명
 DOCS = {
@@ -122,6 +123,16 @@ def main() -> int:
     # 3b. 규제 문서 등록 — 스냅샷 해시·정책 타임라인은 저장소 실데이터에서 계산
     (out / "sources.html").write_text(
         render_intake(ev.extraction), encoding="utf-8")
+
+    # 3c. 검증 요약 — 보고서의 1페이지 요약. QA 골드 검수 진행률도 실데이터에서.
+    from regimpact.eval import Split, load_split
+    dev = load_split(Split.DEV)
+    (out / "validation_summary.html").write_text(
+        render_summary(
+            ev,
+            qa_confirmed=sum(1 for i in dev if i.authored_by == "human_confirmed"),
+            qa_total=len(dev),
+        ), encoding="utf-8")
 
     # 4. 랜딩 — 진입점
     (out / "index.html").write_text(

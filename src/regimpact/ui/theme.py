@@ -105,6 +105,7 @@ button{font:inherit;border:0;cursor:pointer}
 [hidden]{display:none!important}
 .flex{display:flex}.grid{display:grid}.flex-col{flex-direction:column}
 .flex-wrap{flex-wrap:wrap}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}
+.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .items-center{align-items:center}.items-start{align-items:flex-start}
@@ -248,6 +249,7 @@ NAV_SECTIONS = (
         ("playground.html", "판정 플레이그라운드", "science"),
     )),
     ("검증 문서", (
+        ("validation_summary.html", "검증 요약", "dashboard"),
         ("validation_report.html", "검증보고서", "gavel"),
         ("model_system_card.html", "모델·시스템 카드", "person"),
         ("ai_risk_register.html", "AI 리스크 레지스터", "shield_lock"),
