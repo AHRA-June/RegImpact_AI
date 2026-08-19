@@ -4,10 +4,10 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 **이 파일부터** 읽는다.
 > 규칙: "지금 어디 / 다음 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-19 (QA 골드 DEV 40 검수표 준비)
-- **개발 브랜치:** `claude/remaining-work-zwayt7`
-- **전체 단계:** 🟢 **Phase 2 마무리** — 배포 완료, 남은 것은 사용자 확정 2건과 Phase 3 진입
-- **테스트:** 484개 통과(1 skipped) · **비용: 0원** (유료 API 키 미사용)
+- **마지막 갱신:** 2026-08-19 (시연 모드 demo.html 신설 — 신한퓨처스랩 시연동영상용)
+- **개발 브랜치:** `claude/work-progress-jlg9hy`
+- **전체 단계:** 🟢 **Phase 2 마무리** — 배포 완료, 남은 것은 QA 골드 검수와 Phase 3 진입
+- **테스트:** 535개 통과(1 skipped) · **비용: 0원** (유료 API 키 미사용)
 
 ---
 
@@ -133,22 +133,21 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 | **고객 영향 분석** | ✅ | `impact/customer.py` | 심사 판정 **91.4%** / 영향 측정 **74.1%** |
 | **UI 5화면** | ✅ | `ui/`, `examples/build_ui.py` | 자기완결 HTML, `docs/ui/generated/index.html` |
 | **추출 골드** | ✅ **사람 확정** | `docs/eval/regchange_gold_6_30.json` | 16+4항목, 지문 `098cd126` |
-| **QA 골드 115문항** | 🤖 초안 | `docs/eval/gold/`, `examples/run_goldset_eval.py` | DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35 |
+| **QA 골드 115문항** | 🤖 초안(검수 4/40) | `docs/eval/gold/`, `examples/run_goldset_eval.py` | DEV 40 / 🔒LOCKED 40 / 🔒CHALLENGE 35 |
+| **시점 질의 골드 TEMPORAL** | 🤖 초안 | `docs/eval/gold/temporal.json`, `eval/temporal.py` | 12문항 · resolver 정합 검사 통과 |
 | **QA 평가 하네스** | ✅ | `eval/qa.py` | DEV 실측: Fact 95.0% · Exact 92.5% · **Escalation Recall 100%** |
-| **metrics_spec 임계값** | 🤖 제안 | `docs/metrics_spec.md` | TBD 1개만 남음(측정 불가한 것) |
+| **metrics_spec 임계값** | ✅ **사람 확정** | `docs/metrics_spec.md` | 2026-08-19 확정 · TBD 1개(시점 골드 검수 후) |
 | 검증보고서 | ✅ (S-06) | `report/`, `docs/validation/VALIDATION_REPORT.md` | 602줄, 라이브 수치 조립 |
 
 ---
 
 ## 다음 작업 (순서대로)
 
-### 1. ✍️ metrics_spec 임계값 확정 — **사용자 판단 필요, 다른 작업의 전제**
-- 파일: `docs/metrics_spec.md` §1·§2 (🤖 제안 상태, 근거 함께 기재)
-- 요지: 임계는 **점수가 아니라 위험**에서 정했다. 예외·시행일·경과규정·escalation 누락 = 100%,
-  Completeness 95% / Citation 98% / Escalation Precision 70%.
-- 확정하면 표의 🤖를 ✅로 바꾸고 `02_DECISION_LOG.md`에 기록.
+### ✅ metrics_spec 임계값 확정 — **완료 (2026-08-19 사용자)**
+- 제안 전체 채택. Policy-version Consistency만 TBD 유지(시점 질의 골드 검수 후 측정 가동 +
+  임계 별도 제안). 상세: `02_DECISION_LOG.md` 2026-08-19.
 
-### 2. ✍️ QA 골드 DEV 40 검수 — **진행 중 4/40 (2026-08-19)**
+### 1. ✍️ QA 골드 DEV 40 검수 — **진행 중 4/40 (2026-08-19)**
 - 검수표: `docs/eval/QA_GOLD_REVIEW.md` + `qa_gold_review.html` (`python tools/build_qa_review.py`로 재생성)
 - ✅ 1차 완료: "인용만으로 확인 불가" 4문항(GF-007·REG-002·BOR-003·AMB-001) 사용자 확정 +
   인용 보강 2건. 상세: `02_DECISION_LOG.md` 2026-08-19. **잔여 36문항.**
@@ -156,6 +155,14 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
   그다음 카테고리 순서대로.
 - 확정되면 `tools/gold_dev.py`에서 `authored_by="human_confirmed"` 지정 후 재생성.
 - 확정 후에야 QA 지표(Fact Coverage 95.0% 등)가 절대값이 된다. 지금은 상대 비교용.
+
+### 2. ✍️ 시점 질의 골드 TEMPORAL 12문항 검수 — **신설 (2026-08-19 🤖)**
+- 파일: `docs/eval/gold/temporal.json` (`tools/gold_temporal.py`로 재생성)
+- Policy-version Consistency 가동용 별도 셋 — 115문항(DEV/LOCKED/CHALLENGE)과 분리, 비봉인.
+- as_of 문항은 Temporal Policy Resolver 정합을 코드가 강제(`eval/temporal.py`).
+  **escalation 2문항은 2020 6·17 해제일 미상의 한계를 새긴 것** — 해제 원문 확보·confirm() 시
+  같은 검사가 갱신을 요구한다.
+- 검수 완료 → 측정 가동 → 임계 제안(TBD 해소)의 순서.
 
 ### 3. Phase 3 — LOCKED / CHALLENGE 최초 실행
 - **코어 완성 후 1회만.** 지금 열지 말 것(브리프 §12).
@@ -174,8 +181,8 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 
 | 항목 | 위치 | 영향 |
 |---|---|---|
-| metrics_spec 임계값 확정 | `metrics_spec.md` §1·§2 | 합격/불합격 판정 기준 |
-| QA 골드 DEV 40 검수 | `docs/eval/gold/dev.json` | QA 지표의 절대값 신뢰도 |
+| QA 골드 DEV 40 검수 (잔여 36) | `docs/eval/gold/dev.json` | QA 지표의 절대값 신뢰도 |
+| 시점 질의 골드 TEMPORAL 12 검수 | `docs/eval/gold/temporal.json` | Policy-version Consistency 측정 가동 |
 | 非규제(수도권) 비처분 1주택 LTV | Q10 (해결됨·현행 유지 결정) | 원문에 없음 → escalation 유지 중 |
 
 ---
@@ -210,6 +217,26 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 ---
 
 ## 작업 로그 (append-only, 최신이 위)
+
+- **2026-08-19(시연 모드)** — 🎬 **demo.html 신설** (신한퓨처스랩 지원 시연동영상용, 사용자 지시:
+  고도화 중단·시연 화면 우선). `ui/demo.py` — 사이드바 없는 풀스크린 7막 무대(훅 → 원문 등록 →
+  AI 추출 → 룰 변경안 70→40 플립 → **라이브 판정** → 포트폴리오 영향 → 검증 성적표+CTA).
+  녹화 모드(자동 재생·전체화면·진행바)와 라이브 시연(←/→·장면 클릭) 겸용, 390px 반응형(가로
+  스크롤 0 실측). 라이브 판정은 플레이그라운드와 **같은 검증된 JS 엔진 포팅본** — 발표일 70% /
+  시행일 40% / 경과규정 70% / 미등록 지역 '사람 검토'를 브라우저 실측으로 확인. 수치는 전부
+  evidence·픽스처에서 오고(스코어카드 미측정·합성 데이터 명시 포함 — 피치라고 숨기지 않는다),
+  테스트 4건이 grounding·엔진 재사용·한계 표기·조작 장치를 고정. 랜딩에 "▶ 시연 모드" CTA.
+  '이 페이지는?' 설명은 ℹ 오버레이로 유지(무대 오염 방지). 테스트 530→535.
+
+- **2026-08-19(임계 확정 + 시점 골드)** — ✍️ **metrics_spec 임계값 확정**(사용자: 제안 전체 채택,
+  🤖→✅ 전환, Policy-version Consistency만 TBD 유지) + 🤖 **시점 질의 골드 TEMPORAL 12문항 신설**
+  (`tools/gold_temporal.py` → `temporal.json`, 115문항과 별도·비봉인). 새 장치: GoldItem `as_of`
+  필드 + `eval/temporal.py` — as_of 문항은 Temporal Policy Resolver와 정합해야 하고, escalation
+  문항(해제일 미상 2건)은 **해제 원문 확보로 DB가 답할 수 있게 되면 검사가 갱신을 요구**한다.
+  곁가지: KNOWN_POLICY_VERSIONS 손 목록 → 정책 DB 유도, 골드 인용 대조를 코퍼스 7건 전체로,
+  "단일 정책이라 측정 불가" 문구를 실상(골드 초안이라 검수 대기)으로 정정. 검증보고서·거버넌스
+  문서 재생성(추적본이 §3.1 스코어카드 절 이전 버전이었던 것도 이번에 정합화). 테스트 521→530.
+  **다음: TEMPORAL 12 + DEV 잔여 36 검수(✍️) → Policy-version Consistency 측정 가동 → 임계 제안.**
 
 - **2026-08-19(지역 이관 확정)** — ✍️ **2020 6·17 검수 확정 반영** (사용자: Q1-A·Q2-A·Q3-A 전부 채택).
   레지스트리 코드 11개 신설 + 동명 구 별칭 결함 수정('대전 중구'→DAEJEON_JUNG, 맨 '중구'는 서울 유지).

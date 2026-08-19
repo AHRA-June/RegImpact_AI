@@ -10,6 +10,15 @@
 | DEV | `dev.json` | 40 | 52% | 프롬프트·retrieval·extractor 튜닝 — **개발 중 쓰는 유일한 셋** |
 | LOCKED TEST | `locked.json` | 40 | 52% | 최종 성능평가 (코어 완성 후 1회) |
 | CHALLENGE | `challenge.json` | 35 | 80% | 적대적 평가 (마지막 1회) |
+| TEMPORAL | `temporal.json` | 12 | 58% | 시점 질의 — Policy-version Consistency 가동용 (비봉인, 2026-08-19 신설) |
+
+TEMPORAL은 위 115문항과 **별도의 셋**이다(DEV/LOCKED 분포 규율 불변). 코퍼스 확장에서
+드러난 실패모드(recall 급락의 원인 = 시점 판별)를 직접 겨눈다: 시점이 명시된 질문,
+발표일≠시행일 경계쌍, 2025↔2026 동형 문구 판별, 그리고 **원문에 해제일이 없어
+escalation이 정답인** 문항. `as_of` 필드가 있는 문항은 인용 대조에 더해 Temporal Policy
+Resolver와의 정합 검사(`eval/temporal.py`)를 통과해야 한다 — 2020 6·17이 해제 원문과 함께
+confirm() 되는 순간, 같은 검사가 escalation 문항을 "답변형으로 갱신하라"고 지목한다.
+작성 도구: `tools/gold_temporal.py`. 🤖 ai_draft — ✍️ 검수 대기.
 
 DEV와 LOCKED는 **카테고리 분포가 동일**하다. 분포가 다르면 최종 성능 차이가 실력 차이인지
 난이도 차이인지 구분할 수 없기 때문이다(테스트로 고정).

@@ -25,15 +25,17 @@ from regimpact.eval import (
 )
 from regimpact.eval.goldset import MIN_REASON_CHARS, SEALED, save_split
 from regimpact.eval.schema import Citation, GoldItem
-from regimpact.extractor.sources import load_sources
+from regimpact.extractor.sources import load_corpus
 
 REPO = Path(__file__).resolve().parent.parent
-SOURCES = load_sources()
+# 인용 대조는 코퍼스 전체에서 — TEMPORAL 셋이 과거 정책 원문(2020 6·17, 2025 10·15)을
+# 인용한다. 6·30 세 문서의 doc_id 조회는 코퍼스가 상위집합이라 결과가 같다.
+SOURCES = load_corpus()
 REASON = "테스트에서 봉인 동작을 검증하기 위한 접근 (튜닝 아님)"
 
 
 def _all_items():
-    items = load_split(Split.DEV)
+    items = load_split(Split.DEV) + load_split(Split.TEMPORAL)
     for sp in SEALED:
         items += load_split(sp, unseal_reason=REASON, log_path=REPO / ".tmp_seal_log.md")
     return items

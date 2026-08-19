@@ -50,6 +50,11 @@ body{background:var(--background);color:var(--on-surface)}
   border-left:3px solid var(--primary);border-radius:0 4px 4px 0;font-size:13px;line-height:21px;
   color:var(--on-surface-variant)}
 .note strong{color:var(--on-surface)}
+.demo-cta{display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:13px 22px;
+  border-radius:8px;background:var(--primary);color:var(--on-primary,#fff);text-decoration:none;
+  font-size:15px;font-weight:600;transition:transform .12s}
+.demo-cta:hover{transform:translateY(-1px)}
+.demo-cta small{font-weight:400;opacity:.85}
 footer{margin-top:72px;padding:28px 0 56px;border-top:1px solid var(--outline-variant);
   font-size:12px;line-height:20px;color:var(--on-surface-variant)}
 footer code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
@@ -171,6 +176,9 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
       그 자리는 <strong>사유와 함께 사람 검토로</strong> 넘어간다.
       값을 지어내면 두 숫자는 즉시 100%가 된다.
     </div>
+
+    <a class="demo-cta" href="demo.html">▶ 시연 모드
+      <small>발표부터 심사 반영·검증까지 — 3분 · 자동 재생</small></a>
   </header>
 
   <section class="sec">

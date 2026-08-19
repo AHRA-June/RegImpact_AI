@@ -1,0 +1,298 @@
+{
+  "_note": "TEMPORAL split — docs/00_BRIEF.md §11/§12. authored_by=ai_draft는 사람 확정 대기(🤖), human_confirmed는 확정(✅).",
+  "split": "TEMPORAL",
+  "count": 12,
+  "items": [
+    {
+      "id": "TEMPORAL-EFF-001",
+      "split": "TEMPORAL",
+      "category": "EFFECTIVE_DATE",
+      "question": "2025년 10월 16일 시점에 유효한 최신 규제지역 지정은 어느 대책에 따른 것인가?",
+      "gold_answer": "2025년 10·15 대책이다. 발표 후 즉각 시행(10.16일)돼 이날부터 강화된 대출규제가 적용된다.",
+      "gold_facts": [
+        "10·15",
+        "10.16"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "즉시 시행이 가능한 조치들은 발표 후 즉각 시행*(10.16일)하고, 후속 조치가 필요한 과제**는 최대한 신속하게 추진해 나갈 예정이다. 다만, 금번 조치 시행 이전에 ➊주택 매매계약 또는 전세계"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20251016",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "",
+      "as_of": "2025-10-16"
+    },
+    {
+      "id": "TEMPORAL-EFF-002",
+      "split": "TEMPORAL",
+      "category": "EFFECTIVE_DATE",
+      "question": "2026년 6월 30일(6·30 대책 발표일 당일)에 유효한 규제지역 지정은 어느 대책 기준인가?",
+      "gold_answer": "아직 2025년 10·15 대책 기준이다. 6·30 대책으로 강화되는 대출규제는 7.1일부터 적용되므로, 발표일 당일은 직전 정책이 유효하다.",
+      "gold_facts": [
+        "10·15",
+        "7.1"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "강화된 대출규제가 7.1일부터 즉시 적용된다. * 은행업감독규정, 보험업감독규정, 여신전문금융업감독규정, 상호저축은행업감독규정, 상호금융업감독규정 [ 규제지역 지"
+        },
+        {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "즉시 시행이 가능한 조치들은 발표 후 즉각 시행*(10.16일)하고, 후속 조치가 필요한 과제**는 최대한 신속하게 추진해 나갈 예정이다. 다만, 금번 조치 시행 이전에 ➊주택 매매계약 또는 전세계"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20251016",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "EFF-003과 하루 차이 경계쌍 — 발표일≠시행일을 판별하는지 본다",
+      "as_of": "2026-06-30"
+    },
+    {
+      "id": "TEMPORAL-EFF-003",
+      "split": "TEMPORAL",
+      "category": "EFFECTIVE_DATE",
+      "question": "2026년 7월 1일부터 규제지역에서 적용되는 강화 대출규제는 어느 대책에 따른 것인가?",
+      "gold_answer": "2026년 6·30 대책이다. 규제지역 지정에 따라 旣 마련된 규정의 강화 대출규제가 7.1일부터 즉시 적용된다.",
+      "gold_facts": [
+        "6·30",
+        "7.1"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "강화된 대출규제가 7.1일부터 즉시 적용된다. * 은행업감독규정, 보험업감독규정, 여신전문금융업감독규정, 상호저축은행업감독규정, 상호금융업감독규정 [ 규제지역 지"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "EFF-002와 하루 차이 경계쌍",
+      "as_of": "2026-07-01"
+    },
+    {
+      "id": "TEMPORAL-REG-001",
+      "split": "TEMPORAL",
+      "category": "REGION",
+      "question": "서울 전 지역이 투기과열지구로 지정된 것은 언제부터인가?",
+      "gold_answer": "2017년 8월 3일부터다(’17.8.3). 2020 6·17 대책의 지정 현황표가 서울 투기과열지구 지정일을 ’17.8.3으로 기록한다.",
+      "gold_facts": [
+        "17.8.3"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "서 울 전 지역 (’17.8.3) 전 지역 (’16.11.3) 경 기 과천(’17.8.3), 성남분당(’17.9.6), 광명, 하남(’18.8.28), 수원, 성"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20170803",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "2017 8·2 대책 원문은 미확보 — 근거는 2020 현황표의 소급 기록. 원문 확보 시 인용 교체",
+      "as_of": "2017-08-03"
+    },
+    {
+      "id": "TEMPORAL-REG-002",
+      "split": "TEMPORAL",
+      "category": "REGION",
+      "question": "서울 전 지역이 조정대상지역으로 지정된 것은 언제부터인가?",
+      "gold_answer": "2016년 11월 3일부터다(’16.11.3). 2020 6·17 대책의 지정 현황표가 서울 조정대상지역 지정일을 ’16.11.3으로 기록한다.",
+      "gold_facts": [
+        "16.11.3"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "서 울 전 지역 (’17.8.3) 전 지역 (’16.11.3) 경 기 과천(’17.8.3), 성남분당(’17.9.6), 광명, 하남(’18.8.28), 수원, 성"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20161103",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "2016 11·3 대책 원문은 미확보 — 근거는 2020 현황표의 소급 기록. 원문 확보 시 인용 교체",
+      "as_of": "2016-11-03"
+    },
+    {
+      "id": "TEMPORAL-EFF-004",
+      "split": "TEMPORAL",
+      "category": "EFFECTIVE_DATE",
+      "question": "2020 6·17 대책으로 신규 지정된 규제지역의 효력은 언제부터 발생하는가?",
+      "gold_answer": "관보 게시일인 6월 19일부터 효력이 발생한다. 원문은 6.19(금) 일자로 지정 및 효력발생을 명시한다.",
+      "gold_facts": [
+        "6월 19일|6.19",
+        "관보"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "QNA_20200617",
+          "quote": "관보게시일인6월19일부터효력이발생 ----- p4 ----- - 2 - 2. 8월이후전매제한기간이강화되는수도권및광역시는 규제지역지정시전매제한강화가즉시적용되는지?"
+        },
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "6.19(금) 일자로지정및효력발생 < 조정대상지역및투기과열지구지정> 조정대상지역 투기과열지구 기존 (서울) 全 지역 (경기) 과천, 광명, 성남, 고양(7개 택지"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20200617",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "",
+      "as_of": null
+    },
+    {
+      "id": "TEMPORAL-EFF-005",
+      "split": "TEMPORAL",
+      "category": "EFFECTIVE_DATE",
+      "question": "2020 6·17 대책에서 토지거래허가구역의 효력 발생일은 규제지역과 같은가?",
+      "gold_answer": "다르다. 규제지역은 6.19일부터, 토지거래허가구역은 6.18일 공고 후 5일이 지난 6.23일부터 효력이 발생한다 — 같은 대책 안에 서로 다른 두 효력일이 있다.",
+      "gold_facts": [
+        "6.19",
+        "6.23"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "6.23일부터효력발생(공고후5일) ◈ 이번 토지거래허가구역 지정 이후 시장 과열이 주변으로 확산될 경우에는 지정구역 확대도 적극 검토 ◈ 향후 개발호재 등에 따른"
+        },
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "6.19(금) 일자로지정및효력발생 < 조정대상지역및투기과열지구지정> 조정대상지역 투기과열지구 기존 (서울) 全 지역 (경기) 과천, 광명, 성남, 고양(7개 택지"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20200617",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "한 문서 안의 두 효력일 — 날짜 하나만 뽑아 오는 시스템을 잡는 함정",
+      "as_of": null
+    },
+    {
+      "id": "TEMPORAL-GF-001",
+      "split": "TEMPORAL",
+      "category": "GRANDFATHERING",
+      "question": "2020 6·17 규제 효력 발생 전에 금융회사에 대출신청을 완료한 차주에게는 어떤 규제가 적용되는가?",
+      "gold_answer": "6.18일까지 대출신청을 완료한 차주 등에게는 규제지역 신규 지정 이전의 규제가 적용된다.",
+      "gold_facts": [
+        "6.18",
+        "이전의 규제|종전"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "QNA_20200617",
+          "quote": "6.18일까지금융회사에대출신청을완료한차주등의경우 규제지역신규지정이전의규제가적용됨 2. 금번에새로투기과열지구로지정된지역의15억초과 아파트담보대출은언제부터금지되는것인지? □규제지역지정효력발생일(6.19일)부터주택구입목적"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20200617",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "",
+      "as_of": null
+    },
+    {
+      "id": "TEMPORAL-GF-002",
+      "split": "TEMPORAL",
+      "category": "GRANDFATHERING",
+      "question": "2025 10·15 대책에서 규제 효력 발생 전에 주택매매계약을 체결한 차주의 경과규정은 어떻게 되는가?",
+      "gold_answer": "규제지역 효력 발생일 전일(10.15일)까지 주택매매계약을 체결하고 계약금 납부 사실을 증명하는 경우 등에는 종전규정이 적용된다.",
+      "gold_facts": [
+        "10.15",
+        "종전규정"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "계약금 납부사실을 증명할 경우 등에는 종전규정이 적용되며, 집단대출의 경우 규제 지역 효력 발생일 전일(10.15일)까지 입주자모집공고(없을시 착공신고, 재건축· 재개발 사업장 조합원은 관리처분인가)가 된 사업장에 대해서는 종전규정"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "MOLIT_20251016",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "",
+      "as_of": null
+    },
+    {
+      "id": "TEMPORAL-NOC-001",
+      "split": "TEMPORAL",
+      "category": "NO_CHANGE",
+      "question": "규제지역 지정 시 주담대 LTV 강화 수치는 2025 10·15 대책과 2026 6·30 대책에서 서로 다른가?",
+      "gold_answer": "다르지 않다. 두 대책 모두 같은 旣 마련된 규정이 발동돼 LTV가 70%에서 40%로 강화된다. 문구가 거의 동일하므로 어느 시점의 문서인지 판별이 필요하다.",
+      "gold_facts": [
+        "다르지 않",
+        "70",
+        "40"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "주담대 LTV 비율이 기존 70%에서 40%로 낮아지며, 전세 ․ 신용대출 차주의 규제지역 주택구입도 제한되는 등 해당지역의 대출수요 관리 수준이 한층 강화될 예"
+        },
+        {
+          "source_doc_id": "FSC_PRESS_20260630",
+          "quote": "규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용 다"
+        }
+      ],
+      "expect_escalation": false,
+      "policy_version": "FSC_20260630",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "recall@5 82%→53% 급락의 원인이었던 동형 문구 쌍(02_DECISION_LOG 2026-08-19) — 시점 판별이 이 셋의 존재 이유",
+      "as_of": null
+    },
+    {
+      "id": "TEMPORAL-AMB-001",
+      "split": "TEMPORAL",
+      "category": "AMBIGUOUS",
+      "question": "2023년 3월 시점에 수원시 팔달구는 투기과열지구였는가?",
+      "gold_answer": "원문만으로는 단정할 수 없다. 2020 6·17 대책이 수원을 투기과열지구로 지정한 사실은 있으나(’20.6.19), 해제 시점을 말하는 원문이 코퍼스에 없어 2023년 3월의 상태는 확인 불가 — 사람 검토가 필요하다.",
+      "gold_facts": [
+        "단정할 수 없|확인 불가",
+        "해제"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "수원, 성남수정, 안양, 안산단원, 구리, 군포, 의왕, 용인수지·기흥, 동탄2(’20.6.19) 과천, 성남, 하남, 동탄2(’16.11.3), 광명(’17.6"
+        }
+      ],
+      "expect_escalation": true,
+      "policy_version": "MOLIT_20200617",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "해제 보도자료 확보·confirm() 후 답변형으로 갱신 — check_temporal_gold가 그때 이 문항을 지목한다",
+      "as_of": "2023-03-01"
+    },
+    {
+      "id": "TEMPORAL-AMB-002",
+      "split": "TEMPORAL",
+      "category": "AMBIGUOUS",
+      "question": "2021년 1월 시점에 대전 유성구의 규제지역 상태는 무엇이었는가?",
+      "gold_answer": "원문만으로는 확인할 수 없다. 2020 6·17 대책이 대전 4개 지역을 투기과열지구로 지정한 사실은 있으나, 해제 시점 원문이 없어 2021년 1월의 상태를 단정할 수 없다 — 사람 검토가 필요하다.",
+      "gold_facts": [
+        "확인할 수 없|단정할 수 없",
+        "해제"
+      ],
+      "citations": [
+        {
+          "source_doc_id": "MOLIT_PRESS_20200617",
+          "quote": "대전4개지역을투기과열지구로지정 □(적용시기) 6.19(금) 일자로지정및효력발생 < 조정대상지역및투기과열지구지정> 조정대상지역 투기과열지구 기존 (서울) 全 지역"
+        }
+      ],
+      "expect_escalation": true,
+      "policy_version": "MOLIT_20200617",
+      "rule_id": null,
+      "authored_by": "ai_draft",
+      "note": "해제 보도자료 확보·confirm() 후 답변형으로 갱신",
+      "as_of": "2021-01-01"
+    }
+  ]
+}

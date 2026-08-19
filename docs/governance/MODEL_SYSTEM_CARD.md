@@ -1,6 +1,6 @@
 # Model & System Card — RegImpact AI
 
-> 생성: `python examples/build_governance_docs.py` · 생성 시각 2026-08-19 01:44 UTC
+> 생성: `python examples/build_governance_docs.py` · 생성 시각 2026-08-19 12:18 UTC
 > 정량 수치는 파이프라인 실측(`docs/eval/runs/run_perdoc_sonnet5.json`, provider `replay`)에서 온다.
 
 ---
@@ -49,7 +49,7 @@
 - **입력:** 공개 보도자료·FAQ 3건 (sha256 고정). 실제 회사 문서·고객 데이터 없음
 - **지역 레지스트리:** 42곳, 시점 버전 데이터. 값 출처는 공문 현황표
 - **포트폴리오:** 층화 합성 2,000건 (seed `0`) — **커버리지 측정 전용**
-- **평가셋:** DEV 40문항 · LOCKED 40문항 · CHALLENGE 35문항 (LOCKED/CHALLENGE 봉인)
+- **평가셋:** DEV 40문항 · LOCKED 40문항 · CHALLENGE 35문항 · TEMPORAL 12문항 (LOCKED/CHALLENGE 봉인)
 
 ## A.6 정량 평가 결과
 

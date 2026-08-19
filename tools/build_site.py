@@ -40,6 +40,7 @@ from regimpact.graph import build_graph                          # noqa: E402
 from regimpact.report import collect                             # noqa: E402
 from regimpact.retrieval import BM25Index, chunk_sources, citation_recall  # noqa: E402
 from regimpact.report.validation_report import render as render_report  # noqa: E402
+from regimpact.ui.demo import render as render_demo              # noqa: E402
 from regimpact.ui.docrender import markdown_to_html              # noqa: E402
 from regimpact.ui.graphview import render as render_graph        # noqa: E402
 from regimpact.ui.intake import render as render_intake          # noqa: E402
@@ -139,6 +140,10 @@ def main() -> int:
     # 3. 플레이그라운드 (픽스처는 위에서 이미 썼다)
     (out / "playground.html").write_text(
         render_playground(ev, fixtures), encoding="utf-8")
+
+    # 3a. 시연 모드 — 녹화·라이브 시연용 풀스크린 무대. 같은 evidence·같은 엔진 포팅본을
+    #     쓰므로 시연 수치가 본편과 갈라질 수 없다.
+    (out / "demo.html").write_text(render_demo(ev, fixtures), encoding="utf-8")
 
     # 3b. 규제 문서 등록 — 스냅샷 해시·정책 타임라인은 저장소 실데이터에서 계산
     (out / "sources.html").write_text(

@@ -17,9 +17,11 @@ sys.path.insert(0, str(REPO / "src"))
 from regimpact.eval.goldset import save_split  # noqa: E402
 from regimpact.eval.schema import Category as C  # noqa: E402
 from regimpact.eval.schema import Citation, GoldItem, Split  # noqa: E402
-from regimpact.extractor.sources import load_sources  # noqa: E402
+from regimpact.extractor.sources import load_corpus  # noqa: E402
 
-SOURCES = load_sources()
+# 인용 대조는 코퍼스 전체(6·30 스냅샷 + 과거 정책 원문)에서 한다 — 시점 질의 골드가
+# 과거 정책 문서를 인용하기 때문. 6·30 문항의 doc_id 조회는 코퍼스가 상위집합이라 불변.
+SOURCES = load_corpus()
 _NORM = {k: re.sub(r"\s+", " ", v).strip() for k, v in SOURCES.items()}
 
 FSC, MOLIT, FAQ = "FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"

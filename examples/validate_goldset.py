@@ -20,13 +20,15 @@ from regimpact.eval import (  # noqa: E402
     validate_items,
 )
 from regimpact.eval.goldset import SEALED  # noqa: E402
-from regimpact.extractor.sources import load_sources  # noqa: E402
+from regimpact.eval.temporal import check_temporal_gold  # noqa: E402
+from regimpact.extractor.sources import load_corpus  # noqa: E402
 
 REASON = "무결성 검사 전용 실행 — 정답을 출력하지 않고 인용·필드만 대조 (튜닝 아님)"
 
 
 def main() -> None:
-    sources = load_sources()
+    # 코퍼스 전체를 쓴다 — TEMPORAL 셋이 과거 정책 원문(2020·2025)을 인용한다.
+    sources = load_corpus()
     print(f"원문 {len(sources)}건 로드: {', '.join(sources)}\n")
 
     total, all_ok = 0, True
@@ -52,7 +54,7 @@ def main() -> None:
     print(f"총 {total}문항 — {'✅ 전체 무결성 통과' if all_ok else '❌ 오류 있음'}")
 
     # 무결성(인용이 원문에 있는가)과 별개로, 확정 명세와 어긋나지 않는지도 본다.
-    every = load_split(Split.DEV) + [
+    every = load_split(Split.DEV) + load_split(Split.TEMPORAL) + [
         i for sp in SEALED for i in load_split(sp, unseal_reason=REASON)
     ]
     conf = check_gold_against_spec(every)
@@ -61,6 +63,12 @@ def main() -> None:
         print("  ❌", c)
     if conf.conflicts:
         print("  → 검수표: docs/eval/GOLD_V2_REVIEW.md §1")
+
+    # 시점 질의 골드는 Temporal Policy Resolver와도 정합해야 한다 (eval/temporal.py)
+    trep = check_temporal_gold(load_split(Split.TEMPORAL))
+    print(f"\n{trep.summary()}")
+    for c in trep.conflicts:
+        print("  ❌", c)
 
     # 추출 골드의 확정 상태 — 확정 이후 내용이 바뀌었으면 재검수가 필요하다
     import json as _json

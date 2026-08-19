@@ -39,6 +39,7 @@ from .schema import (
     Split,
     ValidationReport,
 )
+from .temporal import TemporalReport, check_temporal_gold, policy_version_consistency
 from .validate import KNOWN_RULE_IDS, validate_items
 
 __all__ = [
@@ -48,6 +49,7 @@ __all__ = [
     "GoldItem", "Citation", "Category", "Split", "ValidationReport",
     "HIGH_RISK_CATEGORIES", "validate_items", "KNOWN_RULE_IDS",
     "check_gold_against_spec", "ConsistencyReport",
+    "check_temporal_gold", "policy_version_consistency", "TemporalReport",
     "check_confirmation", "compute_digest", "ConfirmationStatus",
     "answer_questions", "score_qa", "format_qa_report", "build_qa_prompt",
     "QAReport", "QAResponse", "QA_SYSTEM_PROMPT", "QA_JSON_SCHEMA",

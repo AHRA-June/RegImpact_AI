@@ -4,10 +4,10 @@
 |---|---|
 | 대상 시스템 | RegImpact AI — 주택담보대출 규제 변경 영향분석·검증 시스템 |
 | 검증 시나리오 | FSC_20260630 — 규제지역 추가 지정 (시행 2026-07-01) |
-| 생성 시각 | 2026-08-19 01:44 UTC |
+| 생성 시각 | 2026-08-19 12:18 UTC |
 | 생성 방법 | `python examples/build_validation_report.py` — 파이프라인 실행 결과에서 자동 조립 |
 | LLM provider | `replay` (재생 원본 `docs/eval/runs/run_perdoc_sonnet5.json`) |
-| 감사로그 head | `540d94034d0044c474bc51dd31a84c0f67914f00c74a1a428356a885d5a43c5d` |
+| 감사로그 head | `cb41e182346af13a3a61a86713587100db11e0f05acdbe23dae68c459b05b1ef` |
 
 > 이 보고서의 **모든 수치는 파이프라인을 실제로 실행해 얻은 값**이다. 손으로 적은 숫자는 없다.
 > 시스템이 바뀌면 보고서도 바뀐다. 재현 방법은 §13.
@@ -87,21 +87,54 @@ LLM 의 신규 추론 능력(재생 실행 사용, §13).
 마지막 행이 핵심이다. 정상 데이터에서 100%가 나오는 것만으로는 하니스가 오류에 반응하는지
 알 수 없다. **항상 100%인 검증 시스템은 그 자체가 red flag다.**
 
+### 3.1 Assurance 스코어카드 — 임계 대조 판정
+
+지표를 나열하는 것과 통과 여부를 **판정하는 것**은 다르다. 판정이 없으면 숫자를 본 사람이
+각자 기준으로 해석하게 된다.
+
+**임계는 "우리가 받은 점수"가 아니라 "이 실패가 얼마나 위험한가"에서 정한다.** 실측치는
+그 임계가 달성 가능함을 보이는 증거일 뿐 임계의 근거가 아니다 — 달성치를 그대로 임계로
+삼으면 곡선에 맞춰 채점하는 것이 된다. 각 임계는 근거 없이 등록할 수 없다(코드가 거부한다).
+
+종합 **✅** — 10/12 통과 · 미달 0 · 미측정 2
+
+| 지표 | 임계 | 실측 | 판정 | 고위험 |
+|---|---|---|---|---|
+| **① Hallucination · Grounding** | | | **✅** | |
+| &nbsp;&nbsp;Citation Correctness | ≥ 98% | 100% | ✅ |  |
+| &nbsp;&nbsp;Unsupported Claim Rate | ≤ 2% | 0% | ✅ |  |
+| **② RegChange 추출 완전성** | | | **✅** | |
+| &nbsp;&nbsp;Change Completeness | ≥ 95% | 100% | ✅ |  |
+| &nbsp;&nbsp;Exception Recall | ≥ 100% | 100% | ✅ | ★ |
+| &nbsp;&nbsp;Effective-date Accuracy | ≥ 100% | 100% | ✅ | ★ |
+| &nbsp;&nbsp;Region Accuracy | ≥ 100% | 100% | ✅ | ★ |
+| **③ 시점·정책 버전 일관성** | | | **✅** | |
+| &nbsp;&nbsp;Policy Baseline Consistency | ≥ 100% | 100% | ✅ | ★ |
+| &nbsp;&nbsp;Policy-version Consistency | — | — | ⚪ 미측정 |  |
+| **④ Rule · Test 회귀** | | | **✅** | |
+| &nbsp;&nbsp;Rule-regression Pass Rate | ≥ 100% | 100% | ✅ | ★ |
+| &nbsp;&nbsp;Boundary-case Pass Rate | ≥ 100% | 100% | ✅ | ★ |
+| &nbsp;&nbsp;Conflict-case Pass Rate | ≥ 100% | 100% | ✅ | ★ |
+| &nbsp;&nbsp;JS Port Agreement | ≥ 100% | — | ⚪ 미측정 | ★ |
+
+**미측정은 통과가 아니다.** 측정할 수 없는 지표에는 임계를 먼저 적지 않고, 판정에서도
+통과로 세지 않는다 — 모르는 것을 통과로 처리하는 것이 R-01 의 실패 양상이었다.
+
 ## 4. 대상 시스템 개요
 
 파이프라인은 다음 순서로 관통하며, 각 단계가 감사로그에 이벤트를 남긴다.
 
 | # | 단계 | 대상 | 해시 |
 |---|---|---|---|
-| 0 | SOURCE_INGESTED | FSC_PRESS_20260630 | `02bc71615e97…` |
-| 1 | SOURCE_INGESTED | MOLIT_PRESS_20260630 | `9762b4f44e91…` |
-| 2 | SOURCE_INGESTED | FAQ_20260630 | `31e7445deb8f…` |
-| 3 | EXTRACTION | FSC_20260630 | `c41a08dffd24…` |
-| 4 | POLICY_RESOLVED | policy_registry | `046dad194464…` |
-| 5 | IMPACT_ANALYZED | FSC_20260630 | `ae6ebc08fcd3…` |
-| 6 | REGRESSION_RUN | tc_generator | `dbc5f5b1c671…` |
-| 7 | PROPOSAL_CREATED | MORTGAGE_LTV_REGULATED_REGION | `d1541238e432…` |
-| 8 | ASSURANCE_SCORED | FSC_20260630 | `540d94034d00…` |
+| 0 | SOURCE_INGESTED | FSC_PRESS_20260630 | `c33548e3326c…` |
+| 1 | SOURCE_INGESTED | MOLIT_PRESS_20260630 | `56ab37c7b092…` |
+| 2 | SOURCE_INGESTED | FAQ_20260630 | `daaabd95a8ce…` |
+| 3 | EXTRACTION | FSC_20260630 | `9b181b2f9198…` |
+| 4 | POLICY_RESOLVED | policy_registry | `9e0664af5394…` |
+| 5 | IMPACT_ANALYZED | FSC_20260630 | `7d764826333d…` |
+| 6 | REGRESSION_RUN | tc_generator | `786226d43c6b…` |
+| 7 | PROPOSAL_CREATED | MORTGAGE_LTV_REGULATED_REGION | `3265e39b662f…` |
+| 8 | ASSURANCE_SCORED | FSC_20260630 | `cb41e182346a…` |
 
 각 이벤트의 해시는 직전 해시를 포함한다(해시 체인). 사후 변조 시 체인이 깨진다(§13).
 
@@ -123,6 +156,10 @@ LLM 의 신규 추론 능력(재생 실행 사용, §13).
 | FSC_PRESS_20260630 | 규제지역 추가 지정 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료) | 금융위원회 | 2026-06-30 | `original/fsc_press_20260630.pdf` | `403fb8fb…e8f39d23` | 2026-08-10 |
 | MOLIT_PRESS_20260630 | 투기과열지구 및 조정대상지역 추가 지정 (보도참고자료) | 국토교통부 | 2026-06-30 | `original/molit_press_20260630.pdf` | `6115271b…66c11edd` | 2026-08-10 |
 | FAQ_20260630 | 규제지역 추가 지정 관련 FAQ | 관계기관 합동 | 2026-06-30 | `original/faq_20260630.hwp` | `ef3dad7b…14ea7c9a` | 2026-08-10 |
+| FSC_PRESS_20251015 | 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료) | 금융위원회 | 2025-10-15 | `original/fsc_press_20251015.pdf` | `4a7d1f8c…4bc51374` | 2026-08-19 |
+| FAQ_20251015 | 대출수요 관리 방안 FAQ | 관계기관 합동 | 2025-10-15 | `original/faq_20251015.pdf` | `26a826fc…e6f24613` | 2026-08-19 |
+| MOLIT_PRESS_20200617 | 주택시장 안정을 위한 관리방안 (6·17 대책 보도자료) | 관계부처 합동 | 2020-06-17 | `original/molit_press_20200617.pdf` | `67070527…4b99b04f` | 2026-08-19 |
+| QNA_20200617 | 주택시장 안정을 위한 관리방안 외부용 Q&A | 관계부처 합동 | 2020-06-17 | `original/qna_20200617.pdf` | `0eaa30c2…2c82a356` | 2026-08-19 |
 
 ### 5.2 지역 레지스트리
 
@@ -164,6 +201,7 @@ LLM 의 신규 추론 능력(재생 실행 사용, §13).
 |---|---|---|---|
 | 2016-11-03 | 지난 정책 | MOLIT_20161103 | — |
 | 2017-08-03 | 지난 정책 | MOLIT_20170803 | MOLIT_20161103 |
+| 2020-06-19 | 초안(미확정) | MOLIT_20200617 | MOLIT_20170803 |
 | 2025-10-16 | 지난 정책 | MOLIT_20251016 | MOLIT_20170803 |
 | 2026-07-01 | 현재 유효 | FSC_20260630 | MOLIT_20251016 |
 
@@ -280,6 +318,11 @@ LLM 이 스스로 판단하지 않는다.
 | Exception Recall | 100% | 50% | ✅ |
 | Effective-date Correct | 100% | 0% | ✅ |
 | Regions Correct | 100% | 0% | ✅ |
+
+위 표는 **주입한** 오류에 대한 반응이다. 다른 provider 로 돌린 초기 실측에서는 실제 모델이
+만든 요약·근사 인용을 grounding 이 잡아낸 기록이 있다 — 검사 장치가 실제 환각에도
+반응한다는 증거다(`docs/eval/VALIDATION_LIMITS.md` §3.2, `docs/eval/runs/gemini_first_run.md`).
+파이프라인 세대가 달라 성능 비교로는 읽을 수 없다.
 
 **간극의 크기에 주목해야 한다.** 추출 75건 중 인용 1건을 환각으로 바꿔도
 Citation Correctness 는 소폭만 움직인다 — 집계 비율은 단건 오류에 둔감하다.
@@ -421,9 +464,10 @@ LLM 은 룰엔진을 직접 고치지 않는다. 추출 → **구조화 변경�
 
 | split | 규모 | 고위험 비중 | 작성 |
 |---|---|---|---|
-| DEV | 40문항 | 고위험 52.5% | ai_draft |
+| DEV | 40문항 | 고위험 52.5% | ai_draft, human_confirmed |
 | LOCKED | 40문항 | 고위험 52.5% | ai_draft, human_confirmed |
 | CHALLENGE | 35문항 | 고위험 82.9% | ai_draft, human_confirmed |
+| TEMPORAL | 12문항 | 고위험 58.3% | ai_draft |
 
 LOCKED / CHALLENGE 는 20자 이상의 사유 없이는 **로드 자체가 거부**되며, 접근은 append-only
 로그에 남는다. 봉인은 문서가 아니라 코드로 강제된다.
@@ -474,7 +518,7 @@ LLM 호출 없이 전 과정이 재현된다 — provider `replay` 가 실제 �
 이번 실행의 감사로그: **9건**, 체인 무결성 **✅**.
 
 ```
-head = 540d94034d0044c474bc51dd31a84c0f67914f00c74a1a428356a885d5a43c5d
+head = cb41e182346af13a3a61a86713587100db11e0f05acdbe23dae68c459b05b1ef
 ```
 
 각 이벤트 해시가 직전 해시를 포함하므로 항목 수정·순서 변경·중간 삭제는 즉시 드러난다.

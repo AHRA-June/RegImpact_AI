@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 
+from ..policy.registry import load_registry
 from ..rule_engine import (
     LTV_BASELINE,  # noqa: F401 - 존재 확인용 import (모듈 로드 보증)
 )
@@ -18,7 +19,11 @@ from .schema import Category, GoldItem, Split, ValidationReport
 KNOWN_RULE_IDS = frozenset({
     "REG_STD", "REG_FIRSTHOME", "REG_REALDEMAND", "REG_OWNER_0", "MULTI_0", "NONREG_STD_70",
 })
-KNOWN_POLICY_VERSIONS = frozenset({"FSC_20260630", "MOLIT_20260630"})
+# 정책 버전은 손으로 목록을 관리하면 정책 DB와 조용히 갈라진다 — DB(docs/policies/*.json)에서
+# 유도하고, 정책 DB에 없는 관례 표기(MOLIT_20260630: 6·30 대책의 MOLIT 발표분)만 명시로 남긴다.
+KNOWN_POLICY_VERSIONS = frozenset({"MOLIT_20260630"}) | {
+    p.policy_id for p in load_registry().policies
+}
 
 
 def _norm(s: str) -> str:
@@ -91,5 +96,7 @@ def validate_items(
             rep.errors.append(f"{tag} 알 수 없는 policy_version: {item.policy_version}")
         if item.authored_by not in ("ai_draft", "human_confirmed"):
             rep.errors.append(f"{tag} authored_by 값 오류: {item.authored_by}")
+        if item.as_of is not None and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", item.as_of):
+            rep.errors.append(f"{tag} as_of 형식 오류(YYYY-MM-DD 필요): {item.as_of!r}")
 
     return rep

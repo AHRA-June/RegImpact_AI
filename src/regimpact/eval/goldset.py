@@ -25,7 +25,12 @@ GOLD_DIR = Path(__file__).resolve().parents[3] / "docs" / "eval" / "gold"
 ACCESS_LOG = GOLD_DIR / "SEAL_ACCESS_LOG.md"
 
 SEALED = frozenset({Split.LOCKED, Split.CHALLENGE})
-_FILES = {Split.DEV: "dev.json", Split.LOCKED: "locked.json", Split.CHALLENGE: "challenge.json"}
+_FILES = {
+    Split.DEV: "dev.json",
+    Split.LOCKED: "locked.json",
+    Split.CHALLENGE: "challenge.json",
+    Split.TEMPORAL: "temporal.json",     # 시점 질의 — DEV처럼 비봉인(튜닝·검수용)
+}
 
 MIN_REASON_CHARS = 20   # "test" 같은 형식적 사유로 봉인이 열리지 않게
 
