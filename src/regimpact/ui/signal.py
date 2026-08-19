@@ -25,6 +25,7 @@ import re
 from datetime import date, timedelta
 from pathlib import Path
 
+from ..extractor.sources import load_corpus
 from ..report.evidence import ValidationEvidence
 from .intake import load_snapshots
 from .theme import CSS, FONTS, esc, explainer
@@ -175,10 +176,45 @@ details.more[open] summary{border-bottom:1px solid var(--outline-variant)}
 .qa .preset button:hover{border-color:var(--primary);color:var(--primary)}
 .qa .hits{margin-top:12px;display:flex;flex-direction:column;gap:9px}
 .hit-c{border:1px solid var(--outline-variant);border-radius:12px;padding:11px 13px;
-  background:var(--surface-container-lowest)}
+  background:var(--surface-container-lowest);width:100%;text-align:left;font-family:inherit;
+  cursor:pointer;display:block;box-sizing:border-box}
+.hit-c:hover{border-color:var(--primary)}
 .hit-c .meta{font-size:10.5px;color:var(--primary);
   font-family:'JetBrains Mono',ui-monospace,monospace;margin-bottom:6px}
-.hit-c .tx{font-size:12.5px;line-height:1.6;color:var(--on-surface);word-break:keep-all}
+.hit-c .tx{font-size:12.5px;line-height:1.6;color:var(--on-surface);word-break:keep-all;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.hit-c .open{display:block;margin-top:7px;font-size:11px;color:var(--primary);font-weight:600}
+/* 쉬운 요약 */
+.easy{border:1px solid var(--primary);border-radius:12px;padding:13px 14px;
+  background:color-mix(in srgb,var(--primary) 5%,var(--surface-container-lowest))}
+.easy-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;
+  padding:3px 9px;border-radius:99px;background:var(--primary);color:#fff;margin-bottom:9px}
+.easy-tx{font-size:13.5px;line-height:1.65;word-break:keep-all}
+.easy .q-cite{margin-top:10px}
+.src-t{font-size:11px;font-weight:700;color:var(--on-surface-variant);margin:12px 0 -2px;
+  letter-spacing:.04em}
+.q-cite.qbtn{cursor:pointer;width:100%;text-align:left;font-family:inherit;display:block;
+  box-sizing:border-box;border-top:none;border-right:none;border-bottom:none}
+.q-cite.qbtn:hover{background:var(--surface-container-high)}
+/* 원문 전체 모달 */
+#modal{position:fixed;inset:0;z-index:20;background:rgba(15,23,42,.45);display:flex;
+  align-items:center;justify-content:center;padding:18px}
+#modal[hidden]{display:none}
+.m-box{background:var(--background);border-radius:16px;max-width:660px;width:100%;
+  max-height:84vh;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 24px 70px rgba(0,0,0,.3)}
+.m-head{display:flex;align-items:center;gap:10px;padding:13px 16px;
+  border-bottom:1px solid var(--outline-variant)}
+.m-head .mt{font-size:13px;font-weight:700;word-break:keep-all}
+.m-head .ms{font-size:10.5px;color:var(--on-surface-variant)}
+.m-head button{margin-left:auto;border:1px solid var(--outline-variant);background:transparent;
+  color:var(--on-surface);border-radius:99px;width:30px;height:30px;cursor:pointer;flex:none}
+.m-body{padding:16px;overflow-y:auto;font-size:13px;line-height:1.75;color:var(--on-surface);
+  word-break:keep-all;white-space:pre-wrap}
+.m-body mark{background:color-mix(in srgb,var(--primary) 22%,transparent);
+  color:var(--on-surface);padding:1px 2px;border-radius:3px}
+.m-note{padding:9px 16px;border-top:1px solid var(--outline-variant);font-size:10.5px;
+  color:var(--on-surface-variant)}
 .consult{border:1px solid var(--outline-variant);border-radius:12px;padding:14px;
   background:var(--surface-container-low);font-size:13px;line-height:1.55;word-break:keep-all}
 .honesty{font-size:11.5px;line-height:1.55;color:var(--on-surface-variant);
@@ -226,6 +262,63 @@ def _rule_quotes(extraction) -> dict:
     return out
 
 
+def _corpus_cut(norm_corpus: dict, doc: str, anchor: str, length: int = 150) -> dict:
+    """코퍼스 원문에서 anchor 로 시작하는 구간을 그대로 잘라 온다(verbatim 보장).
+
+    author_goldset.q 와 같은 규율 — 손으로 옮겨 적으면 반드시 어긋난다."""
+    text = norm_corpus[doc]
+    i = text.find(re.sub(r"\s+", " ", anchor).strip())
+    if i < 0:
+        raise ValueError(f"[{doc}] anchor 없음: {anchor!r}")
+    return {"quote": text[i:i + max(length, len(anchor))].strip(), "doc": doc}
+
+
+def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]:
+    """자주 묻는 질문의 '쉬운 요약' — **미리 작성해 사람이 검수하는 안내문**이다.
+
+    질문을 이해해 답을 '생성'하는 LLM이 아니다(정적 배포에서 그런 척하지 않는다 —
+    LLM 배선은 PoC 목표라고 화면에 적는다). 규칙 값·날짜는 전부 엔진 상수에서 오고,
+    근거 인용은 verbatim 절단이라 원문과 어긋날 수 없다. 문구는 🤖 초안 — ✍️ 검수 대상.
+    """
+    cutoff = constants["GRANDFATHERING_CUTOFF"]
+    p_base = f"{constants['LTV_BASELINE']:.0%}"
+    p_std = f"{constants['LTV_REGULATED_STANDARD']:.0%}"
+    p_first = f"{constants['LTV_FIRST_HOME']:.0%}"
+    molit, faq = "MOLIT_PRESS_20260630", "FAQ_20260630"
+    return [
+        {"id": "gf-timing",
+         "keys": ["잔금", "중도금", "시행일 뒤", "실행일", "시행 후"],
+         "easy": f"핵심은 '언제 계약했나'예요. {cutoff}까지 매매계약을 하고 계약금 낸 사실을 "
+                 f"증명할 수 있으면(또는 대출 신청 접수를 마쳤으면), 잔금이나 대출 실행이 "
+                 f"시행일 뒤여도 예전 기준(LTV {p_base})을 그대로 적용받아요. 해당되지 않으면 "
+                 f"새 기준(LTV {p_std})이 적용됩니다. 위 ③ 경과규정 체크에 날짜를 넣으면 "
+                 "내 경우를 바로 확인할 수 있어요.",
+         "cites": [quotes["_GF"]]},
+        {"id": "first-home",
+         "keys": ["생애최초", "생애 최초", "첫 집", "첫집"],
+         "easy": f"줄지 않아요. 생애최초 구입자는 이번 강화 대상이 아니어서, 규제지역이 "
+                 f"되어도 완화된 비율(LTV {p_first})이 유지됩니다. 다만 정해진 기간 안에 "
+                 "입주(전입)해야 하는 의무 같은 조건이 함께 붙으니 아래 원문을 확인하세요.",
+         "cites": [quotes["REG_FIRSTHOME"],
+                   _corpus_cut(norm_corpus, molit, "생애최초 LTV 70% + 전입의무(6개월 이내)", 90)]},
+        {"id": "gf-downpay",
+         "keys": ["계약금", "종전", "가계약"],
+         "easy": f"네, 가능성이 높아요. {cutoff}까지 계약을 체결하고 계약금 납부 사실을 "
+                 "증명하면 종전 규정이 그대로 적용됩니다. 계약서와 입금 내역 같은 증빙을 "
+                 "준비해 두세요. 위 ③ 경과규정 체크에 날짜를 넣으면 바로 확인돼요.",
+         "cites": [quotes["_GF"]]},
+        {"id": "jeonse",
+         "keys": ["전세", "전세대출"],
+         "easy": "전세대출이 없어지는 건 아니에요. 다만 규제 수위가 높은 지역(투기·투기과열"
+                 "지역)에서 시가 3억 원이 넘는 아파트를 사는 경우에는 전세대출 이용이 제한될 "
+                 "수 있어요. 직장 이동·자녀 교육·부모 봉양 같은 불가피한 사유는 예외로 "
+                 "인정됩니다. 내 경우가 예외인지는 요건이 복잡해서 상담으로 확인하는 게 안전해요.",
+         "cites": [_corpus_cut(norm_corpus, faq,
+                               "3억원 초과 APT를 취득한 자의 전세대출 제한의 예외사유는?", 60),
+                   _corpus_cut(norm_corpus, faq, "불가피한 실수요 등*에 대해서는 적용 예외를 인정", 160)]},
+    ]
+
+
 def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     """고객용 화면. 판정·인용·검색 재료는 전부 검증된 산출물에서 온다."""
     C = fixtures["constants"]
@@ -247,6 +340,12 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     n_cases = len(fixtures["cases"])
     n_probe = sum(len(v) for v in fixtures["region_probe"].values())
     docs_630 = sorted({c.citation.source_doc_id for c in ev.extraction.changes})
+
+    # 쉬운 요약(미리 검수된 안내) + 원문 전체(클릭 시 모달 — 발췌만 주면 일반인은 벽을 만난다)
+    corpus = load_corpus()
+    norm_corpus = {k: re.sub(r"\s+", " ", v).strip() for k, v in corpus.items()}
+    easy = easy_answers(quotes, fixtures["constants"], norm_corpus)
+    docs_full = {d: norm_corpus[d] for d in docs_630}
 
     region_opts = "".join(
         f'<option value="{esc(code)}"{" selected" if code == "GURI" else ""}>'
@@ -387,9 +486,11 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <input type="text" id="q" placeholder="예) 잔금일이 시행일 뒤인데 저는 어떻게 되나요">
       <div class="preset">{preset_btns}</div>
       <div class="hits" id="hits"></div>
-      <div class="honesty" style="margin-top:11px">지금은 질문과 관련된 <b>공문 원문 문단</b>을
-      찾아 그대로 보여줍니다(검색 품질은 정답셋 기준 실측). 문장으로 답을 만들어 주는
-      LLM 연결은 PoC 기간 배선 목표이며, 그때도 근거 없는 답은 만들지 않습니다.</div>
+      <div class="honesty" style="margin-top:11px">쉬운 요약은 자주 묻는 질문에 대해
+      <b>미리 작성해 사람이 검수하는 안내문</b>이에요 — 질문을 이해해 답을 '생성'하는 AI가
+      아닙니다. 자유 질문에 문장으로 답하는 LLM 연결(모든 문장에 인용 부착)은 PoC 기간
+      배선 목표이며, 그때도 근거를 못 찾으면 지어내지 않고 전문 상담을 안내합니다.
+      원문 발췌를 누르면 공문 전체를 볼 수 있어요.</div>
     </div>
 
     <div class="foot">
@@ -402,12 +503,25 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     </div>
     <div class="mnote">데스크톱에서 열면 제안 요약(팀 엣지케이스)이 함께 보입니다</div>
   </div>
+</div>
+
+<div id="modal" hidden>
+  <div class="m-box">
+    <div class="m-head"><div><div class="mt" id="m-title"></div>
+      <div class="ms" id="m-sub"></div></div>
+      <button id="m-close" aria-label="닫기">✕</button></div>
+    <div class="m-body" id="m-body"></div>
+    <div class="m-note">공문 원문 전체(텍스트 추출본) — 표·서식은 추출 특성상 일부 흐트러질 수
+    있으며, 해시로 봉인된 원본 PDF/HWP 기준입니다.</div>
+  </div>
 </div>"""
 
     script_tpl = """
 <script type="module">
 const FX = __FX__;
 const DEMO = __DEMO__;
+const EASY = __EASY__;
+const DOCS_FULL = __DOCS_FULL__;
 const IDX_EXPORT = __IDX__;
 const QUOTES = __QUOTES__;
 const DOCL = __DOCL__;
@@ -468,12 +582,46 @@ function card(el, when, d, price) {
   }
 }
 
+// ── 원문 전체 모달 — 발췌만 주면 일반인은 벽을 만난다. 누르면 공문 전체 + 해당 문장 강조.
+const TGT = [];
+const tgt = (doc, find) => (TGT.push({ doc, find }) - 1);
+const clean = (t) => t.replace(/-{2,}\\s*p\\d+\\s*-{2,}/g, " ").replace(/\\s+/g, " ").trim();
+const escT = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+function openDoc(doc, find) {
+  const d = DOCL[doc] ?? {};
+  const full = clean(DOCS_FULL[doc] ?? "");
+  const target = clean(find);
+  const i = target ? full.indexOf(target.slice(0, 70)) : -1;
+  $("#m-title").textContent = d.title ?? doc;
+  $("#m-sub").textContent = `${d.issuer ?? ""} · ${d.published ?? ""}`;
+  $("#m-body").innerHTML = i < 0 ? escT(full)
+    : escT(full.slice(0, i)) + '<mark id="m-mark">'
+      + escT(full.slice(i, i + target.length)) + "</mark>"
+      + escT(full.slice(i + target.length));
+  $("#modal").hidden = false;
+  const mk = document.getElementById("m-mark");
+  if (mk) mk.scrollIntoView({ block: "center" });
+  else $("#m-body").scrollTop = 0;
+}
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-t]");
+  if (el && TGT[Number(el.dataset.t)] !== undefined) {
+    const t = TGT[Number(el.dataset.t)];
+    openDoc(t.doc, t.find);
+  }
+});
+$("#m-close").addEventListener("click", () => { $("#modal").hidden = true; });
+$("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") $("#modal").hidden = true; });
+
+const qciteHtml = (q) => {
+  const d = DOCL[q.doc] ?? {};
+  return `<button type="button" class="q-cite qbtn" data-t="${tgt(q.doc, q.quote)}">“${q.quote}”`
+    + `<span class="src">${d.issuer ?? ""} · ${d.title ?? q.doc} · ${d.published ?? ""}`
+    + ` — 원문 전체 보기 →</span></button>`;
+};
 function cite(box, keys, fallback) {
-  box.innerHTML = keys.filter((k) => QUOTES[k]).map((k) => {
-    const q = QUOTES[k], d = DOCL[q.doc] ?? {};
-    return `<div class="q-cite">“${q.quote}”`
-      + `<span class="src">${d.issuer ?? ""} · ${d.title ?? q.doc} · ${d.published ?? ""}</span></div>`;
-  }).join("") || `<div class="q-cite">${fallback}</div>`;
+  box.innerHTML = keys.filter((k) => QUOTES[k]).map((k) => qciteHtml(QUOTES[k])).join("")
+    || `<div class="q-cite">${fallback}</div>`;
 }
 
 function run() {
@@ -572,24 +720,47 @@ $("#gf-no").addEventListener("click", () => {
 $("#cond").addEventListener("input", run);
 run();
 
-// ---- ④ 근거 우선 Q&A — BM25 포팅본 (원본과 전 프로브 대조 후 배포) ----
+// ---- ④ 근거 우선 Q&A — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
+//      요약은 질문 의도 매칭으로 고르는 사전 작성 안내문이지, 답을 생성하는 LLM이 아니다.
 const INDEX = buildIndex(IDX_EXPORT);
-const clean = (t) => t.replace(/-{2,}\\s*p\\d+\\s*-{2,}/g, " ").replace(/\\s+/g, " ").trim();
+function matchEasy(q) {
+  let best = null, bestN = 0;
+  for (const e of EASY) {
+    const n = e.keys.filter((k) => q.includes(k)).length;
+    if (n > bestN) { best = e; bestN = n; }
+  }
+  return best;
+}
 function ask(q) {
   if (!q.trim()) return;
   $("#q").value = q;
+  const easy = matchEasy(q);
   const hits = search(INDEX, q, 3, { expand: true, docIds: DOCS_NOW });
   const box = $("#hits");
-  if (!hits.length) {
-    box.innerHTML = `<div class="consult"><b>이 질문의 근거를 공문에서 찾지 못했어요.</b>
-      지어내서 답하지 않아요 — 전문 상담(대출 상담 창구·콜센터)을 안내해 드릴게요.</div>`;
-    return;
+  let html = "";
+  if (easy) {
+    html += `<div class="easy"><span class="easy-tag">쉬운 요약 · 미리 검수된 안내</span>`
+      + `<div class="easy-tx">${easy.easy}</div>`
+      + easy.cites.map(qciteHtml).join("") + `</div>`;
   }
-  box.innerHTML = hits.map((h) => {
-    const d = DOCL[h.chunk.doc_id] ?? {};
-    return `<div class="hit-c"><div class="meta">${d.issuer ?? ""} · ${d.title ?? h.chunk.doc_id}</div>`
-      + `<div class="tx">${clean(h.chunk.text)}</div></div>`;
-  }).join("");
+  if (hits.length) {
+    html += `<div class="src-t">근거 원문 발췌 — 누르면 공문 전체가 열려요</div>`
+      + hits.map((h) => {
+          const d = DOCL[h.chunk.doc_id] ?? {};
+          return `<button type="button" class="hit-c" data-t="${tgt(h.chunk.doc_id, h.chunk.text)}">`
+            + `<div class="meta">${d.issuer ?? ""} · ${d.title ?? h.chunk.doc_id}</div>`
+            + `<div class="tx">${clean(h.chunk.text)}</div>`
+            + `<span class="open">원문 전체에서 보기 →</span></button>`;
+        }).join("");
+  }
+  if (!easy && !hits.length) {
+    html = `<div class="consult"><b>이 질문의 근거를 공문에서 찾지 못했어요.</b>
+      지어내서 답하지 않아요 — 전문 상담(대출 상담 창구·콜센터)을 안내해 드릴게요.</div>`;
+  } else if (!easy) {
+    html = `<div class="consult">이 질문의 <b>쉬운 요약은 아직 준비되지 않았어요.</b>
+      아래 원문 발췌를 참고하시고, 판단이 어려우면 전문 상담으로 확인하세요.</div>` + html;
+  }
+  box.innerHTML = html;
 }
 $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); ask($("#q").value); } });
 document.querySelectorAll(".qa .preset button").forEach((b) =>
@@ -606,6 +777,8 @@ document.querySelectorAll(".qa .preset button").forEach((b) =>
         script_tpl
         .replace("__FX__", json.dumps(fixtures, ensure_ascii=False, separators=(",", ":")))
         .replace("__DEMO__", json.dumps(demo, ensure_ascii=False))
+        .replace("__EASY__", json.dumps(easy, ensure_ascii=False))
+        .replace("__DOCS_FULL__", json.dumps(docs_full, ensure_ascii=False))
         .replace("__IDX__", json.dumps(search_export, ensure_ascii=False, separators=(",", ":")))
         .replace("__QUOTES__", json.dumps(quotes, ensure_ascii=False))
         .replace("__DOCL__", json.dumps(doc_labels, ensure_ascii=False))
