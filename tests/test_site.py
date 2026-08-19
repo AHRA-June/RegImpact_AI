@@ -192,3 +192,16 @@ def test_readme_site_links_match_built_pages(site):
     assert linked, "README 에 사이트 링크가 없다"
     missing = linked - set(site) - {"_dir"}
     assert not missing, f"README 가 가리키는 페이지가 빌드되지 않는다: {missing}"
+
+
+def test_playground_shows_verdict_before_form_on_mobile(site):
+    """모바일에서 결과가 폼 아래면 입력을 바꿔도 화면 밖이라 안 보인다.
+
+    실제 모바일 뷰포트로 확인하다 발견했다 — 세로 배치에서 순서를 안 바꾸면
+    "즉시 바뀐다"는 것 자체가 전달되지 않는다.
+    """
+    html = site["playground.html"]
+    assert 'class="result"' in html, "결과 영역에 순서 제어용 클래스가 없다"
+    assert ".cols > .result{order:-1}" in html, "모바일에서 결과를 위로 올리는 규칙이 없다"
+    assert "min-width:940px" in html and ".cols > .result{order:0}" in html, \
+        "데스크톱에서 원래 좌우 배치로 되돌리는 규칙이 없다"
