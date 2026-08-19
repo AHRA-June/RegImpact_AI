@@ -1,0 +1,137 @@
+<title>2020 6·17 지역 이관 검수표</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground:#fcf8ff; --panel:#ffffff; --panel-2:#f5f2ff; --line:#c4c6cf;
+  --ink:#1a1a2e; --ink-2:#43474e; --navy:#022448; --action:#0051d5;
+  --alarm:#ba1a1a; --alarm-bg:#ffdad6; --alarm-ink:#93000a;
+  --pend:#edbf7f; --pend-bg:#fff4e2; --pend-ink:#60410c;
+  --ok:#0051d5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#12121c; --panel:#1b1b28; --panel-2:#222232; --line:#3a3a4d;
+    --ink:#eceaf6; --ink-2:#a9adbe; --navy:#adc8f5; --action:#8fb2ff;
+    --alarm:#ff8a80; --alarm-bg:#3d1512; --alarm-ink:#ffb4ab;
+    --pend:#edbf7f; --pend-bg:#3a2c14; --pend-ink:#f0d3a3;
+    --ok:#8fb2ff;
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#12121c; --panel:#1b1b28; --panel-2:#222232; --line:#3a3a4d;
+  --ink:#eceaf6; --ink-2:#a9adbe; --navy:#adc8f5; --action:#8fb2ff;
+  --alarm:#ff8a80; --alarm-bg:#3d1512; --alarm-ink:#ffb4ab;
+  --pend:#edbf7f; --pend-bg:#3a2c14; --pend-ink:#f0d3a3;
+  --ok:#8fb2ff;
+}
+*,*::before,*::after { box-sizing:border-box; }
+body {
+  background:var(--ground); color:var(--ink); margin:0;
+  font-family:'Noto Sans KR',system-ui,sans-serif; line-height:1.7;
+  padding:clamp(20px,4vw,56px) clamp(16px,5vw,40px);
+}
+.wrap { max-width:920px; margin:0 auto; display:flex; flex-direction:column; gap:40px; }
+h1,h2,h3 { font-family:'Noto Serif KR',Georgia,serif; text-wrap:balance; margin:0; }
+h1 { font-size:clamp(28px,4.5vw,40px); letter-spacing:-.02em; color:var(--navy); }
+h2 { font-size:22px; letter-spacing:-.01em; padding-bottom:10px; border-bottom:2px solid var(--navy); }
+p { margin:0; }
+.lede { color:var(--ink-2); max-width:62ch; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; }
+.meta span { background:var(--panel-2); border:1px solid var(--line); padding:3px 9px; border-radius:3px; color:var(--ink-2); }
+section { display:flex; flex-direction:column; gap:18px; }
+
+.conflict { background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--alarm);
+  border-radius:4px; padding:22px; display:flex; flex-direction:column; gap:16px; }
+.conflict header { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.id { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--alarm-ink);
+  background:var(--alarm-bg); padding:3px 9px; border-radius:3px; }
+.tag { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);
+  border:1px solid var(--line); padding:2px 8px; border-radius:99px; }
+.tag.seal::before { content:"🔒 "; }
+.ask { font-family:'Noto Serif KR',serif; font-size:17px; font-weight:500; }
+.face-off { display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:stretch; }
+@media (max-width:640px) { .face-off { grid-template-columns:1fr; } .versus { justify-self:start; } }
+.side { padding:14px; border-radius:4px; background:var(--panel-2); border:1px solid var(--line); }
+.side.gold { border-color:var(--pend); background:var(--pend-bg); }
+.side.spec { border-color:var(--action); }
+.side-label { display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-2); margin-bottom:6px; }
+.side.gold .side-label { color:var(--pend-ink); }
+.side.spec .side-label { color:var(--action); }
+.side p { font-size:14px; }
+.versus { align-self:center; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-2); }
+.verdict { border:1px dashed var(--line); border-radius:4px; padding:12px 14px; margin:0;
+  display:flex; flex-wrap:wrap; gap:14px; }
+.verdict legend { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); padding:0 6px; }
+.verdict label { display:flex; align-items:center; gap:7px; font-size:14px; cursor:pointer; }
+
+.conflict.resolved { border-left-color:var(--ok); }
+.id.ok { color:var(--panel); background:var(--ok); }
+.tag.done { border-color:var(--ok); color:var(--ok); }
+.why { font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--ok); padding-left:12px; }
+.q { margin:0; border-left:3px solid var(--line); padding-left:12px; }
+.q figcaption { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); margin-bottom:3px; }
+.q blockquote { margin:0; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.65;
+  color:var(--ink-2); word-break:keep-all; }
+
+.note { background:var(--panel-2); border:1px solid var(--line); border-radius:4px; padding:18px;
+  display:flex; flex-direction:column; gap:12px; }
+.note pre { margin:0; overflow-x:auto; background:var(--panel); border:1px solid var(--line);
+  border-radius:3px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-2); }
+
+ol.items { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.item { display:flex; gap:14px; padding:14px 12px; border-bottom:1px solid var(--line); }
+.item:has(.cb:checked) { background:var(--panel-2); }
+.item.confirmed { border-left:3px solid var(--ok); }
+.item:has(.cb:checked) .claim { color:var(--ink-2); text-decoration:line-through; }
+.check { flex-shrink:0; padding-top:3px; cursor:pointer; }
+.check input { position:absolute; opacity:0; width:0; height:0; }
+.check span { display:block; width:20px; height:20px; border:2px solid var(--line); border-radius:3px; }
+.check input:checked + span { background:var(--ok); border-color:var(--ok); }
+.check input:checked + span::after { content:"✓"; display:block; color:var(--panel); font-size:14px;
+  line-height:16px; text-align:center; }
+.check input:focus-visible + span { outline:2px solid var(--action); outline-offset:2px; }
+.body { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.head { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+.head code { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--navy);
+  background:var(--panel-2); padding:2px 7px; border-radius:3px; }
+.claim { font-weight:500; }
+.kw { display:flex; flex-wrap:wrap; gap:5px; }
+kbd { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-2);
+  border:1px solid var(--line); border-radius:3px; padding:1px 6px; }
+.hits { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); }
+
+.progress { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:10;
+  background:var(--navy); color:var(--ground); font-family:'JetBrains Mono',monospace; font-size:13px;
+  padding:9px 18px; border-radius:99px; box-shadow:0 4px 16px rgba(0,0,0,.28); }
+:root[data-theme="dark"] .progress, :root:not([data-theme="light"]) .progress { color:#12121c; }
+footer { color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); padding-top:16px; }
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
+
+.st{font-size:11px;font-weight:600;border-radius:99px;padding:2px 9px}
+.st-ok{background:var(--secondary);color:#fff}
+.st-new{background:var(--pend-bg);color:var(--pend-ink);border:1px solid var(--pend)}
+.st-part{background:var(--alarm-bg);color:var(--alarm-ink)}
+.why2{font-size:12.5px;line-height:19px;color:var(--on-surface-variant)}
+.verdict{flex-direction:column;align-items:flex-start}
+</style>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <h1>2020 6·17 대책 지역 이관 검수표</h1>
+    <p class="lede">신규 투기과열지구 <strong>17곳</strong>의 레지스트리 매핑 초안(🤖).
+    조정대상지역은 원문이 "全 지역-제외" 방식이라 <strong>열거를 지어내지 않고</strong> 원문 그대로 싣는다.
+    시행일 2020-06-19. 확정 전 원본 PDF p12·p14 눈 대조 권장(표 평탄화 전례).</p>
+    <div class="meta"><span>기존 코드 5</span><span>신규 코드 제안 9</span>
+    <span>부분·경계 결정 3</span><span>대상: MOLIT_20200617 (DRAFT)</span></div>
+  </header>
+  <section><h2>0. 먼저 결정할 구조 질문</h2><article class="conflict"><header><span class="id">Q1</span><span class="ask" style="font-size:15px">조정대상지역(신규)을 어떻게 기록할 것인가</span></header><p class="why">원문은 시군구 열거가 아니라 &quot;경기 全 지역(제외 목록)·인천 全 지역(강화·옹진 제외)·대전·청주(부분)&quot; 방식이다. 원문에 없는 시군구 목록을 만들어 delta 로 넣으면 열거를 지어내는 것이 된다.</p><fieldset class="verdict"><legend>선택</legend><label><input type="radio" name="Q1"> (권고) delta 는 명시 열거된 투기과열 17곳만 등록하고, 조정대상 &#x27;全 지역-제외&#x27; 서술은 정책의 범위 노트(rule_note)로 원문 그대로 보존한다</label><label><input type="radio" name="Q1"> 행정구역 목록(외부 자료)으로 시군구를 전개해 delta 등록 — 원문 밖 자료가 필요함을 감수</label><label><input type="radio" name="Q1"> 레지스트리에 이미 있는 지역만 조정대상 delta 로 추가 등록 (부분적 기록)</label></fieldset></article><article class="conflict"><header><span class="id">Q2</span><span class="ask" style="font-size:15px">레지스트리를 어디까지 확장할 것인가</span></header><p class="why">신규 코드 제안 8건(안산단원·군포·인천 3·대전 4). 인천·대전은 코어 엔진(수도권 LTV) 스코프 밖이지만 시점 판정(2020년의 규제 상태)에는 필요하다.</p><fieldset class="verdict"><legend>선택</legend><label><input type="radio" name="Q2"> (권고) 17곳 전부 코드 신설 — 시점 판정 커버리지 확보. 동명 구(중구·서구) 별칭 결함도 함께 수정</label><label><input type="radio" name="Q2"> 수도권만 신설(인천 포함, 대전 제외) — 코어 스코프 유지</label><label><input type="radio" name="Q2"> 기존 코드로 매핑 가능한 6곳만 등록</label></fieldset></article><article class="conflict"><header><span class="id">Q3</span><span class="ask" style="font-size:15px">해제 이력 없이 확정할 수 있는가</span></header><p class="why">이 문서는 &#x27;지정&#x27;만 말한다. 이 지역들 다수는 이후 해제됐다가(원문 미보유) 2025년에 재지정됐다 — 해제일 없이 2020 지정을 확정하면 2021~2024 시점 판정이 &#x27;계속 규제&#x27;로 잘못 나온다.</p><fieldset class="verdict"><legend>선택</legend><label><input type="radio" name="Q3"> (권고) 2020 정책은 DRAFT 유지 + 검수 결과를 초안에 반영해 두고, 해제 보도자료(원문) 확보 후 구간을 닫으면서 함께 확정한다</label><label><input type="radio" name="Q3"> effective_to 미상으로 표시하는 스키마 확장 후 확정</label><label><input type="radio" name="Q3"> 해제 원문 확보 전에는 시점 판정에 쓰지 않는 조건부 확정</label></fieldset></article></section>
+  <section><h2>1. 신규 투기과열지구 17곳 — 매핑 초안</h2>
+    <ol class="items"><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">성남 수정구</span><code>SEONGNAM_SUJEONG</code><span class="st st-ok">기존 코드</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">수원시</span><code>SUWON_JANGAN + SUWON_PALDAL + SUWON_YEONGTONG (+ 권선구 코드 없음)</code><span class="st st-part">부분·경계 결정 필요</span></div><div class="why2">원문은 &#x27;수원&#x27; 시 전체 — 레지스트리는 구 단위 3개뿐(권선구 없음). ① 신규 SUWON_GWONSEON 추가 후 4개 구로 등록 ② 시 단위 코드 신설 중 선택</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">안양시</span><code>ANYANG_DONGAN (+ 만안구 코드 없음)</code><span class="st st-part">부분·경계 결정 필요</span></div><div class="why2">원문은 &#x27;안양&#x27; 시 전체 — 동안구만 등록돼 있음. 신규 ANYANG_MANAN 제안</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">안산 단원구</span><code>ANSAN_DANWON (신규)</code><span class="st st-new">신규 코드 제안</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">구리시</span><code>GURI</code><span class="st st-ok">기존 코드</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">군포시</span><code>GUNPO (신규)</code><span class="st st-new">신규 코드 제안</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">의왕시</span><code>UIWANG</code><span class="st st-ok">기존 코드</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">용인 수지구</span><code>YONGIN_SUJI</code><span class="st st-ok">기존 코드</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">용인 기흥구</span><code>YONGIN_GIHEUNG</code><span class="st st-ok">기존 코드</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">화성 (동탄2만)</span><code>HWASEONG_DONGTAN</code><span class="st st-part">부분·경계 결정 필요</span></div><div class="why2">원문은 &#x27;동탄2 신도시&#x27;만 — 레지스트리 코드는 2026년 행정구 &#x27;동탄구&#x27;. 경계가 같지 않다(동탄1 포함 여부 등). 부분 지정 표현 방식 결정 필요</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">인천 연수구</span><code>INCHEON_YEONSU (신규)</code><span class="st st-new">신규 코드 제안</span></div><div class="why2">레지스트리에 INCHEON(시 단위)만 있음 — 강화·옹진 제외 부분 지정이라 구 단위 코드 필요</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">인천 남동구</span><code>INCHEON_NAMDONG (신규)</code><span class="st st-new">신규 코드 제안</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">인천 서구</span><code>INCHEON_SEO (신규)</code><span class="st st-new">신규 코드 제안</span></div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">대전 동구</span><code>DAEJEON_DONG (신규)</code><span class="st st-new">신규 코드 제안</span></div><div class="why2">대전은 레지스트리에 코드가 전혀 없음</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">대전 중구</span><code>DAEJEON_JUNG (신규)</code><span class="st st-new">신규 코드 제안</span></div><div class="why2">⚠ 결함 발견: 현행 별칭 테이블이 &#x27;대전 중구&#x27;를 SEOUL_JUNG(서울 중구)으로 오매핑 — 별칭이 수도권 전제로 만들어져 광역시 동명 구를 구분 못 한다. 확장 시 함께 수정 필요</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">대전 서구</span><code>DAEJEON_SEO (신규)</code><span class="st st-new">신규 코드 제안</span></div><div class="why2">&#x27;서구&#x27;도 인천 서구와 동명 — 같은 문제</div></div></li><li class="item"><label class="check"><input type="checkbox" class="cb"><span></span></label><div class="body"><div class="head"><span class="claim">대전 유성구</span><code>DAEJEON_YUSEONG (신규)</code><span class="st st-new">신규 코드 제안</span></div></div></li></ol></section>
+  <section><h2>2. 원문 근거 (verbatim 대조 통과)</h2><figure class="q"><figcaption>MOLIT_PRESS_20200617 · table_spec</figcaption><blockquote>(서울) 全 지역 (경기) 과천, 성남분당·수정, 광명, 하남, 수원, 안양, 안산단원, 구리, 군포, 의왕, 용인수지·기흥, 화성(동탄2만 지정) (인천) 연수, 남동, 서구 (지방) 대구 수성, 세종(행복도시 예정지역만 지정), 대전 동·중·서·유성 ----- p13 ----- - 6 - 참고 1 조정대상지역·투기과열지구 지정 현황도 (’20.6.19</blockquote></figure><figure class="q"><figcaption>MOLIT_PRESS_20200617 · body_count</figcaption><blockquote>➋非규제지역중과열이심각한지역중경기10개지역, 인천 3개지역, 대전4개지역을투기과열지구로지정 □(적용시기) 6.19(금) 일자로지정및효력발생 &lt; 조정대상지역및투기과열지구지정&gt; 조정대상지역 투기과열지구 기존 (서울) 全</blockquote></figure><figure class="q"><figcaption>MOLIT_PRESS_20200617 · effective</figcaption><blockquote>(적용시기) 6.19(금) 일자로지정및효력발생 &lt; 조정대상지역및투기과열지구지정&gt; 조정대상지역 투기과열지구 기</blockquote></figure><figure class="q"><figcaption>MOLIT_PRESS_20200617 · adj_all</figcaption><blockquote>(서울) 全 지역 (경기) 全 지역(일부 지역* 제외) * 김포, 파주, 연천, 동두천, 포천, 가평, 양평, 여주, 이천, 용인처인(포곡읍,</blockquote></figure><figure class="q"><figcaption>MOLIT_PRESS_20200617 · adj_exclude</figcaption><blockquote>* 김포, 파주, 연천, 동두천, 포천, 가평, 양평, 여주, 이천, 용인처인(포곡읍, 모현·백암·양지면, 원삼면 가재월·사암·미평·좌항·두창·맹리), 광주(초월·곤지암읍, 도척·퇴촌·남종·남한산성면), 남양주(화도읍·수동면·조안면), 안성(일죽면, 죽산면 죽산·용설·장계·매산·장릉·장원·두현리, 삼죽면 용월·덕산·율곡·내장·배태리) (인천) 全 지역(강화·옹진 제외) (지방) 세종(행복도시 예정지역만 지정), 대전, 청주(동 지역, 오창·오송읍만 지정) (서울) 全 지역 (경기) 과천, 성남분당·수정, 광명, 하남, 수원, 안양, 안산단원, 구리, 군포, 의왕, 용인수지·기흥, 화성</blockquote></figure><figure class="q"><figcaption>MOLIT_PRESS_20200617 · adj_etc</figcaption><blockquote>(인천) 全 지역(강화·옹진 제외) (지방) 세종(행복도시 예정지역만 지정), 대전, 청주(동 지역, 오창·오송읍만 지정) (서울) 全 지역 (경기) 과천, 성남분당·수정, 광명, 하남, 수원, 안양, 안산단원, 구리, 군포, 의왕, 용인수지·기흥,</blockquote></figure><figure class="q"><figcaption>MOLIT_PRESS_20200617 · prior_spec</figcaption><blockquote>(서울) 全 지역 (경기) 과천, 성남분당, 광명, 하남 (지방) 대구 수성, 세종(행복도시 예정지역만 지정) ⤋ 개선 (서울) 全 지역 (경기) 全 지역(일부</blockquote></figure></section>
+  <section><h2>3. 검수 중 발견된 결함</h2>
+    <div class="note"><p><b>별칭 테이블의 동명 구 오매핑</b> — <code>normalize_region_name('대전 중구')</code>가
+    현재 <code>SEOUL_JUNG</code>(서울 중구)을 돌려준다. 별칭이 수도권 전제라 광역시의 동명 구(중구·서구)를
+    구분하지 못한다. 대전·인천 코드 신설 시 별칭을 시·도 한정으로 바꾸지 않으면 같은 오매핑이 재발한다.</p></div></section>
+  <footer style="padding-bottom:52px">검수 후 Q1~Q3 선택과 표 판정을 알려주시면 레지스트리·정책 DB에 반영합니다.
+  체크 상태는 저장되지 않습니다 — 한 번의 검수 세션용입니다.</footer>
+</div>
