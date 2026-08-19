@@ -24,7 +24,7 @@ DEFAULT_SIZE = 2000
 TARGET_REGIONS = ("GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN")
 # 대조군은 6·30 대상이 아닌 실재 지역. Stitch가 환각했던 지역명(세종·부산·강남·분당)은
 # UI grounding 테스트의 금지어이므로 대조군으로 쓰지 않는다.
-CONTROL_REGION = "CHEONGJU"        # REGION_VERSIONS 미등록 → 항상 NON_REGULATED
+CONTROL_REGION = "CHEONGJU"        # 비수도권·비규제로 REGION_VERSIONS 에 명시 등록됨
 
 # ---- 층화 비율 (합계 1.0). 실제 통계가 아니라 **명시된 가정**이다. ----
 P_CONTROL_REGION = 0.16            # 대조군 비중

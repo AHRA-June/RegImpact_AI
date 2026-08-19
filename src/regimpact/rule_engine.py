@@ -4,7 +4,8 @@ LOCKED §4: 이 엔진의 규칙 '값·우선순위'는 사람이 확정한 명�
 regulatory_facts.md)에서 온다. LLM이 규칙을 생성하지 않는다. 이 코드는 확정 명세의 구현이며,
 LLM 출력(RegChange Extractor 등)을 검증하는 기준점(ground truth)이다.
 
-우선순위(short-circuit): P0 스코프 → P0b 정책대출=Discovery → **P0c 수도권 다주택** → P1 경과규정
+우선순위(short-circuit): P0 스코프 → P0b 정책대출=Discovery → **P0c 수도권 다주택**
+→ P0d 지역 미상 → P1 경과규정
 → P2 지역상태 → P3 다주택 → P4 유주택 → P5 생애최초 → P6 서민실수요 → P7 일반.
 """
 from __future__ import annotations
@@ -64,6 +65,25 @@ def evaluate(app: MortgageApplication) -> LtvDecision:
     if app.house_count >= 2 and is_capital_area(app.region_code):
         return _decided(LTV_MULTI, "MULTI_0", ReasonCode.LTV_MULTI_HOME_0)
 
+    # P0d. 지역 미상 → 사람 검토
+    #
+    # 레지스트리에 없는 지역코드는 판정할 수 없다. 예전에는 미등록 지역을 NON_REGULATED 로
+    # 간주했는데, 그 기본값 때문에 강남·서초·송파·용산이 비규제로 판정되어 무주택 차주가
+    # 강남에서 70%를 받았다. 규제 시스템에서 데이터 누락이 **관대한 쪽으로** 새는 것은
+    # 가장 나쁜 실패 방향이라, 모르면 멈추게 한다.
+    #
+    # P0c 뒤에 두는 이유: 수도권 다주택은 "규제지역 여부와 무관하게" 0%라(FSC p2 / FAQ Q1 ※)
+    # 시군구 단위 규제상태를 몰라도 판정이 선다. 예컨대 "서울특별시"처럼 광역까지만 아는
+    # 입력도 다주택이면 0%로 확정된다.
+    # P1 앞에 두는 이유: 경과규정은 6·30 지정으로 **바뀐 것**으로부터 보호하는 장치인데,
+    # 지역을 모르면 무엇이 바뀌었는지도 모른다.
+    region_status, _rt = resolve_region_status(app.region_code, app.evaluation_date)
+    if region_status == RegionStatus.UNKNOWN:
+        return LtvDecision(
+            status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
+            reason_codes=[ReasonCode.REGION_UNKNOWN],
+        )
+
     # P1. 경과규정. 종전규정 = 非규제 수도권 무주택 70%.
     grandfathered, gf_reason = is_grandfathered(app)
     if grandfathered:
@@ -89,9 +109,8 @@ def evaluate(app: MortgageApplication) -> LtvDecision:
             source_policy_ids=list(SOURCE_6_30),
         )
 
-    # P2. 지역상태 (시점 해석)
-    status, _regulated_type = resolve_region_status(app.region_code, app.evaluation_date)
-    if status == RegionStatus.NON_REGULATED:
+    # P2. 지역상태 (P0d에서 이미 해석함 — UNKNOWN 은 여기 도달하지 않는다)
+    if region_status == RegionStatus.NON_REGULATED:
         return _baseline_rule(app)
 
     # --- 이하 REGULATED ---

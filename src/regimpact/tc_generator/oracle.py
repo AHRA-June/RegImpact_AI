@@ -34,17 +34,53 @@ _GF_CUTOFF = date(2026, 6, 30)          # 경과규정 경계 (<= 포함) — §
 _REG_EFFECTIVE = date(2026, 7, 1)       # 규제 효력일 — regulatory_facts C02/C03
 _SIX_THIRTY_REGIONS = frozenset({"GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN"})
 
-# 수도권(서울·인천·경기) — regions.py 를 import 하지 않고 명세에서 독립 재기입.
-# 근거: FSC p2 / FAQ Q1 ※ "다주택자는 수도권 內 ... 규제지역 여부와 무관하게 LTV 0%".
-# 오라클은 6·30 시나리오에 등장하는 지역만 알면 충분하므로 최소 집합으로 둔다
-# — 엔진이 수도권 집합을 넓게 잡아 오판하면 disagreement 로 드러나게 하는 편이 낫다.
-_CAPITAL_AREA = frozenset({
-    "GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN",
-    "SEOUL", "SEOUL_GANGNAM", "SEOUL_SEOCHO", "SEOUL_SONGPA",
-    "SEOUL_YONGSAN", "SEOUL_SEONGDONG", "SEOUL_MAPO",
-    "GWACHEON", "SEONGNAM_BUNDANG", "SUWON_YEONGTONG",
-    "ANYANG_DONGAN", "GWANGMYEONG", "HANAM",
+# 지정 현황 — regions.py 를 import 하지 않고 **원문에서 독립 재기입**한다.
+# 출처: docs/sources/raw/molit_press_20260630.txt p5 참고2 「투기과열지구 및 조정대상지역 현황」
+# 같은 원문을 두 번 옮겨적는 것이 차등검증의 요점이다. 한쪽이 잘못 옮기면 불일치로 드러난다.
+#
+# ⚠️ 이전 버전은 "미등록 지역은 항상 非규제"라고 적었고 엔진도 같은 가정을 갖고 있어서,
+#    강남을 비규제로 보는 결함이 양쪽에 동시에 있었는데도 일치율 100%가 나왔다.
+#    같은 가정을 공유하면 차등검증은 아무것도 잡지 못한다.
+
+# 서울 강남·서초·송파·용산 — 조정 '16.11.3, 투기과열 '17.8.3
+_SEOUL_EARLY = frozenset({
+    "SEOUL_GANGNAM", "SEOUL_SEOCHO", "SEOUL_SONGPA", "SEOUL_YONGSAN",
 })
+# 서울 나머지 21개구 — '25.10.16
+_SEOUL_LATE = frozenset({
+    "SEOUL_SEONGDONG", "SEOUL_MAPO", "SEOUL_GANGDONG", "SEOUL_YEONGDEUNGPO",
+    "SEOUL_YANGCHEON", "SEOUL_DONGJAK", "SEOUL_GWANGJIN", "SEOUL_JUNG",
+    "SEOUL_JONGNO", "SEOUL_SEODAEMUN", "SEOUL_GANGSEO", "SEOUL_NOWON",
+    "SEOUL_SEONGBUK", "SEOUL_GURO", "SEOUL_DONGDAEMUN", "SEOUL_GWANAK",
+    "SEOUL_EUNPYEONG", "SEOUL_JUNGNANG", "SEOUL_GEUMCHEON", "SEOUL_GANGBUK",
+    "SEOUL_DOBONG",
+})
+# 경기 12곳 — '25.10.16
+_GYEONGGI_LATE = frozenset({
+    "SUWON_JANGAN", "SUWON_PALDAL", "SUWON_YEONGTONG",
+    "SEONGNAM_SUJEONG", "SEONGNAM_JUNGWON", "SEONGNAM_BUNDANG",
+    "ANYANG_DONGAN", "GWACHEON", "YONGIN_SUJI", "GWANGMYEONG",
+    "HANAM", "UIWANG",
+})
+_D_EARLY_ADJ = date(2016, 11, 3)
+_D_EARLY_SPEC = date(2017, 8, 3)
+_D_LATE = date(2025, 10, 16)
+
+# 비규제임이 확인된 지역(현황표 어느 열에도 없음). UNKNOWN 과 구분해 명시 등록.
+_NON_REGULATED_KNOWN = frozenset({"SEJONG", "CHEONGJU"})
+
+# 수도권(서울·인천·경기) — FSC p2 / FAQ Q1 ※ "다주택자는 수도권 內 ... 규제지역 여부와 무관".
+# 광역 표기("SEOUL")는 시군구를 몰라도 수도권인 것은 확실하다.
+_CAPITAL_AREA = (
+    _SEOUL_EARLY | _SEOUL_LATE | _GYEONGGI_LATE | _SIX_THIRTY_REGIONS
+    | {"SEOUL", "INCHEON"}
+)
+
+# 레지스트리에 있는(=규제상태를 판정할 수 있는) 지역 전체
+_KNOWN_REGIONS = (
+    _SEOUL_EARLY | _SEOUL_LATE | _GYEONGGI_LATE | _SIX_THIRTY_REGIONS
+    | _NON_REGULATED_KNOWN
+)
 
 _LTV_REGULATED_STD = 0.40
 _LTV_FIRST_HOME = 0.70
@@ -69,13 +105,13 @@ class ExpectedOutcome:
 # 독립 재구현: 지역상태 · 경과규정 · 소유상태
 # ---------------------------------------------------------------------------
 def _region_is_regulated(region_code: str, as_of: date) -> bool:
-    """지역 규제상태를 regions.py 없이 독립 판정 (regulatory_facts C02/C03).
-
-    6·30 신규지정 3개 지역은 효력일(7.1)부터 REGULATED, 그 전엔 非규제.
-    그 외(미등록) 지역은 이 시나리오에서 항상 非규제로 간주.
-    """
-    if region_code in _SIX_THIRTY_REGIONS and as_of >= _REG_EFFECTIVE:
-        return True
+    """지역 규제상태를 regions.py 없이 독립 판정 (참고2 현황표)."""
+    if region_code in _SIX_THIRTY_REGIONS:
+        return as_of >= _REG_EFFECTIVE
+    if region_code in _SEOUL_EARLY:
+        return as_of >= _D_EARLY_ADJ
+    if region_code in _SEOUL_LATE or region_code in _GYEONGGI_LATE:
+        return as_of >= _D_LATE
     return False
 
 
@@ -150,6 +186,16 @@ def expected_outcome(app: MortgageApplication) -> ExpectedOutcome:
             max_ltv=_LTV_MULTI,
             applicable_rule_id="MULTI_0",
             must_include_reasons=("LTV_MULTI_HOME_0",),
+        )
+
+    # P0d. 지역 미상 → 사람 검토 (§H P0d)
+    # 레지스트리에 없으면 규제상태를 알 수 없다. 非규제로 간주하면 데이터 누락이
+    # 관대한 판정으로 새어나간다. P0c 뒤인 이유: 수도권 다주택은 규제 여부와 무관하게
+    # 0%라 시군구를 몰라도 판정이 선다.
+    if app.region_code not in _KNOWN_REGIONS:
+        return ExpectedOutcome(
+            status=EvaluationStatus.NEEDS_HUMAN_REVIEW,
+            must_include_reasons=("REGION_UNKNOWN",),
         )
 
     # P1. 경과규정

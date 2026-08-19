@@ -46,9 +46,47 @@ def test_p2_before_effective_date_is_baseline_70():
     assert d.max_ltv == 0.70
 
 
-def test_p2_unregistered_region_is_non_regulated():
+# ---------- P0d: 지역 미상 (결함 R-01 고정) ----------
+#
+# 이전 판은 여기서 "SEOUL_GANGNAM 은 미등록 → 非규제 70%"를 기대했다. 강남은 '17.8.3
+# 투기과열지구이고(참고2 현황표), 레지스트리에 6·30 신규 3곳만 있었던 것이 결함이었다.
+# 테스트가 결함을 정답으로 못박고 있었으므로 아래 4개로 대체한다.
+
+def test_existing_regulated_region_is_regulated():
+    """강남 무주택 → 투기과열 기준 40%. (전에는 70%가 나왔다.)"""
     d = evaluate(app(region_code="SEOUL_GANGNAM", house_count=0))
-    assert d.max_ltv == 0.70  # 미등록 지역 → 非규제 기준선
+    assert d.status == EvaluationStatus.DECIDED
+    assert d.max_ltv == 0.40
+    assert d.applicable_rule_id == "REG_STD"
+
+
+def test_regulated_region_before_its_designation_is_baseline():
+    """같은 강남도 지정 전('16.11.3 이전)이면 非규제 70%. 지역은 버전 데이터다."""
+    d = evaluate(app(region_code="SEOUL_GANGNAM",
+                     evaluation_date=date(2016, 1, 1), house_count=0))
+    assert d.max_ltv == 0.70
+
+
+def test_unregistered_region_escalates_not_baseline():
+    """레지스트리에 없는 코드는 非규제가 아니라 '모름' → 사람 검토.
+
+    미등록을 조용히 非규제로 처리하면 데이터 누락이 관대한 판정으로 새어나간다.
+    """
+    d = evaluate(app(region_code="BUSAN_HAEUNDAE", house_count=0))
+    assert d.status == EvaluationStatus.NEEDS_HUMAN_REVIEW
+    assert "REGION_UNKNOWN" in d.reason_codes
+    assert d.max_ltv is None
+
+
+def test_capital_area_multi_home_decides_even_when_district_unknown():
+    """광역까지만 아는 입력("SEOUL")도 다주택이면 0% 확정.
+
+    "규제지역 여부와 무관하게"(FSC p2) 이므로 시군구 규제상태를 몰라도 판정이 선다.
+    P0d 를 P0c 앞에 두면 이 케이스가 불필요하게 사람 검토로 샌다.
+    """
+    d = evaluate(app(region_code="SEOUL", house_count=2))
+    assert d.status == EvaluationStatus.DECIDED
+    assert d.max_ltv == 0.0
 
 
 # ---------- P3 / P4: 소유 상태 ----------
