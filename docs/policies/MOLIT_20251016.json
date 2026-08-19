@@ -1,0 +1,293 @@
+{
+  "policy_id": "MOLIT_20251016",
+  "title": "서울 21개 자치구·경기 12곳 투기과열지구 및 조정대상지역 지정",
+  "issuer": "국토교통부",
+  "published_at": "2025-10-16",
+  "effective_from": "2025-10-16",
+  "effective_to": null,
+  "supersedes_policy_id": "MOLIT_20170803",
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "CONFIRMED",
+  "provenance": "HUMAN_CONFIRMED",
+  "sources": [
+    {
+      "source_document_id": "MOLIT_PRESS_20260630",
+      "title": "투기과열지구 및 조정대상지역 추가 지정 (보도참고자료)",
+      "source_hash": "6115271bf81d487e752ccc1315585018e89ed6c5d4137f7ecca271cb66c11edd",
+      "retrieved_at": "2026-08-10",
+      "source_url": null,
+      "filename": "molit_press_20260630.pdf",
+      "byte_size": null
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "ANYANG_DONGAN",
+      "region_name": "안양시 동안구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GWACHEON",
+      "region_name": "과천시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "GWANGMYEONG",
+      "region_name": "광명시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "HANAM",
+      "region_name": "하남시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEONGNAM_BUNDANG",
+      "region_name": "성남시 분당구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEONGNAM_JUNGWON",
+      "region_name": "성남시 중원구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEONGNAM_SUJEONG",
+      "region_name": "성남시 수정구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_DOBONG",
+      "region_name": "도봉구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_DONGDAEMUN",
+      "region_name": "동대문구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_DONGJAK",
+      "region_name": "동작구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_EUNPYEONG",
+      "region_name": "은평구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GANGBUK",
+      "region_name": "강북구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GANGDONG",
+      "region_name": "강동구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GANGSEO",
+      "region_name": "강서구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GEUMCHEON",
+      "region_name": "금천구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GURO",
+      "region_name": "구로구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GWANAK",
+      "region_name": "관악구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_GWANGJIN",
+      "region_name": "광진구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_JONGNO",
+      "region_name": "종로구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_JUNG",
+      "region_name": "중구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_JUNGNANG",
+      "region_name": "중랑구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_MAPO",
+      "region_name": "마포구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_NOWON",
+      "region_name": "노원구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEODAEMUN",
+      "region_name": "서대문구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEONGBUK",
+      "region_name": "성북구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_SEONGDONG",
+      "region_name": "성동구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_YANGCHEON",
+      "region_name": "양천구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SEOUL_YEONGDEUNGPO",
+      "region_name": "영등포구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_JANGAN",
+      "region_name": "수원시 장안구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_PALDAL",
+      "region_name": "수원시 팔달구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "SUWON_YEONGTONG",
+      "region_name": "수원시 영통구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "UIWANG",
+      "region_name": "의왕시",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "YONGIN_SUJI",
+      "region_name": "용인시 수지구",
+      "region_status": "REGULATED",
+      "effective_from": "2025-10-16",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    }
+  ],
+  "rule_notes": [],
+  "notes": "regions.REGION_VERSIONS 에서 생성 (tools/seed_policies.py). 근거: regulatory_facts C16 — MOLIT p5 참고2 현황표."
+}

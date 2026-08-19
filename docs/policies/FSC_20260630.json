@@ -1,0 +1,71 @@
+{
+  "policy_id": "FSC_20260630",
+  "title": "6·30 대책 — 화성동탄·용인기흥·구리 규제지역 지정 및 주담대 LTV 강화",
+  "issuer": "금융위원회·국토교통부",
+  "published_at": "2026-06-30",
+  "effective_from": "2026-07-01",
+  "effective_to": null,
+  "supersedes_policy_id": "MOLIT_20251016",
+  "jurisdiction": "KR",
+  "policy_scope": "MORTGAGE_LTV",
+  "version": "1",
+  "status": "CONFIRMED",
+  "provenance": "HUMAN_CONFIRMED",
+  "sources": [
+    {
+      "source_document_id": "FSC_PRESS_20260630",
+      "title": "규제지역 추가 지정 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)",
+      "source_hash": "403fb8fbf8bb1d68cadc7524d1b6631abe11dd2a4c2f62550c9d2873e8f39d23",
+      "retrieved_at": "2026-08-10",
+      "source_url": null,
+      "filename": "fsc_press_20260630.pdf",
+      "byte_size": null
+    },
+    {
+      "source_document_id": "MOLIT_PRESS_20260630",
+      "title": "투기과열지구 및 조정대상지역 추가 지정 (보도참고자료)",
+      "source_hash": "6115271bf81d487e752ccc1315585018e89ed6c5d4137f7ecca271cb66c11edd",
+      "retrieved_at": "2026-08-10",
+      "source_url": null,
+      "filename": "molit_press_20260630.pdf",
+      "byte_size": null
+    },
+    {
+      "source_document_id": "FAQ_20260630",
+      "title": "규제지역 추가 지정 관련 FAQ",
+      "source_hash": "ef3dad7b55b5781027393f6114fcb656db618962b627535d6a8da3bf14ea7c9a",
+      "retrieved_at": "2026-08-10",
+      "source_url": null,
+      "filename": "faq_20260630.hwp",
+      "byte_size": null
+    }
+  ],
+  "region_deltas": [
+    {
+      "region_code": "GURI",
+      "region_name": "구리시",
+      "region_status": "REGULATED",
+      "effective_from": "2026-07-01",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "HWASEONG_DONGTAN",
+      "region_name": "화성시 동탄구",
+      "region_status": "REGULATED",
+      "effective_from": "2026-07-01",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    },
+    {
+      "region_code": "YONGIN_GIHEUNG",
+      "region_name": "용인시 기흥구",
+      "region_status": "REGULATED",
+      "effective_from": "2026-07-01",
+      "effective_to": null,
+      "regulated_type": "SPECULATIVE_OVERHEATED"
+    }
+  ],
+  "rule_notes": [],
+  "notes": "regions.REGION_VERSIONS 에서 생성 (tools/seed_policies.py). 근거: regulatory_facts C16 — MOLIT p5 참고2 현황표."
+}
