@@ -72,7 +72,20 @@ _SIX_THIRTY_REGIONS = ("GURI", "YONGIN_GIHEUNG", "HWASEONG_DONGTAN")
 
 # 비규제임이 확인된 지역. UNKNOWN 과 구분하기 위해 **명시적으로** 등록한다.
 #   세종·청주는 수도권이 아니고 현황표 어느 열에도 없다.
+#   ⚠ 알려진 한계(2026-08-19): 2020 6·17 원문에 따르면 세종(행복도시)·청주(부분)·대전은
+#   2020-06-19 조정대상지역이었다 — 이 열린 비규제 구간은 6·30 시점 기준이며 2020~해제
+#   사이 시점 판정에는 틀리다. 해제 원문 확보 후 구간을 나누기로 결정(검수 Q3-A).
 _KNOWN_NON_REGULATED = ("SEJONG", "CHEONGJU")
+
+# 2020 6·17 대책 신규 투기과열지구 중 레지스트리에 없던 지역 (검수 확정 2026-08-19, Q2-A).
+# **버전 구간은 아직 없다** — 이 문서는 지정만 말하고 해제는 말하지 않으므로, 해제 원문
+# 확보 전에는 REGION_VERSIONS 에 넣지 않는다(넣으면 2021~ 시점 판정이 '계속 규제'로 오판).
+# 구간이 없으므로 resolve_region_status 는 UNKNOWN → 사람 검토. 그게 정직한 상태다.
+_REGIONS_2020_PENDING = (
+    "SUWON_GWONSEON", "ANYANG_MANAN", "ANSAN_DANWON", "GUNPO",
+    "INCHEON_YEONSU", "INCHEON_NAMDONG", "INCHEON_SEO",
+    "DAEJEON_DONG", "DAEJEON_JUNG", "DAEJEON_SEO", "DAEJEON_YUSEONG",
+)
 
 
 REGION_VERSIONS: dict[str, list[RegionVersion]] = {}
@@ -146,6 +159,10 @@ CAPITAL_AREA_REGIONS: frozenset[str] = frozenset(
     | set(_SEOUL_2016) | set(_SEOUL_2025)     # 서울 25개 자치구
     | set(_GYEONGGI_2025)                     # 경기 12곳
     | set(_SIX_THIRTY_REGIONS)                # 경기 3곳 (6·30 신규)
+    # 2020 6·17 신설 코드 중 수도권(경기·인천) — 수도권 여부는 법령상 확실한 사실이라
+    # 규제 구간(미확정)과 무관하게 등록한다. 대전 4곳은 수도권이 아니므로 제외.
+    | {"SUWON_GWONSEON", "ANYANG_MANAN", "ANSAN_DANWON", "GUNPO",
+       "INCHEON_YEONSU", "INCHEON_NAMDONG", "INCHEON_SEO"}
 )
 
 
@@ -207,6 +224,22 @@ REGION_ALIASES: dict[str, str] = {
     # 비수도권 대조군
     "세종특별자치시": "SEJONG", "세종시": "SEJONG",
     "청주시": "CHEONGJU",
+    # ---- 2020 6·17 신설 (검수 확정 2026-08-19) ----
+    # 동명 구 정책: 광역시의 동명 구(중구·서구·동구)는 **시명 한정 별칭만** 등록한다.
+    # 맨 "중구"는 기존대로 서울(6·30 코퍼스 문맥) — 시명 없는 모호 표기를 광역시로
+    # 넓히면 기존 추출 재생·골드 매핑이 갈라진다. 부분 포함 매칭은 긴 별칭 우선이므로
+    # "대전 중구"가 "중구"보다 먼저 잡힌다.
+    "수원시 권선구": "SUWON_GWONSEON", "수원권선": "SUWON_GWONSEON", "권선구": "SUWON_GWONSEON",
+    "안양시 만안구": "ANYANG_MANAN", "안양만안": "ANYANG_MANAN", "만안구": "ANYANG_MANAN",
+    "안산시 단원구": "ANSAN_DANWON", "안산단원": "ANSAN_DANWON", "단원구": "ANSAN_DANWON",
+    "군포시": "GUNPO", "군포": "GUNPO",
+    "인천 연수구": "INCHEON_YEONSU", "인천연수": "INCHEON_YEONSU", "연수구": "INCHEON_YEONSU",
+    "인천 남동구": "INCHEON_NAMDONG", "인천남동": "INCHEON_NAMDONG", "남동구": "INCHEON_NAMDONG",
+    "인천 서구": "INCHEON_SEO", "인천서구": "INCHEON_SEO",
+    "대전 동구": "DAEJEON_DONG", "대전동구": "DAEJEON_DONG",
+    "대전 중구": "DAEJEON_JUNG", "대전중구": "DAEJEON_JUNG",
+    "대전 서구": "DAEJEON_SEO", "대전서구": "DAEJEON_SEO",
+    "대전 유성구": "DAEJEON_YUSEONG", "대전유성": "DAEJEON_YUSEONG", "유성구": "DAEJEON_YUSEONG",
 }
 
 _ALIAS_STRIP = ("경기도", "경기", "인천광역시", "서울시", "특별자치시", "광역시")

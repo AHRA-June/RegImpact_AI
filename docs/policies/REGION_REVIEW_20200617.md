@@ -1,5 +1,7 @@
 # 2020 6·17 대책 지역 이관 검수표 (🤖 초안)
 
+✅ **검수 완료 (2026-08-19)** — Q1-A(투기과열 17곳만 delta, 조정대상은 rule_note 보존) · Q2-A(코드 11개 신설 + 동명 구 별칭 시명 한정) · Q3-A(해제 원문 확보까지 DRAFT 유지). 수원·안양 '시 전체'는 구 단위 전개(21개 코드), 반영: `MOLIT_20200617.json` · `regions.py`.
+
 > 생성: `python tools/build_region_review_2020.py` · 대상: `MOLIT_20200617` (DRAFT) ·
 > 원문: `docs/sources/original/molit_press_20200617.pdf` p12 지정표 (본문 서술과 개수 교차 일치)
 

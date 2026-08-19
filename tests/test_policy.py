@@ -65,8 +65,14 @@ def test_seeded_registry_has_the_designation_policies(registry):
     }
     assert len(registry.confirmed()) == 4
     draft = registry.get("MOLIT_20200617")
+    # 검수 확정(2026-08-19, Q1-A·Q2-A·Q3-A): 신규 투기과열 17곳 → 구 단위 21개 코드.
+    # 해제 원문 확보 전이므로 DRAFT 유지 — 해제일 없이 CONFIRMED 로 바꾸면
+    # 2021~2024 시점 판정이 '계속 규제'로 오판된다.
     assert draft.status.value == "DRAFT"
-    assert not draft.region_deltas, "지역 이관은 사람 검수 전 — 값을 지어내면 안 된다"
+    assert len(draft.region_deltas) == 21
+    assert all(d.effective_from.isoformat() == "2020-06-19" for d in draft.region_deltas)
+    assert all(d.effective_to is None for d in draft.region_deltas), "해제일은 원문에 없다 — 지어내면 안 된다"
+    assert draft.rule_notes, "조정대상 '全 지역-제외' 서술은 열거 대신 rule_note 로 보존(Q1-A)"
     assert draft.sources, "DRAFT 라도 원문 스냅샷은 연결돼 있어야 한다"
 
 

@@ -133,3 +133,42 @@ def test_alias_resolution(name, code):
 
 def test_unknown_name_returns_none_not_a_guess():
     assert normalize_region_name("울산광역시 남구") is None
+
+
+# ------------------------------------------------ 2020 6·17 신설 코드 (검수 확정 2026-08-19)
+
+def test_homonym_gu_aliases_resolve_by_city():
+    """검수 중 발견된 결함의 회귀 고정 — '대전 중구'가 서울 중구로 오매핑되던 문제.
+
+    광역시의 동명 구는 시명 한정 별칭만 등록한다. 맨 '중구'는 기존대로 서울이다
+    (6·30 코퍼스 문맥 — 바꾸면 기존 추출 재생·골드 매핑이 갈라진다)."""
+    from regimpact.regions import normalize_region_name as n
+    assert n("대전 중구") == "DAEJEON_JUNG"
+    assert n("대전광역시 중구") == "DAEJEON_JUNG"
+    assert n("대전 서구") == "DAEJEON_SEO"
+    assert n("인천 서구") == "INCHEON_SEO"
+    assert n("중구") == "SEOUL_JUNG"          # 기존 동작 유지
+    assert n("서울 중구") == "SEOUL_JUNG"
+
+
+def test_2020_pending_codes_are_unknown_until_release_docs():
+    """신설 코드는 버전 구간이 없다 — 해제 원문 확보 전이므로 UNKNOWN(사람 검토)이 정직한 상태.
+
+    NON_REGULATED 로 두면 2020~해제 사이가 조용히 비규제로 판정되고,
+    REGULATED 로 두면 해제 이후가 계속 규제로 판정된다. 둘 다 지어낸 값이다."""
+    from datetime import date
+    from regimpact.models import RegionStatus
+    from regimpact.regions import resolve_region_status
+    for code in ("GUNPO", "ANSAN_DANWON", "SUWON_GWONSEON", "DAEJEON_YUSEONG", "INCHEON_SEO"):
+        status, _ = resolve_region_status(code, date(2021, 6, 1))
+        assert status is RegionStatus.UNKNOWN, code
+
+
+def test_2020_capital_area_membership():
+    """수도권 여부는 법령상 확실한 사실 — 규제 구간 미확정과 무관하게 등록한다."""
+    from regimpact.regions import is_capital_area
+    for code in ("GUNPO", "ANSAN_DANWON", "SUWON_GWONSEON", "ANYANG_MANAN",
+                 "INCHEON_YEONSU", "INCHEON_NAMDONG", "INCHEON_SEO"):
+        assert is_capital_area(code), code
+    for code in ("DAEJEON_DONG", "DAEJEON_JUNG", "DAEJEON_SEO", "DAEJEON_YUSEONG"):
+        assert not is_capital_area(code), code

@@ -106,7 +106,13 @@ n_exist = sum(1 for r in SPECULATIVE_NEW if r[2] == "EXISTING")
 n_new = sum(1 for r in SPECULATIVE_NEW if r[2] == "NEW")
 n_part = sum(1 for r in SPECULATIVE_NEW if r[2] == "PARTIAL")
 
+# 검수 결과 (2026-08-19, 사용자): Q1-A·Q2-A·Q3-A 채택, §1 매핑 전 행 승인.
+RESOLVED = ("✅ **검수 완료 (2026-08-19)** — Q1-A(투기과열 17곳만 delta, 조정대상은 rule_note 보존) · "
+            "Q2-A(코드 11개 신설 + 동명 구 별칭 시명 한정) · Q3-A(해제 원문 확보까지 DRAFT 유지). "
+            "수원·안양 '시 전체'는 구 단위 전개(21개 코드), 반영: `MOLIT_20200617.json` · `regions.py`.")
+
 L = ["# 2020 6·17 대책 지역 이관 검수표 (🤖 초안)", "",
+     RESOLVED, "",
      "> 생성: `python tools/build_region_review_2020.py` · 대상: `MOLIT_20200617` (DRAFT) ·",
      "> 원문: `docs/sources/original/molit_press_20200617.pdf` p12 지정표 (본문 서술과 개수 교차 일치)", "",
      f"**신규 투기과열지구 17곳** — 기존 코드 매핑 {n_exist} · 신규 코드 제안 {n_new} · "
@@ -181,6 +187,7 @@ html = f"""<title>2020 6·17 지역 이관 검수표</title>
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:14px">
     <h1>2020 6·17 대책 지역 이관 검수표</h1>
+    <div class="note" style="border-left:3px solid var(--ok)"><p>{esc(RESOLVED.replace('**',''))}</p></div>
     <p class="lede">신규 투기과열지구 <strong>17곳</strong>의 레지스트리 매핑 초안(🤖).
     조정대상지역은 원문이 "全 지역-제외" 방식이라 <strong>열거를 지어내지 않고</strong> 원문 그대로 싣는다.
     시행일 2020-06-19. 확정 전 원본 PDF p12·p14 눈 대조 권장(표 평탄화 전례).</p>
