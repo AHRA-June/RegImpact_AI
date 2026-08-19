@@ -32,12 +32,13 @@ EXPECTED = {
     "assurance.html", "portfolio.html", "sources.html",
     "validation_report.html", "validation_summary.html",
     "model_system_card.html", "ai_risk_register.html",
-    "graph.html", "search.html", "demo.html",
+    "graph.html", "search.html", "demo.html", "signal.html",
 }
 
-# 사이드바 셸 밖의 독립 무대 — 랜딩(그 자체가 안내판)과 시연 모드(녹화 화면을 메뉴가
-# 오염하면 안 된다). 홈으로 돌아가는 링크는 두 페이지 모두 본문에 있다.
-STANDALONE = {"index.html", "demo.html"}
+# 사이드바 셸 밖의 독립 화면 — 랜딩(그 자체가 안내판), 시연 모드(녹화 화면을 메뉴가
+# 오염하면 안 된다), 내 한도 시그널(고객용 웹뷰 — B2B 사이드바가 어울리지 않는다).
+# 홈으로 돌아가는 링크는 전부 본문에 있다.
+STANDALONE = {"index.html", "demo.html", "signal.html"}
 
 
 def test_all_expected_pages_are_built(site):
@@ -88,8 +89,9 @@ def test_every_page_has_the_same_global_nav(site):
 
 
 def test_standalone_pages_still_link_home(site):
-    """무대 페이지는 사이드바가 없지만, 나가는 길은 있어야 한다."""
-    assert 'href="index.html"' in site["demo.html"]
+    """무대·웹뷰 페이지는 사이드바가 없지만, 나가는 길은 있어야 한다."""
+    for name in STANDALONE - {"index.html"}:
+        assert 'href="index.html"' in site[name], f"{name} 에 홈 링크가 없다"
 
 
 def test_sources_page_hashes_come_from_real_files(site):
@@ -329,6 +331,43 @@ def test_demo_has_recording_and_live_controls(site):
     html = site["demo.html"]
     for token in ("자동 재생", "전체화면", 'data-dur="', "data-scene", "ArrowRight"):
         assert token in html
+
+
+# ---------- 내 한도 시그널 (고객용 — Tomorrow Challenge 제안 화면) ----------
+def test_signal_runs_verified_ports_not_mocks(site):
+    """고객 화면도 본편과 같은 엔진·검색 포팅본이어야 한다 — 데모용 별도 로직 금지."""
+    html = site["signal.html"]
+    assert "evaluate(FX" in html            # 판정: 룰엔진 포팅본
+    assert "buildIndex(" in html            # Q&A: BM25 포팅본
+    assert "GRANDFATHERING_CUTOFF" in html  # 규칙 값·날짜는 픽스처 상수에서
+    # 판정 결과(LTV·한도)는 HTML에 미리 박지 않는다 — 엔진이 그린다
+    assert '<div class="vc" id="vc-before"></div>' in html
+
+
+def test_signal_quotes_are_verbatim_from_the_corpus(site):
+    """'근거 조문과 함께'가 이 제안의 약속이다 — 인용은 전부 원문에 실재해야 한다."""
+    import re as _re
+    from regimpact.extractor.sources import load_corpus
+    from regimpact.report import collect
+    from regimpact.ui.signal import _rule_quotes
+
+    ev = collect(generated_at="x")
+    norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
+    html = site["signal.html"]
+    quotes = _rule_quotes(ev.extraction)
+    assert {"REG_STD", "REG_FIRSTHOME", "REG_REALDEMAND", "MULTI_0", "_GF"} <= set(quotes)
+    for key, q in quotes.items():
+        assert q["quote"] in norm[q["doc"]], f"{key}: 인용이 원문에 없다"
+        assert q["quote"] in html, f"{key}: 인용이 화면에 실리지 않았다"
+
+
+def test_signal_is_honest_with_customers(site):
+    """고객 화면일수록 한계를 숨기면 안 된다 — 금융사고가 되는 지점이다."""
+    html = site["signal.html"]
+    assert "미반영" in html                 # DSR·최대한도 등 부가 규제 미반영 명시
+    assert "전문 상담" in html              # 모르는 것은 상담으로
+    assert "지어내" in html                 # 근거 없으면 답하지 않는다
+    assert "PoC" in html                    # LLM 답변 생성은 배선 목표임을 명시
 
 
 # ---------- README 의 문서 지도가 실재하는가 ----------

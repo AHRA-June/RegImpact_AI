@@ -177,8 +177,13 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
       값을 지어내면 두 숫자는 즉시 100%가 된다.
     </div>
 
-    <a class="demo-cta" href="demo.html">▶ 시연 모드
-      <small>발표부터 심사 반영·검증까지 — 3분 · 자동 재생</small></a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="demo-cta" href="demo.html">▶ 시연 모드
+        <small>발표부터 심사 반영·검증까지 — 3분 · 자동 재생</small></a>
+      <a class="demo-cta" style="background:var(--surface-container-lowest);color:var(--on-surface);
+        border:1px solid var(--outline-variant)" href="signal.html">📱 내 한도 시그널
+        <small>고객용 개인화 시뮬레이터 — 웹뷰 탑재형</small></a>
+    </div>
   </header>
 
   <section class="sec">
