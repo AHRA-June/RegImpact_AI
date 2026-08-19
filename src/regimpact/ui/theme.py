@@ -124,6 +124,10 @@ button{font:inherit;border:0;cursor:pointer}
 .pl-6{padding-left:24px}.pl-72{padding-left:288px}.pt-16{padding-top:64px}.pt-6{padding-top:24px}
 .pt-4{padding-top:16px}.pb-1{padding-bottom:4px}
 .glance{scroll-margin-top:80px}
+.pg-explain .pe-row{display:grid;grid-template-columns:170px minmax(0,1fr);gap:12px}
+.pg-explain .pe-q{font-size:12.5px;font-weight:600;color:var(--on-surface-variant)}
+.pg-explain .pe-a{font-size:13.5px;line-height:21px}
+@media (max-width:640px){.pg-explain .pe-row{grid-template-columns:minmax(0,1fr);gap:2px}}
 .mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mt-6{margin-top:24px}
 .fixed{position:absolute}.top-0{top:0}.left-0{left:0}.right-0{right:0}.left-72{left:288px}
 .z-40{z-index:40}.z-50{z-index:50}
@@ -225,6 +229,8 @@ _ICON_PATHS = {
     "dashboard": "M4 4h6v6H4zM14 4h6v4h-6zM14 12h6v8h-6zM4 14h6v6H4z",
     "home": "M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10",
     "upload_file": "M12 16V5M8 9l4-4 4 4M4 19h16",
+    "hub": "M12 5a2 2 0 100-4 2 2 0 000 4zM5 21a2 2 0 100-4 2 2 0 000 4zM19 21a2 2 0 100-4 2 2 0 000 4zM12 5v6M12 11l-6 7M12 11l6 7",
+    "search": "M10 4a6 6 0 100 12 6 6 0 000-12zM14.5 14.5L20 20",
 }
 
 FONTS = (
@@ -247,6 +253,8 @@ NAV_SECTIONS = (
         ("portfolio.html", "고객·포트폴리오 영향", "account_balance_wallet"),
         ("assurance.html", "검증", "verified_user"),
         ("playground.html", "판정 플레이그라운드", "science"),
+        ("graph.html", "영향 지식그래프", "hub"),
+        ("search.html", "규제 원문 검색", "search"),
     )),
     ("검증 문서", (
         ("validation_summary.html", "검증 요약", "dashboard"),
@@ -347,6 +355,29 @@ def page(
         "</div></main></div>"
         f"{extra_script}"
         "</body></html>"
+    )
+
+
+def explainer(what: str, made_of: str, how: str = "") -> str:
+    """페이지 최상단 '이 페이지는?' 밴드 — 비전공자용 기능 설명 (2026-08-19 사용자 리뷰).
+
+    glance 가 "결과가 어떤가"라면 explainer 는 "이게 뭐 하는 화면이고 무엇으로
+    만들었나"다. 전문용어 없이, 처음 온 사람이 3줄로 이 화면의 역할을 이해하게 한다.
+    """
+    rows = [("무엇을 보는 화면인가요?", what), ("무엇으로 만들었나요?", made_of)]
+    if how:
+        rows.append(("어떻게 보나요?", how))
+    items = "".join(
+        '<div class="pe-row">'
+        f'<div class="pe-q">{esc(q)}</div><div class="pe-a">{esc(a)}</div></div>'
+        for q, a in rows
+    )
+    return (
+        '<div class="pg-explain rounded-xl border border-outline-variant '
+        'bg-surface-container-low p-5 flex flex-col gap-3">'
+        '<div class="flex items-center gap-2 font-mono-label text-mono-label uppercase '
+        'text-secondary">' + icon("travel_explore", 16) + "<span>이 페이지는?</span></div>"
+        + items + "</div>"
     )
 
 

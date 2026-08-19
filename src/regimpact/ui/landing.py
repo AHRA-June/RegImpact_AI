@@ -106,6 +106,14 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
         screens += _tile("playground.html", "판정 플레이그라운드",
                          "차주 조건을 바꾸면 즉시 판정이 바뀐다. JS 포팅본은 Python 엔진과 전 케이스 대조된다.",
                          "직접 만져보기")
+    screens += _tile("graph.html", "영향 지식그래프",
+                     "문서 → 정책 → 지역 → 룰 → 고객까지 변경이 흘러가는 경로. "
+                     "LLM 추출 그래프가 아니라 검증된 산출물의 조립 — 관계마다 출처가 있다.",
+                     "노드 클릭 → 경로 강조")
+    screens += _tile("search.html", "규제 원문 검색",
+                     "BM25 검색이 브라우저에서 실제로 실행된다. 품질은 사람 확정 인용 기준 "
+                     "recall@k 실측 — RAG의 검색 절반.",
+                     "직접 검색해보기")
 
     docs = "".join([
         _tile("validation_summary.html", "검증 요약 (1페이지)",

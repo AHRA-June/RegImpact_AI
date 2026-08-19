@@ -13,7 +13,7 @@ from __future__ import annotations
 from ..report.evidence import ValidationEvidence
 from .pages import _SEGMENT_TONE, _won
 from ..impact.customer import Segment
-from .theme import bar, card, chip, esc, glance, page, page_title, stat, table
+from .theme import bar, card, chip, esc, explainer, glance, page, page_title, stat, table
 
 # 스코어카드 지표명(영문 고정 id) → 화면 라벨. 값이 아니라 표기만 여기서 정한다.
 _METRIC_KO = {
@@ -216,6 +216,14 @@ def render(ev: ValidationEvidence, *, qa_confirmed: int = 0, qa_total: int = 0) 
     body = (
         page_title("검증 요약",
                    "검증보고서 전체의 한 페이지 요약 — 목적·수행 내용·결과·한계.")
+        + explainer(
+            "긴 검증보고서를 한 페이지로 줄인 요약입니다 — 이 시스템이 뭘 하고, "
+            "얼마나 잘하고, 뭐가 부족한지.",
+            "본문 보고서와 같은 실제 실행 결과. 사람이 옮겨 적은 숫자가 없어서 "
+            "요약과 본문의 수치가 어긋날 수 없습니다.",
+            "위에서부터: 종합 판정 → 목적 → 한 일 → 점수 → 고객 영향 → 잘 되는 것/부족한 것. "
+            "더 깊이 보려면 맨 아래 링크로 본문 보고서에 갑니다.",
+        )
         + top + purpose + did + scores + impact_card + honest
         + card("더 보기", links)
     )
