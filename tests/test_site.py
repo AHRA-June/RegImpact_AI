@@ -32,8 +32,12 @@ EXPECTED = {
     "assurance.html", "portfolio.html", "sources.html",
     "validation_report.html", "validation_summary.html",
     "model_system_card.html", "ai_risk_register.html",
-    "graph.html", "search.html",
+    "graph.html", "search.html", "demo.html",
 }
+
+# 사이드바 셸 밖의 독립 무대 — 랜딩(그 자체가 안내판)과 시연 모드(녹화 화면을 메뉴가
+# 오염하면 안 된다). 홈으로 돌아가는 링크는 두 페이지 모두 본문에 있다.
+STANDALONE = {"index.html", "demo.html"}
 
 
 def test_all_expected_pages_are_built(site):
@@ -76,11 +80,16 @@ def test_every_page_has_the_same_global_nav(site):
     """
     from regimpact.ui.theme import NAV
     for name, html in site.items():
-        if name in ("_dir", "index.html"):
+        if name == "_dir" or name in STANDALONE:
             continue
         for href, label, _ in NAV:
             assert f'href="{href}"' in html, f"{name} 의 메뉴에 {href} 가 없다"
         assert 'href="index.html"' in html, f"{name} 에 홈 버튼이 없다"
+
+
+def test_standalone_pages_still_link_home(site):
+    """무대 페이지는 사이드바가 없지만, 나가는 길은 있어야 한다."""
+    assert 'href="index.html"' in site["demo.html"]
 
 
 def test_sources_page_hashes_come_from_real_files(site):
@@ -280,6 +289,46 @@ def test_playground_shows_the_rule_trace(site):
     html = site["playground.html"]
     for rule_id in ("P0c", "P0d", "P1", "P7"):
         assert rule_id in html
+
+
+# ---------- 시연 모드 (신한퓨처스랩 데모) ----------
+def test_demo_numbers_come_from_the_pipeline(site):
+    """시연이라고 숫자를 꾸미면 이 제품의 존재 이유가 무너진다 — 전부 evidence 에서."""
+    from regimpact.report import collect
+    agreement = 1.0 if shutil.which("node") else None
+    ev = collect(generated_at="x", js_port_agreement=agreement)
+    html = site["demo.html"]
+    s = ev.scorecard.summary()
+    assert f"{s['passed']}/{s['total']}" in html                       # 스코어카드
+    assert f"{len(ev.impact.reduced):,}건" in html                     # 한도 감소
+    assert f"{ev.grounding.grounded}/{ev.grounding.total}" in html     # 인용 대조
+    assert f"{ev.regression.passed}/{ev.regression.total}" in html     # 오라클 회귀
+    assert ev.this_policy.published_at.isoformat() in html             # 발표일
+    assert str(ev.extraction.effective_from) in html                   # 시행일
+
+
+def test_demo_runs_the_verified_engine_not_a_mock(site):
+    """라이브 판정은 플레이그라운드와 같은 검증된 엔진 포팅본이어야 한다 — 시연용 별도 로직 금지."""
+    html = site["demo.html"]
+    assert "evaluate(FX" in html          # 판정은 엔진 호출
+    assert "GRANDFATHERING_CUTOFF" in html  # 규칙 값은 픽스처 상수에서
+    # 시연 장면의 판정 결과(70%/40% 등)를 HTML 에 미리 박아두지 않는다 — 엔진이 그린다
+    assert 'id="verdict"></div>' in html
+
+
+def test_demo_admits_limits_even_in_a_pitch(site):
+    """피치라고 좋은 숫자만 추리면 그 화면이 곧 과장이다 — 한계도 무대에 올린다."""
+    html = site["demo.html"]
+    assert "미측정" in html                       # 스코어카드 미측정을 숨기지 않는다
+    assert "실 고객데이터 미사용" in html          # 합성 포트폴리오임을 명시
+    assert "사람 검토" in html                    # 모르는 것은 검토로 넘긴다는 원칙
+
+
+def test_demo_has_recording_and_live_controls(site):
+    """녹화(자동 재생·전체화면)와 라이브 시연(수동 넘김·장면 선택) 둘 다 돼야 한다."""
+    html = site["demo.html"]
+    for token in ("자동 재생", "전체화면", 'data-dur="', "data-scene", "ArrowRight"):
+        assert token in html
 
 
 # ---------- README 의 문서 지도가 실재하는가 ----------
