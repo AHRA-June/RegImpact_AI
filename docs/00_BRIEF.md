@@ -45,7 +45,8 @@ PRD 작성과 개발 과정에서 모든 결정을 같은 강도로 고정하지
 ## 1. 프로젝트 한 줄 정의
 
 **생성형 AI 기반 주택담보대출 규제 변경 영향분석 및 검증 시스템**  
-영문: **RegChange AI — Financial Policy Impact & Assurance Lab**
+영문: **RegImpact AI — Financial Regulation Impact & Assurance Platform**
+(구 표기 "RegChange AI"는 2026-08-18 사업화 결정으로 제품명 RegImpact AI에 통일 — "RegChange"는 변경 추출 컴포넌트명으로만 사용)
 
 핵심 질문 두 개:
 
@@ -293,7 +294,7 @@ Human Policy Owner
 
 ## 7. Temporal Policy Resolver — 변경 탐지의 기준선
 
-RegChange AI는 새 문서 하나를 요약하는 시스템이 아니다.
+RegImpact AI는 새 문서 하나를 요약하는 시스템이 아니다.
 
 핵심은:
 
@@ -1146,7 +1147,7 @@ PRD는 최소 다음을 구체화해야 한다.
 
 ## 26. 최종 프로젝트 정의
 
-RegChange AI는:
+RegImpact AI는:
 
 > **금융 규제 변경을 읽어주는 챗봇이 아니다.**
 
