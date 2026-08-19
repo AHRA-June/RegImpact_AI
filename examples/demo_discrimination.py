@@ -15,34 +15,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
-from regimpact import rule_engine                                    # noqa: E402
-from regimpact.discrimination import (                               # noqa: E402
-    Discrimination,
-    DiscriminationReport,
-    corrupt_extraction,
-    discriminate_extraction,
-)
+from regimpact.discrimination import discriminate_pipeline           # noqa: E402
 from regimpact.extractor import extract_regchange, load_sources      # noqa: E402
 from regimpact.extractor.backends import resolve_completion          # noqa: E402
 from regimpact.extractor.postprocess import normalize_regions        # noqa: E402
 from regimpact.impact.builder import derive_rule_diff                # noqa: E402
-from regimpact.proposal import (                                     # noqa: E402
-    build_proposal_from_extraction,
-    check_proposal_consistency,
-)
-from regimpact.tc_generator import run_regression                    # noqa: E402
 
 DEFAULT_RUN = REPO / "docs" / "eval" / "runs" / "run_perdoc_sonnet5.json"
-
-
-def _regression_under_mutation(constant: str, value: float) -> float:
-    """룰엔진 상수를 변조한 상태의 회귀 Pass Rate."""
-    original = getattr(rule_engine, constant)
-    setattr(rule_engine, constant, value)
-    try:
-        return run_regression().pass_rate
-    finally:
-        setattr(rule_engine, constant, original)
 
 
 def main() -> int:
@@ -53,35 +32,8 @@ def main() -> int:
         (REPO / "docs" / "eval" / "regchange_gold_6_30.json").read_text(encoding="utf-8")
     )
 
-    results: list[Discrimination] = list(
-        discriminate_extraction(extraction, sources, gold).results
-    )
+    report = discriminate_pipeline(extraction, sources, gold, rule_diff=derive_rule_diff())
 
-    # 룰 회귀 — 엔진 상수를 변조하면 독립 오라클이 잡아야 한다
-    clean_rate = run_regression().pass_rate
-    results.append(Discrimination(
-        "Rule Regression (LTV 40%→50% 변조)",
-        clean_rate, _regression_under_mutation("LTV_REGULATED_STANDARD", 0.50),
-    ))
-    results.append(Discrimination(
-        "Rule Regression (기준선 70%→65% 변조)",
-        clean_rate, _regression_under_mutation("LTV_BASELINE", 0.65),
-    ))
-
-    # 변경안 ↔ 엔진 일치 — 오염된 추출로 만든 변경안은 통과율이 떨어져야 한다
-    diff = derive_rule_diff()
-
-    def _consistency_rate(ex) -> float:
-        rep = check_proposal_consistency(build_proposal_from_extraction(ex), rule_diff=diff)
-        s = rep.summary()
-        return s["passed"] / s["total"]
-
-    results.append(Discrimination(
-        "Proposal Consistency",
-        _consistency_rate(extraction), _consistency_rate(corrupt_extraction(extraction)),
-    ))
-
-    report = DiscriminationReport(results)
 
     print("=" * 78)
     print("판별력(negative control) — 정상 데이터 vs 오류 주입")
