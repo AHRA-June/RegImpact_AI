@@ -117,21 +117,24 @@ def build_graph(
                                 provenance="정책 버전 DB (supersedes)"))
 
     # ---------------- ③ 규제지역 — 이번 정책의 신규 지정은 개별, 과거는 집계
-    prior_total = 0
-    for p in policies[:-1]:
-        prior_total += len(p.region_deltas)
+    # 집계 수는 **확정 정책만** 센다 — DRAFT 지정(해제 원문 대기)을 섞으면
+    # "지정 N곳"이 확립된 사실처럼 읽힌다. DRAFT 는 엣지에 (초안)으로만 나타난다.
+    prior_total = sum(
+        len(p.region_deltas) for p in policies[:-1] if p.status.value == "CONFIRMED")
     prior_id = "REGIONS_PRIOR"
     g.nodes.append(Node(id=prior_id, type="region", label="기존 규제지역",
                         sub=f"{policies[0].effective_from.year}~"
-                            f"{policies[-2].effective_from.year} 지정 {prior_total}곳",
+                            f"{policies[-2].effective_from.year} 확정 지정 {prior_total}곳",
                         value=prior_total))
     for p in policies[:-1]:
         if not p.region_deltas:
-            continue   # 지역 이관 전 DRAFT (예: 6·17 소급 등록) — 없는 지정을 그리지 않는다
+            continue   # 지역 이관 전 DRAFT — 없는 지정을 그리지 않는다
+        draft = p.status.value != "CONFIRMED"
         g.edges.append(Edge(source=p.policy_id, target=prior_id, kind="designates",
-                            label=f"{len(p.region_deltas)}곳 지정",
+                            label=f"{len(p.region_deltas)}곳 지정" + (" (초안)" if draft else ""),
                             weight=len(p.region_deltas),
-                            provenance="정책 버전 DB (region_deltas)"))
+                            provenance="정책 버전 DB (region_deltas"
+                                       + (" — DRAFT, 해제 원문 대기)" if draft else ")")))
     for d in current.region_deltas:
         g.nodes.append(Node(id=d.region_code, type="region",
                             label=region_label(d.region_code),
