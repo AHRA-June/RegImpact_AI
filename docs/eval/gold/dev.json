@@ -445,13 +445,17 @@
         {
           "source_doc_id": "FAQ_20260630",
           "quote": "규제지역 효력 발생일 전일(6.30일)까지 주택매매계약 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능 2. 규제지역 지정시 생애최초 주담대도 LTV가 강화"
+        },
+        {
+          "source_doc_id": "FAQ_20260630",
+          "quote": "주택매매계약을 체결하고 계약금 납부사실 증명시 종전규정 적용 참고 汤捯 규제지역 지정에 따라 강화되는 대출규제 적용 예외사유 조치 규제 규제 적용 예외 규제지역"
         }
       ],
       "expect_escalation": false,
       "policy_version": "FSC_20260630",
       "rule_id": null,
-      "authored_by": "ai_draft",
-      "note": ""
+      "authored_by": "human_confirmed",
+      "note": "검수 2026-08-19: 인용 앞 문맥 '사업자 주담대 관련'으로 범위 확인. 앵커와 동일 표현의 󰊵 각주 인용 추가(인용만으로 확인 가능하게)."
     },
     {
       "id": "DEV-EFF-001",
@@ -617,13 +621,17 @@
         {
           "source_doc_id": "FSC_PRESS_20260630",
           "quote": "동탄구, 기흥구, 구리시의 규제지역(투기과열지역, 조정대상지역) 지정에 따라 LTV(70% → 40%) 등 강화된 대출 규제 즉시 적용(7.1일～) ▴향후 지속적"
+        },
+        {
+          "source_doc_id": "MOLIT_PRESS_20260630",
+          "quote": "3곳을 투기과열지구 및 조정대상지역으로 신규 지정한다. ㅇ 화성시 동탄구와 용인시 기흥구의 경우 최근 반도체 업계 특수에 따른 집값 상승 기대감과 GTX-A 개통"
         }
       ],
       "expect_escalation": false,
       "policy_version": "FSC_20260630",
       "rule_id": null,
-      "authored_by": "ai_draft",
-      "note": ""
+      "authored_by": "human_confirmed",
+      "note": "검수 2026-08-19: FSC 보도자료는 '투기과열지역'으로 2회 오기 — 지정권자 MOLIT 원문이 '투기과열지구'로 명시(지구 10회)하므로 공식 용어 앵커를 엄격 유지하고 MOLIT 지정 문장을 인용 추가."
     },
     {
       "id": "DEV-REG-003",
@@ -730,8 +738,8 @@
       "expect_escalation": false,
       "policy_version": "FSC_20260630",
       "rule_id": "REG_STD",
-      "authored_by": "ai_draft",
-      "note": ""
+      "authored_by": "human_confirmed",
+      "note": "검수 2026-08-19: FAQ 주1과 MOLIT LTV 표가 독립적으로 뒷받침. 원문은 괄호 표기라 앵커(서술형)가 인용에 없는 것은 구조적 — 결함 아님. 근거가 LTV 표 각주이므로 범위는 LTV 기준."
     },
     {
       "id": "DEV-BOR-004",
@@ -892,8 +900,8 @@
       "expect_escalation": true,
       "policy_version": "FSC_20260630",
       "rule_id": null,
-      "authored_by": "ai_draft",
-      "note": "Q10 잔여 미결 — 지어내면 실패"
+      "authored_by": "human_confirmed",
+      "note": "Q10 잔여 미결 — 지어내면 실패. 검수 2026-08-19: 세 문서 전수 스캔으로 '없음' 확인 — '유주택'은 MOLIT 2곳뿐(규제지역 0% / 수도권 外 60%), FAQ Q2 수도권 열은 주1) 무주택 기준."
     }
   ]
 }
