@@ -121,6 +121,18 @@ main 현재 보유: `extractor/`(backends·merge·postprocess·evaluate) · `imp
 | S-20 | `docs/features/` 기능단위 버전관리 체계 | d2et38 |
 | S-21 | Ollama / OpenAI 호환 백엔드 (backends.py 확장) | sp37fd |
 
+### 삭제 브랜치에서 뒤늦게 발견한 항목
+
+브랜치 3개를 지우기 전 재확인에서 나왔다. 처음 분류 때 "이식할 것 없음"이라 했던 것이
+부분적으로 틀렸다 — 파일 경로만 비교하고 **경로가 다른 고유 기능**을 놓쳤다.
+
+| # | 능력 | 출처 | 상태 |
+|---|---|---|---|
+| S-23 | **고객용 내러티브** — reason_code 를 사람 말로 번역해 "그래서 나는?"에 답한다 | `71qh9m` (태그 `archive/start-work-71qh9m`) | ⬜ 미이식 |
+| S-24 | 타 provider(Gemini) 초기 실측 기록 — grounding 이 **실제 환각**을 잡은 증거 | `kus0w7` | ✅ 이식 완료 |
+
+브랜치는 지웠지만 커밋은 `archive/*` 태그로 보존돼 있다. S-23 은 거기서 꺼내면 된다.
+
 ### 별도 트랙
 | ~~S-22~~ | ~~사업계획서 v0/v1 (PSST)~~ | ✅ 2026-08-19 완료 (제품 명칭 RegImpact AI 통일 포함) |
 

@@ -1,0 +1,22 @@
+{
+  "_note": "재측정 스냅샷 — Extractor 개선 후(프롬프트 verbatim·예외분리 + 지역코드 정규화). 개발 관측, LLM 비결정.",
+  "date": "2026-08-10",
+  "provider": "google-gemini",
+  "model": "gemini-flash-latest",
+  "sources": ["FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"],
+  "extraction_count": 7,
+  "metrics": {
+    "change_completeness": 1.0,
+    "effective_date_ok": true,
+    "exception_recall": 1.0,
+    "citation_correctness": 0.8571,
+    "unsupported_claim_rate": 0.1429,
+    "regions_code_ok": true
+  },
+  "improvements": [
+    "프롬프트: verbatim 인용 강제(생략표 금지) + 예외를 종류별 개별 항목으로 분리 지시",
+    "후처리: 지역 한글명 → 내부 코드 결정적 매핑(normalize_extraction, LLM 아님)"
+  ],
+  "remaining": "GRANDFATHERING 인용 1건이 아직 근사(…)라 grounding 미통과 — Citation 86%로 상승했으나 완전하지 않음(정직 보고).",
+  "caveat": "개발 관측 스냅샷: 튜닝은 6·30 앵커 시나리오에서만(§12). 무료 티어·LLM 비결정. 최종 성능 아님."
+}
