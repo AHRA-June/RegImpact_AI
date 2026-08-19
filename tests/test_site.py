@@ -396,6 +396,26 @@ def test_signal_qa_answers_in_plain_language_backed_by_full_source(site):
     assert "원문 전체" in html                    # 발췌 → 전체로 가는 길
 
 
+def test_signal_fixes_from_phone_review(site):
+    """폰 실사용 리뷰(2026-08-19) 3건 고정 — ③ 방향, 연락처 구간, 규제 외 질문."""
+    import json as _json
+    import re as _re
+    html = site["signal.html"]
+    # ① ③은 결과보다 위에 있다 — "아래 ③" 같은 방향 오류 대신 탭하면 스크롤되는 링크
+    assert "아래 ③" not in html
+    assert 'href="#gf"' in html and 'id="gf"' in html
+    # ② 고객 화면 검색 색인에 담당자 연락처 구간(실명·전화)이 없다.
+    #    공문 전체 보기(DOCS_FULL)에는 원문 그대로 남는다 — 문서 편집이 아니라 재료 선별.
+    idx_json = html.split("const IDX_EXPORT = ", 1)[1].split(";\nconst QUOTES", 1)[0]
+    chunks = _json.loads(idx_json)["chunks"]
+    phone = _re.compile(r"0\d{1,2}-\d{3,4}-\d{4}")
+    assert chunks, "고객 색인이 비었다"
+    hits = [c["id"] for c in chunks if phone.search(c["text"])]
+    assert not hits, f"고객 색인에 연락처 구간이 남아 있다: {hits[:3]}"
+    # ③ 비규제/규제 외 질문에도 미리 검수된 쉬운 요약이 있다
+    assert "규제 외" in html and "non-regulated" in html
+
+
 def test_signal_is_honest_with_customers(site):
     """고객 화면일수록 한계를 숨기면 안 된다 — 금융사고가 되는 지점이다."""
     html = site["signal.html"]
