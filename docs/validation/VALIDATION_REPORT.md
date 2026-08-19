@@ -4,10 +4,10 @@
 |---|---|
 | 대상 시스템 | RegImpact AI — 주택담보대출 규제 변경 영향분석·검증 시스템 |
 | 검증 시나리오 | FSC_20260630 — 규제지역 추가 지정 (시행 2026-07-01) |
-| 생성 시각 | 2026-08-19 01:35 UTC |
+| 생성 시각 | 2026-08-19 01:44 UTC |
 | 생성 방법 | `python examples/build_validation_report.py` — 파이프라인 실행 결과에서 자동 조립 |
 | LLM provider | `replay` (재생 원본 `docs/eval/runs/run_perdoc_sonnet5.json`) |
-| 감사로그 head | `71b8bb39712d76432692c613f7b4a7b9d4224ac0df6dfd958756888990a05e08` |
+| 감사로그 head | `540d94034d0044c474bc51dd31a84c0f67914f00c74a1a428356a885d5a43c5d` |
 
 > 이 보고서의 **모든 수치는 파이프라인을 실제로 실행해 얻은 값**이다. 손으로 적은 숫자는 없다.
 > 시스템이 바뀌면 보고서도 바뀐다. 재현 방법은 §13.
@@ -93,15 +93,15 @@ LLM 의 신규 추론 능력(재생 실행 사용, §13).
 
 | # | 단계 | 대상 | 해시 |
 |---|---|---|---|
-| 0 | SOURCE_INGESTED | FSC_PRESS_20260630 | `46906eb8632f…` |
-| 1 | SOURCE_INGESTED | MOLIT_PRESS_20260630 | `bb75105220b5…` |
-| 2 | SOURCE_INGESTED | FAQ_20260630 | `1e1aa51dce03…` |
-| 3 | EXTRACTION | FSC_20260630 | `dcaa1562035a…` |
-| 4 | POLICY_RESOLVED | policy_registry | `d8f8593669ab…` |
-| 5 | IMPACT_ANALYZED | FSC_20260630 | `8a9154dfd8cc…` |
-| 6 | REGRESSION_RUN | tc_generator | `c764e71f140c…` |
-| 7 | PROPOSAL_CREATED | MORTGAGE_LTV_REGULATED_REGION | `bcba0f5e827e…` |
-| 8 | ASSURANCE_SCORED | FSC_20260630 | `71b8bb39712d…` |
+| 0 | SOURCE_INGESTED | FSC_PRESS_20260630 | `02bc71615e97…` |
+| 1 | SOURCE_INGESTED | MOLIT_PRESS_20260630 | `9762b4f44e91…` |
+| 2 | SOURCE_INGESTED | FAQ_20260630 | `31e7445deb8f…` |
+| 3 | EXTRACTION | FSC_20260630 | `c41a08dffd24…` |
+| 4 | POLICY_RESOLVED | policy_registry | `046dad194464…` |
+| 5 | IMPACT_ANALYZED | FSC_20260630 | `ae6ebc08fcd3…` |
+| 6 | REGRESSION_RUN | tc_generator | `dbc5f5b1c671…` |
+| 7 | PROPOSAL_CREATED | MORTGAGE_LTV_REGULATED_REGION | `d1541238e432…` |
+| 8 | ASSURANCE_SCORED | FSC_20260630 | `540d94034d00…` |
 
 각 이벤트의 해시는 직전 해시를 포함한다(해시 체인). 사후 변조 시 체인이 깨진다(§13).
 
@@ -474,7 +474,7 @@ LLM 호출 없이 전 과정이 재현된다 — provider `replay` 가 실제 �
 이번 실행의 감사로그: **9건**, 체인 무결성 **✅**.
 
 ```
-head = 71b8bb39712d76432692c613f7b4a7b9d4224ac0df6dfd958756888990a05e08
+head = 540d94034d0044c474bc51dd31a84c0f67914f00c74a1a428356a885d5a43c5d
 ```
 
 각 이벤트 해시가 직전 해시를 포함하므로 항목 수정·순서 변경·중간 삭제는 즉시 드러난다.
@@ -598,5 +598,7 @@ head = 71b8bb39712d76432692c613f7b4a7b9d4224ac0df6dfd958756888990a05e08
 | `docs/05_RULE_SPEC.md` | 확정 룰 명세 (엔진 구현의 기준) |
 | `docs/regulatory_facts.md` | 사람 확정 규제 사실 (C01~C16) |
 | `docs/eval/VALIDATION_LIMITS.md` | 검증 한계 상세 분석 |
+| `docs/governance/MODEL_SYSTEM_CARD.md` | Model & System Card |
+| `docs/governance/AI_RISK_REGISTER.md` | AI 리스크 레지스터 (18건) |
 | `docs/02_DECISION_LOG.md` | 의사결정 이력 |
 | `docs/07_BRANCH_TRIAGE.md` | 브랜치 정리·이식 백로그 |
