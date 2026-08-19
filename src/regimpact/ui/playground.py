@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 from ..report.evidence import ValidationEvidence
-from .theme import esc, page, page_title
+from .theme import esc, explainer, page, page_title
 
 ENGINE_JS = Path(__file__).resolve().parent / "static" / "engine.js"
 
@@ -95,9 +95,18 @@ def render(ev: ValidationEvidence, fixtures: dict) -> str:
     n_cases = len(fixtures["cases"])
     n_probe = sum(len(v) for v in fixtures["region_probe"].values())
 
+    intro = explainer(
+        "대출 조건(지역·주택 수·시점 등)을 직접 바꿔보면서 심사 결과가 어떻게 달라지는지 "
+        "즉시 확인하는 체험 화면입니다.",
+        "심사 엔진을 웹용으로 옮긴 것. 원본 엔진과 답이 어긋나면 배포 자체가 막히도록 "
+        "수백 건을 자동 대조하므로, 여기서 보는 판정은 실제 엔진과 같습니다.",
+        "왼쪽에서 조건을 바꾸면 오른쪽에 결과가 바로 바뀝니다. 결과 아래 목록은 "
+        "“어떤 규칙을 차례로 검사해 이 결론이 났는지”의 과정입니다.",
+    )
     body = f"""{page_title(
         "판정 플레이그라운드",
         "차주 조건을 바꾸면 즉시 판정이 바뀐다 — 값만이 아니라 어느 규칙에서 멈췄는지(trace)까지.")}
+{intro}
   <div class="cols">
     <form class="panel" id="f">
       <h2>차주 조건</h2>

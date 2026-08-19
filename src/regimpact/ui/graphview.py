@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 
 from ..graph import Graph
-from .theme import card, chip, esc, glance, page, page_title
+from .theme import card, chip, esc, explainer, glance, page, page_title
 
 _COL_LABEL = {
     "doc": "원문 문서", "policy": "정책 버전", "region": "규제지역",
@@ -123,6 +123,15 @@ def render(g: Graph, *, portfolio_size: int) -> str:
             "영향 지식그래프",
             "문서 → 정책 → 지역 → 룰 → 고객까지, 규제 변경이 흘러가는 경로. "
             "노드를 클릭하면 그 노드와 연결된 경로가 양방향으로 강조된다.",
+        )
+        + explainer(
+            "규제 변경이 문서 → 정책 → 지역 → 규칙 → 고객으로 어떻게 번져가는지 "
+            "연결 지도로 보는 화면입니다.",
+            "이 사이트의 다른 화면들이 이미 계산·검증해 둔 데이터(정책 이력, 규칙 변경, "
+            "고객 영향 계산, 검산 결과)를 이어 붙인 것. AI가 상상으로 그린 그림이 아니라서 "
+            "연결선마다 \"어느 데이터에서 왔는지\" 출처가 있습니다.",
+            "상자(노드)를 클릭하면 그것과 연결된 경로만 밝게 남습니다. 아래 패널에서 "
+            "각 연결의 출처를 확인할 수 있습니다.",
         )
         + top
         + card(

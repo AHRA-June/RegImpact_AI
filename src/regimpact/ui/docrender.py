@@ -243,7 +243,8 @@ _DOC_CSS = """
 
 
 def markdown_to_html(md: str, *, title: Optional[str] = None,
-                     active: str = "", status: str = "실측 생성") -> str:
+                     active: str = "", status: str = "실측 생성",
+                     intro_html: str = "") -> str:
     """마크다운 문자열을 공통 셸(사이드바 + 헤더) 안의 자체완결 HTML 문서로 렌더한다.
 
     문서도 화면과 같은 메뉴를 쓴다 — 페이지마다 내비게이션이 다르면 길을 잃는다
@@ -259,7 +260,9 @@ def markdown_to_html(md: str, *, title: Optional[str] = None,
         doc_title = doc_title or "문서"
 
     body = (
-        '<div class="doc-shell">'
+        (f'<div style="max-width:1120px;margin:0 auto 8px">{intro_html}</div>'
+         if intro_html else "")
+        + '<div class="doc-shell">'
         f'<div class="doc-toc">{_toc(md)}</div>'
         f'<div class="doc-body">{_render_blocks(md)}</div>'
         "</div>"

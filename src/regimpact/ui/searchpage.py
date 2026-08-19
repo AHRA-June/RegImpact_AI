@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 from ..retrieval.evaluate import RetrievalReport
-from .theme import card, chip, esc, glance, page, page_title, table
+from .theme import card, chip, esc, explainer, glance, page, page_title, table
 
 SEARCH_JS = Path(__file__).resolve().parent / "static" / "search.js"
 
@@ -90,6 +90,14 @@ def render(index_export: dict, reports: dict[bool, RetrievalReport]) -> str:
             "규제 원문 검색",
             "질문과 어휘가 겹치는 원문 구간을 BM25로 찾는다 — RAG의 검색 절반. "
             "품질은 골드 인용 기준 recall@k 실측.",
+        )
+        + explainer(
+            "규제 원문에서 궁금한 내용을 찾아주는 검색 기능입니다. AI가 문서를 참고해 답하게 "
+            "하는 기술(RAG)의 앞 절반 — \"어느 대목을 참고할지 고르기\"에 해당합니다.",
+            "정부 공문을 잘게 나눈 색인 + 검색 알고리즘(BM25). 이 화면 안에서 검색이 실제로 "
+            "작동하고, \"얼마나 잘 찾는지\"를 사람이 확정한 정답 기준으로 채점한 점수도 함께 실었습니다.",
+            "검색창에 입력하면 관련 원문 구간이 점수 순으로 나옵니다. 못 찾은 사례 목록도 "
+            "아래에 그대로 실었습니다 — 좋은 점수만 보여주지 않습니다.",
         )
         + top
         + card("검색 — 브라우저에서 실제 실행", search_ui,

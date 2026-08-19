@@ -49,11 +49,25 @@ from regimpact.ui.playground import render as render_playground  # noqa: E402
 from regimpact.ui.site import render_site                        # noqa: E402
 from regimpact.ui.summary import render as render_summary        # noqa: E402
 
-# 마크다운 문서 → 사이트 파일명
+from regimpact.ui.theme import explainer                         # noqa: E402
+
+# 마크다운 문서 → 사이트 파일명 · 상단 '이 페이지는?' 설명 (비전공자용)
 DOCS = {
-    "validation_report.html": ("검증보고서", render_report),
-    "model_system_card.html": ("모델·시스템 카드", render_card),
-    "ai_risk_register.html": ("AI 리스크 레지스터", render_register),
+    "validation_report.html": ("검증보고서", render_report, explainer(
+        "이 시스템이 믿을 만한지 항목별로 검사한 정식 보고서(전문)입니다.",
+        "파이프라인을 실제로 한 번 관통 실행한 결과. 보고서의 모든 숫자가 그 실행에서 "
+        "자동으로 채워지므로, 손으로 적은 숫자가 없습니다.",
+        "왼쪽 목차로 이동하며 읽습니다. 짧게 보려면 메뉴의 \"검증 요약\"이 이 문서의 1페이지 요약입니다.")),
+    "model_system_card.html": ("모델·시스템 카드", render_card, explainer(
+        "이 시스템에서 AI가 무엇을 하고, 무엇을 하면 안 되는지 정리한 사용 설명서입니다.",
+        "AI 업계의 Model Card 관례를 따른 문서 + 실측 수치. 용도 밖 사용(오용)을 막는 "
+        "경계선을 명시합니다.",
+        "\"이 시스템은 무엇이 아닌가\" 절이 핵심입니다 — AI가 규칙 값을 정하지 않는다는 경계.")),
+    "ai_risk_register.html": ("AI 리스크 레지스터", render_register, explainer(
+        "이 시스템이 잘못될 수 있는 경우들과 그 대비책을 정리한 목록입니다.",
+        "사람이 판단한 리스크 평가 + 실제 코드·테스트를 가리키는 대비책. 대비책이 말뿐이 "
+        "아닌지(실제 코드로 존재하는지) 테스트가 확인합니다.",
+        "각 리스크의 발생가능성·영향·대비책·실제 발생 이력을 표로 봅니다.")),
 }
 
 
@@ -116,10 +130,11 @@ def main() -> int:
         (out / name).write_text(html, encoding="utf-8")
 
     # 2. 문서 3종 — 마크다운 렌더러로, 화면과 같은 셸(사이드바) 안에
-    for filename, (title, renderer) in DOCS.items():
+    for filename, (title, renderer, intro) in DOCS.items():
         md = renderer(ev)
         (out / filename).write_text(
-            markdown_to_html(md, title=title, active=filename), encoding="utf-8")
+            markdown_to_html(md, title=title, active=filename, intro_html=intro),
+            encoding="utf-8")
 
     # 3. 플레이그라운드 (픽스처는 위에서 이미 썼다)
     (out / "playground.html").write_text(

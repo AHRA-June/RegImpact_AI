@@ -118,6 +118,16 @@ def test_summary_shows_gaps_not_only_scores(site):
     assert "미측정" in html                      # 측정 불가 지표를 통과로 치지 않는다
 
 
+def test_every_page_explains_itself_to_non_experts(site):
+    """모든 페이지 상단에 '이 페이지는?' 설명이 있다 (2026-08-19 사용자 리뷰 —
+    비전공자가 무엇을 보는 화면인지 알 수 없었다). 랜딩은 그 자체가 안내판이라 제외."""
+    for name, html in site.items():
+        if name in ("_dir", "index.html"):
+            continue
+        assert "pg-explain" in html and "이 페이지는?" in html, f"{name}: 페이지 설명 없음"
+        assert "무엇으로 만들었나요?" in html, f"{name}: 재료 설명 없음"
+
+
 def test_graph_page_carries_provenance(site):
     """그래프 화면의 관계마다 출처가 실려 있어야 한다 — 없으면 LLM 그래프와 구분이 안 된다."""
     html = site["graph.html"]

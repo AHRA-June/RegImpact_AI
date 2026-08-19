@@ -24,7 +24,7 @@ from pathlib import Path
 
 from ..extractor.schema import RegChangeExtraction
 from ..policy import load_registry
-from .theme import card, chip, esc, glance, icon, page, page_title, table
+from .theme import card, chip, esc, explainer, glance, icon, page, page_title, table
 
 REPO = Path(__file__).resolve().parents[3]
 SOURCES_MD = REPO / "docs" / "sources" / "SOURCES.md"
@@ -157,6 +157,13 @@ def render(extraction: RegChangeExtraction) -> str:
         page_title(
             "규제 문서 등록",
             "새 공문이 파이프라인에 들어오는 입구 — 스냅샷(해시) → 추출 → 정책 버전 → 사람 확정.",
+        )
+        + explainer(
+            "정부가 발표한 규제 공문(PDF·HWP)을 시스템에 들여오는 입구입니다.",
+            "공문 파일 + 문서 지문(해시) 기술. 문서마다 고유한 지문을 남겨서, 나중에 원본이 "
+            "바뀌거나 위조됐는지 확인할 수 있게 합니다.",
+            "파일을 선택하면 지문이 만들어지는 걸 직접 볼 수 있습니다(파일은 어디로도 전송되지 "
+            "않습니다). 아래 표는 이미 등록된 문서와 과거 정책의 등록 현황입니다.",
         )
         + top
         + card("새 문서 등록 — 스냅샷 해시 만들기", upload_panel,
