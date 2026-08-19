@@ -209,7 +209,17 @@ def test_playground_shows_verdict_before_form_on_mobile(site):
 
 
 # ---------- 모바일 ----------
-CHROMIUM = Path("/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+def _find_chromium() -> Path | None:
+    """샌드박스는 /opt/pw-browsers 에, CI 는 ~/.cache/ms-playwright 에 둔다."""
+    for root in (Path("/opt/pw-browsers"), Path.home() / ".cache" / "ms-playwright"):
+        if not root.exists():
+            continue
+        for exe in sorted(root.glob("chromium*/chrome-linux/chrome")):
+            return exe
+    return None
+
+
+CHROMIUM = _find_chromium()
 MOBILE_WIDTH = 390
 
 
@@ -225,7 +235,7 @@ def mobile_scroll(site):
             "브라우저 검사는 이 샌드박스에서 페이지당 ~10초라 기본 스위트에서 제외한다. "
             "CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다.")
     pytest.importorskip("playwright")
-    if not CHROMIUM.exists():
+    if CHROMIUM is None:
         pytest.skip("chromium 없음")
     from playwright.sync_api import sync_playwright
 
