@@ -4,6 +4,7 @@
 먼저 발견한다. 여기서 먼저 잡는다.
 """
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -125,3 +126,40 @@ def test_screens_carry_no_mockup_ltv_values(site):
         rule_engine.LTV_OWNER, rule_engine.LTV_MULTI)}
     found = set(re.findall(r"LTV (\d{1,3}%)", site["rule.html"]))
     assert found <= allowed, f"엔진에 없는 LTV: {found - allowed}"
+
+
+# ---------- JS 포팅본 대조 ----------
+def test_js_port_matches_python_engine(site):
+    """화면에 두 번째 룰 구현을 두는 것 자체가 위험이다 — 그 위험을 대조로 상쇄한다.
+
+    이 테스트가 없으면 JS 가 조용히 갈라져도 아무도 모르고, 화면만 거짓말을 한다.
+    """
+    if shutil.which("node") is None:
+        pytest.skip("node 없음 — CI 에서는 반드시 돈다")
+    r = subprocess.run(
+        ["node", str(REPO / "tools" / "verify_js_port.mjs"),
+         str(site["_dir"] / "fixtures.json")],
+        cwd=REPO, capture_output=True, text=True,
+    )
+    assert r.returncode == 0, r.stderr or r.stdout
+
+
+def test_playground_is_built_and_linked(site):
+    assert "playground.html" in site
+    assert 'href="playground.html"' in site["index.html"]
+
+
+def test_playground_has_no_hardcoded_ltv(site):
+    """규칙 값은 픽스처에서 읽어야 한다 — JS 에 적으면 엔진이 바뀌어도 화면이 안 따라온다."""
+    engine = (REPO / "src" / "regimpact" / "ui" / "static" / "engine.js").read_text(
+        encoding="utf-8")
+    code = re.sub(r"/\*[\s\S]*?\*/", "", engine)
+    code = re.sub(r"//.*$", "", code, flags=re.M)
+    assert not re.findall(r"(?<![\w.])0\.\d+", code), "engine.js 에 LTV 리터럴이 있다"
+
+
+def test_playground_shows_the_rule_trace(site):
+    """값만 보여주면 검증 시스템의 화면이 아니다 — 어디서 멈췄는지가 있어야 한다."""
+    html = site["playground.html"]
+    for rule_id in ("P0c", "P0d", "P1", "P7"):
+        assert rule_id in html

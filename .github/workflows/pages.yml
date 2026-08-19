@@ -38,6 +38,10 @@ jobs:
       - name: Build site
         run: python tools/build_site.py --out site
 
+      # 화면의 JS 룰엔진이 Python 엔진과 갈라지면 배포를 막는다.
+      - name: Verify JS port against Python engine
+        run: node tools/verify_js_port.mjs site/fixtures.json
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
