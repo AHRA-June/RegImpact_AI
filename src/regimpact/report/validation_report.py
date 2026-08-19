@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from .. import rule_engine
 from ..grandfathering import CUTOFF
+from ..governance.risk import RISKS as _RISKS
 from ..regions import REG_EFFECTIVE
 from .evidence import ValidationEvidence
 
@@ -607,5 +608,7 @@ def _appendix(ev: ValidationEvidence) -> str:
 | `docs/05_RULE_SPEC.md` | 확정 룰 명세 (엔진 구현의 기준) |
 | `docs/regulatory_facts.md` | 사람 확정 규제 사실 (C01~C16) |
 | `docs/eval/VALIDATION_LIMITS.md` | 검증 한계 상세 분석 |
+| `docs/governance/MODEL_SYSTEM_CARD.md` | Model & System Card |
+| `docs/governance/AI_RISK_REGISTER.md` | AI 리스크 레지스터 ({len(_RISKS)}건) |
 | `docs/02_DECISION_LOG.md` | 의사결정 이력 |
 | `docs/07_BRANCH_TRIAGE.md` | 브랜치 정리·이식 백로그 |"""
