@@ -32,7 +32,16 @@ jobs:
         run: pip install -e ".[dev]"
 
       # 사이트를 굽기 전에 테스트를 통과해야 한다 — 깨진 수치를 배포하지 않는다.
+      # 브라우저 검사(모바일 가로 스크롤)는 느려서 로컬 기본 스위트에서 빠져 있다.
+      # 배포 직전에는 반드시 돈다 — 폰에서 깨진 화면을 올리지 않기 위해서다.
+      - name: Install browser
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
       - name: Test
+        env:
+          REGIMPACT_BROWSER_TESTS: "1"
         run: python -m pytest -q
 
       - name: Build site

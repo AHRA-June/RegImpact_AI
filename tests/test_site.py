@@ -3,6 +3,7 @@
 배포는 되돌리기 어렵다. 깨진 링크·빈 페이지·외부 의존이 올라가면 링크를 받은 사람이
 먼저 발견한다. 여기서 먼저 잡는다.
 """
+import os
 import re
 import shutil
 import subprocess
@@ -205,3 +206,79 @@ def test_playground_shows_verdict_before_form_on_mobile(site):
     assert ".cols > .result{order:-1}" in html, "모바일에서 결과를 위로 올리는 규칙이 없다"
     assert "min-width:940px" in html and ".cols > .result{order:0}" in html, \
         "데스크톱에서 원래 좌우 배치로 되돌리는 규칙이 없다"
+
+
+# ---------- 모바일 ----------
+CHROMIUM = Path("/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+MOBILE_WIDTH = 390
+
+
+@pytest.fixture(scope="module")
+def mobile_scroll(site):
+    """390px 에서 페이지별 실제 가로 스크롤량. 브라우저는 한 번만 띄운다.
+
+    `scrollWidth` 비교만으로는 부족하다 — 스크롤 컨테이너 안의 넓은 표는 정상이고
+    페이지 자체가 밀리는 것만 문제다. 그래서 실제로 스크롤을 시도해 본다.
+    """
+    if not os.environ.get("REGIMPACT_BROWSER_TESTS"):
+        pytest.skip(
+            "브라우저 검사는 이 샌드박스에서 페이지당 ~10초라 기본 스위트에서 제외한다. "
+            "CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다.")
+    pytest.importorskip("playwright")
+    if not CHROMIUM.exists():
+        pytest.skip("chromium 없음")
+    from playwright.sync_api import sync_playwright
+
+    out = {}
+    with sync_playwright() as p:
+        b = p.chromium.launch(executable_path=str(CHROMIUM))
+        pg = b.new_page(viewport={"width": MOBILE_WIDTH, "height": 844})
+        for name in sorted(EXPECTED):
+            pg.goto(f"file://{site['_dir']}/{name}")
+            pg.wait_for_timeout(150)
+            pg.evaluate("window.scrollTo(900, 0)")
+            out[name] = pg.evaluate("window.scrollX")
+            pg.evaluate("window.scrollTo(0, 0)")
+        b.close()
+    return out
+
+
+def test_no_horizontal_scroll_on_mobile(mobile_scroll):
+    """폰에서 실제로 가로로 밀리는지 브라우저로 확인한다 (CI 전용).
+
+    아래 정적 검사들은 규칙이 **존재하는지**만 본다. 규칙이 있어도 다른 곳에서 넘칠 수
+    있으므로 실제 확인이 필요하고, 그건 CI 에서 돈다.
+
+    폰에서 가로로 밀리면 글자 배치가 무너진 것으로 보인다.
+
+    Stitch 목업이 데스크톱 전용(사이드바 fixed w-72 + 본문 pl-72)이라 390px 에서
+    본문이 102px 로 찌그러져 있었다. 데스크톱만 확인하면 이걸 못 잡는다.
+    """
+    bad = {k: v for k, v in mobile_scroll.items() if v}
+    assert not bad, f"390px 에서 가로로 밀리는 페이지: {bad}"
+
+
+def test_mobile_css_is_present_in_every_page(site):
+    """미디어 쿼리가 통째로 빠지면 반응형이 조용히 되돌아간다."""
+    for name, html in site.items():
+        if name == "_dir":
+            continue
+        assert "@media" in html, f"{name}: 반응형 규칙이 없다"
+
+
+@pytest.mark.parametrize("rule,why", [
+    (".pl-72{padding-left:0}", "사이드바 288px 가 본문을 102px 로 찌그러뜨린다"),
+    ("aside.fixed{position:static", "사이드바가 fixed 로 남으면 본문 위를 덮는다"),
+    ("main .grid-cols-4,main .grid-cols-3{grid-template-columns:repeat(2",
+     "4열 그리드가 안 접혀 칸이 78px 이 되고 글자가 칸 밖으로 나간다"),
+    ("main .shrink-0{flex-shrink:1", "고정폭 열이 안 줄어 페이지를 밀어낸다"),
+    ("main table{display:block", "넓은 표가 페이지를 밀어낸다"),
+])
+def test_mobile_rules_that_actually_fixed_something(site, rule, why):
+    """각 규칙은 실제로 관측된 깨짐 하나씩에 대응한다. 지우면 그게 되돌아온다."""
+    assert rule in site["regchange.html"], why
+
+
+def test_long_code_paths_wrap_in_documents(site):
+    """파일 경로 같은 긴 인라인 코드는 끊을 곳이 없어 문단을 밀어낸다."""
+    assert ".doc-body code{overflow-wrap:anywhere}" in site["ai_risk_register.html"]
