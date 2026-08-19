@@ -65,6 +65,11 @@
    **미측정은 통과가 아니다** — JS 포팅 대조를 안 돌리면 NOT_MEASURED 로 남는다.
    metrics_spec 과 코드가 갈라지면 테스트가 실패한다.
 
+✅ **브랜치 정리 완료** — `kus0w7`·`71qh9m`·`o2geks` 삭제, PR #3 종료. 삭제 전 재확인에서
+   고유 기능 2건(고객용 내러티브 S-23, 타 provider 실측 기록 S-24)을 발견해 먼저 이식했다.
+   처음 분류가 부분적으로 틀렸던 이유: merge-base 기준 diff 를 봐서 경로가 다른 고유 기능을
+   놓쳤다 — main 현재 트리와 직접 비교해야 한다.
+
 🔴 **남은 것은 하나뿐** — ✍️ **Settings → Pages → Source = "GitHub Actions"**.
    build·테스트·사이트 빌드·JS 대조는 CI 에서 전부 통과하고 deploy 잡만 실패한다.
    설정 후 워크플로우 re-run 하면 `https://ahra-june.github.io/RegImpact_AI/` 가 뜬다.

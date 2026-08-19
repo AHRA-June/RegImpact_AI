@@ -1,0 +1,22 @@
+{
+  "_note": "첫 LLM 실측 스냅샷(개발 관측, 튜닝 전). LLM 비결정 → 재실행 시 변동 가능. LOCKED/CHALLENGE 아님(§12). 서술본: gemini_first_run.md.",
+  "date": "2026-08-10",
+  "provider": "google-gemini",
+  "model": "gemini-flash-latest",
+  "sources": ["FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"],
+  "extraction_count": 6,
+  "metrics": {
+    "change_completeness": 1.0,
+    "effective_date_ok": true,
+    "exception_recall": 0.5,
+    "citation_correctness": 0.6667,
+    "unsupported_claim_rate": 0.3333,
+    "regions_code_ok": false
+  },
+  "assurance_caught": [
+    "근사 인용 2건(GRANDFATHERING·SCOPE_LIMIT)이 verbatim 아님 → Citation grounding 탐지",
+    "서민·실수요 예외 누락 → Exception Recall이 탐지(real_demand)",
+    "지역을 한글명으로만 추출(코드 미정규화) → Regions 대조가 탐지"
+  ],
+  "caveat": "개발 관측 스냅샷: 프롬프트 튜닝 전, 무료 티어 모델, LLM 비결정. 최종 성능 아님."
+}
