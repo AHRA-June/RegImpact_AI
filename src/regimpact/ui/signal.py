@@ -146,6 +146,45 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .aff-r.bind .bar i{background:var(--error);opacity:.85}
 .aff-r.bind .nm,.aff-r.bind .vv{color:var(--error);font-weight:700}
 .aff-r.na .vv{color:var(--on-surface-variant);font-weight:400;font-size:11px}
+/* 목표 역산 — 진단(무엇에 막혔나)에서 행동(그래서 얼마)으로 잇는 다리 */
+.goal-row{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:4px}
+.goal-row .f{flex:1; min-width:150px; margin-bottom:0}
+.goal-row button{padding:10px 16px; font-family:inherit; font-size:13px; font-weight:700;
+  border-radius:9px; border:1px solid var(--primary); background:var(--primary); color:#fff;
+  cursor:pointer; white-space:nowrap}
+.rx{margin-top:12px; display:flex; flex-direction:column; gap:9px}
+.rx-hd{font-size:13.5px; line-height:1.55; word-break:keep-all; padding:12px 14px;
+  border-radius:10px; background:var(--surface-container-low);
+  border:1px solid var(--outline-variant)}
+.rx-hd.ok{border-color:var(--secondary)}
+.rx-hd b{color:var(--error)}
+.rx-hd.ok b{color:var(--secondary)}
+.rx-item{border:1px solid var(--outline-variant); border-radius:10px; padding:12px 14px;
+  background:var(--surface-container-lowest)}
+.rx-item .lb{font-size:11px; font-family:'JetBrains Mono',ui-monospace,monospace;
+  color:var(--primary); font-weight:700; letter-spacing:.04em}
+.rx-item .ways{margin-top:8px; display:flex; flex-direction:column; gap:7px}
+.rx-item .way{font-size:13px; line-height:1.55; word-break:keep-all; display:flex; gap:8px}
+.rx-item .way b{font-family:'JetBrains Mono',ui-monospace,monospace; color:var(--on-surface)}
+.rx-item .way .mk{color:var(--secondary); flex:none; font-weight:700}
+.rx-item .no{font-size:12.5px; color:var(--on-surface-variant); line-height:1.55;
+  word-break:keep-all}
+/* 한도 타임라인 — '시그널'이 규제일에만 쓰는 도구가 아님을 보여준다 */
+.tl{margin-top:12px; border-left:2px solid var(--outline-variant); padding-left:16px;
+  display:flex; flex-direction:column; gap:14px}
+.tl .ev{position:relative}
+.tl .ev::before{content:""; position:absolute; left:-21px; top:5px; width:8px; height:8px;
+  border-radius:99px; background:var(--outline-variant); border:2px solid var(--background)}
+.tl .ev.hit::before{background:var(--error)}
+.tl .dt{font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px;
+  color:var(--on-surface-variant)}
+.tl .ti{font-size:13.5px; font-weight:700; margin-top:2px; word-break:keep-all}
+.tl .ds{font-size:12px; color:var(--on-surface-variant); margin-top:3px; line-height:1.5;
+  word-break:keep-all}
+.tl .ev.hit .ti{color:var(--error)}
+.sub-cta{margin-top:12px; padding:13px 15px; border-radius:10px; border:1px dashed var(--primary);
+  font-size:13px; line-height:1.6; word-break:keep-all; color:var(--on-surface-variant)}
+.sub-cta b{color:var(--on-surface)}
 /* 두 사람 비교 — 계산기가 구조적으로 답 못 하는 질문을 10초 안에 보여준다 */
 .duo-wrap{padding:12px 14px}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -645,12 +684,27 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
           <button type="button" data-lender="NONBANK">2금융권</button>
         </div></div>
       <div id="aff-out"></div>
+      <div class="goal-row" style="margin-top:14px">
+        <div class="f"><label for="goal">이만큼 빌리고 싶어요 (억원)</label>
+          <input type="number" id="goal" min="0" step="0.5" placeholder="예: 4"></div>
+        <button type="button" id="goal-go">방법 찾기</button>
+      </div>
+      <div class="rx" id="rx"></div>
       <div class="honesty" style="margin-top:11px"><b>참고 추정이에요.</b> 원리금균등 상환 기준
       이고 <b>스트레스 금리 가산은 미반영</b>이라 실제 한도는 이보다 적을 수 있어요. 기존
       부채는 월 상환액 전액을 DSR·DTI에 반영(보수적)했고, DTI는 아파트 기준입니다. 실제
       가능 금액은 은행 심사로 확정돼요.</div>
       <details class="more" style="margin-top:10px"><summary>이 계산의 근거 조문</summary>
         <div class="evi" id="aff-evi"></div></details>
+    </div>
+
+    <div class="sec-t">내 한도를 움직인 일들</div>
+    <div class="panel">
+      <div class="tl" id="tl"></div>
+      <div class="sub-cta"><b>규제만 한도를 움직이는 게 아닙니다.</b> 지역 지정·해제, 스트레스
+      금리 단계, 정책 변경이 모두 내 한도를 바꿉니다. 실제 서비스에서는 내 조건을 저장해 두고
+      <b>한도가 움직이는 일이 생길 때마다 알림</b>으로 알려드립니다 — 발표일에만 쓰는 도구가
+      아니라, 집을 준비하는 내내 켜져 있는 신호입니다.</div>
     </div>
 
     <details class="more" open><summary>⚡ 같은 날 계약한 두 사람 — 왜 한도가 다른가요?</summary>
@@ -743,8 +797,10 @@ function app(withGf) {
 }
 
 const pct = (v) => `${Math.round(v * 100)}%`;
-function won(x) {  // 원 → "N억 M천만원"
+function won(x) {  // 원 → "N억 M천만원". 1천만 미만은 만원 단위로 — 목표 역산의 처방이
+  // "월 76만원"처럼 소액이라 억 단위로 반올림하면 "0천만원"이 된다(2026-08-20 실측).
   const eok = Math.floor(x / 1e8), chun = Math.round((x % 1e8) / 1e7);
+  if (eok === 0 && chun === 0) return `${Math.round(x / 1e4).toLocaleString()}만원`;
   if (eok === 0) return `${chun}천만원`;
   return chun ? `${eok}억 ${chun}천만원` : `${eok}억원`;
 }
@@ -1025,7 +1081,103 @@ function affRender() {
   box.innerHTML = `<div class="aff-total"><div class="amt">약 ${won(res.total)}</div>
     <div class="bind">지금 조건에서 가장 낮은 한도는 <b>${res.binding.map((k) => AFF_KO[k]).join(" · ")}</b>${partial}</div></div>
     <div class="aff-rows">${rows}</div>`;
+  if (typeof goalRender === "function") goalRender();
 }
+// ── 목표 역산: "그래서 얼마를 바꿔야 하나" — 조사에서 드러난 공백(계산기는 진단에서 멈춘다)
+function affInput() {
+  const a = lastAfter;
+  const region = $("#region").value;
+  const regulated = regionStatus(FX, region, C.REG_EFFECTIVE) === "REGULATED"
+    && !a.grandfathering_applied;
+  const rateRaw = $("#aff-rate").value;
+  return {
+    price: Number($("#price").value || 0) * 1e8, max_ltv: a.max_ltv,
+    rule_id: a.applicable_rule_id, regulated,
+    regulated_type: regulated ? regulatedTypeAt(region, C.REG_EFFECTIVE) : "NONE",
+    annual_income: Number($("#aff-income").value || 0) * 1e4 || null,
+    monthly_debt_service: Number($("#aff-debt").value || 0) * 1e4,
+    annual_rate: rateRaw === "" ? null : Number(rateRaw) / 100,
+    term_years: Number($("#aff-years").value || 0), lender,
+  };
+}
+function goalRender() {
+  const box = $("#rx");
+  const raw = $("#goal").value;
+  if (raw === "" || !lastAfter || lastAfter.status !== "DECIDED") { box.innerHTML = ""; return; }
+  const target = Number(raw) * 1e8;
+  const plan = planForTarget(FX, { ...affInput(), target });
+  if (plan.reachable === null) { box.innerHTML = ""; return; }
+  if (plan.reachable) {
+    box.innerHTML = `<div class="rx-hd ok"><b>지금 조건으로 가능해요.</b> 목표 ${won(target)} 대비
+      약 ${won(plan.headroom)} 여유가 있습니다.</div>`;
+    return;
+  }
+  let html = `<div class="rx-hd"><b>${won(plan.shortfall)} 모자라요.</b>
+    지금 한도는 ${won(plan.now.total)}입니다. 아래 중 하나를 충족하면 목표에 닿습니다.</div>`;
+  for (const a of plan.actions) {
+    const nm = AFF_KO[a.limit];
+    if (a.kind === "hard") {
+      html += `<div class="rx-item"><div class="lb">${nm}</div>
+        <div class="no">${a.detail}</div></div>`;
+    } else if (a.kind === "price") {
+      html += `<div class="rx-item"><div class="lb">${nm}</div>
+        <div class="no">${a.detail}</div>
+        <div class="ways"><div class="way"><span class="mk">·</span><span>주택가격
+        <b>${won(a.need_price)}</b> 이상이면 이 한도로 목표에 닿아요.</span></div></div></div>`;
+    } else {
+      const ways = [];
+      if (a.cut_monthly_debt) {
+        ways.push(`기존 대출 월 상환액을 <b>${won(a.cut_monthly_debt)}</b> 줄이기`);
+      } else if (a.impossible_by_debt) {
+        ways.push("기존 부채를 전부 갚아도 이 한도만으로는 목표에 닿지 않아요");
+      }
+      if (a.by_term && a.by_term.enough) {
+        ways.push(`만기를 <b>${a.by_term.years}년</b>으로 늘리기 `
+          + `(한도 ${won(a.by_term.limit)})`);
+      }
+      if (a.need_income_delta > 0) {
+        ways.push(`연소득 <b>${won(a.need_income)}</b> 이상 인정받기 `
+          + `(지금보다 ${won(a.need_income_delta)} ↑ — 부부합산·상여 포함 여부 확인)`);
+      }
+      html += `<div class="rx-item"><div class="lb">${nm}</div><div class="ways">`
+        + ways.map((w) => `<div class="way"><span class="mk">·</span><span>${w}</span></div>`).join("")
+        + `</div></div>`;
+    }
+  }
+  html += `<div class="honesty">각 방법은 <b>그 규제 하나를 푸는 조건</b>이에요. 여러 규제에
+    동시에 막혀 있으면 모두 충족해야 목표에 닿습니다. 실제 인정 소득·부채 산정은 은행 심사
+    기준을 따릅니다.</div>`;
+  box.innerHTML = html;
+}
+$("#goal-go").addEventListener("click", goalRender);
+$("#goal").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); goalRender(); }
+});
+
+// ── 한도 타임라인 — 정책 DB 실데이터. '시그널'이 발표일 전용 도구가 아님을 보여준다.
+(function renderTimeline() {
+  const evs = [];
+  for (const [code, entry] of Object.entries(FX.regions)) {
+    for (const v of entry.versions) {
+      if (v.effective_from && v.source_policy_id) {
+        evs.push({ date: v.effective_from, code, label: entry.label,
+                   status: v.status, type: v.regulated_type });
+      }
+    }
+  }
+  const byDate = {};
+  for (const e of evs) (byDate[e.date] ??= []).push(e);
+  const rows = Object.entries(byDate).sort((a, b) => (a[0] < b[0] ? 1 : -1)).slice(0, 5);
+  $("#tl").innerHTML = rows.map(([date, list]) => {
+    const hit = date === C.REG_EFFECTIVE;
+    const names = [...new Set(list.map((x) => x.label))];
+    const shown = names.slice(0, 3).join(", ") + (names.length > 3 ? ` 외 ${names.length - 3}곳` : "");
+    return `<div class="ev${hit ? " hit" : ""}"><div class="dt">${date}</div>
+      <div class="ti">${hit ? "지금 보고 있는 변경 — " : ""}규제지역 지정 ${names.length}곳</div>
+      <div class="ds">${shown} · 이 날짜를 기준으로 한도 판정이 달라집니다</div></div>`;
+  }).join("");
+})();
+
 document.querySelectorAll("#aff-lender button").forEach((b) => b.addEventListener("click", () => {
   lender = b.dataset.lender;
   document.querySelectorAll("#aff-lender button").forEach((x) => x.classList.toggle("on", x === b));

@@ -110,3 +110,62 @@ def test_constants_match_the_source_documents():
     assert DSR_RATES == {"BANK": 0.40, "NONBANK": 0.50}
     assert "최대 만기 30년이내" in norm["MOLIT_PRESS_20260630"]
     assert MAX_TERM_YEARS == 30
+
+
+# ---------- 목표 역산: 진단에서 행동으로 ----------
+def test_plan_prescriptions_actually_reach_the_target():
+    """★ 이 파일의 핵심 — 처방대로 바꾸면 정말 목표에 닿아야 한다.
+
+    고객 조사(2026-08-20): 계산기·아티클은 "기존 대출을 정리하라"고만 하고 **얼마를**
+    줄여야 하는지는 말해주지 않는다. 우리가 그 숫자를 말한다면, 그 숫자가 맞아야 한다.
+    """
+    from regimpact.affordability import plan_for_target
+
+    base = dict(price=800_000_000, max_ltv=0.4, rule_id="REG_STD", regulated=True,
+                regulated_type="SPECULATIVE_OVERHEATED", annual_income=50_000_000,
+                monthly_debt_service=1_000_000, annual_rate=0.04, term_years=30)
+    target = 300_000_000
+    plan = plan_for_target(target=target, **base)
+    assert plan["reachable"] is False and plan["actions"]
+
+    income_actions = [a for a in plan["actions"] if a["kind"] == "income"]
+    assert income_actions, "소득 축 처방이 없다"
+    for a in income_actions:
+        # (a) 부채를 처방만큼 줄이면 도달
+        cut = a["cut_monthly_debt"]
+        assert cut is not None
+        after_cut = estimate(**{**base, "monthly_debt_service": base["monthly_debt_service"] - cut})
+        assert after_cut["limits"][a["limit"]] >= target - 1000, \
+            f"{a['limit']}: 부채 {cut} 감축 처방이 목표에 못 미친다"
+        # (c) 소득을 처방만큼 올리면 도달
+        after_income = estimate(**{**base, "annual_income": a["need_income"]})
+        assert after_income["limits"][a["limit"]] >= target - 1000, \
+            f"{a['limit']}: 소득 {a['need_income']} 처방이 목표에 못 미친다"
+
+
+def test_plan_says_impossible_when_regulation_is_the_wall():
+    """규제가 막는 것(가격구간 최대한도)은 조건을 바꿔도 못 넘는다 — 희망을 지어내지 않는다."""
+    from regimpact.affordability import plan_for_target
+
+    plan = plan_for_target(target=800_000_000, price=800_000_000, max_ltv=0.4,
+                           rule_id="REG_STD", regulated=True,
+                           regulated_type="SPECULATIVE_OVERHEATED")
+    kinds = {a["limit"]: a["kind"] for a in plan["actions"]}
+    assert kinds.get("CAP") == "hard", "최대한도를 넘을 수 있는 것처럼 말하면 안 된다"
+
+
+def test_plan_reports_headroom_when_already_reachable():
+    from regimpact.affordability import plan_for_target
+
+    plan = plan_for_target(target=100_000_000, price=800_000_000, max_ltv=0.4,
+                           rule_id="REG_STD", regulated=True,
+                           regulated_type="SPECULATIVE_OVERHEATED",
+                           annual_income=100_000_000, annual_rate=0.04, term_years=30)
+    assert plan["reachable"] is True and plan["headroom"] > 0 and not plan["actions"]
+
+
+def test_annuity_forward_and_inverse_agree():
+    from regimpact.affordability import annual_payment_for_principal
+
+    pay = annual_payment_for_principal(300_000_000, 0.045, 25)
+    assert abs(principal_from_annual_payment(pay, 0.045, 25) - 300_000_000) <= 2

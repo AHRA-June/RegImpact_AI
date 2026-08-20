@@ -13,7 +13,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { evaluate, regionStatus } from "../src/regimpact/ui/static/engine.js";
-import { estimateAffordability } from "../src/regimpact/ui/static/affordability.js";
+import { estimateAffordability, planForTarget } from "../src/regimpact/ui/static/affordability.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const fxPath = resolve(process.argv[2] ?? join(ROOT, "site", "fixtures.json"));
@@ -82,6 +82,22 @@ for (const pr of fx.affordability?.probes ?? []) {
   }
 }
 
+// --- 3b. 목표 역산 처방 대조 ---
+let planProbes = 0;
+for (const pr of fx.affordability?.plan_probes ?? []) {
+  planProbes += 1;
+  const js = planForTarget(fx, pr.input);
+  const py = pr.expected;
+  const diffs = [];
+  if ((js.reachable ?? null) !== (py.reachable ?? null)) {
+    diffs.push(`reachable ${py.reachable} vs ${js.reachable}`);
+  }
+  if (JSON.stringify(js.actions) !== JSON.stringify(py.actions)) {
+    diffs.push(`actions ${JSON.stringify(py.actions)} vs ${JSON.stringify(js.actions)}`);
+  }
+  if (diffs.length) failures.push({ kind: "plan", id: `plan#${planProbes - 1}`, diffs });
+}
+
 // --- 4. 값이 JS 에 하드코딩되지 않았는지 ---
 for (const f of ["engine.js", "affordability.js"]) {
   const src = readFileSync(join(ROOT, "src/regimpact/ui/static", f), "utf8");
@@ -94,7 +110,7 @@ for (const f of ["engine.js", "affordability.js"]) {
 }
 
 // --- 결과 ---
-const total = fx.cases.length + probes + affProbes;
+const total = fx.cases.length + probes + affProbes + planProbes;
 if (failures.length) {
   console.error(`✗ JS 포팅 대조 실패 ${failures.length}건 / ${total}건 검사\n`);
   for (const f of failures.slice(0, 20)) {
@@ -105,4 +121,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`✓ JS 포팅본이 Python 엔진과 일치 — 판정 ${fx.cases.length}건 · 지역프로브 ${probes}건 · 한도계산 ${affProbes}건`);
+console.log(`✓ JS 포팅본이 Python 엔진과 일치 — 판정 ${fx.cases.length}건 · 지역프로브 ${probes}건 · 한도계산 ${affProbes}건 · 목표역산 ${planProbes}건`);

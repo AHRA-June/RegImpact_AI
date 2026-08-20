@@ -591,6 +591,34 @@ def test_signal_total_affordability_is_grounded_and_honest(site):
         assert anchor in norm[doc] and anchor in html, anchor
 
 
+def test_signal_turns_diagnosis_into_action(site):
+    """고객 조사(2026-08-20)의 공백 — 계산기는 "무엇에 막혔나"에서 멈춘다. 목표를 넣으면
+    "그래서 얼마를 바꿔야 하나"를 규제별로 역산해 답한다."""
+    import json as _json
+    html = site["signal.html"]
+    assert "이만큼 빌리고 싶어요" in html and 'id="goal-go"' in html
+    assert "planForTarget(" in html                 # 대조된 포팅본이 계산한다
+    assert '<div class="rx" id="rx"></div>' in html  # 처방은 JS 가 그린다
+    assert "기존 대출 월 상환액을" in html            # 행동으로 잇는 처방
+    assert "부부합산" in html                        # 소득 인정 축
+    # 처방 역산도 Python 과 대조되는 프로브가 실려 있다
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    assert len(fx["affordability"]["plan_probes"]) >= 200
+
+
+def test_signal_shows_limit_moves_beyond_the_announcement_day(site):
+    """'시그널'이 발표일 전용 도구가 아님을 화면이 보여준다 — 한도를 움직인 이벤트 타임라인.
+    날짜·지역은 정책 버전 DB 실데이터에서 온다."""
+    import json as _json
+    html = site["signal.html"]
+    assert "내 한도를 움직인 일들" in html
+    assert 'id="tl"' in html and "알림" in html
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    dated = {v["effective_from"] for e in fx["regions"].values() for v in e["versions"]
+             if v.get("effective_from") and v.get("source_policy_id")}
+    assert len(dated) >= 3, "타임라인에 쓸 정책 시점이 부족하다"
+
+
 def test_signal_pitch_claims_both_customer_and_bank_sides(site):
     """지원서 어필(2026-08-20 인터뷰): 같은 엔진이 고객 화면과 현업 산출물을 모두 구동한다 —
     과장이 아니라 실태이므로 화면에 적고, 그 산출물 링크가 실제로 살아 있어야 한다."""
