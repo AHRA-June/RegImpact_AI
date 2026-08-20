@@ -168,6 +168,20 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .g-note{font-size:11.5px;color:var(--on-surface-variant);margin-top:4px;line-height:1.5;
   word-break:keep-all}
 .g-row.over .g-note b{color:var(--error)}
+/* 내게 가능한 상품 찾기 — 추천이 아니라 자격 판정 */
+.pr{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pr-i{border:1px solid var(--outline-variant);border-radius:10px;padding:12px 14px;
+  background:var(--surface-container-lowest)}
+.pr-i .top{display:flex;align-items:baseline;gap:8px;justify-content:space-between}
+.pr-i .nm{font-size:13.5px;font-weight:700;word-break:keep-all}
+.pr-i .st{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;flex:none;
+  font-family:'JetBrains Mono',ui-monospace,monospace}
+.pr-i.ok{border-color:var(--secondary)}
+.pr-i.ok .st{background:var(--surface-container-low);color:var(--secondary)}
+.pr-i.no .st{background:var(--surface-container-low);color:var(--error)}
+.pr-i.un .st{background:var(--surface-container-low);color:var(--on-surface-variant)}
+.pr-i .rs{font-size:12.5px;color:var(--on-surface-variant);margin-top:6px;line-height:1.55;
+  word-break:keep-all}
 /* 목표 역산 — 진단(무엇에 막혔나)에서 행동(그래서 얼마)으로 잇는 다리 */
 .goal-row{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:4px}
 .goal-row .f{flex:1; min-width:150px; margin-bottom:0}
@@ -549,6 +563,13 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
                                      "조정대상지역(아파트 限) 50% 투기과열지구 40%", 50)
     quotes["_AFF_TERM"] = _corpus_cut(norm_corpus, "MOLIT_PRESS_20260630",
                                       "최대한도 6억원 제한", 70)
+    # 상품 자격 판정의 근거 — 전부 FAQ 원문 verbatim
+    quotes["_P_RELAXED"] = _corpus_cut(norm_corpus, "FAQ_20260630",
+                                       "규제지역에서도 금융권 생애최초 주담대", 110)
+    quotes["_P_DIDIMDOL"] = _corpus_cut(norm_corpus, "FAQ_20260630",
+                                        "디딤돌 대출 (좌동) 최대한도 일반차주2.0억원", 90)
+    quotes["_P_BOGEUM"] = _corpus_cut(norm_corpus, "FAQ_20260630",
+                                      "보금자리론 아파트70% / 非아파트65%", 80)
     # 모달의 '공문 전체'는 **원문 그대로**(줄바꿈 보존) 보여준다. 정제본(공백까지 합친 본문)을
     # 흘리면 표가 한 줄로 뭉개져 사람이 읽을 수 없다(2026-08-20 폰 리뷰). 검색은 정제본을,
     # 화면은 원문을 본다 — 강조 위치는 JS 가 공백 정규화 좌표에서 찾아 원문 좌표로 되돌린다.
@@ -718,6 +739,18 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       가능 금액은 은행 심사로 확정돼요.</div>
       <details class="more" style="margin-top:10px"><summary>이 계산의 근거 조문</summary>
         <div class="evi" id="aff-evi"></div></details>
+    </div>
+
+    <div class="sec-t">내게 가능한 상품 찾기</div>
+    <div class="panel">
+      <div id="prod"></div>
+      <div class="honesty" style="margin-top:11px"><b>추천이 아니라 자격 판정이에요.</b>
+      취향을 예측하는 것이 아니라, 위에서 판정한 조건(지역·주택 수·생애최초·경과규정)으로
+      <b>원문이 정한 요건에 해당하는지</b>를 되짚습니다. 소득·자산 같은 세부 신청 자격은
+      이 공문에 없어서 <b>판정하지 않고 상담으로 안내</b>합니다 — 없는 근거로 "가능합니다"라고
+      말하지 않습니다.</div>
+      <details class="more" style="margin-top:10px"><summary>이 판정의 근거 조문</summary>
+        <div class="evi" id="prod-evi"></div></details>
     </div>
 
     <div class="sec-t">내 한도를 움직인 일들</div>
@@ -1037,7 +1070,60 @@ function run() {
 
   lastAfter = a;
   affRender();
+  prodRender();
 }
+
+// ── 내게 가능한 상품 찾기 — 추천이 아니라 자격 판정.
+//    엔진이 이미 판정한 사실에서 요건 충족 여부를 되짚는다. 소득·자산 요건은 공문에
+//    없으므로 UNKNOWN 으로 남긴다 — 없는 근거로 "가능"이라 말하지 않는다(products.py 와 동일).
+const PRODUCTS = [
+  { id: "FIRST_HOME", name: "생애최초 주담대", cite: "_P_RELAXED", gate: "first" },
+  { id: "REAL_DEMAND", name: "서민·실수요자 주담대", cite: "_P_RELAXED", gate: "demand" },
+  { id: "DIDIMDOL", name: "디딤돌 대출 (정책모기지)", cite: "_P_DIDIMDOL", gate: null },
+  { id: "BOGEUMJARI", name: "보금자리론 (정책모기지)", cite: "_P_BOGEUM", gate: null },
+];
+const ST_KO = { ELIGIBLE: "해당", BLOCKED: "해당 없음", UNKNOWN: "확인 필요" };
+const ST_CLS = { ELIGIBLE: "ok", BLOCKED: "no", UNKNOWN: "un" };
+function prodRender() {
+  const a = lastAfter, box = $("#prod");
+  if (!a) return;
+  const first = $("#first").checked, demand = $("#demand").checked;
+  const blocked = a.status === "DECIDED" && a.max_ltv === 0;
+  const review = a.status !== "DECIDED";
+  const region = $("#region").value;
+  const regulated = regionStatus(FX, region, C.REG_EFFECTIVE) === "REGULATED";
+  const rows = PRODUCTS.map((p) => {
+    let st, rs;
+    if (blocked) {
+      st = "BLOCKED";
+      rs = "이 조건에서는 신규 주택구입 주담대 자체가 제한돼(LTV 0%) 상품을 따질 단계가 아니에요.";
+    } else if (review) {
+      st = "UNKNOWN";
+      rs = "판정에 사람 확인이 필요한 조건이라 상품 자격도 상담으로 확인해야 해요.";
+    } else if (p.gate === "first") {
+      st = first ? "ELIGIBLE" : "UNKNOWN";
+      rs = first
+        ? "생애최초로 체크하셨고, 원문이 생애최초 주담대를 완화 대상으로 명시합니다."
+          + (regulated ? " 규제지역이어도 좌동입니다." : "")
+        : "생애최초 여부를 체크하지 않으셨어요. 세대 구성원 모두 주택 소유 이력이 없어야 해당합니다.";
+    } else if (p.gate === "demand") {
+      st = demand ? "ELIGIBLE" : "UNKNOWN";
+      rs = demand
+        ? "서민·실수요자 요건으로 체크하셨고, 원문이 완화 대상으로 명시합니다."
+        : "소득·주택가격·무주택 요건을 모두 충족해야 해당해요. 위 ① 조건에서 체크해 보세요.";
+    } else {
+      st = "UNKNOWN";
+      rs = "원문에 한도는 나와 있지만 소득·자산 등 신청 자격 요건은 이 공문에 없어요. "
+         + "해당 여부는 상담으로 확인해야 합니다."
+         + (a.grandfathering_applied ? " 경과규정 대상이면 종전 기준이 함께 검토됩니다." : "");
+    }
+    return `<div class="pr-i ${ST_CLS[st]}"><div class="top">
+      <span class="nm">${p.name}</span><span class="st">${ST_KO[st]}</span></div>
+      <div class="rs">${rs}</div></div>`;
+  }).join("");
+  box.innerHTML = `<div class="pr">${rows}</div>`;
+}
+cite($("#prod-evi"), ["_P_RELAXED", "_P_DIDIMDOL", "_P_BOGEUM"], "");
 
 // ── 총 가능금액(참고 추정) — 판정(LTV)은 엔진 결과를 받고, 나머지 한도는 포팅본이 계산한다.
 //    포팅본은 Python 원본과 프로브 전건 대조 후에만 배포된다(엔진과 같은 통제).
