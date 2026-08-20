@@ -338,6 +338,7 @@ def test_signal_runs_verified_ports_not_mocks(site):
     """고객 화면도 본편과 같은 엔진·검색 포팅본이어야 한다 — 데모용 별도 로직 금지."""
     html = site["signal.html"]
     assert "evaluate(FX" in html            # 판정: 룰엔진 포팅본
+    assert "estimateAffordability(" in html  # 한도 계산: 대조된 포팅본
     assert "buildIndex(" in html            # Q&A: BM25 포팅본
     assert "GRANDFATHERING_CUTOFF" in html  # 규칙 값·날짜는 픽스처 상수에서
     # 판정 결과(LTV·한도)는 HTML에 미리 박지 않는다 — 엔진이 그린다
@@ -559,6 +560,44 @@ def test_signal_answers_the_most_asked_question(site):
         return best["id"] if best else None
     assert pick("뭐가바뀐거야?") == "what-changed"
     assert pick("생애최초인데 한도가 줄어드나요") == "first-home"
+
+
+def test_signal_total_affordability_is_grounded_and_honest(site):
+    """인터뷰 반영(2026-08-20): LTV만이 아니라 총 가능금액. 단 — 값은 전부 확정 명세·원문에서,
+    가정은 화면에 그대로, 결과 숫자는 엔진·포팅본이 그린다(HTML 에 미리 박지 않는다)."""
+    import json as _json
+    import re as _re
+
+    from regimpact.extractor.sources import load_corpus
+    html = site["signal.html"]
+    # 화면 요소 — 총액·binding·한도 4종 입력
+    assert "총 얼마까지 빌릴 수 있나" in html and "참고 추정" in html
+    assert '<div id="aff-out"></div>' in html          # 결과는 JS 가 그린다
+    assert "여기에 막혀요" in html                      # binding 규제 표시
+    # 정직성 — 단순화 가정 명시
+    assert "스트레스 금리 가산은 미반영" in html
+    assert "보수적" in html and "은행 심사로 확정" in html
+    # 상수는 픽스처에서 — 대조 프로브가 실려 있고 규제 값 리터럴은 JS 검증이 막는다
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    aff = fx["affordability"]
+    assert len(aff["probes"]) >= 100
+    assert aff["constants"]["max_loan_caps"][0] == [1_500_000_000, 600_000_000]
+    # 근거 조문 4건이 원문 verbatim 으로 실려 있다
+    norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
+    for anchor, doc in [("주택가격별 대출한도 규제(15억원이하6억원", "FAQ_20260630"),
+                        ("금융권 대출은 DSR 규제(은행권 40%", "FAQ_20260630"),
+                        ("조정대상지역(아파트 限) 50% 투기과열지구 40%", "FAQ_20260630"),
+                        ("최대한도 6억원 제한", "MOLIT_PRESS_20260630")]:
+        assert anchor in norm[doc] and anchor in html, anchor
+
+
+def test_signal_pitch_claims_both_customer_and_bank_sides(site):
+    """지원서 어필(2026-08-20 인터뷰): 같은 엔진이 고객 화면과 현업 산출물을 모두 구동한다 —
+    과장이 아니라 실태이므로 화면에 적고, 그 산출물 링크가 실제로 살아 있어야 한다."""
+    html = site["signal.html"]
+    assert "고객·현업 양면" in html
+    assert "임팩트 매트릭스" in html and "검증보고서" in html
+    assert 'href="validation_summary.html"' in html    # 현업 산출물로 가는 실제 경로
 
 
 def test_signal_is_honest_with_customers(site):

@@ -33,6 +33,7 @@ from .theme import CSS, FONTS, esc, explainer
 
 ENGINE_JS = Path(__file__).resolve().parent / "static" / "engine.js"
 SEARCH_JS = Path(__file__).resolve().parent / "static" / "search.js"
+AFFORD_JS = Path(__file__).resolve().parent / "static" / "affordability.js"
 
 _SIGNAL_CSS = """
 html{scroll-behavior:smooth}
@@ -125,6 +126,26 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .delta b{font-weight:700}
 .gfbadge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;
   background:var(--primary-fixed,#dbe1ff);color:var(--on-primary-fixed,#00174b);margin-right:6px}
+/* 총 가능금액(참고 추정) — 한도 4개를 나란히, binding 규제를 짚는다 */
+.aff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.aff-total{margin-top:13px;padding:13px 14px;border-radius:12px;border:1px solid var(--primary);
+  background:color-mix(in srgb,var(--primary) 5%,var(--surface-container-lowest));
+  word-break:keep-all}
+.aff-total .amt{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:26px;
+  font-weight:700;line-height:1.15}
+.aff-total .bind{font-size:12.5px;margin-top:5px;line-height:1.5}
+.aff-total .bind b{color:var(--error)}
+.aff-rows{margin-top:11px;display:flex;flex-direction:column;gap:8px}
+.aff-r{font-size:12px}
+.aff-r .hd{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}
+.aff-r .nm{color:var(--on-surface-variant)}
+.aff-r .vv{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600}
+.aff-r .bar{height:7px;border-radius:99px;background:var(--surface-container-highest);
+  overflow:hidden}
+.aff-r .bar i{display:block;height:100%;border-radius:99px;background:var(--primary);opacity:.55}
+.aff-r.bind .bar i{background:var(--error);opacity:.85}
+.aff-r.bind .nm,.aff-r.bind .vv{color:var(--error);font-weight:700}
+.aff-r.na .vv{color:var(--on-surface-variant);font-weight:400;font-size:11px}
 /* 두 사람 비교 — 계산기가 구조적으로 답 못 하는 질문을 10초 안에 보여준다 */
 .duo-wrap{padding:12px 14px}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -449,6 +470,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
 
     n_cases = len(fixtures["cases"])
     n_probe = sum(len(v) for v in fixtures["region_probe"].values())
+    n_aff = len(fixtures.get("affordability", {}).get("probes", ()))
     docs_630 = sorted({c.citation.source_doc_id for c in ev.extraction.changes})
 
     # 쉬운 요약(미리 검수된 안내) + 원문 전체(클릭 시 모달 — 발췌만 주면 일반인은 벽을 만난다)
@@ -457,6 +479,15 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     capital = set(fixtures.get("capital_area") or ())
     easy = easy_answers(quotes, fixtures["constants"], norm_corpus,
                         labels, bool(regions) and all(c in capital for c in regions))
+    # 통합 계산기 근거 — 최대한도·DSR·DTI·만기 전부 원문 verbatim (affordability.py 상수의 출처)
+    quotes["_AFF_CAP"] = _corpus_cut(norm_corpus, "FAQ_20260630",
+                                     "다만, 주택가격별 대출한도 규제(15억원이하6억원", 90)
+    quotes["_AFF_DSR"] = _corpus_cut(norm_corpus, "FAQ_20260630",
+                                     "금융권 대출은 DSR 규제(은행권 40%", 60)
+    quotes["_AFF_DTI"] = _corpus_cut(norm_corpus, "FAQ_20260630",
+                                     "조정대상지역(아파트 限) 50% 투기과열지구 40%", 50)
+    quotes["_AFF_TERM"] = _corpus_cut(norm_corpus, "MOLIT_PRESS_20260630",
+                                      "최대한도 6억원 제한", 70)
     # 모달의 '공문 전체'는 **원문 그대로**(줄바꿈 보존) 보여준다. 정제본(공백까지 합친 본문)을
     # 흘리면 표가 한 줄로 뭉개져 사람이 읽을 수 없다(2026-08-20 폰 리뷰). 검색은 정제본을,
     # 화면은 원문을 본다 — 강조 위치는 JS 가 공백 정규화 좌표에서 찾아 원문 좌표로 되돌린다.
@@ -489,7 +520,8 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
         "규제가 바뀌었을 때 '내 대출 한도가 얼마에서 얼마로 달라지는지'를 조건 몇 가지로 "
         "확인하는 고객용 시뮬레이터입니다 (Tomorrow Challenge 제안 화면 · 금융앱 웹뷰 탑재형).",
         "판정은 검증 시스템(RegImpact AI)의 심사 엔진을 웹으로 옮긴 것 — 원본과 판정 "
-        f"{n_cases}건·지역 조회 {n_probe}건을 자동 대조해 전부 일치할 때만 배포됩니다. "
+        f"{n_cases}건·지역 조회 {n_probe}건·한도 계산 {n_aff}건을 자동 대조해 전부 일치할 "
+        "때만 배포됩니다. "
         "근거 인용은 공문 원문과 글자 단위 대조를 통과한 문장만 싣습니다.",
         "조건을 바꾸면 변경 전/후 한도가 즉시 다시 계산됩니다. 아래 Q&A는 질문과 관련된 "
         "공문 원문 문단을 찾아 보여줍니다.",
@@ -504,7 +536,8 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
   금융앱(슈퍼SOL 등) 웹뷰 탑재형 제안입니다.</p>
   <ul>
     <li><b>①</b><span><b>영향 알림</b> — 공문 발표 시 내 조건 기준 영향 여부 (아래는 시뮬레이션)</span></li>
-    <li><b>②</b><span><b>전/후 비교</b> — 변경 전·후 한도를 나란히, 어느 규칙에서 판정됐는지까지</span></li>
+    <li><b>②</b><span><b>전/후 비교 + 총 가능금액</b> — 변경 전·후 한도를 나란히, 어느 규칙에서
+      판정됐는지까지. LTV·최대한도·DSR·DTI를 합쳐 <b>어느 규제에 막혔는지</b>도 짚어줍니다</span></li>
     <li><b>③</b><span><b>경과규정 체크</b> — 계약·계약금·접수 일자로 종전 규정 적용 여부</span></li>
     <li><b>④</b><span><b>근거 우선 Q&A</b> — 원문을 검색해 근거 문단을 보여주고, 없으면 지어내지 않고 상담 안내</span></li>
   </ul>
@@ -524,8 +557,12 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
   </table>
   <div class="vbadge"><b>AI가 판정하지 않는 AI 서비스.</b> LLM은 공문에서 사실만 추출하고
   판정은 결정적 룰엔진이 합니다. 이 화면의 엔진은 원본과 판정 {n_cases}건 + 지역 조회
-  {n_probe}건 자동 대조 후에만 배포되며, 서버 호출 없이 브라우저 안에서 돌아
-  고객 입력이 밖으로 나가지 않습니다.</div>
+  {n_probe}건 + 한도 계산 {n_aff}건 자동 대조 후에만 배포되며, 서버 호출 없이 브라우저
+  안에서 돌아 고객 입력이 밖으로 나가지 않습니다.</div>
+  <div class="vbadge"><b>고객·현업 양면 서비스.</b> 이 엔진은 고객 화면 전용이 아닙니다 —
+  같은 엔진이 현업(심사·리스크)용 산출물인 규제 변경 추출 검증·임팩트 매트릭스·포트폴리오
+  영향 분석·검증보고서를 이미 구동하며 전부 공개 운영 중입니다. B2C 콘텐츠와 B2B 내부도구가
+  한 번의 온보딩으로 함께 열립니다.</div>
   <div class="links">
     <a href="demo.html">시스템 시연(3분)</a>
     <a href="playground.html">판정 플레이그라운드</a>
@@ -589,6 +626,32 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <div class="vc after" id="vc-after"></div>
     </div>
     <div class="delta" id="delta"></div>
+
+    <div class="sec-t">총 얼마까지 빌릴 수 있나 — 참고 추정</div>
+    <div class="panel" id="aff">
+      <div class="aff-grid">
+        <div class="f"><label for="aff-income">연소득 (만원)</label>
+          <input type="number" id="aff-income" min="0" step="100" placeholder="예: 6000"></div>
+        <div class="f"><label for="aff-debt">기존 대출 월 상환액 (만원)</label>
+          <input type="number" id="aff-debt" min="0" step="10" value="0"></div>
+        <div class="f"><label for="aff-rate">예상 금리 (%)</label>
+          <input type="number" id="aff-rate" min="0" max="20" step="0.1" placeholder="예: 4.0"></div>
+        <div class="f"><label for="aff-years">만기 (년, 규제지역 최대 30)</label>
+          <input type="number" id="aff-years" min="1" max="40" value="30"></div>
+      </div>
+      <div class="f"><label>대출 기관</label>
+        <div class="seg" style="grid-template-columns:repeat(2,1fr)" id="aff-lender">
+          <button type="button" data-lender="BANK" class="on">은행권</button>
+          <button type="button" data-lender="NONBANK">2금융권</button>
+        </div></div>
+      <div id="aff-out"></div>
+      <div class="honesty" style="margin-top:11px"><b>참고 추정이에요.</b> 원리금균등 상환 기준
+      이고 <b>스트레스 금리 가산은 미반영</b>이라 실제 한도는 이보다 적을 수 있어요. 기존
+      부채는 월 상환액 전액을 DSR·DTI에 반영(보수적)했고, DTI는 아파트 기준입니다. 실제
+      가능 금액은 은행 심사로 확정돼요.</div>
+      <details class="more" style="margin-top:10px"><summary>이 계산의 근거 조문</summary>
+        <div class="evi" id="aff-evi"></div></details>
+    </div>
 
     <details class="more" open><summary>⚡ 같은 날 계약한 두 사람 — 왜 한도가 다른가요?</summary>
       <div class="duo-wrap">
@@ -654,6 +717,7 @@ const DOCS_NOW = __DOCS_NOW__;
 const RULE_KO = __RULE_KO__;
 __ENGINE__
 __SEARCH__
+__AFFORD__
 
 const $ = (s) => document.querySelector(s);
 const C = FX.constants;
@@ -891,7 +955,84 @@ function run() {
   } else {
     dn.textContent = "이 조건에서는 자동 비교가 어려워 상담으로 안내합니다.";
   }
+
+  lastAfter = a;
+  affRender();
 }
+
+// ── 총 가능금액(참고 추정) — 판정(LTV)은 엔진 결과를 받고, 나머지 한도는 포팅본이 계산한다.
+//    포팅본은 Python 원본과 프로브 전건 대조 후에만 배포된다(엔진과 같은 통제).
+let lastAfter = null;
+let lender = "BANK";
+const AFF_KO = { LTV: "담보 비율(LTV)", CAP: "가격구간 최대한도",
+                 DSR: "총부채원리금(DSR)", DTI: "총부채상환(DTI·아파트)" };
+function regulatedTypeAt(code, asOf) {
+  const e = FX.regions[code];
+  if (!e) return "NONE";
+  for (const v of e.versions) {
+    const a = v.effective_from === null || asOf >= v.effective_from;
+    const b = v.effective_to === null || asOf <= v.effective_to;
+    if (a && b) return v.regulated_type ?? "NONE";
+  }
+  return "NONE";
+}
+function affRender() {
+  const box = $("#aff-out");
+  const a = lastAfter;
+  if (!a) return;
+  if (a.status !== "DECIDED") {
+    box.innerHTML = `<div class="consult">이 조건은 자동 판정이 어려워 가능금액을 추정하지
+      않아요 — 지어내는 대신 전문 상담으로 안내합니다.</div>`;
+    return;
+  }
+  const price = Number($("#price").value || 0) * 1e8;
+  if (a.max_ltv === 0) {
+    box.innerHTML = `<div class="aff-total"><div class="amt">대출 불가 (0원)</div>
+      <div class="bind">이 조건은 LTV ${pct(a.max_ltv)} — 신규 주택구입 주담대가 막혀 있어
+      다른 한도를 계산할 실익이 없어요.</div></div>`;
+    return;
+  }
+  const income = Number($("#aff-income").value || 0) * 1e4;
+  const debt = Number($("#aff-debt").value || 0) * 1e4;
+  const rateRaw = $("#aff-rate").value;
+  const rate = rateRaw === "" ? null : Number(rateRaw) / 100;
+  const region = $("#region").value;
+  const regulated = regionStatus(FX, region, C.REG_EFFECTIVE) === "REGULATED"
+    && !a.grandfathering_applied;      // 경과규정이면 종전 규정 — 이번 캡의 대상이 아니다
+  const res = estimateAffordability(FX, {
+    price, max_ltv: a.max_ltv, rule_id: a.applicable_rule_id,
+    regulated, regulated_type: regulated ? regulatedTypeAt(region, C.REG_EFFECTIVE) : "NONE",
+    annual_income: income || null, monthly_debt_service: debt,
+    annual_rate: rate, term_years: Number($("#aff-years").value || 0), lender,
+  });
+  const known = Object.values(res.limits).filter((v) => v !== null);
+  const maxV = Math.max(...known, 1);
+  const rows = Object.entries(res.limits).map(([k, v]) => {
+    if (v === null) {
+      const why = k === "CAP" ? "해당 없음 — 규제지역 조치" : "소득·금리 입력 시 계산";
+      return `<div class="aff-r na"><div class="hd"><span class="nm">${AFF_KO[k]}</span>
+        <span class="vv">${why}</span></div><div class="bar"></div></div>`;
+    }
+    const isBind = res.binding.includes(k);
+    return `<div class="aff-r${isBind ? " bind" : ""}"><div class="hd">
+      <span class="nm">${AFF_KO[k]}${isBind ? " ← 여기에 막혀요" : ""}</span>
+      <span class="vv">${won(v)}</span></div>
+      <div class="bar"><i style="width:${Math.max(3, Math.round(v / maxV * 100))}%"></i></div></div>`;
+  }).join("");
+  const partial = res.limits.DSR === null
+    ? ` <span style="color:var(--on-surface-variant)">· 담보 기준 — 소득·금리를 입력하면
+        DSR·DTI까지 반영돼요</span>` : "";
+  box.innerHTML = `<div class="aff-total"><div class="amt">약 ${won(res.total)}</div>
+    <div class="bind">지금 조건에서 가장 낮은 한도는 <b>${res.binding.map((k) => AFF_KO[k]).join(" · ")}</b>${partial}</div></div>
+    <div class="aff-rows">${rows}</div>`;
+}
+document.querySelectorAll("#aff-lender button").forEach((b) => b.addEventListener("click", () => {
+  lender = b.dataset.lender;
+  document.querySelectorAll("#aff-lender button").forEach((x) => x.classList.toggle("on", x === b));
+  affRender();
+}));
+$("#aff").addEventListener("input", affRender);
+cite($("#aff-evi"), ["_AFF_CAP", "_AFF_DSR", "_AFF_DTI", "_AFF_TERM"], "");
 
 // ---- 조작 ----
 document.querySelectorAll("#own button").forEach((b) => b.addEventListener("click", () => {
@@ -1022,6 +1163,7 @@ document.querySelectorAll(".qa .preset button").forEach((b) =>
         .replace("__RULE_KO__", json.dumps(_RULE_KO, ensure_ascii=False))
         .replace("__BEFORE_CUT__", before_cut)
         .replace("__ENGINE__", ENGINE_JS.read_text(encoding="utf-8"))
+        .replace("__AFFORD__", AFFORD_JS.read_text(encoding="utf-8"))
         .replace("__SEARCH__", SEARCH_JS.read_text(encoding="utf-8"))
     )
 
