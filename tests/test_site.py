@@ -412,8 +412,37 @@ def test_signal_fixes_from_phone_review(site):
     assert chunks, "고객 색인이 비었다"
     hits = [c["id"] for c in chunks if phone.search(c["text"])]
     assert not hits, f"고객 색인에 연락처 구간이 남아 있다: {hits[:3]}"
+    # 연락처를 걷어내되 **그 청크의 본문은 살아 있어야 한다** — 처음엔 청크를 통째로 버려서
+    # 고객이 가장 많이 묻는 값(비규제 70%/유주택 60%)까지 사라졌다.
+    body = " ".join(c["text"] for c in chunks)
+    assert "非규제지역(수도권 외) 무주택(처분조건부 1주택) 70% / 유주택 60%" in body
     # ③ 비규제/규제 외 질문에도 미리 검수된 쉬운 요약이 있다
     assert "규제 외" in html and "non-regulated" in html
+
+
+def test_signal_excerpt_is_sentence_level(site):
+    """발췌·강조는 청크 통째가 아니라 질문어가 걸린 **문장** 단위여야 한다 (2026-08-19 리뷰 2차).
+
+    청크(420자)를 그대로 실으면 첫 줄이 앞 페이지 꼬리라 "여기가 답"으로 읽히지 않는다.
+    """
+    html = site["signal.html"]
+    assert "function pickSentences" in html and "function sentences" in html
+    assert "openDoc(t.doc, t.marks)" in html      # 강조 대상은 문장 목록
+    assert "공문에서 질문 표현이 나온 문장" in html  # 화면이 할 수 있는 주장만 한다
+    assert "질문과 무관할 수 있어요" in html        # 어휘 매칭의 한계를 고객에게 밝힌다
+
+
+def test_signal_full_text_matches_the_indexed_body(site):
+    """모달의 '공문 전체'와 색인 본문이 같은 정제본이어야 발췌 문장을 찾아 강조할 수 있다."""
+    import json as _json
+    html = site["signal.html"]
+    full = _json.loads(html.split("const DOCS_FULL = ", 1)[1].split(";\nconst IDX_EXPORT", 1)[0])
+    idx = _json.loads(html.split("const IDX_EXPORT = ", 1)[1].split(";\nconst QUOTES", 1)[0])
+    assert full and idx["chunks"]
+    for c in idx["chunks"][:8]:
+        assert c["text"][:60] in full[c["doc_id"]], f"{c['id']}: 청크가 전체 본문에 없다"
+    # 무엇을 뺐는지 화면이 밝힌다 — 조용히 지우지 않는다
+    assert "쪽 번호·담당자 연락처 같은 문서 부속만 뺐고 문장은" in html
 
 
 def test_signal_is_honest_with_customers(site):

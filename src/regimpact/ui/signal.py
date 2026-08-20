@@ -25,8 +25,9 @@ import re
 from datetime import date, timedelta
 from pathlib import Path
 
-from ..extractor.sources import load_corpus
+from ..extractor.sources import SOURCE_FILES, load_corpus
 from ..report.evidence import ValidationEvidence
+from ..retrieval import BM25Index, chunk_sources
 from .intake import load_snapshots
 from .theme import CSS, FONTS, esc, explainer
 
@@ -240,8 +241,31 @@ _RULE_KO = {
 
 # 판정 근거 인용 매핑 — 규칙별로 어떤 원문 문장을 보여줄지. 인용 자체는 아래
 # `_rule_quotes` 가 추출 결과(원문 대조 75/75 통과)에서 verbatim 으로 뽑는다.
-# 담당자 연락처 블록 식별 — 02-2100-1690, 044-201-3317 같은 형식
-_PHONE = re.compile(r"0\d{1,2}-\d{3,4}-\d{4}")
+# 담당자 연락처 블록 — "담당부서 … 과 장 홍길동(02-…)" 나열. 다음 페이지 마커나 참고
+# 자료 제목에서 끝난다. 개별 "이름(전화)" 표기도 본문 중간에 남는다.
+_CONTACT_BLOCK = re.compile(r"담당\s*부서.*?(?=-{3,}\s*p\d+|참고\s*\d|$)", re.S)
+_CONTACT_NAME = re.compile(r"[가-힣]{2,4}\s*\(0\d{1,2}-\d{3,4}-\d{4}\)")
+_PAGE_MARK = re.compile(r"-{3,}\s*p\d+\s*-{3,}|(?<=\s)-\s*\d{1,3}\s*-(?=\s)")
+# 목차 줄 — "1-1. 질문? ······ 3" 처럼 점선 리더가 붙는다
+_TOC_LINE = re.compile(r"[·․‧∙・]{3,}\s*\d*")
+
+
+def customer_text(raw: str) -> str:
+    """고객 화면 검색 색인용 본문 — 답변 재료가 아닌 부속을 걷어낸다.
+
+    걷어내는 것: 담당자 연락처 블록(실명·전화), 페이지 마커, 목차의 점선 리더.
+    **문장 자체는 손대지 않는다** — 남은 텍스트는 전부 원문 verbatim 이고, 모달의
+    '공문 전체 보기'는 이 정제본이 아니라 원문을 보여준다.
+
+    청크를 통째로 버리지 않는 이유: MOLIT p3 참고1(비규제 70%/유주택 60% — 고객이
+    가장 많이 묻는 값)이 바로 앞 페이지 연락처 꼬리와 한 청크에 묶여 있어서, 청크 단위로
+    거르면 핵심 답변 재료가 함께 사라진다(2026-08-19 실측으로 확인).
+    """
+    t = _CONTACT_BLOCK.sub(" ", raw)
+    t = _CONTACT_NAME.sub(" ", t)
+    t = _PAGE_MARK.sub(" ", t)
+    t = _TOC_LINE.sub(" ", t)
+    return re.sub(r"\s+", " ", t).strip()
 
 _QUOTE_PATTERNS = {
     "REG_STD": r"비규제지역70% → 규제지역40%",
@@ -277,6 +301,16 @@ def _corpus_cut(norm_corpus: dict, doc: str, anchor: str, length: int = 150) -> 
     if i < 0:
         raise ValueError(f"[{doc}] anchor 없음: {anchor!r}")
     return {"quote": text[i:i + max(length, len(anchor))].strip(), "doc": doc}
+
+
+def build_customer_index(corpus: dict | None = None) -> BM25Index:
+    """고객 화면 검색 색인 — 6·30 문서를 `customer_text` 로 정제해 색인한다.
+
+    검색 알고리즘은 `search.html` 과 같은 포팅본을 쓰고(정합성은 verify_search_port 가
+    대조), 색인 **재료**만 고객용으로 고른다.
+    """
+    src = corpus if corpus is not None else load_corpus()
+    return BM25Index(chunk_sources({d: customer_text(src[d]) for d in SOURCE_FILES if d in src}))
 
 
 def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]:
@@ -363,16 +397,16 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     corpus = load_corpus()
     norm_corpus = {k: re.sub(r"\s+", " ", v).strip() for k, v in corpus.items()}
     easy = easy_answers(quotes, fixtures["constants"], norm_corpus)
-    docs_full = {d: norm_corpus[d] for d in docs_630}
+    # 모달의 '공문 전체'도 색인과 **같은 정제본**을 쓴다. 쪽 번호·담당자 연락처 같은 부속을
+    # 제거한 본문이며 문장은 원문 그대로다 — 정제본과 원문이 다르면 발췌 문장을 전체 본문에서
+    # 찾지 못해 강조가 실패한다(문자열로 위치를 찾는 설계의 대가). 화면에 무엇을 뺐는지 밝힌다.
+    docs_full = {d: customer_text(corpus[d]) for d in docs_630}
 
-    # 고객 화면 색인에서 담당자 연락처 구간(실명·전화번호 블록)을 제외한다 — 공개 자료이긴
-    # 하지만 고객 질문의 답변 재료가 아니고, 검색 결과에 사람 이름·전화가 떠서 강조되는 것은
-    # UX·개인정보 감수성 문제다(2026-08-19 폰 실사용 리뷰). '공문 전체 보기'에는 원문
-    # 그대로 남는다 — 문서를 편집하는 것이 아니라 검색 재료만 고르는 것이다.
-    customer_export = dict(search_export)
-    customer_export["chunks"] = [
-        ch for ch in search_export["chunks"] if not _PHONE.search(ch["text"])
-    ]
+    # 고객 화면 색인 — 연락처 블록·페이지 마커·목차 리더를 걷어낸 본문으로 다시 색인한다.
+    # (2026-08-19 폰 리뷰) 처음에는 "연락처가 든 청크를 통째로 제외"했는데, MOLIT p3 참고1의
+    # 비규제 70%/유주택 60% — 고객이 가장 많이 묻는 값 — 이 앞 페이지 연락처 꼬리와 한 청크에
+    # 묶여 있어 핵심 재료까지 사라졌다. 청크가 아니라 **텍스트**에서 골라야 했다.
+    customer_export = build_customer_index(corpus).export()
 
     region_opts = "".join(
         f'<option value="{esc(code)}"{" selected" if code == "GURI" else ""}>'
@@ -539,8 +573,9 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <div class="ms" id="m-sub"></div></div>
       <button id="m-close" aria-label="닫기">✕</button></div>
     <div class="m-body" id="m-body"></div>
-    <div class="m-note">공문 원문 전체(텍스트 추출본) — 표·서식은 추출 특성상 일부 흐트러질 수
-    있으며, 해시로 봉인된 원본 PDF/HWP 기준입니다.</div>
+    <div class="m-note">공문 본문 전체 — 쪽 번호·담당자 연락처 같은 문서 부속만 뺐고 문장은
+    원문 그대로입니다. 표·서식은 텍스트 추출 특성상 흐트러질 수 있으며, 기준은 해시로 봉인된
+    원본 PDF/HWP 입니다.</div>
   </div>
 </div>"""
 
@@ -611,21 +646,56 @@ function card(el, when, d, price) {
 }
 
 // ── 원문 전체 모달 — 발췌만 주면 일반인은 벽을 만난다. 누르면 공문 전체 + 해당 문장 강조.
+//    강조는 청크 통째가 아니라 **질문어가 실제로 걸린 문장만** 칠한다(2026-08-19 폰 리뷰:
+//    구간 전체를 칠하면 "여기가 답"이라고 짚어주는 느낌이 아니라 덩어리가 물든 것처럼 보인다).
 const TGT = [];
-const tgt = (doc, find) => (TGT.push({ doc, find }) - 1);
+const tgt = (doc, marks) => (TGT.push({ doc, marks }) - 1);
 const clean = (t) => t.replace(/-{2,}\\s*p\\d+\\s*-{2,}/g, " ").replace(/\\s+/g, " ").trim();
 const escT = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-function openDoc(doc, find) {
+
+// 공문은 마침표가 드물고 불릿(￭ ▪ □ ㅇ - *)으로 항목이 끊긴다 — 둘 다 문장 경계로 본다.
+const SENT_SPLIT = /(?<=[.?!])\\s+|(?=[￭▪□◦○●])|(?=\\sㅇ\\s)|(?=\\s-\\s)|(?=\\s\\*\\s)/;
+function sentences(t) {
+  const out = [];
+  for (const raw of clean(t).split(SENT_SPLIT)) {
+    const s = raw.trim();
+    if (!s) continue;
+    // 너무 짧은 조각은 앞 문장에 붙인다 — 단독으로는 근거가 되지 못한다
+    if (out.length && s.length < 14) out[out.length - 1] += " " + s;
+    else out.push(s);
+  }
+  return out;
+}
+function sentScore(sent, qTerms) {
+  const has = new Set(tokenize(sent));
+  let n = 0;
+  for (const t of qTerms) if (has.has(t)) n++;
+  return n;
+}
+const qTermsOf = (q) => [...new Set(tokenize(q))];
+
+function openDoc(doc, marks) {
   const d = DOCL[doc] ?? {};
   const full = clean(DOCS_FULL[doc] ?? "");
-  const target = clean(find);
-  const i = target ? full.indexOf(target.slice(0, 70)) : -1;
+  // 강조할 문장들을 원문에서 찾아 표시한다. 문장은 정제로 지워지지 않은 원문 조각이라
+  // 공문 전체(원문)에도 그대로 존재한다 — 위치를 좌표가 아니라 문자열로 찾는 이유다.
+  const spans = [];
+  for (const m of marks ?? []) {
+    const i = full.indexOf(m);
+    if (i >= 0) spans.push([i, i + m.length]);
+  }
+  spans.sort((a, b) => a[0] - b[0]);
+  let html = "", cur = 0, first = true;
+  for (const [s, e] of spans) {
+    if (s < cur) continue;                       // 겹치면 앞의 것만
+    html += escT(full.slice(cur, s))
+      + `<mark${first ? ' id="m-mark"' : ""}>` + escT(full.slice(s, e)) + "</mark>";
+    cur = e; first = false;
+  }
+  html += escT(full.slice(cur));
   $("#m-title").textContent = d.title ?? doc;
   $("#m-sub").textContent = `${d.issuer ?? ""} · ${d.published ?? ""}`;
-  $("#m-body").innerHTML = i < 0 ? escT(full)
-    : escT(full.slice(0, i)) + '<mark id="m-mark">'
-      + escT(full.slice(i, i + target.length)) + "</mark>"
-      + escT(full.slice(i + target.length));
+  $("#m-body").innerHTML = html;
   $("#modal").hidden = false;
   const mk = document.getElementById("m-mark");
   if (mk) mk.scrollIntoView({ block: "center" });
@@ -635,7 +705,7 @@ document.addEventListener("click", (e) => {
   const el = e.target.closest("[data-t]");
   if (el && TGT[Number(el.dataset.t)] !== undefined) {
     const t = TGT[Number(el.dataset.t)];
-    openDoc(t.doc, t.find);
+    openDoc(t.doc, t.marks);
   }
 });
 $("#m-close").addEventListener("click", () => { $("#modal").hidden = true; });
@@ -643,7 +713,7 @@ $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") $("#
 
 const qciteHtml = (q) => {
   const d = DOCL[q.doc] ?? {};
-  return `<button type="button" class="q-cite qbtn" data-t="${tgt(q.doc, q.quote)}">“${q.quote}”`
+  return `<button type="button" class="q-cite qbtn" data-t="${tgt(q.doc, [clean(q.quote)])}">“${q.quote}”`
     + `<span class="src">${d.issuer ?? ""} · ${d.title ?? q.doc} · ${d.published ?? ""}`
     + ` — 원문 전체 보기 →</span></button>`;
 };
@@ -752,18 +822,16 @@ run();
 // ---- ④ 근거 우선 Q&A — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
 //      요약은 질문 의도 매칭으로 고르는 사전 작성 안내문이지, 답을 생성하는 LLM이 아니다.
 const INDEX = buildIndex(IDX_EXPORT);
-// 발췌는 질문어가 처음 나오는 근처부터 보여준다 — 구간이 목차·표 꼬리에서 시작하면
-// 첫 네 줄이 질문과 무관해 보인다(2026-08-19 폰 리뷰). 원문 전체 보기는 구간 전체를 강조.
-function excerpt(text, q) {
-  const t = clean(text);
-  const terms = q.replace(/[?.,!]/g, " ").split(/\s+/).filter((w) => w.length >= 2);
-  let first = -1;
-  for (const w of terms) {
-    const j = t.indexOf(w);
-    if (j >= 0 && (first < 0 || j < first)) first = j;
-  }
-  if (first <= 40) return t;
-  return "… " + t.slice(Math.max(0, first - 30));
+// 발췌는 **질문어가 걸린 문장부터** 보여준다(2026-08-19 폰 리뷰: 420자 구간을 그대로 실으면
+// 첫 줄이 앞 페이지 꼬리라 질문과 무관해 보인다). 겹치는 어휘가 하나도 없으면 근거로 제시할
+// 수 없으므로 그 결과는 버린다 — 점수 임계를 지어내는 대신 "질문어가 있는가"로 자른다.
+function pickSentences(text, qTerms, max) {
+  const ss = sentences(text);
+  const scored = ss.map((s, i) => ({ s, i, n: sentScore(s, qTerms) })).filter((x) => x.n > 0);
+  if (!scored.length) return null;
+  scored.sort((a, b) => b.n - a.n || a.i - b.i);
+  const keep = scored.slice(0, max).sort((a, b) => a.i - b.i);
+  return { marks: keep.map((x) => x.s), leading: keep[0].i > 0 };
 }
 function matchEasy(q) {
   let best = null, bestN = 0;
@@ -785,22 +853,31 @@ function ask(q) {
       + `<div class="easy-tx">${easy.easy}</div>`
       + easy.cites.map(qciteHtml).join("") + `</div>`;
   }
-  if (hits.length) {
-    html += `<div class="src-t">근거 원문 발췌 — 누르면 공문 전체가 열려요</div>`
-      + hits.map((h) => {
-          const d = DOCL[h.chunk.doc_id] ?? {};
-          return `<button type="button" class="hit-c" data-t="${tgt(h.chunk.doc_id, h.chunk.text)}">`
-            + `<div class="meta">${d.issuer ?? ""} · ${d.title ?? h.chunk.doc_id}</div>`
-            + `<div class="tx">${excerpt(h.chunk.text, q)}</div>`
-            + `<span class="open">원문 전체에서 보기 →</span></button>`;
-        }).join("");
+  const qTerms = qTermsOf(q);
+  const cards = [];
+  for (const h of hits) {
+    const picked = pickSentences(h.chunk.text, qTerms, 2);
+    if (!picked) continue;                       // 질문어가 하나도 없는 발췌는 근거가 아니다
+    const d = DOCL[h.chunk.doc_id] ?? {};
+    cards.push(
+      `<button type="button" class="hit-c" data-t="${tgt(h.chunk.doc_id, picked.marks)}">`
+      + `<div class="meta">${d.issuer ?? ""} · ${d.title ?? h.chunk.doc_id}</div>`
+      + `<div class="tx">${picked.leading ? "… " : ""}${picked.marks.join(" ")}</div>`
+      + `<span class="open">공문 전체에서 이 문장 보기 →</span></button>`);
   }
-  if (!easy && !hits.length) {
+  if (cards.length) {
+    // "관련된 문장"이라고 단정하지 않는다 — 어휘가 겹치는 문장을 고른 것이지 의도를 이해한
+    // 것이 아니다. 화면이 할 수 있는 주장만 한다.
+    html += `<div class="src-t">공문에서 질문 표현이 나온 문장</div>` + cards.join("");
+  }
+  const hasHits = cards.length > 0;
+  if (!easy && !hasHits) {
     html = `<div class="consult"><b>이 질문의 근거를 공문에서 찾지 못했어요.</b>
       지어내서 답하지 않아요 — 전문 상담(대출 상담 창구·콜센터)을 안내해 드릴게요.</div>`;
   } else if (!easy) {
     html = `<div class="consult">이 질문의 <b>쉬운 요약은 아직 준비되지 않았어요.</b>
-      아래 원문 발췌를 참고하시고, 판단이 어려우면 전문 상담으로 확인하세요.</div>` + html;
+      아래는 질문에 나온 표현이 들어 있는 공문 문장이라 <b>질문과 무관할 수 있어요</b> —
+      판단이 어렵거나 찾는 내용이 아니면 전문 상담으로 확인하세요.</div>` + html;
   }
   box.innerHTML = html;
 }
