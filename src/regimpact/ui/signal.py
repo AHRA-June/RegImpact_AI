@@ -197,6 +197,9 @@ details.more[open] summary{border-bottom:1px solid var(--outline-variant)}
 .easy .q-cite{margin-top:10px}
 .src-t{font-size:11px;font-weight:700;color:var(--on-surface-variant);margin:12px 0 -2px;
   letter-spacing:.04em}
+.xtra{margin-top:11px}
+.xtra summary{font-size:12px;color:var(--on-surface-variant)}
+.xtra-b{padding:11px 12px;display:flex;flex-direction:column;gap:9px}
 .q-cite.qbtn{cursor:pointer;width:100%;text-align:left;font-family:inherit;display:block;
   box-sizing:border-box;border-top:none;border-right:none;border-bottom:none}
 .q-cite.qbtn:hover{background:var(--surface-container-high)}
@@ -213,10 +216,15 @@ details.more[open] summary{border-bottom:1px solid var(--outline-variant)}
 .m-head .ms{font-size:10.5px;color:var(--on-surface-variant)}
 .m-head button{margin-left:auto;border:1px solid var(--outline-variant);background:transparent;
   color:var(--on-surface);border-radius:99px;width:30px;height:30px;cursor:pointer;flex:none}
-.m-body{padding:16px;overflow-y:auto;font-size:13px;line-height:1.75;color:var(--on-surface);
-  word-break:keep-all;white-space:pre-wrap}
-.m-body mark{background:color-mix(in srgb,var(--primary) 22%,transparent);
-  color:var(--on-surface);padding:1px 2px;border-radius:3px}
+.m-body{padding:16px;overflow-y:auto;font-size:12.5px;line-height:1.72;color:var(--on-surface);
+  word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
+.m-body mark{background:color-mix(in srgb,var(--primary) 24%,transparent);
+  color:var(--on-surface);padding:1px 2px;border-radius:3px;
+  box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 30%,transparent)}
+.m-body .pg{display:block;margin:16px 0 9px;padding-top:9px;
+  border-top:1px dashed var(--outline-variant);font-size:10.5px;
+  color:var(--on-surface-variant);font-family:'JetBrains Mono',ui-monospace,monospace}
 .m-note{padding:9px 16px;border-top:1px solid var(--outline-variant);font-size:10.5px;
   color:var(--on-surface-variant)}
 .consult{border:1px solid var(--outline-variant);border-radius:12px;padding:14px;
@@ -292,14 +300,25 @@ def _rule_quotes(extraction) -> dict:
     return out
 
 
-def _corpus_cut(norm_corpus: dict, doc: str, anchor: str, length: int = 150) -> dict:
+def _corpus_cut(norm_corpus: dict, doc: str, anchor: str, length: int = 150,
+                *, nth: int | None = None) -> dict:
     """코퍼스 원문에서 anchor 로 시작하는 구간을 그대로 잘라 온다(verbatim 보장).
 
-    author_goldset.q 와 같은 규율 — 손으로 옮겨 적으면 반드시 어긋난다."""
+    author_goldset.q 와 같은 규율 — 손으로 옮겨 적으면 반드시 어긋난다. 앵커가 여러 번
+    나오면 **실패한다**: 목차와 본문에 같은 문장이 있는데 그냥 첫 것을 집으면 목차 줄
+    (점선 리더·쪽번호·깨진 글리프)이 근거로 실린다(2026-08-20 폰 리뷰에서 실제로 발생).
+    반복이 의도된 경우에만 nth 로 어느 것인지 명시한다.
+    """
     text = norm_corpus[doc]
-    i = text.find(re.sub(r"\s+", " ", anchor).strip())
-    if i < 0:
+    needle = re.sub(r"\s+", " ", anchor).strip()
+    hits = [m.start() for m in re.finditer(re.escape(needle), text)]
+    if not hits:
         raise ValueError(f"[{doc}] anchor 없음: {anchor!r}")
+    if len(hits) > 1 and nth is None:
+        raise ValueError(
+            f"[{doc}] anchor 모호 — {len(hits)}회 등장(목차·본문 중 어느 것인지 nth 로 명시): "
+            f"{anchor!r}")
+    i = hits[0 if nth is None else nth]
     return {"quote": text[i:i + max(length, len(anchor))].strip(), "doc": doc}
 
 
@@ -313,7 +332,8 @@ def build_customer_index(corpus: dict | None = None) -> BM25Index:
     return BM25Index(chunk_sources({d: customer_text(src[d]) for d in SOURCE_FILES if d in src}))
 
 
-def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]:
+def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
+                 region_labels: list[str], all_capital: bool) -> list[dict]:
     """자주 묻는 질문의 '쉬운 요약' — **미리 작성해 사람이 검수하는 안내문**이다.
 
     질문을 이해해 답을 '생성'하는 LLM이 아니다(정적 배포에서 그런 척하지 않는다 —
@@ -325,7 +345,8 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]
     p_std = f"{constants['LTV_REGULATED_STANDARD']:.0%}"
     p_first = f"{constants['LTV_FIRST_HOME']:.0%}"
     p_multi = f"{constants['LTV_MULTI']:.0%}"
-    molit, faq = "MOLIT_PRESS_20260630", "FAQ_20260630"
+    eff = constants["REG_EFFECTIVE"]
+    fsc, molit, faq = "FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"
     return [
         {"id": "gf-timing",
          "keys": ["잔금", "중도금", "시행일 뒤", "실행일", "시행 후"],
@@ -355,7 +376,8 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]
                  "수 있어요. 직장 이동·자녀 교육·부모 봉양 같은 불가피한 사유는 예외로 "
                  "인정됩니다. 내 경우가 예외인지는 요건이 복잡해서 상담으로 확인하는 게 안전해요.",
          "cites": [_corpus_cut(norm_corpus, faq,
-                               "3억원 초과 APT를 취득한 자의 전세대출 제한의 예외사유는?", 60),
+                               "3억원 초과 APT를 취득한 자의 전세대출 제한의 예외사유는?", 60,
+                               nth=1),   # 0번은 목차 줄
                    _corpus_cut(norm_corpus, faq, "불가피한 실수요 등*에 대해서는 적용 예외를 인정", 160)]},
         {"id": "non-regulated",
          # "수도권 규제 외 지역은 어때?" 같은 질문 (2026-08-19 폰 리뷰에서 요약 부재 확인)
@@ -368,6 +390,19 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict) -> list[dict]
                  "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. 위 ① 지역 선택에서 "
                  "내 지역을 골라 직접 확인해 보세요.",
          "cites": [quotes["MULTI_0"], quotes["REG_STD"]]},
+        {"id": "which-regions",
+         "keys": ["어디", "어느 지역", "어떤 지역", "무슨 지역", "지정된 지역", "지정된 곳",
+                  "추가된 지역", "추가 지정", "새로 지정", "내 지역", "우리 동네", "포함되"],
+         "easy": f"이번에 새로 지정된 곳은 {', '.join(region_labels)} "
+                 f"{len(region_labels)}곳이에요"
+                 + ("(모두 수도권)" if all_capital else "")
+                 + f". {eff}부터 이 지역에서 강화된 기준이 적용되고, 그 밖의 지역은 이번 "
+                 "지정 대상이 아니에요. 내가 사려는 집이 여기 해당하는지 위 ① 지역 선택에서 "
+                 "골라 바로 확인할 수 있어요.",
+         "cites": [_corpus_cut(norm_corpus, molit,
+                               "최근 큰 폭으로 집값이 상승한 경기도", 130),
+                   _corpus_cut(norm_corpus, fsc,
+                               "금일 회의에서 참석자들은 경기도 화성시 동탄구", 120)]},
     ]
 
 
@@ -396,11 +431,13 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     # 쉬운 요약(미리 검수된 안내) + 원문 전체(클릭 시 모달 — 발췌만 주면 일반인은 벽을 만난다)
     corpus = load_corpus()
     norm_corpus = {k: re.sub(r"\s+", " ", v).strip() for k, v in corpus.items()}
-    easy = easy_answers(quotes, fixtures["constants"], norm_corpus)
-    # 모달의 '공문 전체'도 색인과 **같은 정제본**을 쓴다. 쪽 번호·담당자 연락처 같은 부속을
-    # 제거한 본문이며 문장은 원문 그대로다 — 정제본과 원문이 다르면 발췌 문장을 전체 본문에서
-    # 찾지 못해 강조가 실패한다(문자열로 위치를 찾는 설계의 대가). 화면에 무엇을 뺐는지 밝힌다.
-    docs_full = {d: customer_text(corpus[d]) for d in docs_630}
+    capital = set(fixtures.get("capital_area") or ())
+    easy = easy_answers(quotes, fixtures["constants"], norm_corpus,
+                        labels, bool(regions) and all(c in capital for c in regions))
+    # 모달의 '공문 전체'는 **원문 그대로**(줄바꿈 보존) 보여준다. 정제본(공백까지 합친 본문)을
+    # 흘리면 표가 한 줄로 뭉개져 사람이 읽을 수 없다(2026-08-20 폰 리뷰). 검색은 정제본을,
+    # 화면은 원문을 본다 — 강조 위치는 JS 가 공백 정규화 좌표에서 찾아 원문 좌표로 되돌린다.
+    docs_full = {d: corpus[d] for d in docs_630}
 
     # 고객 화면 색인 — 연락처 블록·페이지 마커·목차 리더를 걷어낸 본문으로 다시 색인한다.
     # (2026-08-19 폰 리뷰) 처음에는 "연락처가 든 청크를 통째로 제외"했는데, MOLIT p3 참고1의
@@ -573,9 +610,9 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <div class="ms" id="m-sub"></div></div>
       <button id="m-close" aria-label="닫기">✕</button></div>
     <div class="m-body" id="m-body"></div>
-    <div class="m-note">공문 본문 전체 — 쪽 번호·담당자 연락처 같은 문서 부속만 뺐고 문장은
-    원문 그대로입니다. 표·서식은 텍스트 추출 특성상 흐트러질 수 있으며, 기준은 해시로 봉인된
-    원본 PDF/HWP 입니다.</div>
+    <div class="m-note">공문 원문 전체 — 줄바꿈까지 원문 그대로이며 한 글자도 빼지 않았습니다.
+    표는 텍스트로 추출된 것이라 칸이 줄로 풀려 보일 수 있고, 기준은 해시로 봉인된 원본
+    PDF/HWP 입니다.</div>
   </div>
 </div>"""
 
@@ -666,33 +703,60 @@ function sentences(t) {
   }
   return out;
 }
+// 겹친 표현의 **개수**가 아니라 **희소성**으로 점수를 매긴다(2026-08-20 폰 리뷰:
+// "규제·지역·대출"처럼 어디에나 있는 말이 많이 겹친 문장이 이겨서 엉뚱한 곳이 강조됐다).
+// 색인이 이미 갖고 있는 idf 를 그대로 쓴다 — 검색과 강조가 같은 기준을 보게 된다.
 function sentScore(sent, qTerms) {
   const has = new Set(tokenize(sent));
-  let n = 0;
-  for (const t of qTerms) if (has.has(t)) n++;
-  return n;
+  let s = 0;
+  for (const t of qTerms) if (has.has(t)) s += INDEX.idf.get(t) ?? 0;
+  return s;
 }
 const qTermsOf = (q) => [...new Set(tokenize(q))];
 
+// 원문은 줄바꿈·들여쓰기를 그대로 두고 보여준다(2026-08-20 폰 리뷰: 한 덩어리로 흐르면
+// 표가 사라지고 읽을 수 없다). 대신 강조할 문장은 **공백을 합친 좌표**에서 찾으므로,
+// 정규화 문자열과 원문 사이의 위치 대응표를 만들어 되돌린다.
+function normMap(raw) {
+  let norm = "", map = [], sp = true;
+  for (let i = 0; i < raw.length; i++) {
+    if (/\s/.test(raw[i])) {
+      if (!sp) { norm += " "; map.push(i); sp = true; }
+    } else { norm += raw[i]; map.push(i); sp = false; }
+  }
+  return { norm, map };
+}
+// 쪽 마커는 지우지 않고 **구분선으로** 보여준다 — 몇 쪽에서 나온 문장인지가 근거의 일부다.
+const PGMARK = /-{3,}\s*p(\d+)\s*-{3,}/g;
+const fmtDoc = (t) => escT(t).replace(PGMARK, (_, n) => `<span class="pg">${n}쪽</span>`);
+function findSpan(norm, map, m) {
+  let i = norm.indexOf(m), len = m.length;
+  if (i < 0) {                    // 쪽 넘김·연락처 제거로 문장이 갈린 경우 앞부분만 짚는다
+    const head = m.slice(0, 40);
+    if (head.length < 12) return null;
+    i = norm.indexOf(head); len = head.length;
+  }
+  return i < 0 ? null : [map[i], map[i + len - 1] + 1];
+}
+
 function openDoc(doc, marks) {
   const d = DOCL[doc] ?? {};
-  const full = clean(DOCS_FULL[doc] ?? "");
-  // 강조할 문장들을 원문에서 찾아 표시한다. 문장은 정제로 지워지지 않은 원문 조각이라
-  // 공문 전체(원문)에도 그대로 존재한다 — 위치를 좌표가 아니라 문자열로 찾는 이유다.
+  const raw = DOCS_FULL[doc] ?? "";
+  const { norm, map } = normMap(raw);
   const spans = [];
   for (const m of marks ?? []) {
-    const i = full.indexOf(m);
-    if (i >= 0) spans.push([i, i + m.length]);
+    const sp = findSpan(norm, map, m);
+    if (sp) spans.push(sp);
   }
   spans.sort((a, b) => a[0] - b[0]);
   let html = "", cur = 0, first = true;
   for (const [s, e] of spans) {
     if (s < cur) continue;                       // 겹치면 앞의 것만
-    html += escT(full.slice(cur, s))
-      + `<mark${first ? ' id="m-mark"' : ""}>` + escT(full.slice(s, e)) + "</mark>";
+    html += fmtDoc(raw.slice(cur, s))
+      + `<mark${first ? ' id="m-mark"' : ""}>` + fmtDoc(raw.slice(s, e)) + "</mark>";
     cur = e; first = false;
   }
-  html += escT(full.slice(cur));
+  html += fmtDoc(raw.slice(cur));
   $("#m-title").textContent = d.title ?? doc;
   $("#m-sub").textContent = `${d.issuer ?? ""} · ${d.published ?? ""}`;
   $("#m-body").innerHTML = html;
@@ -830,8 +894,11 @@ function pickSentences(text, qTerms, max) {
   const scored = ss.map((s, i) => ({ s, i, n: sentScore(s, qTerms) })).filter((x) => x.n > 0);
   if (!scored.length) return null;
   scored.sort((a, b) => b.n - a.n || a.i - b.i);
-  const keep = scored.slice(0, max).sort((a, b) => a.i - b.i);
-  return { marks: keep.map((x) => x.s), leading: keep[0].i > 0 };
+  const top = scored[0].n;
+  // 같은 카드에 실을 두 번째 문장은 **가장 잘 맞은 문장의 절반 이상**일 때만 붙인다.
+  // 절대 점수에 의미를 부여하지 않기 위한 상대 기준이다 — 점수 임계를 지어내지 않는다.
+  const keep = scored.filter((x) => x.n >= top * 0.5).slice(0, max).sort((a, b) => a.i - b.i);
+  return { marks: keep.map((x) => x.s), leading: keep[0].i > 0, score: top };
 }
 function matchEasy(q) {
   let best = null, bestN = 0;
@@ -854,21 +921,33 @@ function ask(q) {
       + easy.cites.map(qciteHtml).join("") + `</div>`;
   }
   const qTerms = qTermsOf(q);
-  const cards = [];
+  const picks = [];
   for (const h of hits) {
     const picked = pickSentences(h.chunk.text, qTerms, 2);
-    if (!picked) continue;                       // 질문어가 하나도 없는 발췌는 근거가 아니다
+    if (picked) picks.push({ h, picked });       // 질문어가 하나도 없는 발췌는 근거가 아니다
+  }
+  // 칸을 채우려고 약한 결과까지 끌어오면 "근거"라는 말이 헐거워진다. 가장 잘 맞은 발췌의
+  // 40% 에 못 미치면 싣지 않는다 — 역시 상대 기준이며 절대 품질을 주장하지 않는다.
+  const best = picks.reduce((mx, p) => Math.max(mx, p.picked.score), 0);
+  const cards = picks.filter((p) => p.picked.score >= best * 0.4).map(({ h, picked }) => {
     const d = DOCL[h.chunk.doc_id] ?? {};
-    cards.push(
-      `<button type="button" class="hit-c" data-t="${tgt(h.chunk.doc_id, picked.marks)}">`
+    return `<button type="button" class="hit-c" data-t="${tgt(h.chunk.doc_id, picked.marks)}">`
       + `<div class="meta">${d.issuer ?? ""} · ${d.title ?? h.chunk.doc_id}</div>`
       + `<div class="tx">${picked.leading ? "… " : ""}${picked.marks.join(" ")}</div>`
-      + `<span class="open">공문 전체에서 이 문장 보기 →</span></button>`);
-  }
+      + `<span class="open">공문 전체에서 이 문장 보기 →</span></button>`;
+  });
   if (cards.length) {
     // "관련된 문장"이라고 단정하지 않는다 — 어휘가 겹치는 문장을 고른 것이지 의도를 이해한
     // 것이 아니다. 화면이 할 수 있는 주장만 한다.
-    html += `<div class="src-t">공문에서 질문 표현이 나온 문장</div>` + cards.join("");
+    //
+    // 검수된 답이 있을 때 이 문단들을 같은 비중으로 나열하면, **검수되지 않은 문단이 답처럼**
+    // 보인다(2026-08-20 폰 리뷰: 엉뚱한 곳에 음영). 검수된 답의 근거는 요약 카드 안의 인용이고,
+    // 어휘가 겹친 문단은 접어서 보조로 둔다. 요약이 없을 때만 이것이 유일한 단서다.
+    html += easy
+      ? `<details class="more xtra"><summary>공문에서 이 질문의 표현이 나온 다른 문단 `
+        + `${cards.length}개 — 검수된 답은 아니에요</summary>`
+        + `<div class="xtra-b">${cards.join("")}</div></details>`
+      : `<div class="src-t">공문에서 질문 표현이 나온 문장</div>` + cards.join("");
   }
   const hasHits = cards.length > 0;
   if (!easy && !hasHits) {
