@@ -1,0 +1,661 @@
+<title>내 한도 시그널</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap">
+<style>
+  :root{
+    --paper:#F4F6F8; --surface:#FFFFFF; --surface-2:#EDF0F3;
+    --ink:#14171F; --ink-2:#3B434F; --muted:#5C6472;
+    --accent:#10485C; --accent-soft:#E3EDF1;
+    --signal:#B3261E; --signal-soft:#FBEAE8;
+    --good:#1B5E4A;
+    --line:#DCE1E7; --line-strong:#C3CAD3;
+    --serif:"Noto Serif KR",Georgia,serif;
+    --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#0F1319; --surface:#161B23; --surface-2:#1D242E;
+      --ink:#E7EAEF; --ink-2:#BCC4CF; --muted:#98A2B0;
+      --accent:#79C4DC; --accent-soft:#15303B;
+      --signal:#FF9C93; --signal-soft:#3A1D1B;
+      --good:#7FCBAF;
+      --line:#28303B; --line-strong:#44505F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0F1319; --surface:#161B23; --surface-2:#1D242E;
+    --ink:#E7EAEF; --ink-2:#BCC4CF; --muted:#98A2B0;
+    --accent:#79C4DC; --accent-soft:#15303B;
+    --signal:#FF9C93; --signal-soft:#3A1D1B;
+    --good:#7FCBAF;
+    --line:#28303B; --line-strong:#44505F;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.75;
+    word-break:keep-all; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:0 22px 96px}
+  h1,h2,h3{font-family:var(--serif); text-wrap:balance; margin:0}
+  p{margin:0}
+  a{color:var(--accent)}
+  strong{font-weight:700}
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  /* ── 머리말 ── */
+  header{padding:72px 0 40px; border-bottom:2px solid var(--ink)}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); font-weight:600}
+  h1{font-size:clamp(34px,6vw,52px); line-height:1.2; margin:18px 0 0; letter-spacing:-.01em}
+  .sub{font-size:14px; color:var(--muted); margin-top:14px; font-family:var(--mono)}
+  .thesis{font-family:var(--serif); font-size:clamp(19px,2.6vw,24px); line-height:1.62;
+    margin-top:32px; padding-left:20px; border-left:3px solid var(--accent); color:var(--ink)}
+
+  /* ── 날짜 전환 스트립 ── */
+  .clock{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:34px;
+    padding:18px 20px; background:var(--surface); border:1px solid var(--line); border-radius:6px}
+  .clock .d{font-family:var(--mono); font-size:clamp(17px,3vw,22px); font-weight:600}
+  .clock .d span{display:block; font-family:var(--sans); font-size:11px; font-weight:400;
+    color:var(--muted); letter-spacing:.04em; margin-top:5px}
+  .clock .d.hot{color:var(--signal)}
+  .clock .arrow{color:var(--muted); font-size:18px}
+  .clock .tail{font-size:13px; color:var(--muted); line-height:1.55; flex:1; min-width:200px}
+
+  /* ── 섹션 ── */
+  section{padding-top:56px}
+  .snum{font-family:var(--mono); font-size:12px; letter-spacing:.12em; color:var(--muted);
+    font-weight:500}
+  h2{font-size:clamp(23px,3.4vw,30px); line-height:1.35; margin:10px 0 20px}
+  h3{font-size:17px; line-height:1.5; margin:32px 0 10px; font-family:var(--sans); font-weight:700}
+  section p + p{margin-top:16px}
+  .lead{font-size:17px; color:var(--ink-2)}
+
+  ul{margin:16px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:12px}
+  li{padding-left:20px; position:relative; color:var(--ink-2)}
+  li::before{content:""; position:absolute; left:2px; top:.72em; width:6px; height:1.5px;
+    background:var(--line-strong)}
+  li strong{color:var(--ink)}
+
+  /* ── 두 사람 대비 ── */
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px}
+  .person{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:16px}
+  .person .who{font-size:13px; font-weight:700; line-height:1.45}
+  .person .cond{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5}
+  .person .amt{font-family:var(--mono); font-size:clamp(19px,3.4vw,24px); font-weight:600;
+    margin-top:12px; font-variant-numeric:tabular-nums}
+  .person .tag{display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.06em;
+    padding:3px 8px; border-radius:3px; margin-top:8px}
+  .person.keep{border-color:var(--accent)}
+  .person.keep .amt{color:var(--accent)}
+  .person.keep .tag{background:var(--accent-soft); color:var(--accent)}
+  .person.cut .amt{color:var(--signal)}
+  .person.cut .tag{background:var(--signal-soft); color:var(--signal)}
+  .gap-note{margin-top:12px; font-size:14px; padding:13px 16px; border-radius:6px;
+    background:var(--signal-soft); color:var(--ink); line-height:1.6}
+  .gap-note b{color:var(--signal)}
+
+  /* ── 한도 막대 ── */
+  .bars{margin-top:20px; background:var(--surface); border:1px solid var(--line);
+    border-radius:6px; padding:20px}
+  .bars .cap{font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.55}
+  .bar-row{margin-bottom:14px}
+  .bar-row:last-child{margin-bottom:0}
+  .bar-hd{display:flex; justify-content:space-between; gap:12px; align-items:baseline;
+    font-size:13px; margin-bottom:5px}
+  .bar-hd .nm{color:var(--muted)}
+  .bar-hd .vv{font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums}
+  .track{height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden}
+  .track i{display:block; height:100%; background:var(--line-strong); border-radius:99px}
+  .bar-row.bind .nm,.bar-row.bind .vv{color:var(--signal); font-weight:700}
+  .bar-row.bind .track i{background:var(--signal)}
+
+  /* ── 출처 표시 ── */
+  .sref{font-family:var(--mono); font-size:10.5px; color:var(--accent); text-decoration:none;
+    vertical-align:super; padding:0 1px; white-space:nowrap}
+  .sref:hover{text-decoration:underline}
+  .srclist{margin-top:20px; padding:0; list-style:none}
+  .srclist li{padding:12px 0; border-bottom:1px solid var(--line); line-height:1.65;
+    font-size:14px}
+  .srclist li:last-child{border-bottom:none}
+  .srclist li::before{display:none}
+  .srclist .id{font-family:var(--mono); font-size:11.5px; color:var(--accent);
+    margin-right:8px; font-weight:700}
+  .srclist .u{display:block; font-family:var(--mono); font-size:11.5px; color:var(--muted);
+    word-break:break-all; margin-top:3px}
+  .srclist .nb{display:block; font-size:13px; color:var(--muted); margin-top:3px}
+
+  /* ── 표 ── */
+  .tw{overflow-x:auto; margin-top:20px; border:1px solid var(--line); border-radius:6px;
+    background:var(--surface)}
+  table{border-collapse:collapse; width:100%; font-size:14px; min-width:520px}
+  th,td{text-align:left; padding:12px 16px; border-bottom:1px solid var(--line);
+    vertical-align:top; line-height:1.6}
+  thead th{background:var(--surface-2); font-size:12px; font-weight:700; color:var(--ink);
+    letter-spacing:.02em; border-bottom:1px solid var(--line-strong)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+  td:first-child{color:var(--muted); font-size:13px}
+  .tw.compare td:last-child{background:var(--accent-soft)}
+
+  /* ── 지표 ── */
+  .metrics{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line); border-radius:6px;
+    overflow:hidden; margin-top:22px}
+  .metric{background:var(--surface); padding:16px}
+  .metric .v{font-family:var(--mono); font-size:22px; font-weight:600; line-height:1.1;
+    font-variant-numeric:tabular-nums}
+  .metric .l{font-size:11.5px; color:var(--muted); margin-top:7px; line-height:1.5}
+
+  /* ── 인용/강조 블록 ── */
+  .quote{margin-top:20px; padding:16px 20px; background:var(--surface); border-radius:6px;
+    border-left:3px solid var(--accent); font-size:14.5px; line-height:1.7; color:var(--ink-2)}
+  .quote b{color:var(--ink)}
+  .limits{margin-top:20px; padding:20px; border:1px dashed var(--line-strong); border-radius:6px;
+    background:transparent}
+  .limits .hd{font-family:var(--mono); font-size:12px; letter-spacing:.1em; color:var(--muted);
+    text-transform:uppercase; margin-bottom:14px}
+
+  /* ── 링크 표 ── */
+  .links{margin-top:22px; display:flex; flex-direction:column; gap:1px; background:var(--line);
+    border:1px solid var(--line); border-radius:6px; overflow:hidden}
+  .links a{display:flex; justify-content:space-between; gap:14px; align-items:baseline;
+    background:var(--surface); padding:14px 16px; text-decoration:none; flex-wrap:wrap}
+  .links a:hover{background:var(--surface-2)}
+  .links .t{color:var(--ink); font-size:14px; font-weight:500}
+  .links .u{font-family:var(--mono); font-size:11.5px; color:var(--accent); word-break:break-all}
+  .links a:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line);
+    font-size:12.5px; color:var(--muted); line-height:1.7}
+  @media (max-width:560px){
+    .duo{grid-template-columns:1fr}
+    header{padding-top:48px}
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Tomorrow Challenge · 팀 엣지케이스</div>
+    <h1>내 한도 시그널</h1>
+    <div class="sub">규제 변경 개인화 시뮬레이터 · 금융앱 웹뷰 탑재형</div>
+    <p class="thesis">규제가 바뀐 다음 날, 내 대출 한도가 얼마에서 얼마로 달라졌고,
+    나는 경과규정 대상인지, 그리고 무엇에 막혀 있는지를 — 근거 조문과 함께 알려줍니다.</p>
+
+    <div class="clock">
+      <div class="d mono">2026-06-30<span>대책 발표</span></div>
+      <div class="arrow">→</div>
+      <div class="d hot mono">2026-07-01<span>강화 규제 시행</span></div>
+      <div class="tail">하루 사이에 심사 기준·전산·창구 안내가 전부 바뀝니다.
+      고객에게는 그 하루가 수억 원의 차이입니다.</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="snum">01</div>
+    <h2>규제가 바뀌는 날, 고객은 자기 칸을 모른다</h2>
+    <p class="lead">뉴스는 “LTV 70% → 40%”라고만 말합니다. 그러나 실제로는 생애최초 구입자는
+    70%가 그대로고, 서민·실수요자는 60%, 이미 집이 있으면 0%입니다. 계약금을 낸 사람은
+    종전 규정을 유지합니다.</p>
+
+    <div class="duo">
+      <div class="person keep">
+        <div class="who">A — 계약금 납부 증명 있음</div>
+        <div class="cond">6월 28일 계약 · 구리시 8억 · 무주택</div>
+        <div class="amt">5억 6,000만</div>
+        <div class="tag">경과규정 · 종전 기준</div>
+      </div>
+      <div class="person cut">
+        <div class="who">B — 계약금 증빙 없음</div>
+        <div class="cond">6월 28일 계약 · 구리시 8억 · 무주택</div>
+        <div class="amt">3억 2,000만</div>
+        <div class="tag">강화 기준 적용</div>
+      </div>
+    </div>
+    <p class="gap-note">같은 날, 같은 아파트를 계약한 두 사람의 한도가 <b>2억 4,000만 원</b>
+    다릅니다. 차이는 계약금 영수증 한 장입니다. <b>일반 한도 계산기는 이 두 사람에게 같은
+    숫자를 보여줍니다</b> — ‘오늘의 규칙’ 하나만 알기 때문입니다.</p>
+
+    <div class="quote"><b>그런데 이 시장에는 이미 계산기가 넘칩니다.</b> 그리고 그 계산기들은
+    스스로 “공개된 계산방법을 이용한 예측값이므로 실제 금융사에서 확인하는 조건과 다를 수
+    있으며 참고용으로만 사용”이라 고지합니다<a class="sref" href="#src">[S1]</a>. 실제 한도는
+    은행별 내부 심사기준·소득 인정 방식·담보 평가에 따라 갈립니다<a class="sref" href="#src">[S2]</a>.
+    <b>숫자는 많은데, 왜 다른지를 말해 주는 곳이 없습니다.</b></div>
+
+    <p style="margin-top:16px">고객은 두 방향으로 틀립니다. 경과규정 대상인데 겁먹고 계약을 포기하거나, 대상이
+    아닌데 안심하고 있다가 잔금일에 막힙니다. 그 혼란은 전부 창구와 콜센터로 밀려옵니다.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>무엇을 하는가</h2>
+    <p class="lead">조건 몇 가지(지역·주택 보유·가격·계약 일자·소득)를 넣으면 여섯 가지가
+    한 화면에서 이어집니다.</p>
+
+    <h3>① 영향 알림</h3>
+    <p>공문 발표 시 고객 조건 기준으로 “나에게 영향 있음/없음”을 알립니다. 신규 지정 지역과
+    시행일이 함께 표시됩니다.</p>
+
+    <h3>② 변경 전 → 후, 내 한도</h3>
+    <p>같은 조건을 <strong>시행 전·후 두 시점으로 각각 판정</strong>해 나란히 보여줍니다.
+    값만이 아니라 <strong>어느 규칙에서 그 결론이 났는지 판정 경로</strong>까지 펼쳐 볼 수
+    있습니다.</p>
+
+    <h3>③ 경과규정 체크</h3>
+    <p>계약 체결일·계약금 납부 여부·대출 신청 접수일을 넣으면 종전 규정 적용 가능성을
+    판정하고, 해당하면 <strong>“종전 기준 유지”</strong> 표시와 근거 조문을 함께 보여줍니다.
+    준비할 증빙도 안내합니다.</p>
+
+    <h3>④ 총 가능금액 — 어느 규제에 막혔는지까지</h3>
+    <p>한도는 LTV 하나로 정해지지 않습니다. 실제 심사는
+    <strong>min(LTV, 가격구간별 최대한도, DSR, DTI)</strong> 입니다. 소득·기존 대출 월 상환액·
+    금리·만기·기관을 넣으면 네 한도를 나란히 보여주고, 가장 낮은 한도를 지목합니다.</p>
+
+    <div class="bars">
+      <div class="cap">연소득 5,000만 원 · 기존 대출 월 상환 100만 원 · 금리 4% · 구리시 8억 아파트</div>
+      <div class="bar-row">
+        <div class="bar-hd"><span class="nm">담보 비율 (LTV)</span><span class="vv">3억 2,000만</span></div>
+        <div class="track"><i style="width:100%"></i></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-hd"><span class="nm">가격구간 최대한도</span><span class="vv">6억</span></div>
+        <div class="track"><i style="width:100%"></i></div>
+      </div>
+      <div class="bar-row bind">
+        <div class="bar-hd"><span class="nm">총부채원리금 (DSR) ← 여기에 막혀요</span><span class="vv">1억 4,000만</span></div>
+        <div class="track"><i style="width:44%"></i></div>
+      </div>
+      <div class="bar-row bind">
+        <div class="bar-hd"><span class="nm">총부채상환 (DTI) ← 여기에 막혀요</span><span class="vv">1억 4,000만</span></div>
+        <div class="track"><i style="width:44%"></i></div>
+      </div>
+    </div>
+    <p style="margin-top:16px">“당신의 한도는 1억 4,000만 원이고, <strong>LTV가 아니라 DSR
+    때문</strong>입니다”라고 말해주는 계산기는 현재 없습니다. 고객이 다음에 무엇을 해야
+    하는지 — 부채를 정리할지, 지역을 바꿀지 — 가 여기서 갈립니다.</p>
+
+    <h3>⑤ 근거 우선 Q&amp;A</h3>
+    <p>“잔금일이 시행일 뒤인데 저는 어떻게 되나요” 같은 질문에 검수된 쉬운 안내를 먼저
+    보여주고 <strong>공문 원문 문단</strong>을 함께 답니다. 원문은 줄바꿈과 쪽 구분까지 그대로
+    열람할 수 있고, 해당 문장을 음영으로 짚어줍니다. <strong>근거를 찾지 못하면 지어내지
+    않고</strong> 원문 전체 열람과 전문 상담을 안내합니다.</p>
+
+    <h3>⑥ 내게 가능한 상품 찾기 — 추천이 아니라 <em>자격 판정</em></h3>
+    <p>진단에서 끝내지 않습니다. 엔진이 이미 판정한 사실(규제지역 여부·주택 수·생애최초·
+    서민실수요·경과규정)을 근거로, 공문이 언급한 상품군에 대해 <strong>요건 충족 여부</strong>를
+    되짚습니다.</p>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>상태</th><th>의미</th></tr></thead>
+        <tbody>
+          <tr><td><strong>해당</strong></td>
+            <td>원문이 완화 대상으로 명시한 조건에 부합 — 생애최초·서민실수요 주담대</td></tr>
+          <tr><td><strong>해당 없음</strong></td>
+            <td>엔진이 이미 그 경로를 막음 — 예: 다주택 규제지역 LTV 0%, 상품 이전에 대출이 안 됨</td></tr>
+          <tr><td><strong>확인 필요</strong></td>
+            <td>소득·자산 요건 등 <strong>이 공문에 없는 기준</strong>이라 판정하지 않음 —
+              디딤돌·보금자리론</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:16px">여기에 이 기능의 성격이 그대로 드러납니다. 디딤돌·보금자리론의
+    소득·자산 요건은 6·30 공문에 없습니다. 그래서 저희는 <strong>“확인 필요”에서
+    멈춥니다.</strong> 이것을 “가능합니다”로 올리는 순간 값을 지어내는 일이 되고, 이 서비스의
+    원칙이 무너집니다. 표시되는 한도 수치도 <strong>원문 인용으로만</strong> 보여주고 자체
+    계산으로 만들지 않습니다. 취향을 예측하는 추천이 아니므로
+    <strong>금융소비자보호법상 자문·권유가 아니라 정보 제공</strong>에 머뭅니다.</p>
+
+    <div class="quote"><b>왜 저희가 이걸 할 수 있나.</b> 저희는 고객이 <b>무엇에 막혔는지</b>
+    아는 화면입니다. LTV인지, DSR인지, 경과규정 하루 차이인지를 이미 판정했기 때문에 “이
+    고객에게 어떤 상품을 안내해야 하는가”를 취향 추측이 아니라 <b>규제 요건 기준</b>으로 답할
+    수 있습니다. 상품 정보(금리·우대·심사기준)를 가진 은행과 결합되면 그대로 실제 상품
+    안내가 됩니다.</div>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>고객은 실제로 무엇에 불만인가</h2>
+    <p class="lead">기능을 감으로 정하지 않기 위해 <strong>공개 자료를 직접 열람해</strong>
+    실제 불만을 조사했고, 다섯 가지 패턴을 확인했습니다.</p>
+
+    <div class="limits">
+      <div class="hd">조사 방법 · 범위 — 2026-08-20 수행</div>
+      <ul style="margin-top:0">
+        <li><strong>금융사 계산기·안내 페이지를 직접 확인</strong> — 토스피드 DSR 계산기<a class="sref" href="#src">[S1]</a>,
+          토스뱅크 한도 안내<a class="sref" href="#src">[S11]</a>, 핀다 한도 안내<a class="sref" href="#src">[S10]</a>,
+          뱅크몰 고객 Q&amp;A<a class="sref" href="#src">[S2]</a>. 각 서비스가 스스로 무엇을 고지하고
+          무엇을 안 알려주는지를 봤습니다.</li>
+        <li><strong>규제 발표 전후 보도·현장 반응을 직접 확인</strong> — 이데일리<a class="sref" href="#src">[S4]</a>·
+          파이낸셜뉴스<a class="sref" href="#src">[S5]</a><a class="sref" href="#src">[S6]</a>·국민일보<a class="sref" href="#src">[S7]</a>·
+          뉴시스<a class="sref" href="#src">[S12]</a>·서울경제<a class="sref" href="#src">[S3]</a>·
+          뉴스토마토<a class="sref" href="#src">[S9]</a>, 금융위원회 보도자료<a class="sref" href="#src">[S8]</a>.</li>
+        <li><strong>대상 고객 인터뷰</strong>(비공식·소수) — “DSR·DTI가 너무 많은데 총 얼마
+          빌릴 수 있는지를 한 번에 알고 싶다”는 요구가 여기서 나왔고, 그것이 기능 ④가 됐습니다.</li>
+        <li><strong>한계를 밝힙니다.</strong> 표본을 정해 통계적으로 표집한 사용자 조사가 아니라
+          공개 자료 조사 + 소수 인터뷰입니다. 일부 매체는 직접 열람이 제한되어 검색 결과
+          요약으로 확인했습니다. <strong>링크를 모두 남겼으니 직접 대조하실 수 있습니다.</strong></li>
+      </ul>
+    </div>
+    <div class="tw compare">
+      <table>
+        <thead><tr><th></th><th>확인된 불만</th><th>우리의 대응</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>계산기마다·은행마다 숫자가 다르다.</strong> 계산기들 스스로 “예측값·참고용”
+            이라 고지하고<a class="sref" href="#src">[S1]</a>, 실제 한도는 은행별 내부 심사기준·소득 인정 방식·담보
+            평가에 따라 갈립니다<a class="sref" href="#src">[S2]</a>. 한도조회 자체가 불이익이 된 사례도
+            보도됐습니다<a class="sref" href="#src">[S3]</a></td><td>숫자마다 근거 조문과 가정을 명시 — 왜 이 숫자인지 추적 가능</td></tr>
+          <tr><td>2</td><td><strong>규제 발표일 혼란이 반복된다.</strong> 발표 후 차주들이 오픈채팅방으로 몰려
+            주담대 상담방 참여자가 2,000명을 넘고, 문의가 쏟아지자 <strong>유료 상담방까지
+            등장</strong>했습니다<a class="sref" href="#src">[S4]</a>. 한 달 반 뒤에도 은행권 문의가
+            이어졌습니다<a class="sref" href="#src">[S12]</a></td>
+            <td>발표일에 내 조건 기준 개인화 답변을 즉시 제공</td></tr>
+          <tr><td>3</td><td><strong>“이미 계약했는데 대출이 막혔다.”</strong> 계약금→중도금→잔금의 수개월
+            시간차를 규제가 반영하지 못해, 잔금대출이 막혀 입주를 못 하는 사례가 대통령 주재
+            토론회에서 제기되고 보완 지시로 이어졌습니다<a class="sref" href="#src">[S5]</a><a class="sref" href="#src">[S6]</a><a class="sref" href="#src">[S7]</a></td>
+            <td>경과규정 판정을 정면 기능으로</td></tr>
+          <tr><td>4</td><td><strong>스트레스 DSR로 복잡성이 폭증했다.</strong> 수도권 1.50%p / 지방 0.75%p 로
+            가산이 갈리고 상품·은행별로 또 다릅니다<a class="sref" href="#src">[S8]</a><a class="sref" href="#src">[S9]</a></td><td>여러 규제를 합산하고 병목을 지목. 미반영 항목은 명시</td></tr>
+          <tr><td>5</td><td><strong>“한도 늘리는 법”은 알려주지만 ‘얼마를’ 바꿔야 하는지는 없다.</strong> 주요
+            금융앱이 아티클로 “기존 대출을 정리하라·만기를 늘려라”까지만 안내합니다<a class="sref" href="#src">[S10]</a><a class="sref" href="#src">[S11]</a></td><td>목표 역산 — 아래</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:18px"><b>조사 결론: 피버팅하지 않았습니다.</b> 다섯 중 넷은 이미
+    정면으로 치고 있었고, 비어 있던 것은 5번 — 얼마를 바꿔야 하는가 — 이었습니다.</p>
+    <div class="quote"><b>2번의 유료 상담방 등장이 특히 중요한 신호입니다.</b> “저는 어떻게
+    되나요”라는 질문에 <b>실제 지불의사가 존재</b>하고, 그 질문이 지금은 비공식 채널로
+    흘러가고 있다는 뜻이기 때문입니다.</div>
+
+    <h3>다섯 번째 공백을 정면으로 — 목표 역산</h3>
+    <p>진단에서 멈추지 않습니다. 목표 금액을 넣으면 무엇을 얼마나 바꿔야 하는지를 규제별로
+    역산합니다.</p>
+    <div class="bars">
+      <div class="cap">“3억이 필요한데 1억 4,000만 원밖에 안 나와요” → 방법 찾기</div>
+      <div class="bar-row"><div class="bar-hd"><span class="nm">기존 대출 월 상환액 줄이기</span>
+        <span class="vv">−77만 원</span></div><div class="track"><i style="width:26%"></i></div></div>
+      <div class="bar-row"><div class="bar-hd"><span class="nm">연소득 인정받기 (부부합산·상여)</span>
+        <span class="vv">7,000만 원</span></div><div class="track"><i style="width:72%"></i></div></div>
+      <div class="bar-row"><div class="bar-hd"><span class="nm">만기 늘리기</span>
+        <span class="vv">30년</span></div><div class="track"><i style="width:100%"></i></div></div>
+    </div>
+    <p style="margin-top:16px">규제가 막는 것은 정직하게 말합니다 — 가격구간별 최대한도는
+    “조건을 바꿔도 넘을 수 없다”고 안내합니다. <strong>처방대로 바꾸면 실제로 목표에 닿는지를
+    자동 테스트가 왕복 검증합니다.</strong></p>
+
+    <h3>‘시그널’은 발표일에만 켜지지 않습니다</h3>
+    <p>규제 변경은 간헐적이지만 <strong>한도를 움직이는 이벤트는 준상시적</strong>입니다 —
+    지역 지정과 해제, 스트레스 금리 단계 상향, 정책 변경. 화면은 정책 버전 DB의 실데이터로
+    “내 한도를 움직인 일들”을 시간순으로 보여주고, 실제 서비스에서는 조건을 저장해 두고
+    <strong>한도가 움직일 때마다 알림</strong>으로 알립니다. 집을 준비하는 몇 달 내내 켜져
+    있는 신호입니다.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>계산기는 ‘상태’에, 시그널은 ‘사건’에 답한다</h2>
+    <div class="tw compare">
+      <table>
+        <thead><tr><th></th><th>일반 한도 계산기</th><th>내 한도 시그널</th></tr></thead>
+        <tbody>
+          <tr><td>답하는 질문</td><td>지금 얼마 빌릴 수 있나 — <strong>오늘의 상태</strong></td>
+            <td>규제가 바뀌면 나는 뭐가 달라지나 — <strong>변경이라는 사건</strong></td></tr>
+          <tr><td>시점</td><td>현재 규칙 하나</td>
+            <td>변경 전/후 두 시점 비교 + 경과규정·생애최초 등 경계 조건 판정</td></tr>
+          <tr><td>한도 근거</td><td>LTV 중심의 단일 숫자</td>
+            <td>LTV·최대한도·DSR·DTI 합산 후 <strong>병목 규제 지목</strong></td></tr>
+          <tr><td>답의 근거</td><td>숫자만 (출처 없음)</td>
+            <td>공문 원문 인용 — 원문에 실재하는지 기계 대조</td></tr>
+          <tr><td>막혔을 때</td><td>이유도 해법도 없음</td>
+            <td><strong>무엇에 막혔는지</strong> + <strong>얼마를 바꿔야 하는지</strong> 역산</td></tr>
+          <tr><td>다음 행동</td><td>없음 — 숫자에서 끝</td>
+            <td>목표 역산 처방 + <strong>규제 요건 기준 상품 자격 판정</strong></td></tr>
+          <tr><td>틀렸을 때</td><td>“단순 참고용” 고지</td>
+            <td>독립 오라클 대조·회귀 테스트·감사로그가 <strong>배포 조건</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:20px">규제 사고는 평균값이 아니라 <strong>가장자리</strong>에서 납니다.
+    경과규정 하루 차이, 생애최초 예외, 유주택 0%, DSR 병목 — 팀명이 엣지케이스인 이유입니다.</p>
+    <div class="quote"><b>모방 가능성에 대해.</b> 화면은 베낄 수 있습니다. 그러나 판정의 재료인
+    확정 룰 명세·골드 평가셋·독립 재구현 오라클은 여신 실무에서 손수 쌓아야 하는 검증
+    자산이고, 이것 없이는 금융회사가 자기 이름으로 “고객님은 경과규정 대상입니다”라고 말할
+    수 없습니다. 핀테크는 “참고용”이라 쓰고 넘어갈 수 있지만 은행 공식 앱은 그럴 수 없습니다.
+    <b>그 간극이 저희 자리입니다.</b></div>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>왜 믿을 수 있나 — AI가 판정하지 않는 AI 서비스</h2>
+    <p class="lead">한도 안내가 틀리면 그건 오답이 아니라 금융사고입니다. 그래서 역할을
+    갈랐습니다.</p>
+    <ul>
+      <li><strong>LLM은 공문에서 사실만 추출합니다.</strong> 모든 항목에 원문 인용이 강제되고,
+        인용이 원문에 실제로 존재하는지 기계가 글자 단위로 대조합니다.</li>
+      <li><strong>판정은 사람이 확정한 명세를 구현한 결정적 룰엔진이 합니다.</strong> LLM은
+        규칙 값을 만들지 않습니다. 화면에 엔진이 모르는 값이 있으면 테스트가 실패합니다.</li>
+      <li><strong>엔진은 독립 재구현 오라클과 대조됩니다.</strong> 명세에서 따로 유도한
+        검증기와 전 케이스를 맞춰봅니다.</li>
+      <li><strong>브라우저에서 도는 판정 엔진은 원본과 자동 대조 후에만 배포됩니다.</strong>
+        하나라도 어긋나면 배포가 중단됩니다.</li>
+      <li><strong>산출 과정은 해시체인 감사로그</strong>로 남아 사후 변조를 탐지할 수 있습니다.</li>
+    </ul>
+
+    <div class="metrics">
+      <div class="metric"><div class="v">75/75</div><div class="l">인용이 원문에 실재 (100%)</div></div>
+      <div class="metric"><div class="v">36/36</div><div class="l">엔진 ↔ 독립 오라클 일치</div></div>
+      <div class="metric"><div class="v">924</div><div class="l">브라우저 엔진 ↔ 원본 대조 건수</div></div>
+      <div class="metric"><div class="v">569</div><div class="l">배포 전 자동 테스트</div></div>
+    </div>
+
+    <p style="margin-top:20px"><strong>검증 성적표를 함께 공개합니다.</strong> 12개 지표를 확정
+    임계와 대조해 <strong>11개 통과 · 미달 0 · 미측정 1</strong>로 보고하며,
+    <strong>미측정을 통과로 세지 않습니다.</strong> 모르는 것을 통과로 처리하는 것이 검증
+    체계가 무력해지는 가장 흔한 경로이기 때문입니다.</p>
+
+    <p>Q&amp;A(RAG)도 같은 원칙입니다. 검색 품질을 원문 대조를 통과한 정답 인용 기준으로
+    실측하며(recall@5 82%, 못 찾은 인용도 화면에 함께 표기), 답변의 인용은 원문과 대조합니다.
+    평가셋 115문항은 현재 사람 검수 진행 중이며, 확정 전까지 이 수치는 절대 성능이 아니라
+    개선 비교용으로 쓴다는 구분을 문서와 화면에 함께 적습니다.</p>
+  </section>
+
+  <section>
+    <div class="snum">06</div>
+    <h2>고객과 현업, 같은 엔진으로 동시에</h2>
+    <p class="lead">이 엔진은 고객 화면 전용이 아닙니다. 같은 엔진이 현업(심사·리스크)용
+    산출물을 이미 구동하며, 전부 공개 운영 중입니다.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>현업 산출물</th><th>무엇인가</th><th>실측</th></tr></thead>
+        <tbody>
+          <tr><td>규제 변경 추출·검증</td><td>공문에서 변경 항목을 구조화하고 인용을 원문 대조</td>
+            <td class="num">변경 75건 · 인용 100%</td></tr>
+          <tr><td>임팩트 매트릭스</td><td>업무영역별 조치·기한·담당. 자동처리 불가 행은 사유 없이 생성 불가</td>
+            <td class="num">30행 · 자동처리 67%</td></tr>
+          <tr><td>포트폴리오 영향</td><td>보유 신청 건을 시행 전·후 두 시점으로 전량 재평가</td>
+            <td class="num">2,000건 중 638건(31.9%)<br>−1,549억 원 · 보호 134건</td></tr>
+          <tr><td>룰 변경안 · 회귀</td><td>심사 룰 개정안과 테스트케이스 자동 생성·검증</td>
+            <td class="num">36케이스 100%</td></tr>
+          <tr><td>검증보고서 · 모델카드<br>리스크 레지스터</td><td>감독 대응·내부 증빙 문서, 같은 실행에서 자동 생성</td>
+            <td class="num">리스크 18건 / 5범주</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:20px">즉 <strong>하나의 검증된 엔진으로 B2C 콘텐츠와 B2B 내부
+    도구를 동시에 서비스</strong>합니다. 고객이 보는 답과 창구·심사가 보는 근거가 같은
+    엔진에서 나오므로, 규제 발표일 응대의 일관성이 구조적으로 확보됩니다.</p>
+  </section>
+
+  <section>
+    <div class="snum">07</div>
+    <h2>슈퍼SOL 연계 기대효과</h2>
+    <ul>
+      <li><strong>규제 발표일의 경험 차별화</strong> — 다른 앱은 뉴스를 주고, 슈퍼SOL은 ‘내 답’을
+        줍니다. 고객 불안이 최고조인 시점에 개인화된 답변을 제공하는 첫 금융앱이 됩니다.</li>
+      <li><strong>상담 부담 분산</strong> — 발표 직후 창구·콜센터로 몰리는 “저는 어떻게 되나요”를
+        앱 내 자가확인으로 흡수합니다.</li>
+      <li><strong>주담대 퍼널 상단 선점</strong> — 한도가 궁금한 순간이 대출 여정의 시작점입니다.
+        기존 한도조회를 대체하지 않고 앞단에서 증폭해 상담·조회로 잇습니다.</li>
+      <li><strong>신뢰 브랜딩</strong> — 근거 조문 인용과 검증 체계에 기반한 AI 안내는 금융 AI
+        설명책임 흐름과 정합하며, ‘믿을 수 있는 AI’를 슈퍼SOL의 자산으로 만듭니다.</li>
+      <li><strong>현업 확장성</strong> — 같은 엔진이 심사·리스크 도구로 확장되므로, 한 번의
+        온보딩으로 고객 콘텐츠와 내부 업무도구가 함께 열립니다.</li>
+    </ul>
+    <div class="quote">기술적으로도 부담이 적습니다. 판정 엔진이 브라우저에서 동작하므로
+    <b>웹뷰 하나로 탑재</b>되고, <b>서버 호출이 없어 고객 입력이 외부로 나가지 않습니다.</b></div>
+  </section>
+
+  <section>
+    <div class="snum">08</div>
+    <h2>지금 되는 것과, PoC 기간에 할 것</h2>
+    <p class="lead">과장하지 않기 위해 구현 상태를 구분해 밝힙니다.</p>
+
+    <h3>이미 동작합니다 — 공개 데모에서 직접 확인 가능</h3>
+    <ul>
+      <li>변경 전/후 판정·경과규정·예외 판정 엔진, 브라우저 실행 + 원본 대조 924건</li>
+      <li>총 가능금액 계산기 (LTV·최대한도·DSR·DTI + 병목 표시)</li>
+      <li>목표 역산 — 목표 금액 → 규제별 처방(부채 감축액·필요 소득·만기), 왕복 검증</li>
+      <li>한도 타임라인 — 정책 버전 DB 실데이터</li>
+      <li>내게 가능한 상품 찾기 — 해당 / 해당 없음 / 확인 필요 3상태 + 원문 인용</li>
+      <li>근거 조문 인용 · 원문 전체 열람 · 해당 문장 강조</li>
+      <li>공문 원문 검색(BM25, 한국어 토크나이저) 및 recall 실측</li>
+      <li>현업 산출물 전체 — 추출 검증 · 임팩트 매트릭스 · 포트폴리오 영향 · 검증보고서 · 모델카드</li>
+    </ul>
+
+    <h3>PoC 기간 목표</h3>
+    <ul>
+      <li>자유 질문에 문장으로 답하는 LLM 연결 — 모든 문장에 인용 부착, 근거 없으면 상담 안내</li>
+      <li>실시간 공문 수집·추출 파이프라인 자동화</li>
+      <li>슈퍼SOL 웹뷰 연동 및 사용성 테스트</li>
+      <li>조건 저장 + 한도 변동 알림 구독 (현재는 타임라인까지 구현)</li>
+      <li>상품 자격 판정에 <strong>은행 실제 상품 데이터 결합</strong> — 지금은 공문이 언급한
+        상품군까지만 판정하며, 금리·우대·내부 심사기준이 붙으면 그대로 상품 안내로 확장됩니다</li>
+    </ul>
+
+    <div class="limits">
+      <div class="hd">현재의 한계 — 그대로 밝힙니다</div>
+      <ul style="margin-top:0">
+        <li>LTV·DSR·DTI 참고 추정이며 <strong>스트레스 금리 가산은 미반영</strong> — 실제 한도는
+          이보다 적을 수 있고, 최종 가능 금액은 은행 심사로 확정됩니다.</li>
+        <li>포트폴리오 영향 수치는 합성 데이터 기반이며 <strong>실 고객 데이터를 사용하지
+          않았습니다.</strong></li>
+        <li>원문에 기준값이 없는 구간은 <strong>추정하지 않고 사람 검토로 넘깁니다.</strong>
+          자동 판정 커버리지 91.4%, 영향 측정 74.1%가 100%가 아닌 이유가 이것이며, 값을
+          지어내면 즉시 100%가 됩니다. <strong>그 자리를 비워 두는 것이 이 서비스의 설계
+          원칙입니다.</strong></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="snum">09</div>
+    <h2>PoC 계획</h2>
+    <p class="lead">6·30 규제 시나리오 시뮬레이터를 슈퍼SOL 웹뷰 콘텐츠로 전시합니다.</p>
+    <ul>
+      <li><strong>평가 지표</strong> — 완주율, 결과 이해도 응답, 상담·한도조회 전환율,
+        발표일 인입 상담 변화</li>
+      <li><strong>라이브 대응</strong> — 전시 기간 중 실제 규제 이벤트 발생 시 즉시 반영.
+        규제 변경은 반복 이벤트입니다(2026년에만 3건).</li>
+      <li><strong>상품 연계</strong> — 자격 판정 결과를 신한은행 상품 요건과 매핑해
+        “막힌 이유”에서 “그래서 어떤 상품”까지 한 화면에서 잇습니다(요건 데이터 제공이 전제)</li>
+      <li><strong>자금 사용</strong> — LLM 크레딧(실시간 추출·Q&amp;A 응답), UI·사용성 테스트</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="snum">10</div>
+    <h2>팀 엣지케이스</h2>
+    <p class="lead">금융권 개인여신 데이터분석 8년 7개월. 규제가 바뀌는 날 은행 안에서 해석 →
+    Rule 변경 → 테스트 → 전산 반영을 직접 수행한 당사자입니다. LTV 차등 전략을 설계해 불량률
+    <strong>5.77% → 3.16%</strong>로 개선한 실적이 있습니다.</p>
+    <p>이 도메인 지식으로 룰엔진부터 검증 체계, 고객 화면까지 MVP를 완성했습니다. 협업 이력의
+    공백은 산출물의 투명성으로 대신합니다 — 판정 데모·검증보고서·모델카드·리스크 레지스터를
+    모두 공개 웹에 올려 두어, 협업 상대가 <strong>사전에 직접 검증</strong>할 수 있습니다.</p>
+  </section>
+
+  <section>
+    <div class="snum">11</div>
+    <h2>직접 확인해 주세요</h2>
+    <div class="links">
+      <a href="https://ahra-june.github.io/RegImpact_AI/signal.html">
+        <span class="t">고객 화면 (핵심)</span>
+        <span class="u">ahra-june.github.io/RegImpact_AI/signal.html</span></a>
+      <a href="https://ahra-june.github.io/RegImpact_AI/demo.html">
+        <span class="t">3분 시연 · 자동 재생</span>
+        <span class="u">ahra-june.github.io/RegImpact_AI/demo.html</span></a>
+      <a href="https://ahra-june.github.io/RegImpact_AI/playground.html">
+        <span class="t">판정 플레이그라운드</span>
+        <span class="u">ahra-june.github.io/RegImpact_AI/playground.html</span></a>
+      <a href="https://ahra-june.github.io/RegImpact_AI/validation_summary.html">
+        <span class="t">검증 요약 1페이지</span>
+        <span class="u">ahra-june.github.io/RegImpact_AI/validation_summary.html</span></a>
+      <a href="https://ahra-june.github.io/RegImpact_AI/">
+        <span class="t">전체 산출물</span>
+        <span class="u">ahra-june.github.io/RegImpact_AI/</span></a>
+    </div>
+    <div class="quote">고객 화면에서 <b>연소득 5,000 · 기존 대출 월 상환액 100 · 금리 4%</b>를
+    넣어 보시면, 한도가 LTV에서 DSR로 옮겨 가며 <b>“여기에 막혀요”</b> 표시가 이동하는 것을
+    보실 수 있습니다.</div>
+  </section>
+
+  <section id="src">
+    <div class="snum">12</div>
+    <h2>출처</h2>
+
+    <h3>A. 규제 원문 — 판정의 근거</h3>
+    <p>저장소에 스냅샷과 해시로 보관합니다. 화면의 모든 인용은 이 스냅샷과 <strong>글자 단위로
+    대조</strong>됩니다.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>문서</th><th>기관</th><th>발표일</th><th>sha256(앞 8자리)</th></tr></thead>
+        <tbody>
+          <tr><td>규제지역 추가 지정 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</td><td>금융위원회</td><td class="num">2026-06-30</td><td class="num">403fb8fb</td></tr>
+          <tr><td>투기과열지구 및 조정대상지역 추가 지정 (보도참고자료)</td><td>국토교통부</td><td class="num">2026-06-30</td><td class="num">6115271b</td></tr>
+          <tr><td>규제지역 추가 지정 관련 FAQ</td><td>관계기관 합동</td><td class="num">2026-06-30</td><td class="num">ef3dad7b</td></tr>
+          <tr><td>주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최</td><td>금융위원회</td><td class="num">2025-10-15</td><td class="num">4a7d1f8c</td></tr>
+          <tr><td>대출수요 관리 방안 FAQ</td><td>관계기관 합동</td><td class="num">2025-10-15</td><td class="num">26a826fc</td></tr>
+          <tr><td>주택시장 안정을 위한 관리방안 (6·17 대책)</td><td>관계부처 합동</td><td class="num">2020-06-17</td><td class="num">67070527</td></tr>
+          <tr><td>주택시장 안정을 위한 관리방안 외부용 Q&amp;A</td><td>관계부처 합동</td><td class="num">2020-06-17</td><td class="num">0eaa30c2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:16px">전부 <strong>공개 보도자료·FAQ</strong> 입니다. 실제 회사 내부
+    문서나 고객 데이터는 사용하지 않았습니다. 전체 해시와 추출 방법은 저장소
+    <code>docs/sources/SOURCES.md</code> 에 있습니다.</p>
+
+    <h3>B. 고객 문제 정의를 위해 직접 확인한 공개 자료 <span style="font-weight:400;color:var(--muted)">— 확인일 2026-08-20</span></h3>
+    <ul class="srclist">
+      <li><span class="id">[S1]</span>DSR 계산기 — 토스피드<span class="u">https://toss.im/tossfeed/calculator/dsr</span><span class="nb">계산기 자체의 “예측값·참고용” 고지 확인</span></li>
+      <li><span class="id">[S2]</span>은행마다 대출한도 다르게 나오는 이유가 뭔가요? — 뱅크몰 고객 Q&amp;A<span class="u">https://www.bank-mall.co.kr/customer/qna/748</span></li>
+      <li><span class="id">[S3]</span>한도 조회 4번 했다고 부실고객? 은행 황당한 ‘대출 퇴짜’ — 서울경제<span class="u">https://www.sedaily.com/article/12700987</span></li>
+      <li><span class="id">[S4]</span>“대출 언제 풀리나요?”…부동산 오픈채팅방도 ‘줄’섰다 — 이데일리 (2026-07-31)<span class="u">https://www.edaily.co.kr/News/Read?mediaCodeNo=257&amp;newsId=01735126645520096</span><span class="nb">주담대 상담 오픈채팅방 2,000명 초과 · 유료 상담방 등장</span></li>
+      <li><span class="id">[S5]</span>“이미 계약했는데 대출 막혀”…李 보완책 지시에 해법 찾는 금융위 — 파이낸셜뉴스 (2026-07-24)<span class="u">https://www.fnnews.com/news/202607240520224562</span></li>
+      <li><span class="id">[S6]</span>“대출 막혀 계약금 날릴 판”…부동산토론회 앞두고 규제 완화 요구 쇄도 — 파이낸셜뉴스 (2026-07-23)<span class="u">https://www.fnnews.com/news/202607230518279386</span></li>
+      <li><span class="id">[S7]</span>“입주 전 잔금 대출 막혀” 눈물에 李 “피해 최소화하라” 즉석 지시 — 국민일보<span class="u">https://www.kmib.co.kr/article/view.asp?arcid=1784795590&amp;code=11121600&amp;sid1=pol</span></li>
+      <li><span class="id">[S8]</span>3단계 스트레스 DSR 시행방안 확정·발표 (보도자료) — 금융위원회<span class="u">https://www.fsc.go.kr/no010101/84617</span></li>
+      <li><span class="id">[S9]</span>스트레스 DSR 3단계, 수도권만 1.5%p 가산금리 — 뉴스토마토<span class="u">https://www.newstomato.com/readnews.aspx?no=1262492</span></li>
+      <li><span class="id">[S10]</span>대출 한도 늘리는 방법: 핵심은 DSR — 핀다<span class="u">https://finda.co.kr/finposts/finance250605</span></li>
+      <li><span class="id">[S11]</span>대출 한도를 늘리는 방법이 있다고요? (ft. DSR 의미와 계산) — 토스뱅크<span class="u">https://www.tossbank.com/articles/creditline</span></li>
+      <li><span class="id">[S12]</span>“대출 오픈런 이제 끝?” 은행권 문의 잇따라 — 뉴시스 (2026-08-14)<span class="u">https://www.newsis.com/view/NISX20260814_0003749169</span></li>
+    </ul>
+
+    <h3>C. 이 문서의 성능·검증 수치</h3>
+    <p>외부 인용이 아니라 <strong>저희 파이프라인을 실제로 실행한 결과</strong>입니다. 인용
+    정확성 75/75, 오라클 36/36, JS 포팅 대조 924건, recall@5 82%, 자동 테스트 583개 — 모두
+    공개 저장소의 코드로 재현할 수 있고, 문서와 시스템이 어긋나면 테스트가 실패합니다.</p>
+
+    <h3>D. 팀 이력 수치</h3>
+    <p>“개인여신 데이터분석 8년 7개월”, “LTV 차등 전략으로 불량률 5.77% → 3.16%”는
+    <strong>작성자 본인의 경력 사실</strong>이며, 이전 재직사의 내부 성과이므로 공개 링크로
+    제시할 수 없습니다. 요청하시면 경력증명 등으로 확인해 드리겠습니다. 해당 회사의 데이터·
+    문서는 이 프로젝트에 일절 사용하지 않았습니다.</p>
+  </section>
+
+  <footer>
+    본 문서의 모든 수치는 공개 파이프라인을 실제로 실행해 산출한 값이며, 손으로 적은 숫자가
+    없습니다. 문서와 시스템이 어긋나면 테스트가 실패합니다.
+  </footer>
+</div>
