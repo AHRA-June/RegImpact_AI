@@ -514,6 +514,53 @@ def test_signal_answers_which_regions_were_added(site):
         assert c["quote"] in norm[c["doc"]]
 
 
+def test_signal_never_dead_ends_on_an_unanswerable_question(site):
+    """답을 못 찾아도 **원문은 읽게** 해준다 — 화면을 비우는 건 도리가 아니다
+    (2026-08-20 폰 리뷰: "뭐가바뀐거야?"에 아무것도 안 나옴)."""
+    html = site["signal.html"]
+    assert 'id="docrow"' in html and "function docBtns(" in html
+    assert "공문 원문 그대로 읽기" in html
+    assert "음영 없이 전체 보기" in html          # 강조 없이 원문만 여는 경로
+    assert "tgt(doc, [])" in html                 # marks 를 비워서 연다
+    # 못 찾았을 때의 안내가 막다른 길이 아니라 원문으로 이어진다
+    assert "아래 <b>공문 원문 그대로 읽기</b>에서 전체 내용을 보실 수 있고" in html
+
+
+def test_signal_answers_the_most_asked_question(site):
+    """"뭐가 바뀐 거야"는 이 제품의 가장 흔한 질문인데 어휘 검색으로는 못 잡는다 —
+    원문이 "바뀌다"가 아니라 "강화·적용"이라고 쓰기 때문. 사전 검수 안내가 답한다."""
+    import json as _json
+    import re as _re
+
+    from regimpact.extractor.sources import load_corpus
+    from regimpact.report import collect
+    from regimpact.ui.signal import _rule_quotes, easy_answers
+
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    ev = collect(generated_at="x")
+    norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
+    answers = easy_answers(_rule_quotes(ev.extraction), fx["constants"], norm, ["구리시"], True)
+    ids = [a["id"] for a in answers]
+    assert "what-changed" in ids
+    wc = next(a for a in answers if a["id"] == "what-changed")
+    c = fx["constants"]
+    for pct in (c["LTV_BASELINE"], c["LTV_REGULATED_STANDARD"], c["LTV_FIRST_HOME"]):
+        assert f"{pct:.0%}" in wc["easy"], "비율이 엔진 상수에서 오지 않았다"
+    assert c["GRANDFATHERING_CUTOFF"] in wc["easy"]
+    for cite in wc["cites"]:
+        assert cite["quote"] in norm[cite["doc"]]
+    # 더 구체적인 질문은 여전히 그 질문의 안내가 이긴다 (일반 안내가 가로채지 않는다)
+    def pick(q):
+        best, bn = None, 0
+        for a in answers:
+            n = sum(1 for k in a["keys"] if k in q)
+            if n > bn:
+                best, bn = a, n
+        return best["id"] if best else None
+    assert pick("뭐가바뀐거야?") == "what-changed"
+    assert pick("생애최초인데 한도가 줄어드나요") == "first-home"
+
+
 def test_signal_is_honest_with_customers(site):
     """고객 화면일수록 한계를 숨기면 안 된다 — 금융사고가 되는 지점이다."""
     html = site["signal.html"]

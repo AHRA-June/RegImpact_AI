@@ -200,6 +200,15 @@ details.more[open] summary{border-bottom:1px solid var(--outline-variant)}
 .xtra{margin-top:11px}
 .xtra summary{font-size:12px;color:var(--on-surface-variant)}
 .xtra-b{padding:11px 12px;display:flex;flex-direction:column;gap:9px}
+/* 답을 못 찾았을 때도 원문은 읽게 해준다 — 아무것도 안 보여주는 건 도리가 아니다 */
+.docrow{margin-top:13px;padding-top:12px;border-top:1px dashed var(--outline-variant)}
+.docrow .src-t{margin:0 0 8px}
+.dbtn{display:block;width:100%;box-sizing:border-box;text-align:left;padding:11px 12px;
+  margin-bottom:7px;border:1px solid var(--outline-variant);border-radius:10px;
+  background:var(--surface-container-lowest);color:var(--on-surface);font-family:inherit;
+  font-size:12.5px;cursor:pointer;word-break:keep-all}
+.dbtn:hover{border-color:var(--primary)}
+.dbtn small{display:block;color:var(--on-surface-variant);font-size:10.5px;margin-top:3px}
 .q-cite.qbtn{cursor:pointer;width:100%;text-align:left;font-family:inherit;display:block;
   box-sizing:border-box;border-top:none;border-right:none;border-bottom:none}
 .q-cite.qbtn:hover{background:var(--surface-container-high)}
@@ -345,6 +354,8 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
     p_std = f"{constants['LTV_REGULATED_STANDARD']:.0%}"
     p_first = f"{constants['LTV_FIRST_HOME']:.0%}"
     p_multi = f"{constants['LTV_MULTI']:.0%}"
+    p_real = f"{constants['LTV_REAL_DEMAND']:.0%}"
+    p_owner = f"{constants['LTV_OWNER']:.0%}"
     eff = constants["REG_EFFECTIVE"]
     fsc, molit, faq = "FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"
     return [
@@ -390,6 +401,18 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. 위 ① 지역 선택에서 "
                  "내 지역을 골라 직접 확인해 보세요.",
          "cites": [quotes["MULTI_0"], quotes["REG_STD"]]},
+        {"id": "what-changed",
+         # 가장 많이 묻는 질문인데 어휘 검색이 잡지 못한다 — 원문은 "바뀌다"가 아니라
+         # "강화·적용"이라고 쓴다(2026-08-20 폰 리뷰: "뭐가바뀐거야?"에 아무것도 안 나옴).
+         "keys": ["뭐가 바뀌", "뭐가바뀌", "무엇이 바뀌", "바뀐", "바뀌", "달라",
+                  "변경", "얼마", "한도", "어떻게 되"],
+         "easy": f"규제지역으로 지정되면 집을 살 때 빌릴 수 있는 비율(LTV)이 "
+                 f"{p_base}에서 {p_std}로 줄어드는 것이 가장 큰 변화예요. 다만 모두 같지는 "
+                 f"않아요 — 생애최초 구입자는 {p_first} 그대로, 서민·실수요자는 {p_real}, "
+                 f"이미 집이 있으면 {p_owner}가 적용됩니다. 그리고 {cutoff}까지 계약하고 "
+                 f"계약금을 낸 경우에는 예전 기준이 유지돼요. {eff}부터 적용되며, "
+                 "내 조건에서 얼마가 되는지는 위 ② 변경 전 → 후에서 바로 볼 수 있어요.",
+         "cites": [quotes["REG_STD"], quotes["_GF"]]},
         {"id": "which-regions",
          "keys": ["어디", "어느 지역", "어떤 지역", "무슨 지역", "지정된 지역", "지정된 곳",
                   "추가된 지역", "추가 지정", "새로 지정", "내 지역", "우리 동네", "포함되"],
@@ -452,6 +475,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     )
 
     presets_qa = [
+        "뭐가 바뀐 거예요?",
         "잔금일이 시행일 뒤인데 저는 어떻게 되나요",
         "생애최초인데 한도가 줄어드나요",
         "계약금을 냈으면 종전 규정을 적용받나요",
@@ -585,6 +609,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <input type="text" id="q" placeholder="예) 잔금일이 시행일 뒤인데 저는 어떻게 되나요">
       <div class="preset">{preset_btns}</div>
       <div class="hits" id="hits"></div>
+      <div class="docrow" id="docrow"></div>
       <div class="honesty" style="margin-top:11px">쉬운 요약은 자주 묻는 질문에 대해
       <b>미리 작성해 사람이 검수하는 안내문</b>이에요 — 질문을 이해해 답을 '생성'하는 AI가
       아닙니다. 자유 질문에 문장으로 답하는 LLM 연결(모든 문장에 인용 부착)은 PoC 기간
@@ -908,6 +933,17 @@ function matchEasy(q) {
   }
   return best;
 }
+// 강조 없이 원문만 여는 버튼 — 질문에 답하지 못해도 **원문은 그대로** 보여준다.
+// marks 를 비워 openDoc 을 부르면 음영 없이 전체가 열린다(2026-08-20 폰 리뷰).
+function docBtns() {
+  return DOCS_NOW.map((doc) => {
+    const d = DOCL[doc] ?? {};
+    return `<button type="button" class="dbtn" data-t="${tgt(doc, [])}">${d.title ?? doc}`
+      + `<small>${d.issuer ?? ""} · ${d.published ?? ""} · 음영 없이 전체 보기</small></button>`;
+  }).join("");
+}
+$("#docrow").innerHTML = `<div class="src-t">공문 원문 그대로 읽기</div>` + docBtns();
+
 function ask(q) {
   if (!q.trim()) return;
   $("#q").value = q;
@@ -951,8 +987,10 @@ function ask(q) {
   }
   const hasHits = cards.length > 0;
   if (!easy && !hasHits) {
-    html = `<div class="consult"><b>이 질문의 근거를 공문에서 찾지 못했어요.</b>
-      지어내서 답하지 않아요 — 전문 상담(대출 상담 창구·콜센터)을 안내해 드릴게요.</div>`;
+    // 못 찾았다고 화면을 비우면 막다른 길이다 — 지어내지 않되, 읽을 것은 남겨 준다.
+    html = `<div class="consult"><b>이 질문에 딱 맞는 답은 공문에서 찾지 못했어요.</b>
+      지어내서 답하지 않아요 — 아래 <b>공문 원문 그대로 읽기</b>에서 전체 내용을 보실 수 있고,
+      판단이 어려우면 전문 상담(대출 상담 창구·콜센터)으로 확인하세요.</div>`;
   } else if (!easy) {
     html = `<div class="consult">이 질문의 <b>쉬운 요약은 아직 준비되지 않았어요.</b>
       아래는 질문에 나온 표현이 들어 있는 공문 문장이라 <b>질문과 무관할 수 있어요</b> —
