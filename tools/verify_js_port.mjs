@@ -74,6 +74,9 @@ for (const pr of fx.affordability?.probes ?? []) {
     }
   }
   if ((js.total ?? null) !== (py.total ?? null)) diffs.push(`total ${py.total} vs ${js.total}`);
+  if (JSON.stringify(js.caps) !== JSON.stringify(py.caps)) {
+    diffs.push(`caps ${JSON.stringify(py.caps)} vs ${JSON.stringify(js.caps)}`);
+  }
   if (JSON.stringify(js.binding) !== JSON.stringify(py.binding)) {
     diffs.push(`binding [${py.binding}] vs [${js.binding}]`);
   }
@@ -94,6 +97,13 @@ for (const pr of fx.affordability?.plan_probes ?? []) {
   }
   if (JSON.stringify(js.actions) !== JSON.stringify(py.actions)) {
     diffs.push(`actions ${JSON.stringify(py.actions)} vs ${JSON.stringify(js.actions)}`);
+  }
+  const near = (a, b) => (a === null || b === null) ? a === b : Math.abs(a - b) < 1e-9;
+  for (const k of Object.keys(py.at_target ?? {})) {
+    const pv = py.at_target[k], jv = (js.at_target ?? {})[k];
+    if (!jv || !near(pv.actual, jv.actual) || !near(pv.cap, jv.cap) || pv.over !== jv.over) {
+      diffs.push(`at_target.${k} ${JSON.stringify(pv)} vs ${JSON.stringify(jv)}`);
+    }
   }
   if (diffs.length) failures.push({ kind: "plan", id: `plan#${planProbes - 1}`, diffs });
 }

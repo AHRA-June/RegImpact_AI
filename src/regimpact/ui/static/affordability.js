@@ -47,11 +47,45 @@ export function estimateAffordability(fx, inp) {
   const known = Object.entries(limits).filter(([, v]) => v !== null);
   const total = known.length ? Math.min(...known.map(([, v]) => v)) : null;
   const binding = known.filter(([, v]) => v === total).map(([k]) => k).sort();
+  const measurable = income && rate !== null;
+  const caps = {
+    LTV: inp.max_ltv,
+    CAP: inp.regulated ? capForPrice(fx, inp.price) : null,
+    DSR: measurable ? C.dsr_rates[inp.lender ?? "BANK"] : null,
+    DTI: measurable ? dtiRate(fx, inp.rule_id, inp.regulated_type) : null,
+  };
   return {
-    limits, total, binding,
+    limits, total, binding, caps,
     dti_rate: dtiRate(fx, inp.rule_id, inp.regulated_type),
     dsr_rate: C.dsr_rates[inp.lender ?? "BANK"],
   };
+}
+
+/* 이 금액을 빌리면 내 비율이 몇 %가 되는가 — 규제 한도와 나란히. */
+export function ratiosFor(fx, principal, inp) {
+  const C = fx.affordability.constants;
+  const out = {
+    LTV: { actual: inp.price ? principal / inp.price : null, cap: inp.max_ltv,
+           is_amount: false },
+  };
+  if (inp.regulated) {
+    out.CAP = { actual: principal, cap: capForPrice(fx, inp.price), is_amount: true };
+  }
+  const income = inp.annual_income ?? null;
+  const rate = inp.annual_rate ?? null;
+  if (income && rate !== null) {
+    const pay = annualPaymentForPrincipal(principal, rate, inp.term_years);
+    const debtAnnual = (inp.monthly_debt_service ?? 0) * 12;
+    const used = (pay + debtAnnual) / income;
+    out.DSR = { actual: used, cap: C.dsr_rates[inp.lender ?? "BANK"], is_amount: false };
+    out.DTI = { actual: used, cap: dtiRate(fx, inp.rule_id, inp.regulated_type),
+                is_amount: false };
+  }
+  for (const v of Object.values(out)) {
+    if (v.actual === null || v.cap === null) { v.over = null; v.gap = null; }
+    else { v.over = v.actual > v.cap; v.gap = v.actual - v.cap; }
+  }
+  return out;
 }
 
 /* 목표 역산 — Python `plan_for_target` 의 포팅본. 규제 값은 픽스처에서 읽는다. */
@@ -110,5 +144,6 @@ export function planForTarget(fx, inp) {
     }
   }
   return { target: inp.target, reachable: false, now, actions,
+           at_target: ratiosFor(fx, inp.target, inp),
            shortfall: inp.target - now.total };
 }
