@@ -385,7 +385,9 @@ def test_signal_qa_answers_in_plain_language_backed_by_full_source(site):
     fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
     ev = collect(generated_at="x")
     norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
-    answers = easy_answers(_rule_quotes(ev.extraction), fx["constants"], norm)
+    labels = [fx["regions"][c]["label"] for c in ev.extraction.target_regions
+              if c in fx["regions"]]
+    answers = easy_answers(_rule_quotes(ev.extraction), fx["constants"], norm, labels, True)
     assert len(answers) >= 4                      # 프리셋 질문 전부 커버
     for a in answers:
         assert a["easy"] in html, f"{a['id']}: 안내문이 화면에 없다"
@@ -432,17 +434,84 @@ def test_signal_excerpt_is_sentence_level(site):
     assert "질문과 무관할 수 있어요" in html        # 어휘 매칭의 한계를 고객에게 밝힌다
 
 
-def test_signal_full_text_matches_the_indexed_body(site):
-    """모달의 '공문 전체'와 색인 본문이 같은 정제본이어야 발췌 문장을 찾아 강조할 수 있다."""
+def test_signal_full_text_is_the_unedited_original(site):
+    """모달의 '공문 전체'는 **원문 그대로**여야 한다 — 줄바꿈까지(2026-08-20 폰 리뷰:
+    한 덩어리로 흘러 표가 사라졌다). 대신 발췌 문장은 공백을 합친 좌표에서 찾으므로,
+    정규화하면 색인 본문이 전체 본문 안에 있어야 강조가 성립한다."""
     import json as _json
+    import re as _re
+
+    from regimpact.extractor.sources import load_corpus
     html = site["signal.html"]
     full = _json.loads(html.split("const DOCS_FULL = ", 1)[1].split(";\nconst IDX_EXPORT", 1)[0])
     idx = _json.loads(html.split("const IDX_EXPORT = ", 1)[1].split(";\nconst QUOTES", 1)[0])
     assert full and idx["chunks"]
+    corpus = load_corpus()
+    for doc, text in full.items():
+        assert text == corpus[doc], f"{doc}: 모달 본문이 원문과 다르다 — 편집하지 않는다"
+        assert "\n" in text, f"{doc}: 줄바꿈이 사라졌다 (표가 한 줄로 뭉개진다)"
+    norm = {d: _re.sub(r"\s+", " ", t).strip() for d, t in full.items()}
     for c in idx["chunks"][:8]:
-        assert c["text"][:60] in full[c["doc_id"]], f"{c['id']}: 청크가 전체 본문에 없다"
-    # 무엇을 뺐는지 화면이 밝힌다 — 조용히 지우지 않는다
-    assert "쪽 번호·담당자 연락처 같은 문서 부속만 뺐고 문장은" in html
+        assert c["text"][:60] in norm[c["doc_id"]], f"{c['id']}: 청크를 전체 본문에서 못 찾는다"
+    assert "줄바꿈까지 원문 그대로이며 한 글자도 빼지 않았습니다" in html
+
+
+def test_signal_fixes_from_phone_review_day2(site):
+    """폰 실사용 리뷰(2026-08-20) 3건 고정 — 발췌 강조 정확도, 모달 가독성, 인용 출처.
+
+    ① 어휘가 겹친 문단이 검수된 답과 같은 비중으로 놓이면, 검수 안 된 문단이 답처럼 보인다.
+    ② 문장 점수는 겹친 개수가 아니라 희소성(idf)으로 매긴다.
+    ③ 목차 줄이 근거로 실리지 않게, 인용 절단기는 앵커가 모호하면 실패한다.
+    """
+    html = site["signal.html"]
+    # ① 검수된 답이 있으면 어휘 매칭 문단은 접어서 보조로
+    assert "details class=\"more xtra\"" in html
+    assert "검수된 답은 아니에요" in html
+    # ② 문장 점수에 색인의 idf 를 쓴다 (개수 세기가 아니다)
+    assert "INDEX.idf.get(t)" in html
+    # ③ 원문 좌표 되돌리기 + 쪽 구분 (원문을 그대로 두고 강조만 얹는다)
+    assert "function normMap(" in html and "function findSpan(" in html
+    assert 'class="pg"' in html
+
+
+def test_signal_citation_cutter_refuses_ambiguous_anchors():
+    """목차와 본문에 같은 문장이 있는데 첫 것을 집으면 **목차 줄**이 근거로 실린다
+    (2026-08-20 폰 리뷰에서 실제로 발생). 모호하면 실패하는 것이 정상 동작이다."""
+    import re as _re
+
+    from regimpact.extractor.sources import load_corpus
+    from regimpact.ui.signal import _corpus_cut
+    norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
+    ambiguous = "3억원 초과 APT를 취득한 자의 전세대출 제한의 예외사유는?"
+    with pytest.raises(ValueError, match="모호"):
+        _corpus_cut(norm, "FAQ_20260630", ambiguous)
+    body = _corpus_cut(norm, "FAQ_20260630", ambiguous, 60, nth=1)
+    assert "불가피한 실수요" in body["quote"]      # 목차가 아니라 본문
+
+
+def test_signal_answers_which_regions_were_added(site):
+    """"어디가 추가된 거야" — 원문이 '수도권'이 아니라 시·구 이름으로 말하기 때문에
+    어휘 검색으로는 답할 수 없는 질문이다. 사전 검수 안내가 evidence 의 지역으로 답한다."""
+    import json as _json
+    import re as _re
+
+    from regimpact.extractor.sources import load_corpus
+    from regimpact.report import collect
+    from regimpact.ui.signal import _rule_quotes, easy_answers
+
+    html = site["signal.html"]
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    ev = collect(generated_at="x")
+    labels = [fx["regions"][c]["label"] for c in ev.extraction.target_regions
+              if c in fx["regions"]]
+    norm = {k: _re.sub(r"\s+", " ", v).strip() for k, v in load_corpus().items()}
+    answers = easy_answers(_rule_quotes(ev.extraction), fx["constants"], norm, labels, True)
+    which = next(a for a in answers if a["id"] == "which-regions")
+    assert "어디" in which["keys"]
+    for label in labels:                          # 지역명은 evidence 에서 온다
+        assert label in which["easy"] and label in html
+    for c in which["cites"]:                      # 근거는 원문 verbatim
+        assert c["quote"] in norm[c["doc"]]
 
 
 def test_signal_is_honest_with_customers(site):
