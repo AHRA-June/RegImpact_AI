@@ -169,3 +169,67 @@ def test_annuity_forward_and_inverse_agree():
 
     pay = annual_payment_for_principal(300_000_000, 0.045, 25)
     assert abs(principal_from_annual_payment(pay, 0.045, 25) - 300_000_000) <= 2
+
+
+# ---------- "내 비율이 몇 %인가" — 금액만으로는 왜 막혔는지 알 수 없다 ----------
+def test_ratios_report_actual_percentage_against_the_cap():
+    """고객 리뷰(2026-08-20): 금액만 보여주면 왜 막혔는지 모른다.
+    "규정 한도는 40%인데 당신은 58.4%"를 말할 수 있어야 다음 행동이 보인다."""
+    from regimpact.affordability import ratios_for
+
+    r = ratios_for(300_000_000, price=800_000_000, max_ltv=0.4, rule_id="REG_STD",
+                   regulated=True, regulated_type="SPECULATIVE_OVERHEATED",
+                   annual_income=50_000_000, monthly_debt_service=1_000_000,
+                   annual_rate=0.04, term_years=30)
+    assert r["LTV"]["actual"] == pytest.approx(0.375)      # 3억 / 8억
+    assert r["LTV"]["cap"] == 0.40 and r["LTV"]["over"] is False
+    assert r["DSR"]["cap"] == 0.40 and r["DSR"]["over"] is True
+    assert r["DSR"]["actual"] > 0.40 and r["DSR"]["gap"] == pytest.approx(
+        r["DSR"]["actual"] - 0.40)
+    assert r["CAP"]["is_amount"] is True and r["CAP"]["cap"] == 600_000_000
+
+
+def test_ratio_at_the_limit_equals_the_cap():
+    """★ 정합성 — 한도만큼 빌리면 그 규제의 비율은 정확히 한도와 같아야 한다.
+    (min(...)으로 구한 한도와 역방향 비율 계산이 같은 세계를 보고 있는지 확인)"""
+    from regimpact.affordability import ratios_for
+
+    base = dict(price=800_000_000, max_ltv=0.4, rule_id="REG_STD", regulated=True,
+                regulated_type="SPECULATIVE_OVERHEATED", annual_income=50_000_000,
+                monthly_debt_service=1_000_000, annual_rate=0.04, term_years=30)
+    est = estimate(**base)
+    at_dsr = ratios_for(est["limits"]["DSR"], **base)
+    assert at_dsr["DSR"]["actual"] == pytest.approx(0.40, abs=1e-6)
+    at_ltv = ratios_for(est["limits"]["LTV"], **base)
+    assert at_ltv["LTV"]["actual"] == pytest.approx(0.40, abs=1e-9)
+
+
+def test_ratios_stay_none_without_income():
+    from regimpact.affordability import ratios_for
+
+    r = ratios_for(300_000_000, price=800_000_000, max_ltv=0.4, rule_id="REG_STD",
+                   regulated=True)
+    assert "DSR" not in r and "DTI" not in r      # 모르면 비율을 지어내지 않는다
+    assert r["LTV"]["actual"] == pytest.approx(0.375)
+
+
+def test_estimate_reports_the_caps_it_applied():
+    r = estimate(price=800_000_000, max_ltv=0.4, rule_id="REG_STD", regulated=True,
+                 regulated_type="ADJUSTMENT", annual_income=50_000_000,
+                 annual_rate=0.04, term_years=30, lender="NONBANK")
+    assert r["caps"]["LTV"] == 0.40
+    assert r["caps"]["DSR"] == 0.50               # 2금융권
+    assert r["caps"]["DTI"] == 0.50               # 조정대상지역
+    assert r["caps"]["CAP"] == 600_000_000
+
+
+def test_plan_includes_ratios_at_the_target():
+    from regimpact.affordability import plan_for_target
+
+    plan = plan_for_target(target=300_000_000, price=800_000_000, max_ltv=0.4,
+                           rule_id="REG_STD", regulated=True,
+                           regulated_type="SPECULATIVE_OVERHEATED",
+                           annual_income=50_000_000, monthly_debt_service=1_000_000,
+                           annual_rate=0.04, term_years=30)
+    assert plan["at_target"]["DSR"]["over"] is True
+    assert plan["at_target"]["DSR"]["cap"] == 0.40

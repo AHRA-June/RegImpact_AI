@@ -606,6 +606,17 @@ def test_signal_turns_diagnosis_into_action(site):
     assert len(fx["affordability"]["plan_probes"]) >= 200
 
 
+def test_signal_shows_my_actual_ratio_against_the_cap(site):
+    """금액만으로는 왜 막혔는지 알 수 없다(2026-08-20 리뷰) — 규정 한도와 내 비율을 함께.
+    "규정 한도는 40%인데 이 금액이면 58.4%가 돼요 — 18.4%p 초과"""
+    html = site["signal.html"]
+    assert "규정 한도" in html                      # 한도 막대마다 규제 기준 표기
+    assert "ratiosFor(" in html                     # 대조된 포팅본이 계산한다
+    assert "이 금액이면" in html and "초과" in html   # 초과 설명 문장(값은 런타임 조립)
+    assert 'class="gauge"' in html and 'class="lim"' in html  # 한도 선이 있는 게이지
+    assert "pct1" in html                           # 소수 한 자리 — 40%와 40.4%를 구분
+
+
 def test_signal_shows_limit_moves_beyond_the_announcement_day(site):
     """'시그널'이 발표일 전용 도구가 아님을 화면이 보여준다 — 한도를 움직인 이벤트 타임라인.
     날짜·지역은 정책 버전 DB 실데이터에서 온다."""

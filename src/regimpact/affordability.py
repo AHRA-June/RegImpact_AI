@@ -102,9 +102,63 @@ def estimate(
     known = {k: v for k, v in limits.items() if v is not None}
     total = min(known.values()) if known else None
     binding = sorted(k for k, v in known.items() if v == total) if known else []
+    caps = {
+        "LTV": max_ltv,
+        "CAP": cap_for_price(price) if regulated else None,
+        "DSR": DSR_RATES[lender] if (annual_income and annual_rate is not None) else None,
+        "DTI": dti_rate(rule_id, regulated_type) if (annual_income and annual_rate is not None)
+               else None,
+    }
     return {"limits": limits, "total": total, "binding": binding,
+            "caps": caps,
             "dti_rate": dti_rate(rule_id, regulated_type),
             "dsr_rate": DSR_RATES[lender]}
+
+
+def ratios_for(
+    principal: int,
+    *,
+    price: int,
+    max_ltv: float,
+    rule_id: Optional[str],
+    regulated: bool,
+    regulated_type: str = "NONE",
+    annual_income: Optional[int] = None,
+    monthly_debt_service: int = 0,
+    annual_rate: Optional[float] = None,
+    term_years: int = MAX_TERM_YEARS,
+    lender: str = "BANK",
+) -> dict:
+    """**이 금액을 빌리면 내 비율이 몇 %가 되는가** — 규제 한도와 나란히 돌려준다.
+
+    고객 리뷰(2026-08-20): 금액만 보여주면 왜 막혔는지 모른다. "규정 한도는 40%인데
+    당신은 55%"라고 말해 줘야 다음 행동이 보인다. 한도 계산이 min(...)의 결과라면,
+    이것은 그 반대 방향 — 주어진 금액에서 각 규제 비율을 되짚는다.
+
+    금액 상한(CAP)은 비율이 아니라 금액이므로 `is_amount=True` 로 구분해 돌려준다.
+    """
+    out: dict[str, dict] = {
+        "LTV": {"actual": (principal / price) if price else None, "cap": max_ltv,
+                "is_amount": False},
+    }
+    if regulated:
+        cap_amt = cap_for_price(price)
+        out["CAP"] = {"actual": principal, "cap": cap_amt, "is_amount": True}
+    if annual_income and annual_rate is not None:
+        pay = annual_payment_for_principal(principal, annual_rate, term_years)
+        debt_annual = monthly_debt_service * 12
+        used = (pay + debt_annual) / annual_income
+        out["DSR"] = {"actual": used, "cap": DSR_RATES[lender], "is_amount": False}
+        out["DTI"] = {"actual": used, "cap": dti_rate(rule_id, regulated_type),
+                      "is_amount": False}
+    for v in out.values():
+        if v["actual"] is None or v["cap"] is None:
+            v["over"] = None
+            v["gap"] = None
+        else:
+            v["over"] = v["actual"] > v["cap"]
+            v["gap"] = v["actual"] - v["cap"]
+    return out
 
 
 def annual_payment_for_principal(principal: int, annual_rate: float, term_years: int) -> float:
@@ -202,4 +256,9 @@ def plan_for_target(
             })
 
     return {"target": target, "reachable": False, "now": now, "actions": actions,
+            "at_target": ratios_for(
+                target, price=price, max_ltv=max_ltv, rule_id=rule_id, regulated=regulated,
+                regulated_type=regulated_type, annual_income=annual_income,
+                monthly_debt_service=monthly_debt_service, annual_rate=annual_rate,
+                term_years=term_years, lender=lender),
             "shortfall": target - now["total"]}

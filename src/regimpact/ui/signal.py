@@ -146,6 +146,28 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .aff-r.bind .bar i{background:var(--error);opacity:.85}
 .aff-r.bind .nm,.aff-r.bind .vv{color:var(--error);font-weight:700}
 .aff-r.na .vv{color:var(--on-surface-variant);font-weight:400;font-size:11px}
+.aff-r .rt{font-size:11px;color:var(--on-surface-variant);margin-top:3px;
+  font-family:'JetBrains Mono',ui-monospace,monospace}
+.aff-r.bind .rt{color:var(--error)}
+/* 규정 한도 대비 내 비율 — "한도 40%인데 당신은 58%" */
+.gauge{margin-top:10px;border:1px solid var(--outline-variant);border-radius:10px;
+  padding:12px 14px;background:var(--surface-container-lowest)}
+.gauge .g-t{font-size:12px;color:var(--on-surface-variant);margin-bottom:10px;
+  word-break:keep-all;line-height:1.5}
+.g-row{margin-bottom:11px}
+.g-row:last-child{margin-bottom:0}
+.g-hd{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;margin-bottom:4px}
+.g-hd .gn{color:var(--on-surface-variant)}
+.g-hd .gv{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700}
+.g-bar{position:relative;height:9px;background:var(--surface-container-highest);
+  border-radius:99px;overflow:visible}
+.g-bar i{display:block;height:100%;border-radius:99px;background:var(--secondary);opacity:.7}
+.g-bar .lim{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--on-surface)}
+.g-row.over .g-bar i{background:var(--error);opacity:.9}
+.g-row.over .gv{color:var(--error)}
+.g-note{font-size:11.5px;color:var(--on-surface-variant);margin-top:4px;line-height:1.5;
+  word-break:keep-all}
+.g-row.over .g-note b{color:var(--error)}
 /* 목표 역산 — 진단(무엇에 막혔나)에서 행동(그래서 얼마)으로 잇는 다리 */
 .goal-row{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:4px}
 .goal-row .f{flex:1; min-width:150px; margin-bottom:0}
@@ -797,6 +819,7 @@ function app(withGf) {
 }
 
 const pct = (v) => `${Math.round(v * 100)}%`;
+const pct1 = (v) => `${(v * 100).toFixed(1)}%`;
 function won(x) {  // 원 → "N억 M천만원". 1천만 미만은 만원 단위로 — 목표 역산의 처방이
   // "월 76만원"처럼 소액이라 억 단위로 반올림하면 "0천만원"이 된다(2026-08-20 실측).
   const eok = Math.floor(x / 1e8), chun = Math.round((x % 1e8) / 1e7);
@@ -1070,10 +1093,14 @@ function affRender() {
         <span class="vv">${why}</span></div><div class="bar"></div></div>`;
     }
     const isBind = res.binding.includes(k);
+    const cap = res.caps[k];
+    const capTxt = cap === null || cap === undefined ? ""
+      : (k === "CAP" ? `규정 한도 ${won(cap)}` : `규정 한도 ${pct(cap)}`);
     return `<div class="aff-r${isBind ? " bind" : ""}"><div class="hd">
       <span class="nm">${AFF_KO[k]}${isBind ? " ← 여기에 막혀요" : ""}</span>
       <span class="vv">${won(v)}</span></div>
-      <div class="bar"><i style="width:${Math.max(3, Math.round(v / maxV * 100))}%"></i></div></div>`;
+      <div class="bar"><i style="width:${Math.max(3, Math.round(v / maxV * 100))}%"></i></div>
+      ${capTxt ? `<div class="rt">${capTxt}</div>` : ""}</div>`;
   }).join("");
   const partial = res.limits.DSR === null
     ? ` <span style="color:var(--on-surface-variant)">· 담보 기준 — 소득·금리를 입력하면
@@ -1113,7 +1140,31 @@ function goalRender() {
     return;
   }
   let html = `<div class="rx-hd"><b>${won(plan.shortfall)} 모자라요.</b>
-    지금 한도는 ${won(plan.now.total)}입니다. 아래 중 하나를 충족하면 목표에 닿습니다.</div>`;
+    지금 한도는 ${won(plan.now.total)}입니다.</div>`;
+
+  // ★ "규정 한도는 40%인데 당신은 58.4%" — 왜 막혔는지를 비율로 보여준다(2026-08-20 리뷰).
+  const at = plan.at_target ?? {};
+  const gRows = Object.entries(at).map(([k, r]) => {
+    if (r.actual === null || r.cap === null) return "";
+    const isAmt = r.is_amount;
+    const shown = isAmt ? won(r.actual) : pct1(r.actual);
+    const capTxt = isAmt ? won(r.cap) : pct(r.cap);
+    // 막대: 한도를 60% 지점에 두고 내 비율을 비례로 그린다 — 초과분이 눈에 보이게
+    const w = Math.max(3, Math.min(100, Math.round((r.actual / r.cap) * 60)));
+    const note = r.over
+      ? `규정 한도는 <b>${capTxt}</b>인데 이 금액이면 <b>${shown}</b>가 돼요 —
+         ${isAmt ? `${won(r.actual - r.cap)} 초과` : `${pct1(r.gap)}p 초과`}입니다.`
+      : `규정 한도 ${capTxt} 안에 들어와요 (${shown}).`;
+    return `<div class="g-row${r.over ? " over" : ""}">
+      <div class="g-hd"><span class="gn">${AFF_KO[k]}</span><span class="gv">${shown}</span></div>
+      <div class="g-bar"><i style="width:${w}%"></i><span class="lim" style="left:60%"></span></div>
+      <div class="g-note">${note}</div></div>`;
+  }).join("");
+  if (gRows) {
+    html += `<div class="gauge"><div class="g-t">목표 ${won(target)}을 빌리면 내 비율은
+      이렇게 됩니다 — 검은 선이 규정 한도예요.</div>${gRows}</div>`;
+  }
+  html += `<div class="rx-hd">아래 중 하나를 충족하면 목표에 닿습니다.</div>`;
   for (const a of plan.actions) {
     const nm = AFF_KO[a.limit];
     if (a.kind === "hard") {
