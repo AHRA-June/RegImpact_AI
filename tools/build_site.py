@@ -45,6 +45,7 @@ from regimpact.ui.docrender import markdown_to_html              # noqa: E402
 from regimpact.ui.graphview import render as render_graph        # noqa: E402
 from regimpact.ui.intake import render as render_intake          # noqa: E402
 from regimpact.ui.searchpage import render as render_search      # noqa: E402
+from regimpact.ui.servicedoc import render as render_servicedoc  # noqa: E402
 from regimpact.ui.signal import render as render_signal          # noqa: E402
 from regimpact.ui.landing import render as render_landing        # noqa: E402
 from regimpact.ui.playground import render as render_playground  # noqa: E402
@@ -197,6 +198,10 @@ def main() -> int:
     #     같은 엔진 포팅본 + 같은 검색 색인을 쓰므로 고객 화면도 본편과 갈라질 수 없다.
     (out / "signal.html").write_text(
         render_signal(ev, fixtures, export), encoding="utf-8")
+
+    # 3g. 서비스 설명서 — 공모전 심사용 문서. 저장소의 원본 HTML 을 감싸기만 하므로
+    #     문서를 고치면 다음 배포에서 이 페이지가 따라 바뀐다(복사본을 두지 않는다).
+    (out / "service.html").write_text(render_servicedoc(), encoding="utf-8")
 
     # 3c. 검증 요약 — 보고서의 1페이지 요약. QA 골드 검수 진행률도 실데이터에서.
     from regimpact.eval import Split, load_split

@@ -183,6 +183,9 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
       <a class="demo-cta" style="background:var(--surface-container-lowest);color:var(--on-surface);
         border:1px solid var(--outline-variant)" href="signal.html">📱 내 한도 시그널
         <small>고객용 개인화 시뮬레이터 — 웹뷰 탑재형</small></a>
+      <a class="demo-cta" style="background:var(--surface-container-lowest);color:var(--on-surface);
+        border:1px solid var(--outline-variant)" href="service.html">📄 서비스 설명서
+        <small>무엇이 되고 무엇이 아직 안 되는지 — 출처 포함</small></a>
     </div>
   </header>
 

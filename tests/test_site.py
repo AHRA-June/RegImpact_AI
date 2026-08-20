@@ -33,12 +33,14 @@ EXPECTED = {
     "validation_report.html", "validation_summary.html",
     "model_system_card.html", "ai_risk_register.html",
     "graph.html", "search.html", "demo.html", "signal.html",
+    "service.html",
 }
 
 # 사이드바 셸 밖의 독립 화면 — 랜딩(그 자체가 안내판), 시연 모드(녹화 화면을 메뉴가
-# 오염하면 안 된다), 내 한도 시그널(고객용 웹뷰 — B2B 사이드바가 어울리지 않는다).
+# 오염하면 안 된다), 내 한도 시그널(고객용 웹뷰 — B2B 사이드바가 어울리지 않는다),
+# 서비스 설명서(제출 문서 그대로의 조판을 셸이 덮어쓰면 안 된다).
 # 홈으로 돌아가는 링크는 전부 본문에 있다.
-STANDALONE = {"index.html", "demo.html", "signal.html"}
+STANDALONE = {"index.html", "demo.html", "signal.html", "service.html"}
 
 
 def test_all_expected_pages_are_built(site):
@@ -92,6 +94,35 @@ def test_standalone_pages_still_link_home(site):
     """무대·웹뷰 페이지는 사이드바가 없지만, 나가는 길은 있어야 한다."""
     for name in STANDALONE - {"index.html"}:
         assert 'href="index.html"' in site[name], f"{name} 에 홈 링크가 없다"
+
+
+def test_service_page_is_the_repo_document_not_a_copy(site):
+    """설명서를 사이트가 따로 베껴 두면 저장소 문서와 갈라진다 — 감싸기만 하는지 확인한다."""
+    from regimpact.ui.servicedoc import DOC, SITE_ROOT, _localize
+    html = site["service.html"]
+    # 사이트 안에서는 자기 자신을 가리키는 절대 URL 만 상대 링크로 바뀐다 — 그 외는 그대로.
+    doc = _localize(DOC.read_text(encoding="utf-8"))
+    # 문서 본문(스타일 블록 뒤)이 통째로 들어가 있어야 한다.
+    body = doc.partition("</style>")[2]
+    for chunk in body.split("\n\n"):
+        chunk = chunk.strip()
+        if len(chunk) > 200 and "</header>" not in chunk and "<footer>" not in chunk:
+            assert chunk in html, f"설명서 본문 일부가 사이트 페이지에 없다: {chunk[:60]}"
+    assert SITE_ROOT not in html, "사이트 안에서 자기 자신을 절대 URL 로 가리킨다"
+
+
+def test_service_page_carries_its_sources(site):
+    """외부에서 가져온 주장은 링크로 확인 가능해야 한다 — 출처 절이 살아 있는지 고정한다."""
+    html = site["service.html"]
+    assert 'id="src"' in html and "출처" in html
+    for sid in [f"[S{i}]" for i in range(1, 13)]:
+        assert sid in html, f"출처 표시 {sid} 가 없다"
+    for host in ("toss.im", "fnnews.com", "fsc.go.kr", "edaily.co.kr"):
+        assert host in html, f"출처 링크 {host} 가 없다"
+    assert "통계적으로 표집한 사용자 조사가 아니라" in html, "조사 한계 고지가 없다"
+    # 고객 화면과 나란히 열어 두고 보는 페이지다 — 탭 제목이 같으면 구분이 안 된다.
+    assert "<title>내 한도 시그널 — 서비스 설명서</title>" in html
+    assert site["signal.html"].count("<title>내 한도 시그널 — 서비스 설명서</title>") == 0
 
 
 def test_sources_page_hashes_come_from_real_files(site):

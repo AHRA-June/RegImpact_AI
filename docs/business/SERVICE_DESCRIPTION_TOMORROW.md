@@ -294,6 +294,7 @@ Q&A(RAG)도 같은 원칙입니다. 검색 품질을 **원문 대조를 통과�
 | 판정 플레이그라운드 | https://ahra-june.github.io/RegImpact_AI/playground.html |
 | 검증 요약 1페이지 | https://ahra-june.github.io/RegImpact_AI/validation_summary.html |
 | 전체 산출물 | https://ahra-june.github.io/RegImpact_AI/ |
+| 이 설명서의 웹 버전 | https://ahra-june.github.io/RegImpact_AI/service.html |
 
 > 고객 화면에서 **연소득 5,000 · 기존 대출 월 상환액 100 · 금리 4%** 를 넣어 보시면,
 > 한도가 LTV에서 DSR로 옮겨 가며 **"여기에 막혀요"** 표시가 이동하는 것을 보실 수 있습니다.
