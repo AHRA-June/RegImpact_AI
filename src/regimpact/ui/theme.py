@@ -238,6 +238,12 @@ FONTS = (
     '&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>'
 )
 
+# 검색 색인 거부 — 이 사이트는 **링크를 받은 사람이 보는 자료**이지 검색으로 찾아올 자료가
+# 아니다(공모전 제출·검증용). 저장소가 공개라 페이지 자체는 열리지만, 검색 결과로 흘러
+# 다니지는 않게 한다. robots.txt 로 크롤링을 막지 않는 이유: 크롤러가 못 읽으면 이 태그도
+# 못 읽어서 색인 제거가 오히려 안 된다.
+NOINDEX = '<meta name="robots" content="noindex, nofollow"/>'
+
 # 전역 내비게이션 — **모든 페이지가 같은 메뉴를 쓴다** (랜딩 제외: 랜딩이 곧 홈이다).
 # 화면마다 메뉴가 달라 길을 잃는 문제(2026-08-19 사용자 리뷰)를 이 단일 정의로 해소한다.
 # (섹션 라벨, ((파일명, 라벨, 아이콘), ...))
@@ -343,6 +349,7 @@ def page(
     return (
         '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/>'
         '<meta content="width=device-width, initial-scale=1.0" name="viewport"/>'
+        f"{NOINDEX}"
         f"<title>{esc(title)} · RegImpact AI</title>"
         f"{FONTS}<style>{CSS}{extra_css}</style></head>"
         '<body class="bg-background font-body-md text-body-md text-on-surface">'

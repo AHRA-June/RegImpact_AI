@@ -48,6 +48,7 @@ def write_site(pages: dict[str, str], out_dir: str | Path) -> list[Path]:
     index = out / "index.html"
     index.write_text(
         '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/>'
+        '<meta name="robots" content="noindex, nofollow"/>'
         '<meta http-equiv="refresh" content="0; url=regchange.html"/>'
         "<title>RegImpact AI</title></head>"
         '<body><a href="regchange.html">RegImpact AI</a></body></html>',

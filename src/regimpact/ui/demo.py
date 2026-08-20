@@ -494,6 +494,7 @@ go(0);
 <html lang="ko"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>시연 모드 · RegImpact AI</title>
 <meta name="description" content="규제 발표부터 심사 반영·검증까지 — RegImpact AI 3분 시연.">
 {FONTS}

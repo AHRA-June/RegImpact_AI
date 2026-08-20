@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from regimpact.ui.theme import NOINDEX
+
 DOC = Path(__file__).resolve().parents[3] / "docs" / "business" / "service_description.html"
 
 # 문서 자신의 색·서체 토큰만 쓴다. 사이트 셸의 CSS 를 끌어오면 문서 디자인이 깨진다.
@@ -85,6 +87,7 @@ def render() -> str:
         "<!doctype html>\n<html lang=\"ko\">\n<head>\n"
         '<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        + NOINDEX + "\n"
         + head + _EXTRA_CSS + "</style>\n</head>\n<body>\n"
         + body.strip() + "\n</body>\n</html>\n"
     )
