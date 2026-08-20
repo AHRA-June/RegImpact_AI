@@ -238,6 +238,22 @@ def test_no_external_scripts_or_stylesheets(site):
     assert not bad, f"외부 의존: {bad}"
 
 
+def test_every_page_refuses_search_indexing(site):
+    """이 사이트는 링크를 받은 사람이 보는 자료다 — 검색 결과로 흘러 다니지 않게 한다.
+
+    한 쪽이라도 빠지면 그 쪽이 색인의 입구가 되므로 전 페이지를 확인한다.
+    robots.txt 로 크롤링 자체를 막지는 않는다 — 크롤러가 못 읽으면 이 태그도 못 읽어서
+    색인 제거가 오히려 되지 않는다.
+    """
+    for name, html in site.items():
+        if name == "_dir":
+            continue
+        assert re.search(r'<meta name="robots" content="noindex[^"]*"\s*/?>', html), \
+            f"{name}: noindex 메타가 없다 — 검색에 노출된다"
+    assert not (site["_dir"] / "robots.txt").exists(), \
+        "robots.txt 로 크롤링을 막으면 noindex 를 읽지 못해 색인이 남는다"
+
+
 def test_no_page_is_suspiciously_small(site):
     for name, html in site.items():
         if name == "_dir":

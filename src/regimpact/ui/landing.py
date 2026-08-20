@@ -142,6 +142,7 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
 <html lang="ko"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>RegImpact AI — 규제 변경 영향분석·검증 시스템</title>
 <meta name="description" content="주택담보대출 규제 변경을 추출하고, 그 변경이 여신 룰·고객 영향으로 어떻게 전파되는지 산출하며, 각 단계 산출물을 독립 기준과 대조하는 시스템.">
 {FONTS}

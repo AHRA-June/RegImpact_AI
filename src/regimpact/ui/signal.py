@@ -1460,6 +1460,7 @@ document.querySelectorAll(".qa .preset button").forEach((b) =>
 <html lang="ko"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>내 한도 시그널 · 규제 변경 개인화 시뮬레이터</title>
 <meta name="description" content="규제가 바뀐 다음 날, 내 대출 한도가 얼마에서 얼마로 달라졌고 나는 경과규정 대상인지 — 근거 조문과 함께.">
 {FONTS}
