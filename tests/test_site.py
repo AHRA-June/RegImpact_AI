@@ -617,6 +617,21 @@ def test_signal_shows_my_actual_ratio_against_the_cap(site):
     assert "pct1" in html                           # 소수 한 자리 — 40%와 40.4%를 구분
 
 
+def test_signal_matches_products_as_eligibility_not_recommendation(site):
+    """상품 매칭은 추천이 아니라 자격 판정이다 — 금소법상 자문·권유가 아니라 정보 제공.
+    소득·자산 요건은 공문에 없으므로 "가능합니다"라고 말하지 않는다."""
+    html = site["signal.html"]
+    assert "내게 가능한 상품 찾기" in html
+    assert "추천이 아니라 자격 판정" in html
+    assert "판정하지 않고 상담으로 안내" in html
+    assert "없는 근거로" in html                     # 원칙을 화면에 명시
+    assert '<div id="prod"></div>' in html          # 결과는 JS 가 그린다
+    # 화면과 Python 규칙이 같은 상품군을 다루는가
+    from regimpact.products import PRODUCTS
+    for prod in PRODUCTS:
+        assert prod["name"] in html, f"{prod['id']} 이 화면에 없다"
+
+
 def test_signal_shows_limit_moves_beyond_the_announcement_day(site):
     """'시그널'이 발표일 전용 도구가 아님을 화면이 보여준다 — 한도를 움직인 이벤트 타임라인.
     날짜·지역은 정책 버전 DB 실데이터에서 온다."""
