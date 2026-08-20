@@ -139,6 +139,19 @@ def build() -> dict:
                            annual_income=income, monthly_debt_service=debt,
                            annual_rate=rate, term_years=30, lender=lender)
                 aff_probes.append({"input": inp, "expected": affordability.estimate(**inp)})
+    # 목표 역산 프로브 — 처방(부채 감축·만기·소득)이 Python 과 JS 에서 같아야 한다
+    plan_probes = []
+    for price in (400_000_000, 800_000_000, 1_600_000_000):
+        for target in (200_000_000, 300_000_000, 600_000_000):
+            for max_ltv, rule_id, regulated, rtype in profiles[:4]:
+                for income, debt, rate, lender in moneys[:4]:
+                    for years in (20, 30):
+                        inp = dict(target=target, price=price, max_ltv=max_ltv,
+                                   rule_id=rule_id, regulated=regulated, regulated_type=rtype,
+                                   annual_income=income, monthly_debt_service=debt,
+                                   annual_rate=rate, term_years=years, lender=lender)
+                        plan_probes.append(
+                            {"input": inp, "expected": affordability.plan_for_target(**inp)})
 
     return {
         "_note": "tools/export_fixtures.py 가 Python 엔진을 실제로 실행해 만든 기준값. "
@@ -148,7 +161,8 @@ def build() -> dict:
         "regions": regions,
         "cases": cases,
         "region_probe": probe,
-        "affordability": {"constants": aff_constants, "probes": aff_probes},
+        "affordability": {"constants": aff_constants, "probes": aff_probes,
+                          "plan_probes": plan_probes},
     }
 
 

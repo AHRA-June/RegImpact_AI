@@ -105,3 +105,101 @@ def estimate(
     return {"limits": limits, "total": total, "binding": binding,
             "dti_rate": dti_rate(rule_id, regulated_type),
             "dsr_rate": DSR_RATES[lender]}
+
+
+def annual_payment_for_principal(principal: int, annual_rate: float, term_years: int) -> float:
+    """대출원금 → 연 원리금 (principal_from_annual_payment 의 역함수)."""
+    if principal <= 0 or term_years <= 0:
+        return 0.0
+    n = term_years * 12
+    r = annual_rate / 12.0
+    monthly = principal / n if r <= 0 else principal * r / (1.0 - (1.0 + r) ** -n)
+    return monthly * 12.0
+
+
+def plan_for_target(
+    *,
+    target: int,
+    price: int,
+    max_ltv: float,
+    rule_id: Optional[str],
+    regulated: bool,
+    regulated_type: str = "NONE",
+    annual_income: Optional[int] = None,
+    monthly_debt_service: int = 0,
+    annual_rate: Optional[float] = None,
+    term_years: int = MAX_TERM_YEARS,
+    lender: str = "BANK",
+) -> dict:
+    """목표 금액에 도달하려면 무엇을 얼마나 바꿔야 하는가 — 각 규제별로 **역산**한다.
+
+    고객 조사(2026-08-20)에서 드러난 공백: 계산기·아티클은 "기존 대출을 정리하라"고
+    말하지만 **얼마를 줄여야 하는지**는 아무도 계산해 주지 않는다. 진단(무엇에 막혔나)에서
+    행동(그래서 얼마)으로 잇는 다리다.
+
+    반환하는 처방은 전부 **이미 확정된 규제 값과 표준 상환식에서 역산**한 것이다 —
+    새 도메인 값을 만들지 않는다. 규제 자체가 막는 것(LTV·최대한도)은 "이 조건으로는
+    불가"라고 정직하게 말하고 대안 축(가격 조정)을 제시한다.
+    """
+    now = estimate(
+        price=price, max_ltv=max_ltv, rule_id=rule_id, regulated=regulated,
+        regulated_type=regulated_type, annual_income=annual_income,
+        monthly_debt_service=monthly_debt_service, annual_rate=annual_rate,
+        term_years=term_years, lender=lender,
+    )
+    if now["total"] is None:
+        return {"target": target, "reachable": None, "now": now, "actions": []}
+    if now["total"] >= target:
+        return {"target": target, "reachable": True, "now": now, "actions": [],
+                "headroom": now["total"] - target}
+
+    actions: list[dict] = []
+    limits = now["limits"]
+
+    # ① LTV — 비율은 규제가 정한다. 바꿀 수 있는 축은 주택가격(자기자금)뿐이다.
+    if limits["LTV"] is not None and limits["LTV"] < target and max_ltv > 0:
+        actions.append({
+            "limit": "LTV", "kind": "price",
+            "need_price": int(target / max_ltv),
+            "detail": "담보 비율은 규제가 정한 값이라 바꿀 수 없어요. "
+                      "같은 금액을 빌리려면 주택가격 기준이 더 높아야 합니다.",
+        })
+
+    # ② 가격구간별 최대한도 — 구간 상한 자체가 천장. 넘을 방법이 없다.
+    if limits["CAP"] is not None and limits["CAP"] < target:
+        actions.append({
+            "limit": "CAP", "kind": "hard",
+            "detail": "규제지역 가격구간별 최대한도라 조건을 바꿔도 이 금액을 넘을 수 없어요.",
+        })
+
+    # ③④ DSR·DTI — 소득 여력의 문제라 세 갈래로 역산한다.
+    if annual_income and annual_rate is not None:
+        need_annual = annual_payment_for_principal(target, annual_rate, term_years)
+        for key, rate in (("DSR", DSR_RATES[lender]),
+                          ("DTI", dti_rate(rule_id, regulated_type))):
+            if limits[key] is None or limits[key] >= target:
+                continue
+            # (a) 기존 부채를 얼마나 줄이면 되나
+            allow_debt_annual = annual_income * rate - need_annual
+            cut = monthly_debt_service - allow_debt_annual / 12.0
+            # (b) 만기를 최대로 늘리면 도달하나
+            by_term = None
+            if term_years < MAX_TERM_YEARS:
+                longer = principal_from_annual_payment(
+                    annual_income * rate - monthly_debt_service * 12,
+                    annual_rate, MAX_TERM_YEARS)
+                by_term = {"years": MAX_TERM_YEARS, "limit": longer,
+                           "enough": longer >= target}
+            # (c) 소득이 얼마여야 하나 (부부합산 등)
+            need_income = int((need_annual + monthly_debt_service * 12) / rate)
+            actions.append({
+                "limit": key, "kind": "income",
+                "cut_monthly_debt": int(cut) if 0 < cut <= monthly_debt_service else None,
+                "impossible_by_debt": cut > monthly_debt_service,
+                "by_term": by_term,
+                "need_income": need_income,
+                "need_income_delta": need_income - annual_income,
+            })
+
+    return {"target": target, "reachable": False, "now": now, "actions": actions,
+            "shortfall": target - now["total"]}
