@@ -16,8 +16,9 @@ from typing import Optional
 
 from ..audit import Action, AuditLog
 from ..discrimination import DiscriminationReport, discriminate_pipeline
-from ..eval.goldset import split_stats
+from ..eval.goldset import load_split, split_stats
 from ..eval.schema import Split
+from ..eval.temporal import check_temporal_gold
 from ..extractor import (
     check_citation_grounding,
     extract_regchange,
@@ -95,6 +96,13 @@ class ValidationEvidence:
     audit: AuditLog
     scorecard: object = None
 
+    # 시점 질의 골드 ⟷ Temporal Policy Resolver 대조. `temporal_confirmed` 가 False 면
+    # 골드가 아직 🤖 초안이라는 뜻이고, 그때는 대조가 정합이어도 **수치를 보고하지 않는다**
+    # (스코어카드가 이 플래그를 보고 미측정으로 남긴다). 검수가 끝나 authored_by 가
+    # human_confirmed 로 바뀌면 **코드를 고치지 않아도** 측정이 켜진다.
+    temporal: object = None
+    temporal_confirmed: bool = False
+
     baseline_region_count: int = 0
     notes: list[str] = field(default_factory=list)
 
@@ -152,6 +160,12 @@ def collect(
     # 6. 구조화 변경안 + 엔진 교차검증
     rule_diff = derive_rule_diff()
     proposal = build_proposal_from_extraction(extraction)
+    # 시점 질의 골드 대조 — 골드가 아직 🤖 초안이면 수치를 쓰지 않는다(플래그로 전달).
+    temporal_items = load_split(Split.TEMPORAL)
+    temporal = check_temporal_gold(temporal_items)
+    temporal_confirmed = bool(temporal_items) and all(
+        i.authored_by == "human_confirmed" for i in temporal_items)
+
     consistency = check_proposal_consistency(proposal, rule_diff=rule_diff)
     proposal = apply_consistency_status(proposal, consistency)
     audit.record(Action.PROPOSAL_CREATED, proposal.rule_id,
@@ -194,6 +208,8 @@ def collect(
         regression=regression,
         proposal=proposal,
         consistency=consistency,
+        temporal=temporal,
+        temporal_confirmed=temporal_confirmed,
         discrimination=discrimination,
         split_stats=[split_stats(s) for s in Split],
         audit=audit,
