@@ -928,6 +928,99 @@ def test_submission_docs_do_not_overstate_the_test_count():
     assert not wrong, f"실제 {actual}개인데 문서는 {wrong} 라고 적고 있다"
 
 
+def test_one_line_pitch_lengths_are_counted_not_guessed():
+    """1번 답안의 "(N자)" 는 실제 글자 수여야 한다.
+
+    2026-08-21 점검에서 셋 다 틀려 있었다(66/39/86 이라 적혀 있었고 실제는 74/47/77).
+    같은 파일이 첫 줄에서 **"손으로 지어낸 숫자는 없다"** 고 선언하는데, 그 선언 바로
+    아래 문단이 손으로 지어낸 숫자였다. 이제 센다.
+    """
+    md = (REPO / "docs" / "business" / "APPLY_TOMORROW_CHALLENGE.md").read_text(encoding="utf-8")
+    section = md.split("## 1. 서비스 한 줄 설명")[1].split("\n---")[0]
+    props = re.findall(r"\*\*(.+?) \((\d+)자\)\*\*\n\n((?:> .*\n)+)", section)
+    assert len(props) >= 3, f"한 줄 설명 안을 찾지 못했다 — 형식이 바뀌었으면 이 검사도 고쳐야 한다"
+
+    wrong = []
+    for label, claimed, body in props:
+        # 지원서 칸은 줄바꿈 없이 한 줄로 받는다 — 문서의 줄바꿈은 공백 하나로 센다
+        text = " ".join(ln.lstrip("> ").strip() for ln in body.strip().splitlines())
+        if len(text) != int(claimed):
+            wrong.append((label, int(claimed), len(text)))
+    assert not wrong, "주장한 글자 수와 실제가 다르다 (라벨, 주장, 실제): " + str(wrong)
+
+    limit = 1000
+    for label, _c, body in props:
+        text = " ".join(ln.lstrip("> ").strip() for ln in body.strip().splitlines())
+        assert len(text) <= limit, f"{label}: {len(text)}자 — 한 줄 설명이 지나치게 길다"
+
+
+def test_long_form_answers_fit_the_application_limit():
+    """4번·5번은 1,000자 제한이 있다. 넘으면 잘린 채 제출된다."""
+    md = (REPO / "docs" / "business" / "APPLY_TOMORROW_CHALLENGE.md").read_text(encoding="utf-8")
+    for head in ("## 4.", "## 5."):
+        chunk = md.split(head)[1]
+        claimed = int(re.search(r"제출안 (\d+)자", chunk.split("\n")[0]).group(1))
+        body = chunk.split("```")[1].strip("\n")
+        assert len(body) == claimed, f"{head} 주장 {claimed}자 · 실제 {len(body)}자"
+        assert len(body) <= 1000, f"{head} {len(body)}자 — 1,000자 제한 초과"
+
+
+def test_deck_generator_reads_its_numbers_instead_of_carrying_them():
+    """소개서 덱이 수치를 **직접 들고 있으면** 반드시 실제와 갈라진다.
+
+    2026-08-21 점검에서 덱은 "자동 테스트 590개"(실제는 그보다 훨씬 많았다)와,
+    **엔진이 더 이상 내지 않는 목표 역산 처방 3줄**을 싣고 있었다. 그중 "만기 40년"은
+    규제지역 만기 상한 30년과 정면으로 어긋나, 심사자가 데모에 같은 값을 넣으면
+    덱과 다른 화면을 보게 되는 상태였다. 원인은 생성기가 저장소 밖에 있었던 것이다.
+    """
+    js = (REPO / "tools" / "build_deck.js").read_text(encoding="utf-8")
+    body = "\n".join(ln for ln in js.splitlines()
+                     if not ln.lstrip().startswith(("//", "*", "/*")))
+
+    # 시스템이 만들 수 없는 수치는 예외다 — 사람의 경력·실적은 엔진에서 나오지 않는다.
+    # 예외를 **목록으로 두고 이유를 적는 것**이 요점이다. 정규식을 느슨하게 해서
+    # 통과시키면 다음에 들어오는 도메인 수치도 같이 통과한다.
+    PERSONAL = ("금융권 개인여신 데이터분석 8년 7개월",
+                "불량률 5.77% → 3.16%")
+    for ok in PERSONAL:
+        body = body.replace(ok, "«팀 이력»")
+
+    stale = re.findall(r'"[^"]*\d[\d,]*\s*(?:개|건|행|케이스|/\s*\d+)[^"]*"', body)
+    assert not stale, f"덱에 박힌 수치 문자열: {stale}"
+    money = re.findall(r'"[^"]*\d[\d,]*\s*(?:억|천만|만\s*원)[^"]*"', body)
+    assert not money, f"덱에 박힌 금액 문자열: {money}"
+    for key in ("F.verdict", "F.afford", "F.assurance", "F.reach"):
+        short = {"F.verdict": "V.", "F.afford": "AF.", "F.assurance": "AS.",
+                 "F.reach": "F.reach"}[key]
+        assert short in js, f"{key} 를 읽지 않는다"
+
+    # 팀 이력은 사람이 확인할 몫이라는 것을 지원서가 밝히고 있어야 한다
+    md = (REPO / "docs" / "business" / "APPLY_TOMORROW_CHALLENGE.md").read_text(encoding="utf-8")
+    assert "팀 이력" in md, "덱의 팀 이력 수치는 엔진이 대조할 수 없다 — 그 사실을 적어야 한다"
+
+
+def test_demo_script_matches_what_the_recorder_actually_visits():
+    """대본이 영상에 없는 화면을 설명하면, 내레이션을 얹는 순간 어긋난다.
+
+    2026-08-21 점검에서 녹화본은 6단계에 '지켜보기'가 들어가기 전 화면이었고, 대본은
+    영상에 없는 검증 요약 페이지를 마지막 줄로 갖고 있었다.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    from record_demo import STEPS
+
+    labels = " ".join(label for _a, label, _ms in STEPS)
+    md = (REPO / "docs" / "business" / "APPLY_TOMORROW_CHALLENGE.md").read_text(encoding="utf-8")
+    script = md.split("### 촬영 대본")[1].split("### 3분 자동 재생")[0]
+
+    for step in ("1단계", "3단계", "4단계", "6단계", "7단계"):
+        assert step in labels, f"녹화가 {step} 를 지나지 않는다"
+        assert step in script, f"대본에 {step} 가 없다"
+    assert "지켜보기" in labels and "지켜보기" in script, \
+        "지켜보기는 화면에 있는 기능이다 — 녹화·대본 둘 다 지나야 한다"
+    # 영상에 없는 화면은 없다고 적혀 있어야 한다
+    assert "녹화본에 없다" in md, "대본이 영상 밖 화면을 설명하면서 그 사실을 밝히지 않는다"
+
+
 # ---------- README 의 문서 지도가 실재하는가 ----------
 def test_readme_paths_exist():
     """문서 지도에 없는 파일을 적어두면 처음 오는 사람이 거기서 막힌다."""
