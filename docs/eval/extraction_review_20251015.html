@@ -1,0 +1,1533 @@
+<title>2025 10·15 대책 추출 검수표</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground:#fcf8ff; --panel:#ffffff; --panel-2:#f5f2ff; --line:#c4c6cf;
+  --ink:#1a1a2e; --ink-2:#43474e; --navy:#022448; --action:#0051d5;
+  --alarm:#ba1a1a; --alarm-bg:#ffdad6; --alarm-ink:#93000a;
+  --pend:#edbf7f; --pend-bg:#fff4e2; --pend-ink:#60410c;
+  --ok:#0051d5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#12121c; --panel:#1b1b28; --panel-2:#222232; --line:#3a3a4d;
+    --ink:#eceaf6; --ink-2:#a9adbe; --navy:#adc8f5; --action:#8fb2ff;
+    --alarm:#ff8a80; --alarm-bg:#3d1512; --alarm-ink:#ffb4ab;
+    --pend:#edbf7f; --pend-bg:#3a2c14; --pend-ink:#f0d3a3;
+    --ok:#8fb2ff;
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#12121c; --panel:#1b1b28; --panel-2:#222232; --line:#3a3a4d;
+  --ink:#eceaf6; --ink-2:#a9adbe; --navy:#adc8f5; --action:#8fb2ff;
+  --alarm:#ff8a80; --alarm-bg:#3d1512; --alarm-ink:#ffb4ab;
+  --pend:#edbf7f; --pend-bg:#3a2c14; --pend-ink:#f0d3a3;
+  --ok:#8fb2ff;
+}
+*,*::before,*::after { box-sizing:border-box; }
+body {
+  background:var(--ground); color:var(--ink); margin:0;
+  font-family:'Noto Sans KR',system-ui,sans-serif; line-height:1.7;
+  padding:clamp(20px,4vw,56px) clamp(16px,5vw,40px);
+}
+.wrap { max-width:920px; margin:0 auto; display:flex; flex-direction:column; gap:40px; }
+h1,h2,h3 { font-family:'Noto Serif KR',Georgia,serif; text-wrap:balance; margin:0; }
+h1 { font-size:clamp(28px,4.5vw,40px); letter-spacing:-.02em; color:var(--navy); }
+h2 { font-size:22px; letter-spacing:-.01em; padding-bottom:10px; border-bottom:2px solid var(--navy); }
+p { margin:0; }
+.lede { color:var(--ink-2); max-width:62ch; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; }
+.meta span { background:var(--panel-2); border:1px solid var(--line); padding:3px 9px; border-radius:3px; color:var(--ink-2); }
+section { display:flex; flex-direction:column; gap:18px; }
+
+.conflict { background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--alarm);
+  border-radius:4px; padding:22px; display:flex; flex-direction:column; gap:16px; }
+.conflict header { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.id { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--alarm-ink);
+  background:var(--alarm-bg); padding:3px 9px; border-radius:3px; }
+.tag { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);
+  border:1px solid var(--line); padding:2px 8px; border-radius:99px; }
+.tag.seal::before { content:"🔒 "; }
+.ask { font-family:'Noto Serif KR',serif; font-size:17px; font-weight:500; }
+.face-off { display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:stretch; }
+@media (max-width:640px) { .face-off { grid-template-columns:1fr; } .versus { justify-self:start; } }
+.side { padding:14px; border-radius:4px; background:var(--panel-2); border:1px solid var(--line); }
+.side.gold { border-color:var(--pend); background:var(--pend-bg); }
+.side.spec { border-color:var(--action); }
+.side-label { display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-2); margin-bottom:6px; }
+.side.gold .side-label { color:var(--pend-ink); }
+.side.spec .side-label { color:var(--action); }
+.side p { font-size:14px; }
+.versus { align-self:center; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-2); }
+.verdict { border:1px dashed var(--line); border-radius:4px; padding:12px 14px; margin:0;
+  display:flex; flex-wrap:wrap; gap:14px; }
+.verdict legend { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); padding:0 6px; }
+.verdict label { display:flex; align-items:center; gap:7px; font-size:14px; cursor:pointer; }
+
+.conflict.resolved { border-left-color:var(--ok); }
+.id.ok { color:var(--panel); background:var(--ok); }
+.tag.done { border-color:var(--ok); color:var(--ok); }
+.why { font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--ok); padding-left:12px; }
+.q { margin:0; border-left:3px solid var(--line); padding-left:12px; }
+.q figcaption { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); margin-bottom:3px; }
+.q blockquote { margin:0; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.65;
+  color:var(--ink-2); word-break:keep-all; }
+
+.note { background:var(--panel-2); border:1px solid var(--line); border-radius:4px; padding:18px;
+  display:flex; flex-direction:column; gap:12px; }
+.note pre { margin:0; overflow-x:auto; background:var(--panel); border:1px solid var(--line);
+  border-radius:3px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-2); }
+
+ol.items { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.item { display:flex; gap:14px; padding:14px 12px; border-bottom:1px solid var(--line); }
+.item:has(.cb:checked) { background:var(--panel-2); }
+.item.confirmed { border-left:3px solid var(--ok); }
+.item:has(.cb:checked) .claim { color:var(--ink-2); text-decoration:line-through; }
+.check { flex-shrink:0; padding-top:3px; cursor:pointer; }
+.check input { position:absolute; opacity:0; width:0; height:0; }
+.check span { display:block; width:20px; height:20px; border:2px solid var(--line); border-radius:3px; }
+.check input:checked + span { background:var(--ok); border-color:var(--ok); }
+.check input:checked + span::after { content:"✓"; display:block; color:var(--panel); font-size:14px;
+  line-height:16px; text-align:center; }
+.check input:focus-visible + span { outline:2px solid var(--action); outline-offset:2px; }
+.body { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.head { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+.head code { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--navy);
+  background:var(--panel-2); padding:2px 7px; border-radius:3px; }
+.claim { font-weight:500; }
+.kw { display:flex; flex-wrap:wrap; gap:5px; }
+kbd { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-2);
+  border:1px solid var(--line); border-radius:3px; padding:1px 6px; }
+.hits { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); }
+
+.progress { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:10;
+  background:var(--navy); color:var(--ground); font-family:'JetBrains Mono',monospace; font-size:13px;
+  padding:9px 18px; border-radius:99px; box-shadow:0 4px 16px rgba(0,0,0,.28); }
+:root[data-theme="dark"] .progress, :root:not([data-theme="light"]) .progress { color:#12121c; }
+footer { color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); padding-top:16px; }
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <h1>2025 10·15 대책 추출 검수표</h1>
+    <p class="lede">추출 <strong>71건</strong>. 인용이 원문에 verbatim 으로 실재하는지는
+    <strong>이미 기계가 대조했다</strong>(100%) — 그래서 여기서 다시 묻지 않는다.
+    남은 질문은 하나다: <strong>그 인용이 그 주장을 뒷받침하는가.</strong></p>
+    <div class="meta">
+      <span>2025-10-15</span>
+      <span>원문 2건</span>
+      <span>인용 대조 100%</span>
+      <span>먼저 볼 것 25건</span>
+      <span>골드 없음 — 🤖 초안</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>1. 먼저 볼 것 — 25건</h2>
+    <p class="lede">기계가 짚을 수 있는 것은 "주장이 틀렸다"가 아니라 <strong>"근거가 약하다"</strong>
+    뿐이다. 아래 셋 중 하나라도 걸린 항목을 앞으로 뺐다. 걸렸다고 틀린 것은 아니지만,
+    <strong>검수 시간을 여기에 먼저 쓰는 것이 남는 장사다.</strong></p>
+    <div class="note">
+      <ul>
+        <li><strong>모호</strong> — 인용이 원문에 여러 번 등장해 어느 문장인지 특정되지 않는다.
+          목차 줄과 본문에 같은 문장이 있으면 목차(점선 리더·쪽번호)가 근거로 실린다.
+          2026-08-20 폰 리뷰에서 실제로 밟은 함정이다.</li>
+        <li><strong>짧음</strong> — 인용 25자 미만. verbatim 이어도 주장을 떠받치지 못한다.</li>
+        <li><strong>저신뢰</strong> — 모델 신뢰도 0.80 미만.</li>
+      </ul>
+    </div>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#10</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">은행권 주담대 위험가중치 하한 상향 조치의 시행시기를 &#x27;26.4월에서 &#x27;26.1.1일로 조기 시행</p>
+    <p class="why"><code>‘26.4월</code> → <code>‘26.1.1일</code></p>
+    
+    <figure class="q">
+      <blockquote>‘26.4월 → ‘26.1.1일</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 17자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#11</span>
+      <span class="tag">REGION</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">투기과열지역·조정대상지역 신규 지정에 따라 해당 지역에 기존 강화 대출규제가 즉시 적용</p>
+    <p class="why"><code>—</code> → <code>규제지역(투기과열지역, 조정대상지역) 신규 지정</code></p>
+    
+    <figure class="q">
+      <blockquote>금번 규제지역(투기과열지역, 조정대상지역) 신규 지정에 따라 해당 규제지역에서는 기존 규정에 따라 강화된 대출규제가 즉시 적용된다.</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#12</span>
+      <span class="tag">REGION</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">토지거래허가구역 신규 지정</p>
+    <p class="why"><code>—</code> → <code>토지거래허가구역 신규 지정</code></p>
+    
+    <figure class="q">
+      <blockquote>토지거래허가구역 신규 지정에 따라</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 18자 — 주장을 떠받치기에 짧다</li><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#17</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">금번 조치 시행 이전 주택 매매계약 또는 전세계약을 체결한 차주는 경과규정 적용 대상</p>
+    <p class="why"><code>—</code> → <code>주택 매매계약 또는 전세계약을 체결한 차주는 경과규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>➊주택 매매계약 또는 전세계약을 체결한 차주</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 24자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#18</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">금번 조치 시행 이전 대출 신청접수가 완료된 차주는 경과규정 적용 대상</p>
+    <p class="why"><code>—</code> → <code>대출 신청접수가 완료된 차주는 경과규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>➋대출 신청접수가 완료된 차주</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 16자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#19</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">수도권·규제지역 주담대 여신한도 차등화 조치 시행일: 10.16일</p>
+    <p class="why"><code>—</code> → <code>2025-10-16</code></p>
+    
+    <figure class="q">
+      <blockquote>10.16일</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>모호</strong> — 이 인용이 원문에 3회 등장 — 어느 문장인지 특정되지 않는다</li><li><strong>짧음</strong> — 인용 6자 — 주장을 떠받치기에 짧다</li><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#20</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">스트레스 금리 하한 상향 조치 시행일: 10.16일</p>
+    <p class="why"><code>—</code> → <code>2025-10-16</code></p>
+    
+    <figure class="q">
+      <blockquote>10.16일</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>모호</strong> — 이 인용이 원문에 3회 등장 — 어느 문장인지 특정되지 않는다</li><li><strong>짧음</strong> — 인용 6자 — 주장을 떠받치기에 짧다</li><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#21</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">1주택자 전세대출 DSR 적용 조치 시행일: 10.29일</p>
+    <p class="why"><code>—</code> → <code>2025-10-29</code></p>
+    
+    <figure class="q">
+      <blockquote>10.29일</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>모호</strong> — 이 인용이 원문에 2회 등장 — 어느 문장인지 특정되지 않는다</li><li><strong>짧음</strong> — 인용 6자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#23</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">수도권·규제지역 주택구입목적 주담대 한도: 시가 15억원 이하 구간</p>
+    <p class="why"><code>—</code> → <code>6억원</code></p>
+    
+    <figure class="q">
+      <blockquote>15억원 이하 : 6억원</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 13자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#24</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">수도권·규제지역 주택구입목적 주담대 한도: 시가 15억원 초과~25억원 이하 구간</p>
+    <p class="why"><code>—</code> → <code>4억원</code></p>
+    
+    <figure class="q">
+      <blockquote>15억원 초과~25억원 이하 : 4억원</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 21자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#25</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">수도권·규제지역 주택구입목적 주담대 한도: 시가 25억원 초과 구간</p>
+    <p class="why"><code>—</code> → <code>2억원</code></p>
+    
+    <figure class="q">
+      <blockquote>25억원 초과 : 2억원</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 13자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#26</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">수도권·규제지역 주담대 스트레스 금리 상향 조정</p>
+    <p class="why"><code>1.5%</code> → <code>3.0%</code></p>
+    
+    <figure class="q">
+      <blockquote>수도권·규제지역 주담대에 대한 스트레스 금리 상향 조정 (1.5% →3.0%)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#27</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">유주택자의 수도권·규제지역 내 전세대출에 DSR 신규 적용</p>
+    <p class="why"><code>미적용</code> → <code>DSR 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>유주택자의 수도권·규제지역 내 전세대출에 대한 DSR 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#28</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.60</span>
+    </header>
+    <p class="ask">은행권 주담대 위험가중치 하한 상향</p>
+    <p class="why"><code>15%</code> → <code>20%</code></p>
+    
+    <figure class="q">
+      <blockquote>은행권 주담대에 대한 위험가중치 하한 상향(15% → 20%)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.60 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#34</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">집단대출 경과규정 예외: 기 공고 사업장의 분양권이 시행일부터 전매된 경우는 종전규정 적용 제외</p>
+    <p class="why"><code>—</code> → <code>강화된 규제 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>단, 기 공고된 사업장의 분양권 등이 시행일(10.16일) 부터 전매(전매기준일은 거래당사자가 분양권 등의 거래를 신고한 날)된 경우는 제외</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>모호</strong> — 이 인용이 원문에 3회 등장 — 어느 문장인지 특정되지 않는다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#46</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.75</span>
+    </header>
+    <p class="ask">1억원 초과 신용대출보유 차주, 대출실행일로부터 1년간 규제지역 내 주택구입 제한</p>
+    <p class="why"><code>—</code> → <code>1년간 주택구입 제한</code></p>
+    
+    <figure class="q">
+      <blockquote>1억원 초과 신용대출보유 차주는 대출 실행일로부터 1년간 규제지역* 내 주택 구입이 제한</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.75 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#47</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.75</span>
+    </header>
+    <p class="ask">규제지역 내 1주택자가 재건축·재개발 중도금·이주비대출 수령시 추가 주택구입 제한</p>
+    <p class="why"><code>—</code> → <code>추가 주택구입 제한</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역* 내 1주택 보유자가 해당 주택의재건축·재개발에 따른 중도금·이주비대출을 받을 경우, 추가 주택구입이제한</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.75 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#48</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.75</span>
+    </header>
+    <p class="ask">규제지역 소재 주택구입 목적 사업자대출(주담대) 제한</p>
+    <p class="why"><code>—</code> → <code>제한</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 소재 주택을 구입하기 위한주담대(사업자대출) 제한*</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.75 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#53</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.70</span>
+    </header>
+    <p class="ask">스트레스DSR 상향 적용범위: 수도권·규제지역 취급 주담대(오피스텔담보대출 포함)</p>
+    <p class="why"><code>—</code> → <code>수도권·규제지역 주담대(오피스텔담보대출 포함) 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>동 조치는 수도권·규제지역에서 취급되는 주택담보대출(오피스텔 담보대출 포함)에 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.70 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#55</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.70</span>
+    </header>
+    <p class="ask">중도금·이주비 대출 취급 후 DSR적용대출 신규취급시 기존 원리금상환분(강화된 ST금리 반영) DSR산정에 반영</p>
+    <p class="why"><code>—</code> → <code>신규대출 DSR 산정시 반영</code></p>
+    
+    <figure class="q">
+      <blockquote>다만, 중도금·이주비 등 대출 취급 이후 DSR 적용대출 신규취급시, 기존 중도금· 이주비 대출 등의 원리금상환분(강화된 ST금리 반영)은 신규대출의 DSR 산정시 반영</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.70 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#59</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.70</span>
+    </header>
+    <p class="ask">정책적 목적 전세대출 예시: 버팀목 전세대출은 DSR 적용대상 제외</p>
+    <p class="why"><code>—</code> → <code>적용제외</code></p>
+    
+    <figure class="q">
+      <blockquote>버팀목 전세대출</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 8자 — 주장을 떠받치기에 짧다</li><li><strong>저신뢰</strong> — 신뢰도 0.70 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#60</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.70</span>
+    </header>
+    <p class="ask">정책적 목적 전세대출 예시: 은행-지자체 협약 전세대출은 DSR 적용대상 제외</p>
+    <p class="why"><code>—</code> → <code>적용제외</code></p>
+    
+    <figure class="q">
+      <blockquote>은행↔지자체 협약 전세대출</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 14자 — 주장을 떠받치기에 짧다</li><li><strong>저신뢰</strong> — 신뢰도 0.70 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#62</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">전세대출 DSR 시행일</p>
+    <p class="why"><code>—</code> → <code>2025-10-29</code></p>
+    
+    <figure class="q">
+      <blockquote>‘25.10.29일부터 시행될 예정</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 19자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#66</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">각 조치별 경과규정 총칙: 시행일부터 신규 신청되는 대출부터 적용</p>
+    <p class="why"><code>—</code> → <code>시행일 이후 신규 신청분부터 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>시행일부터 신규 신청되는 대출부터 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>짧음</strong> — 인용 21자 — 주장을 떠받치기에 짧다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#67</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.75</span>
+    </header>
+    <p class="ask">경과규정: 시행일 전일까지 전산 등록완료 또는 대출만기연장 통보받은 차주는 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>시행일 전일*까지 금융회사가 전산상 등록을 통해 대출 신청 접수를 완료하거나, 금융회사로부터 대출만기 연장 통보를 받은 차주 및</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    <div class="note"><p>먼저 볼 이유</p><ul><li><strong>저신뢰</strong> — 신뢰도 0.75 — 모델이 덜 확신했다</li></ul></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li></ol>
+  </section>
+
+  <section>
+    <h2>GRANDFATHERING — 16건</h2>
+    <p class="lede">먼저 볼 이유가 걸리지 않은 항목이다. 신뢰도 낮은 것부터 정렬했다.</p>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#41</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">중도금대출이 증액없이 잔금대출로 전환시 중도금대출 취급시점 LTV 적용 가능</p>
+    <p class="why"><code>—</code> → <code>중도금대출 취급시점 LTV 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>중도금대출이 증액없이 잔금대출로 전환되는 경우에는 해당 중도금대출 취급시점의 담보인정비율(LTV)를 적용할 수 있음</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#49</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">사업자대출 제한 경과규정: 효력발생일 전일까지 매매계약체결+계약금납부 증명시 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>단, 규제지역 효력 발생일 전일(10.15일)까지 주택매매계약을 체결하고 계약금 납부사실 증명시 종전규정 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#69</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">경과규정: 이에 준하는 경우로 금융기관 여신심사위원회 등을 통해 인정되는 차주는 종전규정 적용 가능</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용 가능</code></p>
+    
+    <figure class="q">
+      <blockquote>그 밖에 이에 준하는 경우로 금융기관 여신심사위원회 등을 통해 인정되는 차주 등에 대해서는 종전규정 적용 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#31</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">일반 주담대: 규제지역 효력발생일 전일까지 대출신청접수 완료 또는 매매계약체결+계약금납부 증명시 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정(LTV 70%) 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 효력 발생일 전일(10.15일) 까지 금융회사 전산상 대출 신청 접수가 완료되거나, 주택매매계약을 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#32</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">토지거래허가제 적용 주택: 효력발생일 전일까지 토지거래허가 신청접수시 이후 매매계약 체결해도 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>단, 토지거래허가제 적용 주택의 경우, 규제지역 효력 발생일 전일(10.15일)까지 관할 지자체에 토지거래허가를 신청 접수시, 그 이후에 부동산매매계약을 체결하여도 종전규정 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#33</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">집단대출: 규제지역 효력발생일 전일까지 입주자모집공고(또는 착공신고·관리처분인가)된 사업장은 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 효력 발생일 전일(10.15일)까지 입주자모집 공고(입주자모집공고가 없는 경우, 착공신고, 재건축·재개발 사업장 조합원의 경우 관리 처분인가 등)된 사업장에 대해 종전규정 적용 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#35</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">전세대출 관련: 투기·투과지역 효력발생일 전일까지 매매계약체결+계약금납부 증명시 예외 인정</p>
+    <p class="why"><code>—</code> → <code>예외 인정</code></p>
+    
+    <figure class="q">
+      <blockquote>투기·투과지역 효력 발생일 전일(10.15일)까지 매매계약을 체결하고 계약금 납부사실 증명시 예외 인정 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#36</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">신용대출 관련: 규제지역 효력발생일 전일까지 매매계약체결+계약금납부 증명시 예외 인정</p>
+    <p class="why"><code>—</code> → <code>예외 인정</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 효력 발생일 전일(10.15일)까지 해당 주택매매계약을 체결하고 계약금 납부사실 증명시 예외 인정 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#37</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">이주비·중도금 관련: 규제지역 효력발생일 전일까지 관리처분인가 난 재건축·재개발 주택은 예외 인정</p>
+    <p class="why"><code>—</code> → <code>예외 인정</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 효력 발생일 전일(10.15일)까지 관리 처분인가가 나온 재건축·재개발 주택의 경우 예외 인정 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#38</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">사업자 주담대 관련: 규제지역 효력발생일 전일까지 매매계약체결+계약금납부 증명시 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 효력 발생일 전일(10.15일)까지 주택 매매계약 체결하고 계약금 납부 사실 증명시 종전규정 적용 가능</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#40</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">토허구역: 효력발생일 전일(10.19)까지 매매계약체결+계약금납부 증명시 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>토허구역 효력 발생일 전일(10.19일)까지 매매계약을 체결하고 계약금 납부 사실을증명한 경우 등은 종전규정 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#56</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">기실행 대출의 증액없는 만기연장·자행대환시 DSR 신규 심사하지 않음</p>
+    <p class="why"><code>—</code> → <code>DSR 재심사 없음</code></p>
+    
+    <figure class="q">
+      <blockquote>旣 실행된 대출의 증액없는 만기 연장 및 자행대환시에는 DSR을 신규로 심사하지 않음</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#57</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">규제시행일 이전 기실행 대출의 원리금상환액은 실행 당시 ST금리 적용(소급적용 안됨)</p>
+    <p class="why"><code>실행 당시 ST금리</code> → <code>소급 미적용</code></p>
+    
+    <figure class="q">
+      <blockquote>즉, 금번 조치로 상향된 스트레스 금리(3%)가 소급 적용되지 않음</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#63</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">기존 전세대출 이용자가 계약갱신 등으로 만기 연장시 DSR 미적용</p>
+    <p class="why"><code>—</code> → <code>DSR 미적용</code></p>
+    
+    <figure class="q">
+      <blockquote>규제시행일 이전 전세대출을이미 이용하던차주가기존 주택에 계속 거주하면서 계약 갱신등을 통해 전세대출 만기를 연장하는 경우에는 DSR 미적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#65</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">전세대출 DSR 신뢰보호: 최초 임대차계약이 규제시행일 전일(10.28)까지 체결시 종전규정(DSR 미적용) 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정(DSR 미적용) 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>해당 주택에 대한 최초 임대차계약이 규제시행일 전일(10.28일) 까지 체결되었다면, 종전규정에 따라 DSR 미적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#68</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">경과규정: 시행일 전일까지 매매계약(구입자금)·임대차계약 체결(가계약 불포함)하고 계약금 납부 증명시 종전규정 적용</p>
+    <p class="why"><code>—</code> → <code>종전규정 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>시행일 전일까지 주택매매계약(구입자금)·임대차계약을 체결 (가계약 불포함)하고 계약금을 이미 납부한 사실을 증명한 차주는 종전규정 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li></ol>
+  </section><section>
+    <h2>SCOPE_LIMIT — 14건</h2>
+    <p class="lede">먼저 볼 이유가 걸리지 않은 항목이다. 신뢰도 낮은 것부터 정렬했다.</p>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#42</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득시 전세대출 회수</p>
+    <p class="why"><code>—</code> → <code>전세대출 회수</code></p>
+    
+    <figure class="q">
+      <blockquote>전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득*시 전세대출 회수 (배우자 포함)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#44</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">투기·투과지역에서 3억원 초과 APT 취득자의 전세대출 제한</p>
+    <p class="why"><code>—</code> → <code>전세대출 제한</code></p>
+    
+    <figure class="q">
+      <blockquote>투기·투과지역에서 3억원 초과 APT를 취득*한 자의 전세대출 제한 (배우자 포함)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#03</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">수도권·규제지역 주택구입목적 주담대 대출한도, 시가 15억원 이하 구간은 현행 6억원 유지</p>
+    <p class="why"><code>6억원(주택가격 무관 일률 적용)</code> → <code>6억원(시가 15억원 이하)</code></p>
+    
+    <figure class="q">
+      <blockquote>➊시가 15억원 이하 주택의 주담대 한도는 현행과 동일한 6억원</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#07</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">수도권·규제지역 주담대에 한해 스트레스 DSR 금리 하한을 1.5%에서 3%로 상향</p>
+    <p class="why"><code>하한 1.5%</code> → <code>하한 3%</code></p>
+    
+    <figure class="q">
+      <blockquote>현재 차주별 대출금리에 1.5% 가산되는 스트레스 금리 하한을 수도권 ․ 규제지역내 주담대에 한해 3%로 상향 조정한다.</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#09</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">은행권 주담대 위험가중치 하한이 15%에서 20%로 상향 조정됨</p>
+    <p class="why"><code>15%</code> → <code>20%</code></p>
+    
+    <figure class="q">
+      <blockquote>은행권 주담대 위험가중치 하한 상향(15% → 20%)</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#13</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">규제지역(투기과열지구) 지정에 따라 전세대출 보유 차주의 3억원 초과 APT 취득 및 3억원 초과 APT 취득자의 전세대출이 제한됨</p>
+    <p class="why"><code>—</code> → <code>전세대출 보유 차주의 규제지역내 3억원 초과 APT 취득 제한, 3억원 초과 APT 취득자의 전세대출 제한(투기과열지구)</code></p>
+    
+    <figure class="q">
+      <blockquote>전세대출 보유 차주의 규제지역내 3억원 초과 APT 취득과 규제지역내3억원 초과 APT 취득자의 전세대출 제한(투기과열지구)</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#14</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">1억원 초과 신용대출 보유 차주는 대출실행일로부터 1년간 규제지역내 주택구입 제한</p>
+    <p class="why"><code>—</code> → <code>1억원 초과 신용대출 보유 차주, 대출실행일로부터 1년간 규제지역내 주택구입 제한</code></p>
+    
+    <figure class="q">
+      <blockquote>1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터 1년간 규제지역내 주택 구입 제한</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#15</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">규제지역내 1주택 보유자가 재건축·재개발 중도금·이주비대출 취급시 추가주택 구입 제한</p>
+    <p class="why"><code>—</code> → <code>규제지역내 1주택 보유자의 재건축·재개발 중도금·이주비대출 취급시 추가주택 구입 제한</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역내 1주택 보유자가 해당 주택재건축·재개발로 중도금·이주비대출 취급시 추가주택 구입 제한</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#16</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">주택 매매·임대사업자 외 사업자의 규제지역내 주택구입목적 주담대(사업자대출) 제한</p>
+    <p class="why"><code>—</code> → <code>주택 매매·임대사업자 외 사업자의 규제지역내 주택구입목적 주담대(사업자대출) 제한</code></p>
+    
+    <figure class="q">
+      <blockquote>주택 매매·임대사업자* 외 사업자의 규제지역내주택구입목적 주담대(사업자대출) 제한</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#58</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">전세대출 DSR 적용대상: 1주택자가 수도권·규제지역에서 전세대출 이용시(주택 소재지 무관)</p>
+    <p class="why"><code>—</code> → <code>DSR 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>1주택자가 보유한 주택 소재지에 관계없이 1주택자가 수도권· 규제지역에서 전세대출이용시 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#61</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">전세대출 DSR 산정시 원금 미반영, 이자상환분만 반영</p>
+    <p class="why"><code>—</code> → <code>이자상환분만 DSR 반영</code></p>
+    
+    <figure class="q">
+      <blockquote>전세대출 차주(임차인)의 DSR 산정시 전세대출의 원금은 반영 하지 않고, 이자상환분만 임차인의 DSR에 반영한다는 의미</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#04</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">수도권·규제지역 주택구입목적 주담대 대출한도, 시가 15억원 초과~25억원 이하 구간 4억원으로 신규 차등 적용</p>
+    <p class="why"><code>6억원(주택가격 무관 일률 적용)</code> → <code>4억원(시가 15억원 초과~25억원 이하)</code></p>
+    
+    <figure class="q">
+      <blockquote>➋시가 15억원 초과～25억원 이하 주택은 4억원</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#05</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">수도권·규제지역 주택구입목적 주담대 대출한도, 시가 25억원 초과 구간 2억원으로 신규 차등 적용</p>
+    <p class="why"><code>6억원(주택가격 무관 일률 적용)</code> → <code>2억원(시가 25억원 초과)</code></p>
+    
+    <figure class="q">
+      <blockquote>➌시가 25억원 초과 주택은 2억원으로 대출한도를 차등 적용한다</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#08</span>
+      <span class="tag">SCOPE_LIMIT</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">1주택자가 수도권·규제지역에서 임차인으로 전세대출을 받는 경우 이자상환분을 DSR에 반영</p>
+    <p class="why"><code>전세대출은 DSR 적용 제외</code> → <code>1주택자의 수도권·규제지역 전세대출 이자상환분을 DSR에 반영</code></p>
+    
+    <figure class="q">
+      <blockquote>1주택자(소유주택의 지역은 무관)가 수도권 ․ 규제지역에서 임차인으로서 전세대출을 받는 경우에는 전세대출의 이자상환분을 차주의 DSR에 반영한다.</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li></ol>
+  </section><section>
+    <h2>EXCEPTION — 8건</h2>
+    <p class="lede">먼저 볼 이유가 걸리지 않은 항목이다. 신뢰도 낮은 것부터 정렬했다.</p>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#43</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">전세대출 회수 규제 예외: 투기·투과지역 효력발생일 이전 APT 매매계약 체결시 예외</p>
+    <p class="why"><code>—</code> → <code>예외</code></p>
+    
+    <figure class="q">
+      <blockquote>투기·투과지역 효력 발생일 이전 APT에 대한 매매계약을 체결한 경우 등은 예외</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#45</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">전세대출 제한 규제 예외: 투기·투과지역 효력발생일 이전 해당 APT 매매계약 체결시 예외</p>
+    <p class="why"><code>—</code> → <code>예외</code></p>
+    
+    <figure class="q">
+      <blockquote>투기·투과지역 효력 발생일 이전 해당 APT에 대한 매매계약을 체결한 경우 등은 예외</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#54</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.80</span>
+    </header>
+    <p class="ask">DSR 미적용대출(중도금·이주비 대출 등)은 강화된 스트레스DSR 미적용</p>
+    <p class="why"><code>—</code> → <code>미적용</code></p>
+    
+    <figure class="q">
+      <blockquote>DSR이 적용되지 않는 대출(중도금·이주비 대출 등)은 미적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#51</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">중도금대출은 6.27대책때와 동일하게 대출한도 규제 미적용(제외)</p>
+    <p class="why"><code>—</code> → <code>적용제외</code></p>
+    
+    <figure class="q">
+      <blockquote>6.27대책당시 중도금대출은 6억원 대출한도 규제를 적용하지 않았는 바, 금번 규제에서도 제외됨 (잔금대출 전환시 적용)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#52</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">이주비대출은 대출한도 축소 규제 미적용, 종전과 동일하게 6억원 한도 적용</p>
+    <p class="why"><code>—</code> → <code>6억원 (미적용)</code></p>
+    
+    <figure class="q">
+      <blockquote>이주비대출은 재건축·재개발 사업에 대한 영향등을 감안하여 금번대출한도 축소규제 미적용(현행과 동일하게 6억원 적용)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#64</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">전세대출 만기연장시 대출금액 증액하는 경우는 신규대출로 간주되어 DSR 적용</p>
+    <p class="why"><code>—</code> → <code>DSR 적용</code></p>
+    
+    <figure class="q">
+      <blockquote>다만, 전세대출 만기 연장시 대출금액을 증액하는 것은 신규대출에 해당하므로 DSR 적용</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#06</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">이주비대출은 주택가격 차등 적용 대상에서 제외, 종전과 동일하게 최대한도 6억원 유지</p>
+    <p class="why"><code>—</code> → <code>주택가격에 관계없이 최대한도 6억원</code></p>
+    
+    <figure class="q">
+      <blockquote>다만, 이주비대출은 현행과 동일하게 주택가격에 관계없이 최대한도 6억원 적용</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#50</span>
+      <span class="tag">EXCEPTION</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">생활안정자금 목적 주담대는 대출한도 축소 규제 적용대상 아님</p>
+    <p class="why"><code>—</code> → <code>적용제외</code></p>
+    
+    <figure class="q">
+      <blockquote>생활안정자금 목적의 주담대는 금번 대책의 적용을 받지 않음</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li></ol>
+  </section><section>
+    <h2>LTV — 5건</h2>
+    <p class="lede">먼저 볼 이유가 걸리지 않은 항목이다. 신뢰도 낮은 것부터 정렬했다.</p>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#30</span>
+      <span class="tag">LTV</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">무주택자(처분조건부 1주택자 포함) 규제지역 내 주담대 LTV 강화, &#x27;25.9.7 시행</p>
+    <p class="why"><code>70%</code> → <code>40%</code></p>
+    
+    <figure class="q">
+      <blockquote>강화된LTV(70→40%)가적용* ’25.9.7~</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#02</span>
+      <span class="tag">LTV</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">토지거래허가구역 신규 지정에 따라 상가·오피스텔 등 비주택담보대출의 LTV가 70%에서 40%로 강화됨</p>
+    <p class="why"><code>70%</code> → <code>40%</code></p>
+    
+    <figure class="q">
+      <blockquote>토지거래허가구역 신규 지정에 따라 상가·오피스텔 등 비주택담보대출의 LTV 비율도 기존 70%에서 40%로 낮아진다.</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#22</span>
+      <span class="tag">LTV</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">규제지역 주택 담보 주담대의 LTV 강화</p>
+    <p class="why"><code>70%</code> → <code>40%</code></p>
+    
+    <figure class="q">
+      <blockquote>규제지역 주택을 담보로 하는 주담대의 LTV 강화(70%→40%) 등</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#39</span>
+      <span class="tag">LTV</span>
+      <span class="tag">신뢰도 0.90</span>
+    </header>
+    <p class="ask">토지거래허가구역 지정시 비주택담보대출(가계대출) LTV 강화</p>
+    <p class="why"><code>70%</code> → <code>40%</code></p>
+    
+    <figure class="q">
+      <blockquote>토지거래허가구역지정시 비주택담보대출(가계대출)*의 LTV가 70% →40%로 강화</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#01</span>
+      <span class="tag">LTV</span>
+      <span class="tag">신뢰도 0.95</span>
+    </header>
+    <p class="ask">규제지역 신규 지정에 따라 무주택자(처분조건부 1주택자 포함)의 규제지역 내 주담대 LTV가 70%에서 40%로 강화됨</p>
+    <p class="why"><code>70%</code> → <code>40%</code></p>
+    
+    <figure class="q">
+      <blockquote>무주택자(처분조건부 1주택자 포함)가 규제지역내주담대취급시 LTV 강화 (비규제지역70% →규제지역40%)</blockquote>
+      <figcaption>금융위원회 · 주택시장 안정화 대책 이행 관련 「긴급 가계부채 점검회의」 개최 (보도참고자료)</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li></ol>
+  </section><section>
+    <h2>EFFECTIVE_DATE — 3건</h2>
+    <p class="lede">먼저 볼 이유가 걸리지 않은 항목이다. 신뢰도 낮은 것부터 정렬했다.</p>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#29</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">거시건전성 규제(대출한도차등화·ST금리·전세DSR·위험가중치) 조기 시행</p>
+    <p class="why"><code>2026년 4월</code> → <code>2026년 1월</code></p>
+    
+    <figure class="q">
+      <blockquote>조치를 조기 시행(’26.4월 →‘26.1월)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#70</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">고가주택 주담대 대출한도 축소 시행일</p>
+    <p class="why"><code>—</code> → <code>2025-10-16</code></p>
+    
+    <figure class="q">
+      <blockquote>고가주택 주담대 대출한도 축소 (10.16일 시행)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">#71</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">신뢰도 0.85</span>
+    </header>
+    <p class="ask">수도권·규제지역 주담대 ST금리 하한 상향 시행일</p>
+    <p class="why"><code>—</code> → <code>2025-10-16</code></p>
+    
+    <figure class="q">
+      <blockquote>수도권·규제지역 주담대 ST금리 하한 상향 (10.16일 시행)</blockquote>
+      <figcaption>관계기관 합동 · 대출수요 관리 방안 FAQ</figcaption>
+    </figure>
+    
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 채택(골드로)  ☐ 요약 수정 필요  ☐ 인용 교체 필요  ☐ 폐기(원문 근거 없음)</p>
+  </div>
+</li></ol>
+  </section>
+
+  <footer style="padding-bottom:52px">
+    <p><strong>이 표의 체크는 저장되지 않습니다</strong> — 한 번의 검수 세션용 진행 표시입니다.</p>
+    <p>검수를 마치면 채택한 항목으로 골드 파일을 만들고
+    <code>src/regimpact/extractor/sources.py</code> 의
+    <code>EVENTS["20251015"].gold</code> 에 경로를 적으세요. 그 순간부터
+    완전성·예외 재현율 채점이 켜지고, <code>run_extractor.py --event 20251015</code>
+    가 골드 대조를 함께 출력합니다.</p>
+    <p>골드가 없는 동안 이 이벤트는 <strong>인용 대조까지만</strong> 실측됩니다 —
+    정답 없이 점수를 내지 않기 위해서입니다.</p>
+  </footer>
+</div>
+<div class="progress" id="prog">확인 0 / 71</div>
+
+<script>
+const boxes = [...document.querySelectorAll('.cb')], prog = document.getElementById('prog');
+const sync = () => prog.textContent = `확인 ${boxes.filter(b => b.checked).length} / ${boxes.length}`;
+boxes.forEach(b => b.addEventListener('change', sync));
+sync();
+</script>
