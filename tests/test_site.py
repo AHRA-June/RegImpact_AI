@@ -718,7 +718,8 @@ def test_signal_is_paged_by_topic_not_one_long_scroll(site):
     assert "height:100dvh" in html and "body.sg{margin:0" in html
     assert html.count('<section class="pg" id="pg-') == len(_PAGES)
     for i, (pid, chip, kicker, title, _sub) in enumerate(_PAGES):
-        assert f'<section class="pg" id="{pid}" data-nav="{chip}">' in html
+        assert f'id="{pid}" data-nav="{chip}"' in html, \
+            f"{pid}: 섹션의 data-nav 가 칩 이름과 다르다 — 목록 하나에서 나와야 한다"
         assert f'aria-controls="{pid}"' in html, f"{pid}: 상단 칩이 없다"
         assert f'<span class="n">{i + 1}</span>{chip}' in html
         assert kicker in html and title in html
@@ -770,6 +771,60 @@ def test_signal_has_no_stale_vertical_directions(site):
     html = site["signal.html"]
     for bad in ("아래 ③", "위 ①", "위 ②", "위 ③", "위에서 판정한"):
         assert bad not in html, f"세로 기준 방향 표현이 남아 있다: {bad}"
+
+
+# ---------- 넘김 UI 의 접근성: 안 보이는 주제는 아무에게도 안 보여야 한다 ----------
+def test_signal_pager_is_a_real_tablist_not_just_styled_buttons(site):
+    """칩이 탭처럼 **보이기만** 하면 스크린리더에는 버튼 일곱 개가 나란히 있을 뿐이다.
+
+    "지금 몇 번째 주제인지"와 "이 칩이 어느 내용을 여는지"가 보조기기에 전달되려면
+    역할·선택 상태·연결이 실제 속성으로 있어야 한다.
+    """
+    from regimpact.ui.signal import _PAGES
+
+    html = site["signal.html"]
+    assert 'role="tablist"' in html
+    for pid, _chip, *_r in _PAGES:
+        assert f'role="tab" id="tab-{pid}" aria-controls="{pid}"' in html, f"{pid}: 탭이 아니다"
+        assert f'role="tabpanel" aria-labelledby="tab-{pid}"' in html, f"{pid}: 패널이 아니다"
+    # 로빙 tabindex — 선택된 칩 하나만 탭 순서에 둔다(안 그러면 Tab 일곱 번이 목록에 갇힌다)
+    assert html.count('tabindex="-1"') >= len(_PAGES) - 1
+    assert 'c.tabIndex = i === n ? 0 : -1' in html
+
+
+def test_signal_respects_reduced_motion(site):
+    """넘김의 '미끄러짐'은 모션 민감 사용자에게 어지럼·두통을 일으킨다.
+
+    CSS 만 고치면 부족하다 — `scrollTo({behavior:"smooth"})` 처럼 **스크립트가 명시한**
+    값은 CSS 의 `scroll-behavior` 를 이긴다. 그래서 두 곳 다 있어야 한다.
+    """
+    html = site["signal.html"]
+    assert "@media (prefers-reduced-motion: reduce)" in html
+    assert "html,.pager,.pg{scroll-behavior:auto}" in html
+    assert "prefers-reduced-motion: reduce" in html.split("<script")[-1], \
+        "JS 가 같은 질의를 보지 않으면 smooth 스크롤이 그대로 남는다"
+    assert 'behavior: smooth ? ease() : "auto"' in html
+    # 명시적 smooth 가 남아 있으면 그 자리는 설정을 무시한다
+    assert 'behavior: "smooth"' not in html, "설정을 무시하는 smooth 호출이 남아 있다"
+
+
+def test_signal_turns_off_the_topics_you_cannot_see(site):
+    """가로로 밀어냈을 뿐이라, 안 끄면 Tab·스크린리더가 **화면에 없는 폼**으로 걸어 들어간다.
+
+    보는 사람에게는 아무 일도 안 일어나는 미로가 된다 — 초점은 어딘가에 있는데
+    화면은 그대로다. `inert` 가 그 주제를 통째로 상호작용에서 뺀다.
+    """
+    html = site["signal.html"]
+    assert 'p.toggleAttribute("inert", i !== n)' in html
+
+
+def test_signal_announces_the_topic_change(site):
+    """손가락으로 넘기면 **초점이 움직이지 않는다** — 그래서 아무것도 안내되지 않는다."""
+    html = site["signal.html"]
+    assert 'id="pg-say"' in html and 'aria-live="polite"' in html
+    assert ".sr{position:absolute" in html, "화면 밖 숨김이 없으면 안내문이 화면에 보인다"
+    assert "clip-path:inset(50%)" in html
+    assert '$("#pg-say").textContent' in html
 
 
 def test_signal_is_honest_with_customers(site):
@@ -1229,6 +1284,102 @@ def test_signal_watch_says_so_when_nothing_changed_for_me(signal_watch):
     assert "변화 없음" in q["panel"]
     assert signal_watch["shell_height"] <= 845, \
         f"알림 띠가 셸을 밀어냈다({signal_watch['shell_height']}px)"
+
+
+@pytest.fixture(scope="module")
+def signal_a11y(site):
+    """정적 검사는 속성이 **있는지**만 안다. 실제로 그렇게 동작하는지는 브라우저가 답한다."""
+    _require_browser()
+    from playwright.sync_api import sync_playwright
+
+    url = f"file://{site['_dir']}/signal.html"
+    out = {"errors": []}
+    with sync_playwright() as p:
+        b = p.chromium.launch(executable_path=str(CHROMIUM))
+
+        for key, motion in (("normal", "no-preference"), ("reduce", "reduce")):
+            ctx = b.new_context(viewport={"width": MOBILE_WIDTH, "height": 844},
+                                reduced_motion=motion)
+            pg = ctx.new_page()
+            pg.on("pageerror", lambda e: out["errors"].append(str(e)))
+            pg.goto(url)
+            pg.wait_for_timeout(600)
+            r = {"say": pg.text_content("#pg-say"),
+                 "awake": pg.eval_on_selector_all(
+                     ".pg", "es=>es.filter(e=>!e.hasAttribute('inert')).map(e=>e.id)"),
+                 "tabindex": pg.eval_on_selector_all("#steps button", "es=>es.map(e=>e.tabIndex)")}
+            # 넘긴 직후를 본다 — 모션을 끄면 이미 도착해 있고, 켜면 아직 미끄러지는 중이다
+            pg.evaluate("document.querySelector('#pg-next').click()")
+            pg.wait_for_timeout(60)
+            r["arrived_at_60ms"] = pg.evaluate(
+                "(() => {const p = document.querySelector('#pager');"
+                " return p.scrollLeft === p.clientWidth;})()")
+            # 설정과 무관하게 넘김 자체는 되어야 한다 — 기능이 아니라 움직임만 끈다
+            pg.wait_for_timeout(700)
+            r["after"] = pg.text_content("#pg-prog").strip()
+            r["awake_after"] = pg.eval_on_selector_all(
+                ".pg", "es=>es.filter(e=>!e.hasAttribute('inert')).map(e=>e.id)")
+            r["say_after"] = pg.text_content("#pg-say")
+            out[key] = r
+            ctx.close()
+
+        # 키보드로 탭 목록을 다룰 수 있는가 (초점이 선택을 따라가야 한다)
+        ctx = b.new_context(viewport={"width": MOBILE_WIDTH, "height": 844})
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: out["errors"].append(str(e)))
+        pg.goto(url)
+        pg.wait_for_timeout(600)
+        pg.eval_on_selector("#steps button[aria-controls='pg-cond']", "e=>e.focus()")
+        pg.keyboard.press("ArrowRight")
+        pg.wait_for_timeout(500)
+        out["kb_right"] = pg.evaluate("document.activeElement.getAttribute('aria-controls')")
+        pg.keyboard.press("End")
+        pg.wait_for_timeout(500)
+        out["kb_end"] = pg.evaluate("document.activeElement.getAttribute('aria-controls')")
+        out["kb_end_tabindex"] = pg.evaluate("document.activeElement.tabIndex")
+        out["kb_prog"] = pg.text_content("#pg-prog").strip()
+        ctx.close()
+        b.close()
+    return out
+
+
+def test_signal_only_the_visible_topic_is_reachable(signal_a11y):
+    """보이는 주제 하나만 살아 있어야 한다 — 나머지는 화면 밖에 있을 뿐 여전히 DOM 이다."""
+    r = signal_a11y
+    assert not r["errors"], f"화면에서 JS 오류: {r['errors']}"
+    assert r["normal"]["awake"] == ["pg-cond"], \
+        f"안 보이는 주제가 상호작용 가능하다: {r['normal']['awake']}"
+    assert r["normal"]["awake_after"] == ["pg-gf"], "넘긴 뒤 새 주제가 안 켜졌다"
+    assert r["normal"]["tabindex"][0] == 0 and set(r["normal"]["tabindex"][1:]) == {-1}, \
+        "선택되지 않은 칩이 탭 순서에 남아 있다"
+
+
+def test_signal_says_which_topic_you_landed_on(signal_a11y):
+    """넘김은 초점을 옮기지 않는다 — 알리지 않으면 아무 일도 안 일어난 것과 같다."""
+    r = signal_a11y["normal"]
+    assert "내 조건" in r["say"] and "1 / 7" in r["say"]
+    assert "경과규정" in r["say_after"] and "2 / 7" in r["say_after"], \
+        f"주제가 바뀌었는데 안내가 그대로다: {r['say_after']}"
+
+
+def test_signal_reduced_motion_removes_the_slide_not_the_feature(signal_a11y):
+    """움직임만 끈다 — 넘김 자체가 안 되면 그건 접근성이 아니라 고장이다."""
+    r = signal_a11y
+    assert not r["normal"]["arrived_at_60ms"], \
+        "기본 설정인데 즉시 도착했다 — 미끄러짐이 아예 없다면 이 검사가 무의미해진다"
+    assert r["reduce"]["arrived_at_60ms"], \
+        "모션을 껐는데 여전히 미끄러진다 — CSS 만 고치고 JS 를 안 고쳤을 때 나는 증상"
+    for key in ("normal", "reduce"):
+        assert r[key]["after"].startswith("2 /"), f"{key}: 넘김 자체가 안 된다"
+
+
+def test_signal_keyboard_moves_focus_with_the_selected_tab(signal_a11y):
+    """초점이 따라가지 않으면 **탭 순서 밖으로 밀려난 칩**에 초점이 남는다."""
+    r = signal_a11y
+    assert r["kb_right"] == "pg-gf", f"→ 로 다음 탭에 초점이 안 갔다: {r['kb_right']}"
+    assert r["kb_end"] == "pg-qa", f"End 로 마지막 탭에 안 갔다: {r['kb_end']}"
+    assert r["kb_end_tabindex"] == 0, "초점 받은 칩이 탭 순서 밖이다"
+    assert r["kb_prog"].startswith("7 /")
 
 
 def test_mobile_css_is_present_in_every_page(site):

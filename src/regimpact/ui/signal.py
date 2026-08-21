@@ -57,6 +57,19 @@ def rules_digest(fixtures: dict) -> str:
 
 _SIGNAL_CSS = """
 html{scroll-behavior:smooth}
+/* 화면 밖으로만 밀어내는 숨김 — display:none 과 달리 스크린리더는 읽는다.
+   주제가 바뀐 사실은 손가락으로 넘겨도 알려야 하는데, 넘김은 초점을 옮기지 않는다. */
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+/* 모션 민감 사용자 — 넘김의 '미끄러짐'이 어지럼·두통을 일으킨다. 기능은 그대로 두고
+   **움직임만** 없앤다(넘어가지 않게 하는 것이 아니라 즉시 넘어가게 한다).
+   JS 쪽도 같은 질의를 보고 scrollTo 의 behavior 를 바꾼다 — CSS 만으로는
+   `behavior:"smooth"` 를 명시한 스크립트 호출을 못 막는다. */
+@media (prefers-reduced-motion: reduce){
+  html,.pager,.pg{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;
+    animation-iteration-count:1 !important}
+}
 body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface);
   overflow:hidden}                      /* 폰: 페이지 자체는 안 밀린다 — 세로 스크롤은 주제 안에서 */
 @media(min-width:1020px){body.sg{overflow:auto}}
@@ -104,7 +117,7 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .steps button{flex:none;padding:6px 12px;border-radius:99px;font-family:inherit;font-size:12px;
   border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);
   cursor:pointer;white-space:nowrap}
-.steps button[aria-current="true"]{border-color:var(--primary);color:var(--primary);font-weight:700;
+.steps button[aria-selected="true"]{border-color:var(--primary);color:var(--primary);font-weight:700;
   background:color-mix(in srgb,var(--primary) 7%,transparent)}
 .steps .n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;opacity:.7;
   margin-right:5px}
@@ -478,8 +491,11 @@ _PAGES = [
 def _steps_nav() -> str:
     """상단 주제 칩 — 순서대로 넘기지 않고 바로 뛰어가고 싶은 사람을 위한 길."""
     return "".join(
-        f'<button type="button" aria-controls="{pid}" '
-        f'aria-current="{"true" if i == 0 else "false"}">'
+        f'<button type="button" role="tab" id="tab-{pid}" aria-controls="{pid}" '
+        f'aria-selected="{"true" if i == 0 else "false"}" '
+        # 로빙 tabindex — 탭 목록 전체가 아니라 **선택된 칩 하나**만 탭 순서에 둔다.
+        # 그래야 Tab 한 번에 목록을 지나 내용으로 들어간다(WAI-ARIA tabs 패턴).
+        f'tabindex="{0 if i == 0 else -1}">'
         f'<span class="n">{i + 1}</span>{esc(chip)}</button>'
         for i, (pid, chip, *_r) in enumerate(_PAGES))
 
@@ -487,7 +503,10 @@ def _steps_nav() -> str:
 def _pg_open(pid: str) -> str:
     """주제 페이지 여는 태그 + 머리말."""
     _, chip, kicker, title, sub = next(p for p in _PAGES if p[0] == pid)
-    return (f'<section class="pg" id="{pid}" data-nav="{esc(chip)}">'
+    # role=tabpanel + tabindex=0 — 안에 초점 받을 것이 없는 주제(타임라인 등)도
+    # 키보드로 들어가 읽을 수 있어야 한다. 보이지 않는 주제는 JS 가 `inert` 로 끈다.
+    return (f'<section class="pg" id="{pid}" data-nav="{esc(chip)}" '
+            f'role="tabpanel" aria-labelledby="tab-{pid}" tabindex="0">'
             f'<div class="pg-in"><div class="pg-h"><div class="k">{esc(kicker)}</div>'
             f'<div class="t">{esc(title)}</div><div class="s">{esc(sub)}</div></div>')
 
@@ -812,7 +831,8 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     <div><div class="t">내 한도 시그널</div>
     <div class="s">규제 변경 개인화 시뮬레이터 · 데모 시나리오 {pub} 대책</div></div>
   </header>
-  <nav class="steps" id="steps" aria-label="주제">{_steps_nav()}</nav>
+  <nav class="steps" id="steps" role="tablist" aria-label="주제">{_steps_nav()}</nav>
+  <p id="pg-say" class="sr" role="status" aria-live="polite"></p>
   <button type="button" class="minibar" id="minibar" hidden>
     <span class="mb-c"></span><span class="mb-v"></span><span class="mb-e">내 조건 고치기 →</span>
   </button>
@@ -1021,6 +1041,13 @@ __AFFORD__
 const $ = (s) => document.querySelector(s);
 const C = FX.constants;
 let own = "none";
+
+// 모션 민감 사용자 — 넘김의 '미끄러짐'이 어지럼·두통을 일으킨다. CSS 의
+// `scroll-behavior:auto` 만으로는 부족하다: `scrollTo({behavior:"smooth"})` 처럼
+// **스크립트가 명시한** 값은 CSS 를 이긴다. 그래서 JS 도 같은 질의를 직접 본다.
+// 기능을 없애는 것이 아니라 **움직임만** 없앤다 — 넘김은 그대로 되고 즉시 넘어간다.
+const REDUCE = window.matchMedia?.("(prefers-reduced-motion: reduce)") ?? { matches: false };
+const ease = () => (REDUCE.matches ? "auto" : "smooth");
 
 // 조건 스냅샷 — 화면에서 떼어낸 값. 지켜보기가 저장하는 것도, 나중에 다시 판정할 때
 // 엔진에 먹이는 것도 이것이다. 판정 입력이 DOM 을 직접 읽으면 **저장된 조건은 재판정할 수
@@ -1701,7 +1728,7 @@ function renderWatch() {
       writeWatch({ v: 1, savedAt: new Date().toISOString(), seenAt: null,
                    digest: RULES_DIGEST, cond: c, verdict: verdictOf(c) });
       renderWatch();
-      box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      box.scrollIntoView({ block: "nearest", behavior: ease() });
     });
     $("#alert").hidden = true;
     return;
@@ -1877,17 +1904,26 @@ let curPage = 0;
 
 function markPage(n) {
   curPage = n;
-  CHIPS.forEach((c, i) => c.setAttribute("aria-current", String(i === n)));
+  CHIPS.forEach((c, i) => {
+    c.setAttribute("aria-selected", String(i === n));
+    c.tabIndex = i === n ? 0 : -1;         // 로빙 tabindex — 탭 순서엔 선택된 칩 하나만
+  });
   CHIPS[n]?.scrollIntoView({ block: "nearest", inline: "center" });
+  // 보이지 않는 주제는 **끈다.** 가로로 밀어냈을 뿐이라 그냥 두면 스크린리더·Tab 이
+  // 화면에 없는 폼으로 걸어 들어간다 — 보는 사람에게는 아무 일도 없어 보이는 미로다.
+  PAGES.forEach((p, i) => p.toggleAttribute("inert", i !== n));
   $("#minibar").hidden = n === 0;            // 첫 주제는 폼 자체가 보이니 겹쳐 놓지 않는다
   $("#pg-prev").disabled = n === 0;
   $("#pg-prog").textContent = `${n + 1} / ${PAGES.length}`;
   const next = PAGES[n + 1];              // 마지막 주제에서는 처음으로 되돌아가는 문이 된다
   $("#pg-next").textContent = next ? `다음: ${next.dataset.nav} →` : "↺ 처음 주제로";
+  // 손가락으로 넘기면 초점이 움직이지 않는다 — 그래서 주제가 바뀐 사실을 따로 알린다.
+  $("#pg-say").textContent =
+    `${PAGES[n].dataset.nav} · ${n + 1} / ${PAGES.length} 주제`;
 }
 function goPage(i, smooth = true) {
   const n = Math.max(0, Math.min(PAGES.length - 1, i));
-  pager.scrollTo({ left: pager.clientWidth * n, behavior: smooth ? "smooth" : "auto" });
+  pager.scrollTo({ left: pager.clientWidth * n, behavior: smooth ? ease() : "auto" });
   markPage(n);
 }
 // 손가락으로 넘겼을 때의 위치를 되읽는다 — 스냅이 끝난 뒤 한 번만 본다
@@ -1907,8 +1943,17 @@ $("#minibar").addEventListener("click", () => goPage(0));
 CHIPS.forEach((c, i) => c.addEventListener("click", () => goPage(i)));
 document.addEventListener("keydown", (e) => {           // 데스크톱(폰 프레임)에서는 화살표로
   if (!$("#modal").hidden || e.target.closest("input,select,textarea")) return;
-  if (e.key === "ArrowRight") goPage(curPage + 1);
-  else if (e.key === "ArrowLeft") goPage(curPage - 1);
+  const inTabs = !!e.target.closest("#steps");
+  let n = null;
+  if (e.key === "ArrowRight") n = curPage + 1;
+  else if (e.key === "ArrowLeft") n = curPage - 1;
+  else if (inTabs && e.key === "Home") n = 0;
+  else if (inTabs && e.key === "End") n = PAGES.length - 1;
+  if (n === null) return;
+  goPage(n);
+  // 칩에 초점이 있었으면 초점도 따라가야 한다. 안 옮기면 로빙 tabindex 때문에
+  // **탭 순서 밖으로 밀려난 칩**에 초점이 남고, 그 다음 Tab 이 어디로 갈지 알 수 없다.
+  if (inTabs) { e.preventDefault(); CHIPS[curPage]?.focus(); }
 });
 // 화면 안 앵커(#gf 등)는 이제 '다른 주제'다 — 그 주제로 넘긴 뒤 대상까지 맞춰 준다
 document.addEventListener("click", (e) => {
@@ -1919,7 +1964,7 @@ document.addEventListener("click", (e) => {
   if (!pg) return;
   e.preventDefault();
   goPage(PAGES.indexOf(pg));
-  if (el !== pg) setTimeout(() => el.scrollIntoView({ block: "start", behavior: "smooth" }), 420);
+  if (el !== pg) setTimeout(() => el.scrollIntoView({ block: "start", behavior: ease() }), 420);
 });
 window.addEventListener("resize", () => goPage(curPage, false));
 const deep = PAGES.findIndex((p) => p.id === location.hash.slice(1));
