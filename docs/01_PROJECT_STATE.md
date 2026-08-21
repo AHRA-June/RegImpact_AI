@@ -81,7 +81,7 @@
    상단 **요약 바**(지금 조건 + 판정 LTV, 누르면 조건으로)로 메웠다.
    상세: `02_DECISION_LOG.md` 2026-08-21.
 
-### ⚠️ 배포 확인의 함정 세 가지 (전부 실제로 밟았다)
+### ⚠️ 배포 확인의 함정 네 가지 (전부 실제로 밟았다)
 
 **① 라이브 URL 을 열 수 없다.** 이 실행 환경의 egress 프록시가 `github.io` 를 막는다
 (curl·WebFetch 모두 403). "배포됐다"는 GitHub deployment status 로, "화면이 멀쩡하다"는
@@ -108,6 +108,18 @@
     git log --oneline origin/claude/portfolio-project-planning-9sip11..HEAD
 
   비어 있지 않으면 먼저 PR 을 만들어 병합하거나, 리셋 대신 `git merge` 로 최신을 받는다.
+
+**④ 초록불이 "검사했다"는 뜻은 아니다.** mobile 잡이 `67 passed, 2 skipped` 로 초록인데
+폰 검사가 **통째로 건너뛰어져 있었다**(2026-08-19 잡 도입 이후 줄곧). 캐시 적중이면
+`playwright install` 을 건너뛰게 해 뒀는데, 캐시의 브라우저 빌드가 설치된 playwright
+버전과 어긋나 탐색이 실패했고 → 테스트가 조용히 skip → 잡은 success → 배포.
+
+게이트가 비어 있는지는 **초록/빨강이 아니라 시간과 건수로** 본다. 검사 단계가 2~3초로
+끝나면 안 돈 것이다(실제로 돌면 CI 9초·이 샌드박스 3분대). 지금은
+`REGIMPACT_BROWSER_TESTS=1` 인데 브라우저가 없으면 **실패**한다 — 미측정은 통과가 아니다.
+
+    # 초록불을 믿기 전에 이 두 줄을 본다
+    # "Mobile layout check" 단계 시간 · pytest 요약의 skipped 건수
 
 ## 🚀 새 세션 시작 절차 (2분)
 
