@@ -727,6 +727,29 @@ def test_signal_is_paged_by_topic_not_one_long_scroll(site):
         assert el in html, f"{el} 가 없다"
 
 
+def test_signal_numbering_follows_screen_order(site):
+    """번호는 화면 순서와 같아야 한다 — "STEP 2 · ③ 경과규정" 이 헷갈림의 원인이었다.
+
+    지원서의 서술 순서(①영향알림 ②전/후 ③경과규정 ④Q&A)를 제목에 그대로 달아 두니,
+    두 번째 화면에 ③이 붙었다. 번호는 STEP n 과 상단 칩 **한 군데**에서만 나오고,
+    화면 간 안내는 `N단계 <칩 이름>` 한 형식으로 쓴다.
+    """
+    import re as _re
+    from regimpact.ui.signal import _PAGES
+
+    html = site["signal.html"]
+    for i, (_pid, chip, kicker, title, _sub) in enumerate(_PAGES):
+        assert kicker.startswith(f"STEP {i + 1} "), f"{chip}: 키커 번호가 순서와 다르다"
+        assert not _re.match(r"[①-⑳]", title), \
+            f"{chip}: 제목의 동그라미 번호가 STEP 번호와 다툰다 — 번호는 한 군데에만 둔다"
+    # 안내 문구의 단계 번호가 그 주제의 번호와 어긋나면 안 된다
+    for i, (_pid, chip, *_r) in enumerate(_PAGES):
+        for n in range(1, len(_PAGES) + 1):
+            if n != i + 1:
+                assert f"{n}단계 {chip}" not in html, \
+                    f"'{n}단계 {chip}' — {chip} 는 {i + 1}단계다"
+
+
 def test_signal_conditions_still_drive_every_topic(site):
     """조건 입력이 두 주제(① 내 조건 · ③ 경과규정)로 갈라졌다 — 둘 다 재계산에 물려야 한다.
 
