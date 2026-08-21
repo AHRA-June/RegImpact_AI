@@ -469,3 +469,62 @@ def test_scorecard_does_not_pass_citation_when_nothing_was_checked():
     row = rows["Citation Correctness"]
     assert row.value is None, "대조 0건인데 값이 실려 통과로 세어졌다"
     assert "0건" in row.evidence
+
+
+# ---------- 추출 검수표 (tools/build_extraction_review.py) ----------
+def _review_module():
+    """tools/ 는 패키지가 아니라 스크립트 디렉터리 — 경로를 얹어 불러온다."""
+    import importlib.util
+    import sys as _sys
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+    _sys.path.insert(0, str(root / "tools"))
+    spec = importlib.util.spec_from_file_location(
+        "_build_extraction_review", root / "tools" / "build_extraction_review.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_review_flags_the_ambiguous_citation_trap():
+    """인용이 원문에 여러 번 나오면 '모호'로 걸려야 한다.
+
+    목차 줄과 본문에 같은 문장이 있는데 앞의 것을 집으면 목차(점선 리더·쪽번호)가 근거로
+    실린다 — 2026-08-20 폰 리뷰에서 실제로 밟은 함정이다.
+    """
+    m = _review_module()
+    src = {"D": "같은 문장이 여기 있고 또 같은 문장이 여기 있다"}
+    item = {"confidence": 0.95,
+            "citation": {"quote": "같은 문장이 여기 있", "source_doc_id": "D"}}
+    names = [n for n, _why in m.flags_for(item, src)]
+    assert "모호" in names
+
+
+def test_review_flags_short_and_low_confidence():
+    """짧은 인용·낮은 신뢰도는 '틀렸다'가 아니라 '먼저 보라'는 신호다."""
+    m = _review_module()
+    src = {"D": "아주 긴 원문 문장이 여기에 한 번만 등장한다 " * 5}
+    short = {"confidence": 0.95, "citation": {"quote": "아주 긴", "source_doc_id": "D"}}
+    lowconf = {"confidence": 0.6,
+               "citation": {"quote": "아주 긴 원문 문장이 여기에 한 번만 등장한다",
+                            "source_doc_id": "D"}}
+    assert "짧음" in [n for n, _ in m.flags_for(short, src)]
+    assert "저신뢰" in [n for n, _ in m.flags_for(lowconf, src)]
+
+
+def test_review_does_not_flag_a_solid_item():
+    """근거가 튼튼한 항목까지 걸리면 분류가 무의미해진다."""
+    m = _review_module()
+    quote = "규제지역 내 주담대 취급시 LTV 를 강화하여 적용한다"
+    src = {"D": f"앞말 {quote} 뒷말"}
+    item = {"confidence": 0.9, "citation": {"quote": quote, "source_doc_id": "D"}}
+    assert m.flags_for(item, src) == []
+
+
+def test_review_titles_come_from_the_registry_not_by_hand():
+    """문서 제목을 손으로 옮겨 적으면 SOURCES.md 와 갈라진다."""
+    m = _review_module()
+    titles = m.doc_titles()
+    assert titles, "SOURCES.md 에서 제목을 하나도 못 읽었다"
+    assert "FSC_PRESS_20251015" in titles
+    assert "금융위원회" in titles["FSC_PRESS_20251015"]
