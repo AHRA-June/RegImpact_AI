@@ -157,3 +157,83 @@ def test_report_includes_the_scorecard(evidence):
     text = render(evidence)
     assert "### 3.1 Assurance 스코어카드" in text
     assert "미측정은 통과가 아니다" in text
+
+
+# ---------- 시점 질의 측정은 검수가 끝나면 스스로 켜진다 ----------
+def _evidence():
+    from regimpact.report import collect
+    return collect(generated_at="x")
+
+
+def test_temporal_metric_is_not_reported_while_gold_is_a_draft():
+    """대조가 정합이어도 골드가 🤖 초안이면 수치를 내지 않는다.
+
+    초안을 정답으로 삼아 낸 비율은 비율이 아니다. 미측정은 통과가 아니다.
+    """
+    from regimpact.assurance.scorecard import Verdict, score
+
+    ev = _evidence()
+    assert ev.temporal_confirmed is False, "테스트 전제: 아직 검수 전"
+    assert ev.temporal.ok, "지금 대조는 정합이어야 한다(정합인데도 안 낸다는 것이 요점)"
+
+    row = {r.threshold.metric: r for r in score(ev).all_metrics}["Policy-version Consistency"]
+    assert row.value is None
+    assert row.verdict is Verdict.NOT_MEASURED
+    assert "초안" in row.evidence, "왜 안 냈는지가 근거 문구에 남아야 한다"
+    assert "충돌 0" in row.evidence, "대조를 돌리긴 했다는 사실도 남아야 한다"
+
+
+def test_temporal_metric_turns_on_by_itself_once_the_gold_is_confirmed():
+    """검수가 끝나면 **코드를 고치지 않아도** 값이 흐르기 시작해야 한다.
+
+    값을 손으로 None 이라 적어 두면 검수가 끝나도 누군가 파일을 고쳐야 켜진다 —
+    문서와 시스템이 갈라지는 자리다. 이 테스트가 그 자리를 막는다.
+    """
+    from dataclasses import replace
+
+    from regimpact.assurance.scorecard import score
+
+    ev = replace(_evidence(), temporal_confirmed=True)   # 검수 완료 상황만 흉내
+    row = {r.threshold.metric: r for r in score(ev).all_metrics}["Policy-version Consistency"]
+
+    t = ev.temporal
+    assert row.value == pytest.approx((t.checked - len(t.conflicts)) / t.checked)
+    assert "초안" not in row.evidence
+
+
+def test_temporal_metric_stays_unmeasured_when_there_is_nothing_to_check():
+    """대조할 as_of 문항이 0건이면 100% 가 아니라 미측정이다 — 0건 중 0건은 100% 가 아니다."""
+    from dataclasses import replace
+
+    from regimpact.assurance.scorecard import Verdict, score
+    from regimpact.eval.temporal import TemporalReport
+
+    ev = replace(_evidence(), temporal=TemporalReport(), temporal_confirmed=True)
+    row = {r.threshold.metric: r for r in score(ev).all_metrics}["Policy-version Consistency"]
+    assert row.value is None
+    assert row.verdict is Verdict.NOT_MEASURED
+
+
+def test_temporal_review_table_never_claims_the_gold_is_right():
+    """검수표가 '기계 대조 통과 = 골드가 맞다'로 읽히면 검수를 무력화한다.
+
+    대조 통과는 골드와 정책 DB 가 서로 어긋나지 않는다는 뜻일 뿐이다 —
+    둘이 같은 방향으로 틀렸을 수 있고, 그 판단이 정확히 사람에게 남은 몫이다.
+    """
+    import importlib.util
+    import subprocess
+    import sys as _sys
+    from pathlib import Path as _P
+
+    root = _P(__file__).resolve().parents[1]
+    subprocess.run([_sys.executable, str(root / "tools" / "build_temporal_review.py")],
+                   cwd=root, check=True, capture_output=True)
+    html = (root / "docs" / "eval" / "temporal_gold_review.html").read_text(encoding="utf-8")
+
+    assert "골드가 맞다는 뜻이 아니다" in html
+    assert "같은 방향으로 틀렸을 수 있다" in html
+    # 검수가 끝나면 스스로 켜진다는 다음 단계가 적혀 있어야 한다
+    assert "human_confirmed" in html and "스스로 켜집니다" in html
+    # 임계는 측정 뒤에 정한다는 결정도 남아 있어야 한다
+    assert "thresholds.py" in html
+    assert importlib.util.find_spec is not None      # (import 사용 표시)

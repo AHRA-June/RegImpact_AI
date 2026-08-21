@@ -102,6 +102,24 @@ def _rate(passed: int, total: int) -> Optional[float]:
     return passed / total if total else None
 
 
+def _temporal_metric(ev: ValidationEvidence) -> tuple[Optional[float], str]:
+    """시점 질의 정합률. **골드가 사람 확정 전이면 수치를 내지 않는다.**
+
+    대조 자체는 언제나 돌아간다(충돌은 즉시 드러나야 하므로). 다만 그 결과를 *지표로
+    보고*하려면 골드가 확정돼 있어야 한다 — 초안을 정답으로 삼아 낸 비율은 비율이 아니다.
+    검수가 끝나 `authored_by` 가 `human_confirmed` 로 바뀌면 이 함수가 자동으로 값을
+    돌려주기 시작한다. 코드를 고칠 필요가 없다.
+    """
+    t = getattr(ev, "temporal", None)
+    if t is None or not t.checked:
+        return None, "시점 질의 골드에 as_of 문항이 없어 대조하지 못했다"
+    detail = (f"시점 질의 {t.checked}문항 ↔ Temporal Policy Resolver "
+              f"(충돌 {len(t.conflicts)})")
+    if not getattr(ev, "temporal_confirmed", False):
+        return None, f"{detail} — 골드가 🤖 초안이라 수치를 보고하지 않는다(사람 검수 대기)"
+    return (t.checked - len(t.conflicts)) / t.checked, detail
+
+
 def score(ev: ValidationEvidence, *, js_port_agreement: Optional[float] = None) -> Scorecard:
     """실측 evidence 를 임계와 대조한다.
 
@@ -137,8 +155,10 @@ def score(ev: ValidationEvidence, *, js_port_agreement: Optional[float] = None) 
         "Policy Baseline Consistency": (
             1.0 if ev.drift.ok else 0.0,
             f"정책 {len(ev.registry.policies)}건 ↔ 지역 기준선 {ev.baseline_region_count}곳 양방향"),
-        "Policy-version Consistency": (
-            None, "시점 질의 골드(TEMPORAL 12문항)가 🤖 초안 — 사람 검수 후 측정 가동"),
+        # 값을 손으로 None 이라 적어 두면, 검수가 끝나도 누군가 이 파일을 고쳐야 켜진다 —
+        # 문서와 시스템이 갈라지는 자리다. 대신 **골드의 검수 상태를 코드가 읽어** 판단한다.
+        # 초안이면 대조가 정합이어도 수치를 내지 않는다(미측정은 통과가 아니다).
+        "Policy-version Consistency": _temporal_metric(ev),
         "Rule-regression Pass Rate": (
             r.pass_rate, f"독립 명세 오라클 대조 {r.passed}/{r.total}"),
         "Boundary-case Pass Rate": (

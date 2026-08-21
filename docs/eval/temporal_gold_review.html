@@ -1,0 +1,398 @@
+<title>시점 질의 골드 검수표</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground:#fcf8ff; --panel:#ffffff; --panel-2:#f5f2ff; --line:#c4c6cf;
+  --ink:#1a1a2e; --ink-2:#43474e; --navy:#022448; --action:#0051d5;
+  --alarm:#ba1a1a; --alarm-bg:#ffdad6; --alarm-ink:#93000a;
+  --pend:#edbf7f; --pend-bg:#fff4e2; --pend-ink:#60410c;
+  --ok:#0051d5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#12121c; --panel:#1b1b28; --panel-2:#222232; --line:#3a3a4d;
+    --ink:#eceaf6; --ink-2:#a9adbe; --navy:#adc8f5; --action:#8fb2ff;
+    --alarm:#ff8a80; --alarm-bg:#3d1512; --alarm-ink:#ffb4ab;
+    --pend:#edbf7f; --pend-bg:#3a2c14; --pend-ink:#f0d3a3;
+    --ok:#8fb2ff;
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#12121c; --panel:#1b1b28; --panel-2:#222232; --line:#3a3a4d;
+  --ink:#eceaf6; --ink-2:#a9adbe; --navy:#adc8f5; --action:#8fb2ff;
+  --alarm:#ff8a80; --alarm-bg:#3d1512; --alarm-ink:#ffb4ab;
+  --pend:#edbf7f; --pend-bg:#3a2c14; --pend-ink:#f0d3a3;
+  --ok:#8fb2ff;
+}
+*,*::before,*::after { box-sizing:border-box; }
+body {
+  background:var(--ground); color:var(--ink); margin:0;
+  font-family:'Noto Sans KR',system-ui,sans-serif; line-height:1.7;
+  padding:clamp(20px,4vw,56px) clamp(16px,5vw,40px);
+}
+.wrap { max-width:920px; margin:0 auto; display:flex; flex-direction:column; gap:40px; }
+h1,h2,h3 { font-family:'Noto Serif KR',Georgia,serif; text-wrap:balance; margin:0; }
+h1 { font-size:clamp(28px,4.5vw,40px); letter-spacing:-.02em; color:var(--navy); }
+h2 { font-size:22px; letter-spacing:-.01em; padding-bottom:10px; border-bottom:2px solid var(--navy); }
+p { margin:0; }
+.lede { color:var(--ink-2); max-width:62ch; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; }
+.meta span { background:var(--panel-2); border:1px solid var(--line); padding:3px 9px; border-radius:3px; color:var(--ink-2); }
+section { display:flex; flex-direction:column; gap:18px; }
+
+.conflict { background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--alarm);
+  border-radius:4px; padding:22px; display:flex; flex-direction:column; gap:16px; }
+.conflict header { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.id { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:500; color:var(--alarm-ink);
+  background:var(--alarm-bg); padding:3px 9px; border-radius:3px; }
+.tag { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);
+  border:1px solid var(--line); padding:2px 8px; border-radius:99px; }
+.tag.seal::before { content:"🔒 "; }
+.ask { font-family:'Noto Serif KR',serif; font-size:17px; font-weight:500; }
+.face-off { display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:stretch; }
+@media (max-width:640px) { .face-off { grid-template-columns:1fr; } .versus { justify-self:start; } }
+.side { padding:14px; border-radius:4px; background:var(--panel-2); border:1px solid var(--line); }
+.side.gold { border-color:var(--pend); background:var(--pend-bg); }
+.side.spec { border-color:var(--action); }
+.side-label { display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-2); margin-bottom:6px; }
+.side.gold .side-label { color:var(--pend-ink); }
+.side.spec .side-label { color:var(--action); }
+.side p { font-size:14px; }
+.versus { align-self:center; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-2); }
+.verdict { border:1px dashed var(--line); border-radius:4px; padding:12px 14px; margin:0;
+  display:flex; flex-wrap:wrap; gap:14px; }
+.verdict legend { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); padding:0 6px; }
+.verdict label { display:flex; align-items:center; gap:7px; font-size:14px; cursor:pointer; }
+
+.conflict.resolved { border-left-color:var(--ok); }
+.id.ok { color:var(--panel); background:var(--ok); }
+.tag.done { border-color:var(--ok); color:var(--ok); }
+.why { font-size:13.5px; color:var(--ink-2); border-left:3px solid var(--ok); padding-left:12px; }
+.q { margin:0; border-left:3px solid var(--line); padding-left:12px; }
+.q figcaption { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); margin-bottom:3px; }
+.q blockquote { margin:0; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.65;
+  color:var(--ink-2); word-break:keep-all; }
+
+.note { background:var(--panel-2); border:1px solid var(--line); border-radius:4px; padding:18px;
+  display:flex; flex-direction:column; gap:12px; }
+.note pre { margin:0; overflow-x:auto; background:var(--panel); border:1px solid var(--line);
+  border-radius:3px; padding:12px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-2); }
+
+ol.items { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.item { display:flex; gap:14px; padding:14px 12px; border-bottom:1px solid var(--line); }
+.item:has(.cb:checked) { background:var(--panel-2); }
+.item.confirmed { border-left:3px solid var(--ok); }
+.item:has(.cb:checked) .claim { color:var(--ink-2); text-decoration:line-through; }
+.check { flex-shrink:0; padding-top:3px; cursor:pointer; }
+.check input { position:absolute; opacity:0; width:0; height:0; }
+.check span { display:block; width:20px; height:20px; border:2px solid var(--line); border-radius:3px; }
+.check input:checked + span { background:var(--ok); border-color:var(--ok); }
+.check input:checked + span::after { content:"✓"; display:block; color:var(--panel); font-size:14px;
+  line-height:16px; text-align:center; }
+.check input:focus-visible + span { outline:2px solid var(--action); outline-offset:2px; }
+.body { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.head { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+.head code { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--navy);
+  background:var(--panel-2); padding:2px 7px; border-radius:3px; }
+.claim { font-weight:500; }
+.kw { display:flex; flex-wrap:wrap; gap:5px; }
+kbd { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-2);
+  border:1px solid var(--line); border-radius:3px; padding:1px 6px; }
+.hits { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--action); }
+
+.progress { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:10;
+  background:var(--navy); color:var(--ground); font-family:'JetBrains Mono',monospace; font-size:13px;
+  padding:9px 18px; border-radius:99px; box-shadow:0 4px 16px rgba(0,0,0,.28); }
+:root[data-theme="dark"] .progress, :root:not([data-theme="light"]) .progress { color:#12121c; }
+footer { color:var(--ink-2); font-size:13px; border-top:1px solid var(--line); padding-top:16px; }
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <h1>시점 질의 골드 검수표</h1>
+    <p class="lede">스코어카드의 마지막 미측정 <code>Policy-version Consistency</code> 를 막고 있는 것은
+    코드가 아니라 <strong>이 골드 12문항이 아직 🤖 초안이라는 사실</strong>이다.
+    초안을 정답으로 삼아 낸 비율은 비율이 아니므로, 대조가 정합이어도 수치를 보고하지 않는다.</p>
+    <div class="meta">
+      <span>시점 대조 7문항(답변형 5 · escalation형 2) — ✅ resolver와 정합</span>
+      <span>🤖 초안 12 / 12</span>
+      <span>충돌 0건</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>이 표를 읽는 법</h2>
+    <div class="note">
+      <p>시점 질의 골드는 <strong>두 진실</strong> 위에 서 있다.</p>
+      <ul>
+        <li><strong>원문 인용</strong> — 기계가 verbatim 대조를 이미 끝냈다. 다시 묻지 않는다.</li>
+        <li><strong>정책 버전 DB의 시점 해석</strong> — <code>check_temporal_gold</code> 가
+          resolver 와 대조했다. 결과를 각 문항에 실었다.</li>
+      </ul>
+      <p>대조 통과는 <strong>"골드와 DB가 서로 어긋나지 않는다"</strong>는 뜻이지
+      <strong>"골드가 맞다"</strong>는 뜻이 아니다. 둘이 같은 방향으로 틀렸을 수 있고,
+      그 판단만 사람 몫으로 남는다.</p>
+      <p><strong>escalation 형</strong> 문항은 방향이 반대다 — "DB 가 이 시점을 답할 수 없다"가
+      정답의 근거다. 나중에 DB 가 답할 수 있게 되면(해제 원문 확보 등) 이 검사가
+      "답변형으로 갱신하라"고 지목한다. 한계를 골드에 새겼으면 한계가 풀릴 때 골드도 풀려야 한다.</p>
+    </div>
+  </section>
+
+  
+
+  <section>
+    <h2>1. 전체 — 12문항</h2>
+    <p class="lede">기계 대조는 통과했다. 남은 질문은 <strong>"이 답이 도메인 사실로 맞는가"</strong> 하나다.</p>
+    <ol class="items"><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-EFF-001</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">답변형</span>
+      <span class="tag">as_of 2025-10-16</span>
+      <span class="tag">정책 MOLIT_20251016</span>
+    </header>
+    <p class="ask">2025년 10월 16일 시점에 유효한 최신 규제지역 지정은 어느 대책에 따른 것인가?</p>
+    <p class="why"><strong>초안 답:</strong> 2025년 10·15 대책이다. 발표 후 즉각 시행(10.16일)돼 이날부터 강화된 대출규제가 적용된다.</p>
+    <p class="why">채점 사실: <code>10·15</code>, <code>10.16</code></p>
+    
+    <figure class="q"><blockquote>즉시 시행이 가능한 조치들은 발표 후 즉각 시행*(10.16일)하고, 후속 조치가 필요한 과제**는 최대한 신속하게 추진해 나갈 예정이다. 다만, 금번 조치 시행 이전에 ➊주택 매매계약 또는 전세계</blockquote><figcaption>FSC_PRESS_20251015</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2025-10-16 시점 유효 정책을 DB 도 <code>MOLIT_20251016</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-EFF-002</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">답변형</span>
+      <span class="tag">as_of 2026-06-30</span>
+      <span class="tag">정책 MOLIT_20251016</span>
+    </header>
+    <p class="ask">2026년 6월 30일(6·30 대책 발표일 당일)에 유효한 규제지역 지정은 어느 대책 기준인가?</p>
+    <p class="why"><strong>초안 답:</strong> 아직 2025년 10·15 대책 기준이다. 6·30 대책으로 강화되는 대출규제는 7.1일부터 적용되므로, 발표일 당일은 직전 정책이 유효하다.</p>
+    <p class="why">채점 사실: <code>10·15</code>, <code>7.1</code></p>
+    <p class="why">작성 메모: EFF-003과 하루 차이 경계쌍 — 발표일≠시행일을 판별하는지 본다</p>
+    <figure class="q"><blockquote>강화된 대출규제가 7.1일부터 즉시 적용된다. * 은행업감독규정, 보험업감독규정, 여신전문금융업감독규정, 상호저축은행업감독규정, 상호금융업감독규정 [ 규제지역 지</blockquote><figcaption>FSC_PRESS_20260630</figcaption></figure><figure class="q"><blockquote>즉시 시행이 가능한 조치들은 발표 후 즉각 시행*(10.16일)하고, 후속 조치가 필요한 과제**는 최대한 신속하게 추진해 나갈 예정이다. 다만, 금번 조치 시행 이전에 ➊주택 매매계약 또는 전세계</blockquote><figcaption>FSC_PRESS_20251015</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2026-06-30 시점 유효 정책을 DB 도 <code>MOLIT_20251016</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-EFF-003</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">답변형</span>
+      <span class="tag">as_of 2026-07-01</span>
+      <span class="tag">정책 FSC_20260630</span>
+    </header>
+    <p class="ask">2026년 7월 1일부터 규제지역에서 적용되는 강화 대출규제는 어느 대책에 따른 것인가?</p>
+    <p class="why"><strong>초안 답:</strong> 2026년 6·30 대책이다. 규제지역 지정에 따라 旣 마련된 규정의 강화 대출규제가 7.1일부터 즉시 적용된다.</p>
+    <p class="why">채점 사실: <code>6·30</code>, <code>7.1</code></p>
+    <p class="why">작성 메모: EFF-002와 하루 차이 경계쌍</p>
+    <figure class="q"><blockquote>강화된 대출규제가 7.1일부터 즉시 적용된다. * 은행업감독규정, 보험업감독규정, 여신전문금융업감독규정, 상호저축은행업감독규정, 상호금융업감독규정 [ 규제지역 지</blockquote><figcaption>FSC_PRESS_20260630</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2026-07-01 시점 유효 정책을 DB 도 <code>FSC_20260630</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-REG-001</span>
+      <span class="tag">REGION</span>
+      <span class="tag">답변형</span>
+      <span class="tag">as_of 2017-08-03</span>
+      <span class="tag">정책 MOLIT_20170803</span>
+    </header>
+    <p class="ask">서울 전 지역이 투기과열지구로 지정된 것은 언제부터인가?</p>
+    <p class="why"><strong>초안 답:</strong> 2017년 8월 3일부터다(’17.8.3). 2020 6·17 대책의 지정 현황표가 서울 투기과열지구 지정일을 ’17.8.3으로 기록한다.</p>
+    <p class="why">채점 사실: <code>17.8.3</code></p>
+    <p class="why">작성 메모: 2017 8·2 대책 원문은 미확보 — 근거는 2020 현황표의 소급 기록. 원문 확보 시 인용 교체</p>
+    <figure class="q"><blockquote>서 울 전 지역 (’17.8.3) 전 지역 (’16.11.3) 경 기 과천(’17.8.3), 성남분당(’17.9.6), 광명, 하남(’18.8.28), 수원, 성</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2017-08-03 시점 유효 정책을 DB 도 <code>MOLIT_20170803</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-REG-002</span>
+      <span class="tag">REGION</span>
+      <span class="tag">답변형</span>
+      <span class="tag">as_of 2016-11-03</span>
+      <span class="tag">정책 MOLIT_20161103</span>
+    </header>
+    <p class="ask">서울 전 지역이 조정대상지역으로 지정된 것은 언제부터인가?</p>
+    <p class="why"><strong>초안 답:</strong> 2016년 11월 3일부터다(’16.11.3). 2020 6·17 대책의 지정 현황표가 서울 조정대상지역 지정일을 ’16.11.3으로 기록한다.</p>
+    <p class="why">채점 사실: <code>16.11.3</code></p>
+    <p class="why">작성 메모: 2016 11·3 대책 원문은 미확보 — 근거는 2020 현황표의 소급 기록. 원문 확보 시 인용 교체</p>
+    <figure class="q"><blockquote>서 울 전 지역 (’17.8.3) 전 지역 (’16.11.3) 경 기 과천(’17.8.3), 성남분당(’17.9.6), 광명, 하남(’18.8.28), 수원, 성</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2016-11-03 시점 유효 정책을 DB 도 <code>MOLIT_20161103</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-EFF-004</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">답변형</span>
+      
+      <span class="tag">정책 MOLIT_20200617</span>
+    </header>
+    <p class="ask">2020 6·17 대책으로 신규 지정된 규제지역의 효력은 언제부터 발생하는가?</p>
+    <p class="why"><strong>초안 답:</strong> 관보 게시일인 6월 19일부터 효력이 발생한다. 원문은 6.19(금) 일자로 지정 및 효력발생을 명시한다.</p>
+    <p class="why">채점 사실: <code>6월 19일|6.19</code>, <code>관보</code></p>
+    
+    <figure class="q"><blockquote>관보게시일인6월19일부터효력이발생 ----- p4 ----- - 2 - 2. 8월이후전매제한기간이강화되는수도권및광역시는 규제지역지정시전매제한강화가즉시적용되는지?</blockquote><figcaption>QNA_20200617</figcaption></figure><figure class="q"><blockquote>6.19(금) 일자로지정및효력발생 &lt; 조정대상지역및투기과열지구지정&gt; 조정대상지역 투기과열지구 기존 (서울) 全 지역 (경기) 과천, 광명, 성남, 고양(7개 택지</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure>
+    <div class="note"><p><strong>시점 대조 없음</strong> — <code>as_of</code> 가 없어 resolver 와 대조하지 못한다. 이 문항은 원문 인용만으로 판단해야 한다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-EFF-005</span>
+      <span class="tag">EFFECTIVE_DATE</span>
+      <span class="tag">답변형</span>
+      
+      <span class="tag">정책 MOLIT_20200617</span>
+    </header>
+    <p class="ask">2020 6·17 대책에서 토지거래허가구역의 효력 발생일은 규제지역과 같은가?</p>
+    <p class="why"><strong>초안 답:</strong> 다르다. 규제지역은 6.19일부터, 토지거래허가구역은 6.18일 공고 후 5일이 지난 6.23일부터 효력이 발생한다 — 같은 대책 안에 서로 다른 두 효력일이 있다.</p>
+    <p class="why">채점 사실: <code>6.19</code>, <code>6.23</code></p>
+    <p class="why">작성 메모: 한 문서 안의 두 효력일 — 날짜 하나만 뽑아 오는 시스템을 잡는 함정</p>
+    <figure class="q"><blockquote>6.23일부터효력발생(공고후5일) ◈ 이번 토지거래허가구역 지정 이후 시장 과열이 주변으로 확산될 경우에는 지정구역 확대도 적극 검토 ◈ 향후 개발호재 등에 따른</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure><figure class="q"><blockquote>6.19(금) 일자로지정및효력발생 &lt; 조정대상지역및투기과열지구지정&gt; 조정대상지역 투기과열지구 기존 (서울) 全 지역 (경기) 과천, 광명, 성남, 고양(7개 택지</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure>
+    <div class="note"><p><strong>시점 대조 없음</strong> — <code>as_of</code> 가 없어 resolver 와 대조하지 못한다. 이 문항은 원문 인용만으로 판단해야 한다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-GF-001</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">답변형</span>
+      
+      <span class="tag">정책 MOLIT_20200617</span>
+    </header>
+    <p class="ask">2020 6·17 규제 효력 발생 전에 금융회사에 대출신청을 완료한 차주에게는 어떤 규제가 적용되는가?</p>
+    <p class="why"><strong>초안 답:</strong> 6.18일까지 대출신청을 완료한 차주 등에게는 규제지역 신규 지정 이전의 규제가 적용된다.</p>
+    <p class="why">채점 사실: <code>6.18</code>, <code>이전의 규제|종전</code></p>
+    
+    <figure class="q"><blockquote>6.18일까지금융회사에대출신청을완료한차주등의경우 규제지역신규지정이전의규제가적용됨 2. 금번에새로투기과열지구로지정된지역의15억초과 아파트담보대출은언제부터금지되는것인지? □규제지역지정효력발생일(6.19일)부터주택구입목적</blockquote><figcaption>QNA_20200617</figcaption></figure>
+    <div class="note"><p><strong>시점 대조 없음</strong> — <code>as_of</code> 가 없어 resolver 와 대조하지 못한다. 이 문항은 원문 인용만으로 판단해야 한다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-GF-002</span>
+      <span class="tag">GRANDFATHERING</span>
+      <span class="tag">답변형</span>
+      
+      <span class="tag">정책 MOLIT_20251016</span>
+    </header>
+    <p class="ask">2025 10·15 대책에서 규제 효력 발생 전에 주택매매계약을 체결한 차주의 경과규정은 어떻게 되는가?</p>
+    <p class="why"><strong>초안 답:</strong> 규제지역 효력 발생일 전일(10.15일)까지 주택매매계약을 체결하고 계약금 납부 사실을 증명하는 경우 등에는 종전규정이 적용된다.</p>
+    <p class="why">채점 사실: <code>10.15</code>, <code>종전규정</code></p>
+    
+    <figure class="q"><blockquote>계약금 납부사실을 증명할 경우 등에는 종전규정이 적용되며, 집단대출의 경우 규제 지역 효력 발생일 전일(10.15일)까지 입주자모집공고(없을시 착공신고, 재건축· 재개발 사업장 조합원은 관리처분인가)가 된 사업장에 대해서는 종전규정</blockquote><figcaption>FAQ_20251015</figcaption></figure>
+    <div class="note"><p><strong>시점 대조 없음</strong> — <code>as_of</code> 가 없어 resolver 와 대조하지 못한다. 이 문항은 원문 인용만으로 판단해야 한다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-NOC-001</span>
+      <span class="tag">NO_CHANGE</span>
+      <span class="tag">답변형</span>
+      
+      <span class="tag">정책 FSC_20260630</span>
+    </header>
+    <p class="ask">규제지역 지정 시 주담대 LTV 강화 수치는 2025 10·15 대책과 2026 6·30 대책에서 서로 다른가?</p>
+    <p class="why"><strong>초안 답:</strong> 다르지 않다. 두 대책 모두 같은 旣 마련된 규정이 발동돼 LTV가 70%에서 40%로 강화된다. 문구가 거의 동일하므로 어느 시점의 문서인지 판별이 필요하다.</p>
+    <p class="why">채점 사실: <code>다르지 않</code>, <code>70</code>, <code>40</code></p>
+    <p class="why">작성 메모: recall@5 82%→53% 급락의 원인이었던 동형 문구 쌍(02_DECISION_LOG 2026-08-19) — 시점 판별이 이 셋의 존재 이유</p>
+    <figure class="q"><blockquote>주담대 LTV 비율이 기존 70%에서 40%로 낮아지며, 전세 ․ 신용대출 차주의 규제지역 주택구입도 제한되는 등 해당지역의 대출수요 관리 수준이 한층 강화될 예</blockquote><figcaption>FSC_PRESS_20251015</figcaption></figure><figure class="q"><blockquote>규제지역 내 주담대 취급시 LTV 강화 (비규제지역70% → 규제지역40%) ※ 생애최초 주택구입, 정책모기지 등은 완화된 LTV 규제비율(60~70%) 적용 다</blockquote><figcaption>FSC_PRESS_20260630</figcaption></figure>
+    <div class="note"><p><strong>시점 대조 없음</strong> — <code>as_of</code> 가 없어 resolver 와 대조하지 못한다. 이 문항은 원문 인용만으로 판단해야 한다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-AMB-001</span>
+      <span class="tag">AMBIGUOUS</span>
+      <span class="tag">escalation 형</span>
+      <span class="tag">as_of 2023-03-01</span>
+      <span class="tag">정책 MOLIT_20200617</span>
+    </header>
+    <p class="ask">2023년 3월 시점에 수원시 팔달구는 투기과열지구였는가?</p>
+    <p class="why"><strong>초안 답:</strong> 원문만으로는 단정할 수 없다. 2020 6·17 대책이 수원을 투기과열지구로 지정한 사실은 있으나(’20.6.19), 해제 시점을 말하는 원문이 코퍼스에 없어 2023년 3월의 상태는 확인 불가 — 사람 검토가 필요하다.</p>
+    <p class="why">채점 사실: <code>단정할 수 없|확인 불가</code>, <code>해제</code></p>
+    <p class="why">작성 메모: 해제 보도자료 확보·confirm() 후 답변형으로 갱신 — check_temporal_gold가 그때 이 문항을 지목한다</p>
+    <figure class="q"><blockquote>수원, 성남수정, 안양, 안산단원, 구리, 군포, 의왕, 용인수지·기흥, 동탄2(’20.6.19) 과천, 성남, 하남, 동탄2(’16.11.3), 광명(’17.6</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2023-03-01 시점 유효 정책을 DB 도 <code>MOLIT_20170803</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li><li class="item">
+  <label class="check"><input type="checkbox" class="cb"><span></span></label>
+  <div>
+    <header>
+      <span class="id">TEMPORAL-AMB-002</span>
+      <span class="tag">AMBIGUOUS</span>
+      <span class="tag">escalation 형</span>
+      <span class="tag">as_of 2021-01-01</span>
+      <span class="tag">정책 MOLIT_20200617</span>
+    </header>
+    <p class="ask">2021년 1월 시점에 대전 유성구의 규제지역 상태는 무엇이었는가?</p>
+    <p class="why"><strong>초안 답:</strong> 원문만으로는 확인할 수 없다. 2020 6·17 대책이 대전 4개 지역을 투기과열지구로 지정한 사실은 있으나, 해제 시점 원문이 없어 2021년 1월의 상태를 단정할 수 없다 — 사람 검토가 필요하다.</p>
+    <p class="why">채점 사실: <code>확인할 수 없|단정할 수 없</code>, <code>해제</code></p>
+    <p class="why">작성 메모: 해제 보도자료 확보·confirm() 후 답변형으로 갱신</p>
+    <figure class="q"><blockquote>대전4개지역을투기과열지구로지정 □(적용시기) 6.19(금) 일자로지정및효력발생 &lt; 조정대상지역및투기과열지구지정&gt; 조정대상지역 투기과열지구 기존 (서울) 全 지역</blockquote><figcaption>MOLIT_PRESS_20200617</figcaption></figure>
+    <div class="note"><p><strong>resolver 와 정합</strong> — 2021-01-01 시점 유효 정책을 DB 도 <code>MOLIT_20170803</code> 로 답한다.</p><p>다만 이것은 <strong>골드와 DB가 서로 어긋나지 않는다</strong>는 뜻이지 골드가 맞다는 뜻이 아니다 — 둘이 같은 방향으로 틀렸을 수 있다.</p></div>
+    <p class="why"><strong>✍️ 판단:</strong>
+      ☐ 확정(answer 그대로)  ☐ 답 수정 필요  ☐ 인용 교체 필요  ☐ 문항 폐기</p>
+  </div>
+</li></ol>
+  </section>
+
+  <footer style="padding-bottom:52px">
+    <p><strong>이 표의 체크는 저장되지 않습니다</strong> — 한 번의 검수 세션용 진행 표시입니다.</p>
+    <p>검수를 마치면 <code>docs/eval/gold/temporal.json</code> 의 각 문항
+    <code>authored_by</code> 를 <code>human_confirmed</code> 로 바꾸세요.
+    <strong>그 순간 측정이 스스로 켜집니다</strong> — 스코어카드는 골드의 검수 상태를 코드가 읽어
+    판단하므로, 파일을 하나도 더 고칠 필요가 없습니다
+    (<code>tests/test_assurance.py</code> 가 이 자동 전환을 검사합니다).</p>
+    <p>남는 것은 <strong>임계값</strong> 하나입니다. 2026-08-19 결정에 따라 "측정할 수 없는 지표에
+    임계를 먼저 적지 않는다"이므로, 측정이 켜진 뒤 관측값을 보고
+    <code>src/regimpact/assurance/thresholds.py</code> 에 근거와 함께 적으면 됩니다.</p>
+  </footer>
+</div>
+<div class="progress" id="prog">확인 0 / 12</div>
+
+<script>
+const boxes = [...document.querySelectorAll('.cb')], prog = document.getElementById('prog');
+const sync = () => prog.textContent = `확인 ${boxes.filter(b => b.checked).length} / ${boxes.length}`;
+boxes.forEach(b => b.addEventListener('change', sync));
+sync();
+</script>
