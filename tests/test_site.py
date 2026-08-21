@@ -781,6 +781,98 @@ def test_signal_is_honest_with_customers(site):
     assert "PoC" in html                    # LLM 답변 생성은 배선 목표임을 명시
 
 
+# ---------- 지켜보기: 조건을 저장해 두고 새 규칙으로 다시 판정한다 ----------
+def test_signal_watch_digest_is_computed_from_what_makes_the_verdict(site):
+    """지켜보기가 감시하는 지문은 **손으로 올리는 버전 번호가 아니다.**
+
+    손으로 올리면 규칙을 고치고 지문 올리는 것을 잊는 배포가 반드시 나오고, 그날부터
+    지켜보기는 조용히 아무것도 감지하지 못한다 — 초록불인데 게이트가 빈, 이 저장소가
+    2026-08-21 에 이미 한 번 밟은 함정과 같은 모양이다. 그래서 판정을 만드는 것에서
+    직접 계산하고, 이 검사가 **실제로 반응하는지**까지 확인한다.
+    """
+    import json as _json
+    from regimpact.ui.signal import rules_digest
+
+    fx = _json.loads((site["_dir"] / "fixtures.json").read_text(encoding="utf-8"))
+    digest = rules_digest(fx)
+    assert re.search(rf'RULES_DIGEST = "{digest}"', site["signal.html"]), \
+        "화면에 실린 지문이 규칙에서 계산한 값과 다르다"
+
+    # 규칙이 바뀌면 반드시 움직인다
+    moved = _json.loads(_json.dumps(fx))
+    moved["constants"]["LTV_REGULATED_STANDARD"] = 0.5
+    assert rules_digest(moved) != digest, "LTV 상수를 바꿨는데 지문이 그대로다"
+    moved2 = _json.loads(_json.dumps(fx))
+    next(iter(moved2["regions"].values()))["versions"] = []
+    assert rules_digest(moved2) != digest, "지역 시점 버전을 바꿨는데 지문이 그대로다"
+
+    # 판정과 무관한 것에는 안 움직인다 — 문구만 고친 배포마다 알리면 아무도 안 본다
+    quiet = _json.loads(_json.dumps(fx))
+    quiet["_note"] = "문구만 바뀐 배포"
+    quiet["cases"] = []
+    assert rules_digest(quiet) == digest, "판정과 무관한 변경에 지문이 움직였다"
+
+
+def test_signal_watch_is_honest_about_being_a_local_check(site):
+    """서버가 없으면 밀어 주는 알림도 없다 — 그 한계를 화면에 적는다.
+
+    "알림을 보내드립니다"라고 써 놓고 실제로는 아무것도 밀지 않는 것이 이 화면에서
+    가장 쉬운 거짓말이다. 할 수 있는 것(다시 열 때 재판정)과 없는 것(푸시)을 갈라 적는다.
+    """
+    html = site["signal.html"]
+    assert "이 브라우저에만 저장" in html         # 조건이 기기를 안 벗어난다
+    assert "서버로 보내지 않" in html
+    assert "화면을 다시 열 때" in html            # 이 구현의 한계를 그대로
+    assert "앱 푸시" in html                      # 진짜 알림은 실제 서비스의 몫
+    assert "그대로라고 말합니다" in html          # 안 바뀐 것을 바뀐 것처럼 알리지 않는다
+    assert 'id="alert"' in html and 'aria-live="polite"' in html
+
+
+def test_signal_watch_evaluates_the_saved_condition_not_the_screen(site):
+    """저장된 조건을 재판정하려면 판정 입력이 화면(DOM)에서 떨어져 있어야 한다.
+
+    입력을 DOM 에서 바로 읽으면 지켜보기는 언제나 '지금 화면'을 판정하게 되고, 그러면
+    저장한 조건이 달라졌는지는 **구조적으로 알 수 없다.** 값으로 떼어낸 스냅샷을 엔진에
+    먹이는 형태만 이 기능을 성립시킨다.
+    """
+    html = site["signal.html"]
+    assert "function condSnapshot()" in html
+    assert "function appFrom(c, withGf)" in html
+    assert "appFrom(rec.cond" in html or "appFrom(c, true)" in html
+    # 지켜보는 값에는 고객이 보는 결과가 들어간다
+    assert "sameVerdict" in html and "sameCond" in html
+
+
+# ---------- 제출 문서가 주장하는 수치가 실재하는가 ----------
+def test_submission_docs_do_not_overstate_the_test_count():
+    """제출 문서의 "자동 테스트 N개"가 실제 수와 같아야 한다.
+
+    이 수치는 심사자가 확인하기 가장 쉬운 주장이고, 저장소에서 가장 자주 움직이는 값이다.
+    지금까지는 손으로 옮겨 적어 왔고, 그 사이 590 → 실제 수로 조용히 벌어져 있었다.
+    같은 문서가 **"문서와 시스템이 어긋나면 테스트가 실패합니다"** 라고 적고 있으므로,
+    그 문장이 참이 되게 만드는 검사다 — 부풀린 쪽이든 줄인 쪽이든 어긋나면 실패한다.
+    """
+    got = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q",
+         "-p", "no:cacheprovider", str(REPO / "tests")],
+        cwd=REPO, capture_output=True, text=True, check=True,
+    ).stdout
+    m = re.search(r"(\d+) tests? collected", got)
+    assert m, f"수집 결과를 읽지 못했다:\n{got[-500:]}"
+    actual = int(m.group(1))
+
+    claims = []
+    for rel in ("docs/business/APPLY_TOMORROW_CHALLENGE.md",
+                "docs/business/SERVICE_DESCRIPTION_TOMORROW.md",
+                "docs/business/service_description.html"):
+        text = (REPO / rel).read_text(encoding="utf-8")
+        claims += [(rel, int(n)) for n in re.findall(r"자동 테스트 (\d+)개", text)]
+
+    assert claims, "제출 문서에서 테스트 수 주장을 찾지 못했다 — 표현이 바뀌었으면 이 검사도 고쳐야 한다"
+    wrong = [(rel, n) for rel, n in claims if n != actual]
+    assert not wrong, f"실제 {actual}개인데 문서는 {wrong} 라고 적고 있다"
+
+
 # ---------- README 의 문서 지도가 실재하는가 ----------
 def test_readme_paths_exist():
     """문서 지도에 없는 파일을 적어두면 처음 오는 사람이 거기서 막힌다."""
@@ -957,6 +1049,186 @@ def test_signal_swipes_between_topics_on_mobile(signal_pager):
     assert r["start"].strip().startswith("1 /")
     assert r["after_swipe"].strip().startswith("2 /"), "손가락으로 넘겨도 주제가 안 바뀐다"
     assert "2주택 이상" in r["mini"], "다른 주제에서 지금 조건이 안 보인다"
+
+
+# 지켜보기 — 실제 브라우저에서 저장·재판정·알림까지 한 바퀴 (CI 전용).
+# 정적 검사는 배선이 있는지만 안다. 저장한 조건이 새 규칙에서 정말 다르게 판정되는지는
+# 엔진을 실제로 돌려야 알 수 있고, 그게 이 기능의 전부다.
+_WATCH_COND = {"region": "GURI", "own": "none", "first": False, "demand": False,
+               "price": 8, "contract": "", "downpay": False, "accepted": ""}
+
+
+def _watch_record(digest, ltv, limit):
+    return {"v": 1, "savedAt": "2026-08-01T00:00:00.000Z", "seenAt": None,
+            "digest": digest, "cond": dict(_WATCH_COND),
+            "verdict": {"status": "DECIDED", "ltv": ltv, "gf": False,
+                        "limit": limit, "rule": "R"}}
+
+
+@pytest.fixture(scope="module")
+def signal_watch(site):
+    """저장 → 조용함 → 규칙이 바뀐 척 → 경보 → 확인, 을 실제 브라우저에서."""
+    _require_browser()
+    import json as _json
+
+    from playwright.sync_api import sync_playwright
+
+    url = f"file://{site['_dir']}/signal.html"
+    out = {"errors": []}
+
+    def snap(pg):
+        return {
+            "hidden": pg.eval_on_selector("#alert", "e=>e.hidden"),
+            "hit": pg.eval_on_selector("#alert", "e=>e.classList.contains('hit')"),
+            "kicker": pg.text_content("#alert-k"),
+            "msg": " ".join((pg.text_content("#alert-m") or "").split()),
+            "panel": " ".join((pg.text_content("#watch-c") or "").split()),
+        }
+
+    with sync_playwright() as p:
+        b = p.chromium.launch(executable_path=str(CHROMIUM))
+
+        # ① 아무것도 저장하지 않았을 때 — 알릴 것이 없다
+        ctx = b.new_context(viewport={"width": MOBILE_WIDTH, "height": 844})
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: out["errors"].append(str(e)))
+        pg.goto(url)
+        pg.wait_for_timeout(600)
+        out["fresh_hidden"] = pg.eval_on_selector("#alert", "e=>e.hidden")
+        # 실제 버튼으로 저장한다 — 배선까지 함께 확인하기 위해서다
+        pg.click('#steps button[aria-controls="pg-timeline"]')
+        pg.wait_for_timeout(400)
+        pg.click("#watch-acts button")
+        pg.wait_for_timeout(300)
+        out["saved"] = pg.evaluate("JSON.parse(localStorage.getItem('signal.watch.v1'))")
+        out["saved_hidden"] = pg.eval_on_selector("#alert", "e=>e.hidden")
+        out["saved_sub"] = pg.text_content("#watch-s")
+        out["saved_acts"] = pg.eval_on_selector_all(
+            "#watch-acts button", "es=>es.map(e=>e.textContent)")
+        # 조건을 고치면 지켜보던 것과 달라진다 — 그 사실이 버튼으로 드러나야 한다
+        pg.click('#steps button[aria-controls="pg-cond"]')
+        pg.wait_for_timeout(250)
+        pg.click('#own button[data-own="multi"]')
+        pg.wait_for_timeout(350)
+        pg.click('#steps button[aria-controls="pg-timeline"]')
+        pg.wait_for_timeout(250)
+        out["stale_acts"] = pg.eval_on_selector_all(
+            "#watch-acts button", "es=>es.map(e=>e.textContent)")
+        pg.evaluate("[...document.querySelectorAll('#watch-acts button')]"
+                    ".find(b=>b.textContent==='지금 화면 조건으로 갱신').click()")
+        pg.wait_for_timeout(250)
+        out["updated"] = pg.evaluate(
+            "JSON.parse(localStorage.getItem('signal.watch.v1'))")
+        # 해제하면 흔적이 남지 않는다
+        pg.evaluate("[...document.querySelectorAll('#watch-acts button')]"
+                    ".find(b=>b.textContent==='지켜보기 해제').click()")
+        pg.wait_for_timeout(200)
+        out["cleared"] = pg.evaluate("localStorage.getItem('signal.watch.v1')")
+        ctx.close()
+
+        # ② 규칙이 바뀌어 내 조건의 답까지 달라진 경우 — 저장 당시 LTV 70% 로 심어 둔다
+        ctx = b.new_context(viewport={"width": MOBILE_WIDTH, "height": 844})
+        rec = _watch_record("oldrules0000", 0.7, 560_000_000)
+        ctx.add_init_script(
+            "localStorage.setItem('signal.watch.v1', %s)" % _json.dumps(_json.dumps(rec)))
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: out["errors"].append(str(e)))
+        pg.goto(url)
+        pg.wait_for_timeout(600)
+        out["changed"] = snap(pg)
+        out["changed_acts"] = pg.eval_on_selector_all(
+            "#alert-acts button", "es=>es.map(e=>e.textContent)")
+        pg.evaluate("[...document.querySelectorAll('#alert-acts button')]"
+                    ".find(b=>b.textContent==='확인').click()")
+        pg.wait_for_timeout(300)
+        out["after_ack_hidden"] = pg.eval_on_selector("#alert", "e=>e.hidden")
+        out["after_ack"] = pg.evaluate(
+            "JSON.parse(localStorage.getItem('signal.watch.v1'))")
+        ctx.close()
+
+        # ③ 규칙은 갱신됐지만 내 조건의 답은 그대로인 경우 — 경보가 아니라 안내여야 한다
+        ctx = b.new_context(viewport={"width": MOBILE_WIDTH, "height": 844})
+        same = _watch_record("oldrules0000", out["saved"]["verdict"]["ltv"],
+                             out["saved"]["verdict"]["limit"])
+        ctx.add_init_script(
+            "localStorage.setItem('signal.watch.v1', %s)" % _json.dumps(_json.dumps(same)))
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: out["errors"].append(str(e)))
+        pg.goto(url)
+        pg.wait_for_timeout(600)
+        out["quiet"] = snap(pg)
+        out["shell_height"] = pg.evaluate("document.documentElement.scrollHeight")
+        ctx.close()
+        b.close()
+    return out
+
+
+def test_signal_watch_saves_my_condition_and_stays_quiet(signal_watch):
+    """저장 버튼이 실제로 조건과 그때의 판정을 남기고, 바뀐 것이 없으면 조용하다."""
+    r = signal_watch
+    assert not r["errors"], f"화면에서 JS 오류: {r['errors']}"
+    assert r["fresh_hidden"], "저장한 것이 없는데 알림 띠가 떴다"
+    rec = r["saved"]
+    assert rec and rec["v"] == 1
+    assert rec["cond"]["region"] and rec["digest"], "조건·지문이 저장되지 않았다"
+    assert rec["verdict"]["status"] == "DECIDED" and rec["verdict"]["limit"] > 0, \
+        "저장 당시 판정이 함께 남지 않으면 나중에 '달라졌다'를 말할 수 없다"
+    assert r["saved_hidden"], "방금 저장했는데 바뀌었다고 알렸다"
+    assert "감시 중" in r["saved_sub"]
+    assert "지금 화면 조건으로 갱신" not in r["saved_acts"], \
+        "방금 저장한 조건과 화면이 같은데 갱신을 권한다"
+
+
+def test_signal_watch_notices_my_condition_drifted_from_what_it_watches(signal_watch):
+    """조건을 고치면 지켜보던 것과 달라진다 — 그 사실이 화면에 드러나야 한다.
+
+    안 드러나면 사용자는 지금 화면 조건을 지켜보고 있다고 **믿게 된다.** 지켜보기에서
+    가장 조용한 실패다: 아무 오류도 안 나고, 감시 대상만 사용자 기대와 어긋나 있다.
+    """
+    r = signal_watch
+    assert "지금 화면 조건으로 갱신" in r["stale_acts"], \
+        f"조건을 바꿨는데 갱신할 길이 없다: {r['stale_acts']}"
+    up = r["updated"]
+    assert up["cond"]["own"] == "multi", "갱신했는데 옛 조건이 남아 있다"
+    assert up["verdict"]["ltv"] != r["saved"]["verdict"]["ltv"], \
+        "조건을 갱신했으면 그때의 판정도 함께 갱신돼야 다음 비교가 성립한다"
+    assert r["cleared"] is None, "해제했는데 기록이 남았다"
+
+
+def test_signal_watch_alerts_when_my_saved_limit_actually_moved(signal_watch):
+    """저장한 조건을 **지금 규칙으로 다시 판정**해 달라졌을 때만 경보를 띄운다.
+
+    저장 당시 LTV 70%(5억 6천) 로 심어 두면, 지금 규칙에서 같은 조건은 40%(3억 2천) 다.
+    화면은 두 숫자를 나란히 보여줘야 한다 — "뭔가 바뀌었어요"만으로는 쓸모가 없다.
+    """
+    c = signal_watch["changed"]
+    assert not c["hidden"] and c["hit"], "한도가 달라졌는데 경보가 안 뜬다"
+    assert "70%" in c["msg"] and "40%" in c["msg"], f"전·후 LTV 가 안 보인다: {c['msg']}"
+    assert "5억 6천만원" in c["msg"] and "3억 2천만원" in c["msg"], \
+        f"전·후 금액이 안 보인다: {c['msg']}"
+    assert "oldrules0000" in c["panel"], "무엇을 감시하고 있었는지가 안 보인다"
+    assert signal_watch["changed_acts"] == ["내 조건으로 보기", "확인"]
+
+    # 확인하면 사라지고, 지금 규칙을 새 기준으로 삼는다 — 같은 알림이 매번 다시 뜨지 않는다
+    assert signal_watch["after_ack_hidden"]
+    ack = signal_watch["after_ack"]
+    assert ack["digest"] != "oldrules0000" and ack["verdict"]["ltv"] != 0.7
+    assert ack["seenAt"], "확인한 시각이 남지 않으면 다음 비교의 기준이 없다"
+
+
+def test_signal_watch_says_so_when_nothing_changed_for_me(signal_watch):
+    """규칙이 갱신돼도 **내 조건의 답이 그대로면 그대로라고 말한다.**
+
+    안 바뀐 것을 바뀐 것처럼 알리는 순간 이 신호는 아무도 안 보는 배지가 된다. 그래서
+    같은 '규칙 갱신'이라도 경보(hit)가 아니라 안내로 내려간다.
+    """
+    q = signal_watch["quiet"]
+    assert not q["hidden"], "규칙이 갱신된 사실 자체는 알려야 한다"
+    assert not q["hit"], "내 한도가 그대로인데 경보로 띄웠다"
+    assert "그대로" in q["msg"], f"변화 없음을 말하지 않는다: {q['msg']}"
+    assert "변화 없음" in q["panel"]
+    assert signal_watch["shell_height"] <= 845, \
+        f"알림 띠가 셸을 밀어냈다({signal_watch['shell_height']}px)"
 
 
 def test_mobile_css_is_present_in_every_page(site):
