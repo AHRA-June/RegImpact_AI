@@ -1,7 +1,8 @@
 """내 한도 시그널 — 고객용 개인화 시뮬레이터 (Tomorrow Challenge 제안 화면).
 
 지원서(APPLY_TOMORROW_CHALLENGE)의 4단 콘텐츠를 한 화면에 담는다:
-  ① 영향 알림(시뮬레이션) → ② 변경 전/후 한도 비교 → ③ 경과규정 체크 → ④ 근거 우선 Q&A.
+  ① 영향 알림·내 조건 → ② 경과규정 체크 → ③ 변경 전/후 한도 비교 → ④ 근거 우선 Q&A.
+  (번호는 **화면에 나오는 순서**다 — 지원서의 서술 순서와 다르면 화면 쪽을 따른다.)
 
 기존 사이트(검증·포트폴리오, B2B 시선)와 성격이 달라 **별도의 고객용 화면**으로 둔다.
 금융앱 웹뷰 탑재형이므로 모바일 우선이고, 데스크톱에서는 폰 프레임 안에 담아
@@ -394,12 +395,16 @@ details.more[open] summary{border-bottom:1px solid var(--outline-variant)}
 # 주제별 페이지 — (id, 칩 라벨, 키커, 제목, 설명).
 # 상단 칩·섹션 머리말·"다음: ○○" 버튼이 **전부 이 목록 하나**에서 나온다. 세 곳에 나눠
 # 적으면 하나만 고쳐진 채 배포되고, 그건 화면에서 곧바로 어긋나 보인다.
+#
+# 번호는 여기(STEP n)와 상단 칩에만 둔다. 제목에 동그라미 번호를 또 붙였더니
+# "STEP 2 · ③ 경과규정"처럼 한 화면에 서로 다른 두 번호가 나와 순서가 헷갈렸다
+# (2026-08-21 리뷰). 화면 간 안내도 `N단계 <칩 이름>` 한 형식으로만 쓴다.
 _PAGES = [
-    ("pg-cond", "내 조건", "STEP 1 · 내 조건", "① 무엇을 사려고 하시나요",
+    ("pg-cond", "내 조건", "STEP 1 · 내 조건", "무엇을 사려고 하시나요",
      "지역·주택 보유·가격만 고르면 판정은 엔진이 합니다. 옆으로 넘기면 주제가 하나씩 이어져요."),
-    ("pg-gf", "경과규정", "STEP 2 · 경과규정", "③ 규제 전에 이미 진행 중이었나요",
+    ("pg-gf", "경과규정", "STEP 2 · 경과규정", "규제 전에 이미 진행 중이었나요",
      "계약·계약금·접수 일자에 따라 시행 후에도 종전 규정을 그대로 적용받을 수 있어요."),
-    ("pg-limit", "내 한도", "STEP 3 · 전 → 후", "② 변경 전 → 후, 내 한도",
+    ("pg-limit", "내 한도", "STEP 3 · 전 → 후", "변경 전 → 후, 내 한도",
      "같은 조건을 변경 전·후 두 시점의 규칙으로 각각 판정한 결과입니다."),
     ("pg-afford", "가능 금액", "STEP 4 · 가능 금액", "총 얼마까지 빌릴 수 있나",
      "참고 추정 — LTV·최대한도·DSR·DTI 중 어느 규제에 막히는지까지 짚어줍니다."),
@@ -407,7 +412,7 @@ _PAGES = [
      "추천이 아니라 자격 판정이에요 — 원문이 정한 요건에 해당하는지만 되짚습니다."),
     ("pg-timeline", "타임라인", "STEP 6 · 타임라인", "내 한도를 움직인 일들",
      "규제 발표일에만 쓰는 도구가 아닙니다 — 한도가 움직이는 일은 계속 생깁니다."),
-    ("pg-qa", "물어보기", "STEP 7 · 물어보기", "④ 물어보기 — 근거가 있을 때만 답합니다",
+    ("pg-qa", "물어보기", "STEP 7 · 물어보기", "물어보기 — 근거가 있을 때만 답합니다",
      "질문에 나온 표현을 공문에서 찾아 원문 문단을 보여줍니다. 못 찾으면 지어내지 않아요."),
 ]
 
@@ -548,7 +553,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
          "easy": f"핵심은 '언제 계약했나'예요. {cutoff}까지 매매계약을 하고 계약금 낸 사실을 "
                  f"증명할 수 있으면(또는 대출 신청 접수를 마쳤으면), 잔금이나 대출 실행이 "
                  f"시행일 뒤여도 예전 기준(LTV {p_base})을 그대로 적용받아요. 해당되지 않으면 "
-                 f"새 기준(LTV {p_std})이 적용됩니다. ③ 경과규정 체크에 날짜를 넣으면 "
+                 f"새 기준(LTV {p_std})이 적용됩니다. 2단계 경과규정에 날짜를 넣으면 "
                  "내 경우를 바로 확인할 수 있어요.",
          "cites": [quotes["_GF"]]},
         {"id": "first-home",
@@ -562,7 +567,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
          "keys": ["계약금", "종전", "가계약"],
          "easy": f"네, 가능성이 높아요. {cutoff}까지 계약을 체결하고 계약금 납부 사실을 "
                  "증명하면 종전 규정이 그대로 적용됩니다. 계약서와 입금 내역 같은 증빙을 "
-                 "준비해 두세요. ③ 경과규정 체크에 날짜를 넣으면 바로 확인돼요.",
+                 "준비해 두세요. 2단계 경과규정에 날짜를 넣으면 바로 확인돼요.",
          "cites": [quotes["_GF"]]},
         {"id": "jeonse",
          "keys": ["전세", "전세대출"],
@@ -582,7 +587,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  f"지금처럼 LTV {p_base}가 유지됩니다. 다만 두 가지는 주의하세요. "
                  f"수도권에서 2주택 이상을 사는 경우는 규제지역이 아니어도 이번 규제"
                  f"(LTV {p_multi})가 적용되고, 유주택자의 일부 조건은 공문에 기준값이 "
-                 "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. ① 내 조건의 지역 선택에서 "
+                 "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. 1단계 내 조건의 지역 선택에서 "
                  "내 지역을 골라 직접 확인해 보세요.",
          "cites": [quotes["MULTI_0"], quotes["REG_STD"]]},
         {"id": "what-changed",
@@ -595,7 +600,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  f"않아요 — 생애최초 구입자는 {p_first} 그대로, 서민·실수요자는 {p_real}, "
                  f"이미 집이 있으면 {p_owner}가 적용됩니다. 그리고 {cutoff}까지 계약하고 "
                  f"계약금을 낸 경우에는 예전 기준이 유지돼요. {eff}부터 적용되며, "
-                 "내 조건에서 얼마가 되는지는 ② 변경 전 → 후에서 바로 볼 수 있어요.",
+                 "내 조건에서 얼마가 되는지는 3단계 내 한도에서 바로 볼 수 있어요.",
          "cites": [quotes["REG_STD"], quotes["_GF"]]},
         {"id": "which-regions",
          "keys": ["어디", "어느 지역", "어떤 지역", "무슨 지역", "지정된 지역", "지정된 곳",
@@ -604,7 +609,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  f"{len(region_labels)}곳이에요"
                  + ("(모두 수도권)" if all_capital else "")
                  + f". {eff}부터 이 지역에서 강화된 기준이 적용되고, 그 밖의 지역은 이번 "
-                 "지정 대상이 아니에요. 내가 사려는 집이 여기 해당하는지 ① 내 조건의 지역 선택에서 "
+                 "지정 대상이 아니에요. 내가 사려는 집이 여기 해당하는지 1단계 내 조건의 지역 선택에서 "
                  "골라 바로 확인할 수 있어요.",
          "cites": [_corpus_cut(norm_corpus, molit,
                                "최근 큰 폭으로 집값이 상승한 경기도", 130),
@@ -706,9 +711,9 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
   금융앱(슈퍼SOL 등) 웹뷰 탑재형 제안입니다.</p>
   <ul>
     <li><b>①</b><span><b>영향 알림</b> — 공문 발표 시 내 조건 기준 영향 여부 (아래는 시뮬레이션)</span></li>
-    <li><b>②</b><span><b>전/후 비교 + 총 가능금액</b> — 변경 전·후 한도를 나란히, 어느 규칙에서
+    <li><b>②</b><span><b>경과규정 체크</b> — 계약·계약금·접수 일자로 종전 규정 적용 여부</span></li>
+    <li><b>③</b><span><b>전/후 비교 + 총 가능금액</b> — 변경 전·후 한도를 나란히, 어느 규칙에서
       판정됐는지까지. LTV·최대한도·DSR·DTI를 합쳐 <b>어느 규제에 막혔는지</b>도 짚어줍니다</span></li>
-    <li><b>③</b><span><b>경과규정 체크</b> — 계약·계약금·접수 일자로 종전 규정 적용 여부</span></li>
     <li><b>④</b><span><b>근거 우선 Q&A</b> — 원문을 검색해 근거 문단을 보여주고, 없으면 지어내지 않고 상담 안내</span></li>
   </ul>
   <table class="cmp-t">
@@ -759,7 +764,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     <div class="push">
       <div class="head"><span class="dot"></span>영향 알림 · 시뮬레이션 <span style="margin-left:auto">{esc(pub)}</span></div>
       <div class="bd"><b>규제지역 {len(labels)}곳 추가 지정 ({", ".join(esc(l) for l in labels)})</b>
-      {esc(eff)}부터 강화 규제가 적용됩니다. 아래 ① 내 조건으로 영향을 확인하세요.</div>
+      {esc(eff)}부터 강화 규제가 적용됩니다. 아래에서 내 조건을 고르면 바로 계산됩니다.</div>
     </div>
 
     <form class="panel" id="cond">
@@ -783,7 +788,7 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
 
     {_pg_open("pg-gf")}
       <form class="panel gfbox" id="gf">
-        <div class="f" style="margin-bottom:8px"><label>③ 경과규정 체크 — 규제 발표 전에 이미 진행 중이었나요?</label>
+        <div class="f" style="margin-bottom:8px"><label>경과규정 체크 — 규제 발표 전에 이미 진행 중이었나요?</label>
           <div class="hint">
             <button type="button" id="gf-yes">시행 전에 계약했어요</button>
             <button type="button" id="gf-no">해당 없음</button>
@@ -1113,7 +1118,7 @@ function run() {
       dl.className = "delta bad";
       dl.innerHTML = `<b>한도가 약 ${won(diff)} 줄어요</b> (LTV ${pct(b.max_ltv)} → ${pct(a.max_ltv)}). `
         + `계약·접수 시점에 따라 경과규정 대상일 수 있어요 — `
-        + `<a class="dlink" href="#gf">③ 경과규정 체크</a>로 넘어가 날짜를 넣어 보세요.`;
+        + `<a class="dlink" href="#gf">2단계 경과규정</a>으로 넘어가 날짜를 넣어 보세요.`;
     } else if (diff === 0) {
       dl.className = "delta good";
       dl.innerHTML = `<b>이번 변경으로 한도가 달라지지 않아요</b> (LTV ${pct(a.max_ltv)} 유지).`;
@@ -1240,7 +1245,7 @@ function prodRender() {
       st = demand ? "ELIGIBLE" : "UNKNOWN";
       rs = demand
         ? "서민·실수요자 요건으로 체크하셨고, 원문이 완화 대상으로 명시합니다."
-        : "소득·주택가격·무주택 요건을 모두 충족해야 해당해요. ① 내 조건에서 체크해 보세요.";
+        : "소득·주택가격·무주택 요건을 모두 충족해야 해당해요. 1단계 내 조건에서 체크해 보세요.";
     } else {
       st = "UNKNOWN";
       rs = "원문에 한도는 나와 있지만 소득·자산 등 신청 자격 요건은 이 공문에 없어요. "
@@ -1469,7 +1474,7 @@ $("#cond").addEventListener("input", run);
 $("#gf").addEventListener("input", run);   // 경과규정이 별도 주제로 나갔다 — 같이 물려 둔다
 run();
 
-// ---- ④ 근거 우선 Q&A — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
+// ---- 물어보기(근거 우선 Q&A) — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
 //      요약은 질문 의도 매칭으로 고르는 사전 작성 안내문이지, 답을 생성하는 LLM이 아니다.
 const INDEX = buildIndex(IDX_EXPORT);
 // 발췌는 **질문어가 걸린 문장부터** 보여준다(2026-08-19 폰 리뷰: 420자 구간을 그대로 실으면
