@@ -701,6 +701,54 @@ def test_signal_pitch_claims_both_customer_and_bank_sides(site):
     assert 'href="validation_summary.html"' in html    # 현업 산출물로 가는 실제 경로
 
 
+def test_signal_is_paged_by_topic_not_one_long_scroll(site):
+    """폰 리뷰(2026-08-21): 한 화면에 다 담아 세로 4,960px — 스크롤만 하다 끝난다.
+
+    주제 하나가 한 페이지가 되고 옆으로 넘긴다. 칩·섹션·"다음: ○○" 버튼이 **한 목록**
+    에서 나오는 것이 이 구조의 핵심이다 — 세 곳에 나눠 적으면 하나만 고쳐진 채 배포된다.
+    """
+    from regimpact.ui.signal import _PAGES
+
+    html = site["signal.html"]
+    assert 'class="pager" id="pager"' in html
+    # 넘김은 CSS 가 한다 — JS 가 죽어도 손가락으로는 넘어가야 한다
+    assert "scroll-snap-type:x mandatory" in html
+    assert "scroll-snap-align:start" in html and "scroll-snap-stop:always" in html
+    # 앱 셸이 뷰포트에 고정돼야 페이지 자체의 긴 스크롤이 사라진다
+    assert "height:100dvh" in html and "body.sg{margin:0" in html
+    assert html.count('<section class="pg" id="pg-') == len(_PAGES)
+    for i, (pid, chip, kicker, title, _sub) in enumerate(_PAGES):
+        assert f'<section class="pg" id="{pid}" data-nav="{chip}">' in html
+        assert f'aria-controls="{pid}"' in html, f"{pid}: 상단 칩이 없다"
+        assert f'<span class="n">{i + 1}</span>{chip}' in html
+        assert kicker in html and title in html
+    # 위치·이동 조작
+    for el in ('id="pg-prev"', 'id="pg-next"', 'id="pg-prog"', 'id="minibar"'):
+        assert el in html, f"{el} 가 없다"
+
+
+def test_signal_conditions_still_drive_every_topic(site):
+    """조건 입력이 두 주제(① 내 조건 · ③ 경과규정)로 갈라졌다 — 둘 다 재계산에 물려야 한다.
+
+    폼 하나를 쪼개면서 리스너를 안 옮기면, 경과규정을 넣어도 한도가 안 바뀌는 화면이 된다.
+    """
+    html = site["signal.html"]
+    assert '$("#cond").addEventListener("input", run)' in html
+    assert '$("#gf").addEventListener("input", run)' in html
+    # 조건과 결과가 다른 주제에 있으니 요약 바가 지금 조건을 들고 따라다닌다
+    assert "function syncMini()" in html and "syncMini();" in html
+    # 화면 안 앵커(#gf)는 이제 '다른 주제'다 — 그 주제로 넘겨야 한다
+    assert 'href="#gf"' in html and 'id="gf"' in html
+    assert "goPage(PAGES.indexOf(pg))" in html
+
+
+def test_signal_has_no_stale_vertical_directions(site):
+    """'위 ③'·'아래 ③' 같은 세로 스크롤 안내는 주제 넘김에서 틀린 길안내가 된다."""
+    html = site["signal.html"]
+    for bad in ("아래 ③", "위 ①", "위 ②", "위 ③", "위에서 판정한"):
+        assert bad not in html, f"세로 기준 방향 표현이 남아 있다: {bad}"
+
+
 def test_signal_is_honest_with_customers(site):
     """고객 화면일수록 한계를 숨기면 안 된다 — 금융사고가 되는 지점이다."""
     html = site["signal.html"]
@@ -753,14 +801,57 @@ def test_playground_shows_verdict_before_form_on_mobile(site):
 
 
 # ---------- 모바일 ----------
+BROWSER_ROOTS = (Path("/opt/pw-browsers"), Path.home() / ".cache" / "ms-playwright")
+
+
 def _find_chromium() -> Path | None:
     """샌드박스는 /opt/pw-browsers 에, CI 는 ~/.cache/ms-playwright 에 둔다."""
-    for root in (Path("/opt/pw-browsers"), Path.home() / ".cache" / "ms-playwright"):
+    for root in BROWSER_ROOTS:
         if not root.exists():
             continue
-        for exe in sorted(root.glob("chromium*/chrome-linux/chrome")):
+        for exe in sorted(root.glob("chromium*/chrome-linux*/chrome")):
             return exe
     return None
+
+
+def _browser_state() -> str:
+    """못 찾았으면 **어디를 봤고 거기 뭐가 있었는지**를 로그에 남긴다.
+
+    조용한 skip 을 두 번 겪지 않기 위한 것이다 — 이유가 안 남으면 다음 사람도 똑같이
+    "초록이니 됐겠지"로 지나간다.
+    """
+    out = []
+    for root in BROWSER_ROOTS:
+        if not root.exists():
+            out.append(f"{root}: 없음")
+        else:
+            out.append(f"{root}: {sorted(p.name for p in root.iterdir())[:12]}")
+    return " | ".join(out)
+
+
+def _require_browser() -> None:
+    """`REGIMPACT_BROWSER_TESTS=1` 이면 브라우저가 없는 것은 skip 이 아니라 **실패**다.
+
+    2026-08-21 발견: CI 의 mobile 잡이 `67 passed, 2 skipped` 로 초록이었다 — 폰 검사가
+    통째로 건너뛰어졌는데 배포 게이트는 통과였다. 잡을 도입한 2026-08-19 이후 줄곧
+    그랬다(검사 단계가 매번 2~3초로 끝났다).
+
+    **미측정은 통과가 아니다.** assurance 스코어카드에 적어 둔 규율이 정작 자기 CI 에서
+    지켜지지 않고 있었다. 로컬에서는 여전히 skip 한다(브라우저가 없는 것이 정상이다) —
+    다만 "돌리겠다"고 선언한 환경에서 못 돌리는 것은 결함이다.
+    """
+    if not os.environ.get("REGIMPACT_BROWSER_TESTS"):
+        pytest.skip(
+            "브라우저 검사는 이 샌드박스에서 페이지당 ~10초라 기본 스위트에서 제외한다. "
+            "CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다.")
+    try:
+        import playwright  # noqa: F401
+    except ImportError as exc:
+        pytest.fail(f"REGIMPACT_BROWSER_TESTS=1 인데 playwright 가 없다: {exc}")
+    if CHROMIUM is None:
+        pytest.fail(
+            "REGIMPACT_BROWSER_TESTS=1 인데 chromium 을 못 찾았다 — 조용히 건너뛰면 "
+            f"배포 게이트가 빈다. 찾아본 곳: {_browser_state()}")
 
 
 CHROMIUM = _find_chromium()
@@ -774,13 +865,7 @@ def mobile_scroll(site):
     `scrollWidth` 비교만으로는 부족하다 — 스크롤 컨테이너 안의 넓은 표는 정상이고
     페이지 자체가 밀리는 것만 문제다. 그래서 실제로 스크롤을 시도해 본다.
     """
-    if not os.environ.get("REGIMPACT_BROWSER_TESTS"):
-        pytest.skip(
-            "브라우저 검사는 이 샌드박스에서 페이지당 ~10초라 기본 스위트에서 제외한다. "
-            "CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다.")
-    pytest.importorskip("playwright")
-    if CHROMIUM is None:
-        pytest.skip("chromium 없음")
+    _require_browser()
     from playwright.sync_api import sync_playwright
 
     out = {}
@@ -810,6 +895,45 @@ def test_no_horizontal_scroll_on_mobile(mobile_scroll):
     """
     bad = {k: v for k, v in mobile_scroll.items() if v}
     assert not bad, f"390px 에서 가로로 밀리는 페이지: {bad}"
+
+
+@pytest.fixture(scope="module")
+def signal_pager(site):
+    """폰에서 실제로 '넘어가는지' 본다 — 정적 검사는 규칙이 있는지만 안다."""
+    _require_browser()
+    from playwright.sync_api import sync_playwright
+
+    out = {"viewport": 844}
+    with sync_playwright() as p:
+        b = p.chromium.launch(executable_path=str(CHROMIUM))
+        pg = b.new_page(viewport={"width": MOBILE_WIDTH, "height": out["viewport"]})
+        pg.goto(f"file://{site['_dir']}/signal.html")
+        pg.wait_for_timeout(500)
+        out["doc_height"] = pg.evaluate("document.documentElement.scrollHeight")
+        out["tallest_topic"] = pg.evaluate(
+            "Math.max(...[...document.querySelectorAll('.pg')].map((p) => p.scrollHeight))")
+        out["start"] = pg.text_content("#pg-prog")
+        pg.click('#own button[data-own="multi"]')      # 조건은 첫 주제에서 바꾸고
+        pg.wait_for_timeout(300)
+        pg.mouse.move(200, 500)
+        pg.mouse.wheel(400, 0)                          # 손가락 스와이프 흉내
+        pg.wait_for_timeout(700)
+        out["after_swipe"] = pg.text_content("#pg-prog")
+        out["mini"] = pg.text_content("#minibar")
+        b.close()
+    return out
+
+
+def test_signal_swipes_between_topics_on_mobile(signal_pager):
+    """넘김이 실제로 되는지 · 페이지 자체는 안 늘어나는지 (CI 전용)."""
+    r = signal_pager
+    assert r["doc_height"] <= r["viewport"] + 1, \
+        f"셸이 뷰포트를 넘었다({r['doc_height']}px) — 긴 세로 스크롤이 돌아왔다"
+    assert r["tallest_topic"] <= r["viewport"] * 2, \
+        f"한 주제가 두 화면을 넘는다({r['tallest_topic']}px) — 더 쪼개야 한다"
+    assert r["start"].strip().startswith("1 /")
+    assert r["after_swipe"].strip().startswith("2 /"), "손가락으로 넘겨도 주제가 안 바뀐다"
+    assert "2주택 이상" in r["mini"], "다른 주제에서 지금 조건이 안 보인다"
 
 
 def test_mobile_css_is_present_in_every_page(site):

@@ -37,7 +37,9 @@ AFFORD_JS = Path(__file__).resolve().parent / "static" / "affordability.js"
 
 _SIGNAL_CSS = """
 html{scroll-behavior:smooth}
-body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)}
+body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface);
+  overflow:hidden}                      /* 폰: 페이지 자체는 안 밀린다 — 세로 스크롤은 주제 안에서 */
+@media(min-width:1020px){body.sg{overflow:auto}}
 .dlink{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px}
 .dock{display:flex;justify-content:center;align-items:flex-start;gap:44px;
   padding:0;min-height:100vh}
@@ -62,9 +64,10 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .pitch .links a{font-size:12px;color:var(--primary);text-decoration:none;
   border:1px solid var(--outline-variant);border-radius:99px;padding:5px 11px}
 /* ---- 폰(앱 컬럼) ---- */
-.phone{width:100%;max-width:430px;background:var(--background);min-height:100vh;
-  display:flex;flex-direction:column}
-@media(min-width:1020px){.phone{min-height:0;max-height:calc(100vh - 96px);overflow-y:auto}}
+.phone{width:100%;max-width:430px;background:var(--background);
+  height:100vh;height:100dvh;                /* dvh: 폰 주소창이 접혔다 펴져도 셸이 안 튄다 */
+  display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:1020px){.phone{height:calc(100vh - 96px)}}
 .appbar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;
   padding:14px 18px;background:color-mix(in srgb,var(--background) 92%,transparent);
   backdrop-filter:blur(6px);border-bottom:1px solid var(--outline-variant)}
@@ -72,9 +75,55 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
   color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
 .appbar .t{font-size:15px;font-weight:700}
 .appbar .s{font-size:11px;color:var(--on-surface-variant)}
-.body{padding:16px 16px 40px;display:flex;flex-direction:column;gap:14px}
-.sec-t{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--on-surface-variant);
-  text-transform:uppercase;margin:8px 2px 0}
+/* ── 주제별 페이지 넘김 (2026-08-21 폰 리뷰: 한 화면에 다 담아 4,960px 스크롤이었다) ──
+   넘김은 CSS 스크롤 스냅이 한다. JS 는 현재 위치 표시·버튼·앵커 점프만 맡으므로
+   스크립트가 죽어도 손가락으로는 넘어간다. */
+.steps{display:flex;gap:6px;flex:none;overflow-x:auto;scrollbar-width:none;
+  padding:9px 12px;background:var(--background);border-bottom:1px solid var(--outline-variant)}
+.steps::-webkit-scrollbar{display:none}
+.steps button{flex:none;padding:6px 12px;border-radius:99px;font-family:inherit;font-size:12px;
+  border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);
+  cursor:pointer;white-space:nowrap}
+.steps button[aria-current="true"]{border-color:var(--primary);color:var(--primary);font-weight:700;
+  background:color-mix(in srgb,var(--primary) 7%,transparent)}
+.steps .n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;opacity:.7;
+  margin-right:5px}
+/* 요약 바 — 조건과 결과가 다른 주제에 있으니, 어디에 있든 지금 조건이 보여야 한다 */
+.minibar{display:flex;align-items:center;gap:9px;flex:none;width:100%;box-sizing:border-box;
+  padding:8px 14px;border:0;border-bottom:1px solid var(--outline-variant);
+  background:var(--surface-container-low);color:inherit;font-family:inherit;text-align:left;
+  cursor:pointer}
+.minibar[hidden]{display:none}
+.minibar .mb-c{flex:1;min-width:0;font-size:11.5px;line-height:1.4;word-break:keep-all;
+  color:var(--on-surface-variant)}
+.minibar .mb-v{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;
+  font-weight:700}
+.minibar .mb-e{flex:none;font-size:10.5px;color:var(--primary)}
+.pager{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
+.pager::-webkit-scrollbar{display:none}
+.pg{flex:0 0 100%;width:100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always;
+  overflow-y:auto;overscroll-behavior-y:contain}
+.pg-in{padding:14px 16px 26px;display:flex;flex-direction:column;gap:14px}
+.pg-h{margin:0 2px}
+.pg-h .k{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.08em;
+  color:var(--primary);font-weight:700}
+.pg-h .t{font-size:17px;font-weight:700;margin-top:4px;word-break:keep-all;line-height:1.35}
+.pg-h .s{font-size:12px;line-height:1.55;color:var(--on-surface-variant);margin-top:5px;
+  word-break:keep-all}
+.pgnav{display:flex;align-items:center;gap:8px;flex:none;background:var(--background);
+  border-top:1px solid var(--outline-variant);
+  /* env() 에 폴백을 준다 — 값이 정의되지 않으면 calc 이 무효가 되고, 단축 속성이라
+     padding 선언 **전체**가 날아가 넘김 바가 화면 끝에 붙는다 */
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px))}
+.pgnav button{font-family:inherit;font-size:12.5px;padding:11px 13px;border-radius:10px;
+  border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);
+  cursor:pointer;white-space:nowrap}
+.pgnav button.go{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center;
+  background:var(--primary);border-color:var(--primary);color:#fff;font-weight:700}
+.pgnav button:disabled{opacity:.35;cursor:default}
+.pgnav .prog{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;
+  color:var(--on-surface-variant)}
 /* 알림 카드 */
 .push{border:1px solid var(--outline-variant);border-radius:14px;overflow:hidden;
   background:var(--surface-container-lowest)}
@@ -100,8 +149,7 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
   box-shadow:0 0 0 1px var(--primary) inset}
 .chk{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;margin-bottom:9px;cursor:pointer}
 .chk small{display:block;color:var(--on-surface-variant);font-size:11px;line-height:15px}
-.gfbox{border-top:1px dashed var(--outline-variant);margin-top:13px;padding-top:13px;
-  scroll-margin-top:74px}  /* 앵커 점프 시 고정 헤더에 가리지 않게 */
+.gfbox{scroll-margin-top:12px}   /* 앵커 점프(#gf)로 왔을 때 머리말에 가리지 않게 */
 .gfbox .hint{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .gfbox .hint button{padding:5px 10px;font-size:11.5px;border-radius:99px;font-family:inherit;
   border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);cursor:pointer}
@@ -343,6 +391,46 @@ details.more[open] summary{border-bottom:1px solid var(--outline-variant)}
 @media(min-width:1020px){.mnote{display:none}}
 """
 
+# 주제별 페이지 — (id, 칩 라벨, 키커, 제목, 설명).
+# 상단 칩·섹션 머리말·"다음: ○○" 버튼이 **전부 이 목록 하나**에서 나온다. 세 곳에 나눠
+# 적으면 하나만 고쳐진 채 배포되고, 그건 화면에서 곧바로 어긋나 보인다.
+_PAGES = [
+    ("pg-cond", "내 조건", "STEP 1 · 내 조건", "① 무엇을 사려고 하시나요",
+     "지역·주택 보유·가격만 고르면 판정은 엔진이 합니다. 옆으로 넘기면 주제가 하나씩 이어져요."),
+    ("pg-gf", "경과규정", "STEP 2 · 경과규정", "③ 규제 전에 이미 진행 중이었나요",
+     "계약·계약금·접수 일자에 따라 시행 후에도 종전 규정을 그대로 적용받을 수 있어요."),
+    ("pg-limit", "내 한도", "STEP 3 · 전 → 후", "② 변경 전 → 후, 내 한도",
+     "같은 조건을 변경 전·후 두 시점의 규칙으로 각각 판정한 결과입니다."),
+    ("pg-afford", "가능 금액", "STEP 4 · 가능 금액", "총 얼마까지 빌릴 수 있나",
+     "참고 추정 — LTV·최대한도·DSR·DTI 중 어느 규제에 막히는지까지 짚어줍니다."),
+    ("pg-product", "상품", "STEP 5 · 상품", "내게 가능한 상품 찾기",
+     "추천이 아니라 자격 판정이에요 — 원문이 정한 요건에 해당하는지만 되짚습니다."),
+    ("pg-timeline", "타임라인", "STEP 6 · 타임라인", "내 한도를 움직인 일들",
+     "규제 발표일에만 쓰는 도구가 아닙니다 — 한도가 움직이는 일은 계속 생깁니다."),
+    ("pg-qa", "물어보기", "STEP 7 · 물어보기", "④ 물어보기 — 근거가 있을 때만 답합니다",
+     "질문에 나온 표현을 공문에서 찾아 원문 문단을 보여줍니다. 못 찾으면 지어내지 않아요."),
+]
+
+
+def _steps_nav() -> str:
+    """상단 주제 칩 — 순서대로 넘기지 않고 바로 뛰어가고 싶은 사람을 위한 길."""
+    return "".join(
+        f'<button type="button" aria-controls="{pid}" '
+        f'aria-current="{"true" if i == 0 else "false"}">'
+        f'<span class="n">{i + 1}</span>{esc(chip)}</button>'
+        for i, (pid, chip, *_r) in enumerate(_PAGES))
+
+
+def _pg_open(pid: str) -> str:
+    """주제 페이지 여는 태그 + 머리말."""
+    _, chip, kicker, title, sub = next(p for p in _PAGES if p[0] == pid)
+    return (f'<section class="pg" id="{pid}" data-nav="{esc(chip)}">'
+            f'<div class="pg-in"><div class="pg-h"><div class="k">{esc(kicker)}</div>'
+            f'<div class="t">{esc(title)}</div><div class="s">{esc(sub)}</div></div>')
+
+
+_PG_CLOSE = "</div></section>"
+
 _RULE_KO = {
     "REG_STD": "규제지역 · 무주택 표준",
     "REG_FIRSTHOME": "생애최초 예외 — 강화 대상 아님",
@@ -460,7 +548,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
          "easy": f"핵심은 '언제 계약했나'예요. {cutoff}까지 매매계약을 하고 계약금 낸 사실을 "
                  f"증명할 수 있으면(또는 대출 신청 접수를 마쳤으면), 잔금이나 대출 실행이 "
                  f"시행일 뒤여도 예전 기준(LTV {p_base})을 그대로 적용받아요. 해당되지 않으면 "
-                 f"새 기준(LTV {p_std})이 적용됩니다. 위 ③ 경과규정 체크에 날짜를 넣으면 "
+                 f"새 기준(LTV {p_std})이 적용됩니다. ③ 경과규정 체크에 날짜를 넣으면 "
                  "내 경우를 바로 확인할 수 있어요.",
          "cites": [quotes["_GF"]]},
         {"id": "first-home",
@@ -474,7 +562,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
          "keys": ["계약금", "종전", "가계약"],
          "easy": f"네, 가능성이 높아요. {cutoff}까지 계약을 체결하고 계약금 납부 사실을 "
                  "증명하면 종전 규정이 그대로 적용됩니다. 계약서와 입금 내역 같은 증빙을 "
-                 "준비해 두세요. 위 ③ 경과규정 체크에 날짜를 넣으면 바로 확인돼요.",
+                 "준비해 두세요. ③ 경과규정 체크에 날짜를 넣으면 바로 확인돼요.",
          "cites": [quotes["_GF"]]},
         {"id": "jeonse",
          "keys": ["전세", "전세대출"],
@@ -494,7 +582,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  f"지금처럼 LTV {p_base}가 유지됩니다. 다만 두 가지는 주의하세요. "
                  f"수도권에서 2주택 이상을 사는 경우는 규제지역이 아니어도 이번 규제"
                  f"(LTV {p_multi})가 적용되고, 유주택자의 일부 조건은 공문에 기준값이 "
-                 "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. 위 ① 지역 선택에서 "
+                 "명시돼 있지 않아 정확한 한도는 상담 확인이 필요해요. ① 내 조건의 지역 선택에서 "
                  "내 지역을 골라 직접 확인해 보세요.",
          "cites": [quotes["MULTI_0"], quotes["REG_STD"]]},
         {"id": "what-changed",
@@ -507,7 +595,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  f"않아요 — 생애최초 구입자는 {p_first} 그대로, 서민·실수요자는 {p_real}, "
                  f"이미 집이 있으면 {p_owner}가 적용됩니다. 그리고 {cutoff}까지 계약하고 "
                  f"계약금을 낸 경우에는 예전 기준이 유지돼요. {eff}부터 적용되며, "
-                 "내 조건에서 얼마가 되는지는 위 ② 변경 전 → 후에서 바로 볼 수 있어요.",
+                 "내 조건에서 얼마가 되는지는 ② 변경 전 → 후에서 바로 볼 수 있어요.",
          "cites": [quotes["REG_STD"], quotes["_GF"]]},
         {"id": "which-regions",
          "keys": ["어디", "어느 지역", "어떤 지역", "무슨 지역", "지정된 지역", "지정된 곳",
@@ -516,7 +604,7 @@ def easy_answers(quotes: dict, constants: dict, norm_corpus: dict,
                  f"{len(region_labels)}곳이에요"
                  + ("(모두 수도권)" if all_capital else "")
                  + f". {eff}부터 이 지역에서 강화된 기준이 적용되고, 그 밖의 지역은 이번 "
-                 "지정 대상이 아니에요. 내가 사려는 집이 여기 해당하는지 위 ① 지역 선택에서 "
+                 "지정 대상이 아니에요. 내가 사려는 집이 여기 해당하는지 ① 내 조건의 지역 선택에서 "
                  "골라 바로 확인할 수 있어요.",
          "cites": [_corpus_cut(norm_corpus, molit,
                                "최근 큰 폭으로 집값이 상승한 경기도", 130),
@@ -661,15 +749,19 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     <div><div class="t">내 한도 시그널</div>
     <div class="s">규제 변경 개인화 시뮬레이터 · 데모 시나리오 {pub} 대책</div></div>
   </header>
-  <div class="body">
+  <nav class="steps" id="steps" aria-label="주제">{_steps_nav()}</nav>
+  <button type="button" class="minibar" id="minibar" hidden>
+    <span class="mb-c"></span><span class="mb-v"></span><span class="mb-e">내 조건 고치기 →</span>
+  </button>
+  <div class="pager" id="pager">
 
+    {_pg_open("pg-cond")}
     <div class="push">
       <div class="head"><span class="dot"></span>영향 알림 · 시뮬레이션 <span style="margin-left:auto">{esc(pub)}</span></div>
       <div class="bd"><b>규제지역 {len(labels)}곳 추가 지정 ({", ".join(esc(l) for l in labels)})</b>
-      {esc(eff)}부터 강화 규제가 적용됩니다. 아래에서 내 조건으로 영향을 확인하세요.</div>
+      {esc(eff)}부터 강화 규제가 적용됩니다. 아래 ① 내 조건으로 영향을 확인하세요.</div>
     </div>
 
-    <div class="sec-t">① 내 조건</div>
     <form class="panel" id="cond">
       <div class="f"><label for="region">주택 소재 지역</label>
         <select id="region">{region_opts}</select></div>
@@ -686,8 +778,11 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
         <span>서민·실수요자 요건<small>부부합산 소득·주택가격·무주택 요건 충족</small></span></label>
       <div class="f"><label for="price">주택 가격 (억원)</label>
         <input type="number" id="price" min="1" max="50" step="0.5" value="8"></div>
+    </form>
+    {_PG_CLOSE}
 
-      <div class="gfbox" id="gf">
+    {_pg_open("pg-gf")}
+      <form class="panel gfbox" id="gf">
         <div class="f" style="margin-bottom:8px"><label>③ 경과규정 체크 — 규제 발표 전에 이미 진행 중이었나요?</label>
           <div class="hint">
             <button type="button" id="gf-yes">시행 전에 계약했어요</button>
@@ -699,17 +794,26 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
           <span>계약금 납부 사실 증명 가능</span></label>
         <div class="f"><label for="accepted">대출 신청 접수일 (있다면)</label>
           <input type="date" id="accepted"></div>
-      </div>
-    </form>
+      </form>
+      <div class="honesty">{esc(cutoff)}까지 계약을 체결하고 <b>계약금 납부 사실을 증명</b>할 수
+      있으면(또는 대출 신청 접수를 마쳤으면) 종전 규정이 적용됩니다. 해당 없으면 그냥
+      넘기세요 — 다음 주제에서 새 기준으로 판정합니다.</div>
+    {_PG_CLOSE}
 
-    <div class="sec-t">② 변경 전 → 후, 내 한도</div>
+    {_pg_open("pg-limit")}
     <div class="cmp">
       <div class="vc" id="vc-before"></div>
       <div class="vc after" id="vc-after"></div>
     </div>
     <div class="delta" id="delta"></div>
 
-    <div class="sec-t">총 얼마까지 빌릴 수 있나 — 참고 추정</div>
+    <details class="more"><summary>이 판정, 어떻게 나왔나요? (판정 경로)</summary>
+      <div class="trace" id="trace"></div></details>
+    <details class="more" open><summary>근거 조문 (공문 원문 그대로)</summary>
+      <div class="evi" id="evi"></div></details>
+    {_PG_CLOSE}
+
+    {_pg_open("pg-afford")}
     <div class="panel" id="aff">
       <div class="aff-grid">
         <div class="f"><label for="aff-income">연소득 (만원)</label>
@@ -740,20 +844,22 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <details class="more" style="margin-top:10px"><summary>이 계산의 근거 조문</summary>
         <div class="evi" id="aff-evi"></div></details>
     </div>
+    {_PG_CLOSE}
 
-    <div class="sec-t">내게 가능한 상품 찾기</div>
+    {_pg_open("pg-product")}
     <div class="panel">
       <div id="prod"></div>
       <div class="honesty" style="margin-top:11px"><b>추천이 아니라 자격 판정이에요.</b>
-      취향을 예측하는 것이 아니라, 위에서 판정한 조건(지역·주택 수·생애최초·경과규정)으로
+      취향을 예측하는 것이 아니라, 앞 주제에서 판정한 조건(지역·주택 수·생애최초·경과규정)으로
       <b>원문이 정한 요건에 해당하는지</b>를 되짚습니다. 소득·자산 같은 세부 신청 자격은
       이 공문에 없어서 <b>판정하지 않고 상담으로 안내</b>합니다 — 없는 근거로 "가능합니다"라고
       말하지 않습니다.</div>
       <details class="more" style="margin-top:10px"><summary>이 판정의 근거 조문</summary>
         <div class="evi" id="prod-evi"></div></details>
     </div>
+    {_PG_CLOSE}
 
-    <div class="sec-t">내 한도를 움직인 일들</div>
+    {_pg_open("pg-timeline")}
     <div class="panel">
       <div class="tl" id="tl"></div>
       <div class="sub-cta"><b>규제만 한도를 움직이는 게 아닙니다.</b> 지역 지정·해제, 스트레스
@@ -770,13 +876,9 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
         </div>
         <div class="duo-note" id="duo-note"></div>
       </div></details>
+    {_PG_CLOSE}
 
-    <details class="more"><summary>이 판정, 어떻게 나왔나요? (판정 경로)</summary>
-      <div class="trace" id="trace"></div></details>
-    <details class="more" open><summary>근거 조문 (공문 원문 그대로)</summary>
-      <div class="evi" id="evi"></div></details>
-
-    <div class="sec-t">④ 물어보기 — 근거가 있을 때만 답합니다</div>
+    {_pg_open("pg-qa")}
     <div class="panel qa">
       <input type="text" id="q" placeholder="예) 잔금일이 시행일 뒤인데 저는 어떻게 되나요">
       <div class="preset">{preset_btns}</div>
@@ -798,6 +900,13 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
       <a href="playground.html">플레이그라운드</a>
     </div>
     <div class="mnote">데스크톱에서 열면 제안 요약(팀 엣지케이스)이 함께 보입니다</div>
+    {_PG_CLOSE}
+
+  </div>
+  <div class="pgnav">
+    <button type="button" id="pg-prev" aria-label="이전 주제">←</button>
+    <span class="prog" id="pg-prog"></span>
+    <button type="button" class="go" id="pg-next"></button>
   </div>
 </div>
 
@@ -1004,7 +1113,7 @@ function run() {
       dl.className = "delta bad";
       dl.innerHTML = `<b>한도가 약 ${won(diff)} 줄어요</b> (LTV ${pct(b.max_ltv)} → ${pct(a.max_ltv)}). `
         + `계약·접수 시점에 따라 경과규정 대상일 수 있어요 — `
-        + `<a class="dlink" href="#gf">위 ③ 경과규정 체크</a>에 날짜를 넣어 확인하세요.`;
+        + `<a class="dlink" href="#gf">③ 경과규정 체크</a>로 넘어가 날짜를 넣어 보세요.`;
     } else if (diff === 0) {
       dl.className = "delta good";
       dl.innerHTML = `<b>이번 변경으로 한도가 달라지지 않아요</b> (LTV ${pct(a.max_ltv)} 유지).`;
@@ -1071,6 +1180,27 @@ function run() {
   lastAfter = a;
   affRender();
   prodRender();
+  syncMini();
+}
+
+// 요약 바 — 조건(주제 1)과 결과(주제 3~)가 다른 화면에 있으니, 어느 주제를 보고 있든
+// "지금 어떤 조건으로 계산된 값인지"가 한 줄로 따라다녀야 한다. 값은 엔진 판정에서 온다.
+const OWN_KO = { none: "무주택", disposal: "1주택(처분예정)",
+                 keep: "1주택(계속보유)", multi: "2주택 이상" };
+function syncMini() {
+  const bar = $("#minibar");
+  if (!bar) return;
+  const region = $("#region").selectedOptions[0]?.textContent ?? "";
+  const extra = [$("#first").checked ? "생애최초" : null,
+                 $("#demand").checked ? "실수요" : null].filter(Boolean).join(" · ");
+  bar.querySelector(".mb-c").textContent =
+    `${region} · ${OWN_KO[own]} · ${Number($("#price").value || 0)}억`
+    + (extra ? ` · ${extra}` : "");
+  const a = lastAfter;
+  bar.querySelector(".mb-v").textContent =
+    a && a.status === "DECIDED"
+      ? `LTV ${pct(a.max_ltv)}${a.grandfathering_applied ? " (경과)" : ""}`
+      : "상담 필요";
 }
 
 // ── 내게 가능한 상품 찾기 — 추천이 아니라 자격 판정.
@@ -1110,7 +1240,7 @@ function prodRender() {
       st = demand ? "ELIGIBLE" : "UNKNOWN";
       rs = demand
         ? "서민·실수요자 요건으로 체크하셨고, 원문이 완화 대상으로 명시합니다."
-        : "소득·주택가격·무주택 요건을 모두 충족해야 해당해요. 위 ① 조건에서 체크해 보세요.";
+        : "소득·주택가격·무주택 요건을 모두 충족해야 해당해요. ① 내 조건에서 체크해 보세요.";
     } else {
       st = "UNKNOWN";
       rs = "원문에 한도는 나와 있지만 소득·자산 등 신청 자격 요건은 이 공문에 없어요. "
@@ -1336,6 +1466,7 @@ $("#gf-no").addEventListener("click", () => {
   $("#contract").value = ""; $("#accepted").value = ""; $("#downpay").checked = false; run();
 });
 $("#cond").addEventListener("input", run);
+$("#gf").addEventListener("input", run);   // 경과규정이 별도 주제로 나갔다 — 같이 물려 둔다
 run();
 
 // ---- ④ 근거 우선 Q&A — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
@@ -1431,6 +1562,64 @@ function ask(q) {
 $("#q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); ask($("#q").value); } });
 document.querySelectorAll(".qa .preset button").forEach((b) =>
   b.addEventListener("click", () => ask(b.dataset.q)));
+
+// ── 주제별 넘김 (2026-08-21 폰 리뷰: 한 화면에 다 담아 세로 4,960px 이었다) ──
+//    넘김 자체는 CSS 스크롤 스냅이 한다. JS 는 위치 표시·버튼·앵커 점프만 맡으므로
+//    스크립트가 죽어도 손가락으로는 넘어간다.
+const pager = $("#pager");
+const PAGES = [...pager.querySelectorAll(".pg")];
+const CHIPS = [...document.querySelectorAll("#steps button")];
+let curPage = 0;
+
+function markPage(n) {
+  curPage = n;
+  CHIPS.forEach((c, i) => c.setAttribute("aria-current", String(i === n)));
+  CHIPS[n]?.scrollIntoView({ block: "nearest", inline: "center" });
+  $("#minibar").hidden = n === 0;            // 첫 주제는 폼 자체가 보이니 겹쳐 놓지 않는다
+  $("#pg-prev").disabled = n === 0;
+  $("#pg-prog").textContent = `${n + 1} / ${PAGES.length}`;
+  const next = PAGES[n + 1];              // 마지막 주제에서는 처음으로 되돌아가는 문이 된다
+  $("#pg-next").textContent = next ? `다음: ${next.dataset.nav} →` : "↺ 처음 주제로";
+}
+function goPage(i, smooth = true) {
+  const n = Math.max(0, Math.min(PAGES.length - 1, i));
+  pager.scrollTo({ left: pager.clientWidth * n, behavior: smooth ? "smooth" : "auto" });
+  markPage(n);
+}
+// 손가락으로 넘겼을 때의 위치를 되읽는다 — 스냅이 끝난 뒤 한 번만 본다
+let settle;
+pager.addEventListener("scroll", () => {
+  clearTimeout(settle);
+  settle = setTimeout(() => {
+    const n = Math.round(pager.scrollLeft / Math.max(1, pager.clientWidth));
+    if (n !== curPage) markPage(n);
+  }, 70);
+}, { passive: true });
+
+$("#pg-prev").addEventListener("click", () => goPage(curPage - 1));
+$("#pg-next").addEventListener("click", () =>
+  goPage(curPage >= PAGES.length - 1 ? 0 : curPage + 1));
+$("#minibar").addEventListener("click", () => goPage(0));
+CHIPS.forEach((c, i) => c.addEventListener("click", () => goPage(i)));
+document.addEventListener("keydown", (e) => {           // 데스크톱(폰 프레임)에서는 화살표로
+  if (!$("#modal").hidden || e.target.closest("input,select,textarea")) return;
+  if (e.key === "ArrowRight") goPage(curPage + 1);
+  else if (e.key === "ArrowLeft") goPage(curPage - 1);
+});
+// 화면 안 앵커(#gf 등)는 이제 '다른 주제'다 — 그 주제로 넘긴 뒤 대상까지 맞춰 준다
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  const el = document.getElementById(a.getAttribute("href").slice(1));
+  const pg = el && el.closest(".pg");
+  if (!pg) return;
+  e.preventDefault();
+  goPage(PAGES.indexOf(pg));
+  if (el !== pg) setTimeout(() => el.scrollIntoView({ block: "start", behavior: "smooth" }), 420);
+});
+window.addEventListener("resize", () => goPage(curPage, false));
+const deep = PAGES.findIndex((p) => p.id === location.hash.slice(1));
+goPage(deep > 0 ? deep : 0, false);
 </script>"""
 
     demo_region = "GURI" if "GURI" in regions else regions[0]

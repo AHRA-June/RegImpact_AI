@@ -12,6 +12,14 @@ on:
   push:
     branches: [claude/portfolio-project-planning-9sip11]
     paths-ignore: ["**/*.md"]
+  # PR 에서도 같은 검사를 돌린다. 안 그러면 깨진 코드가 기본 브랜치에 **들어간 뒤에야**
+  # 발견된다 — 배포를 막는 것과 병합을 막는 것은 다른 일이다. 배포는 push 일 때만 한다.
+  #
+  # push 와 달리 paths-ignore 를 두지 않는다. 규칙은 "push = 배포(문서만 바뀌면 생략),
+  # pull_request = 검증(항상)" 이다. 문서 커밋이 마지막이면 병합 대상 커밋에 검사 증거가
+  # 없는 채로 남는데, 초록불을 보고 병합하는 사람에게 그건 초록이 아니다.
+  pull_request:
+    branches: [claude/portfolio-project-planning-9sip11]
   workflow_dispatch:
 
 permissions:
@@ -19,8 +27,9 @@ permissions:
   pages: write
   id-token: write
 
+# PR 마다 따로 묶는다 — 한 그룹으로 두면 PR 검사가 기본 브랜치 배포를 취소해 버린다.
 concurrency:
-  group: pages
+  group: pages-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -46,7 +55,9 @@ jobs:
       - name: Verify JS port against Python engine
         run: node tools/verify_js_port.mjs site/fixtures.json
 
+      # PR 검사에서는 굽기까지만 확인하고 산출물은 올리지 않는다 (배포하지 않으므로)
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: site
 
@@ -71,8 +82,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}
 
+      # 캐시 적중이어도 **항상** 돌린다. 이미 있으면 몇 초 만에 끝나고, 캐시가 지금
+      # 설치된 playwright 버전과 어긋나 있으면(빌드 번호가 다르면) 여기서 메꾼다.
+      # 건너뛰었더니 브라우저가 없는 채로 검사가 조용히 skip 됐다 (2026-08-21).
       - name: Install chromium
-        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: python -m playwright install chromium
 
       - name: Mobile layout check
@@ -82,6 +95,8 @@ jobs:
 
   deploy:
     needs: [build, mobile]
+    # PR 검사는 배포하지 않는다 — 병합되지 않은 브랜치가 라이브로 나가면 안 된다.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
