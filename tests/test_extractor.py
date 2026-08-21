@@ -1,3 +1,4 @@
+import pathlib
 """RegChange Extractor + Assurance 테스트 (오프라인, API 불필요).
 
 LLM 호출은 가짜 complete로 주입해 파싱·grounding·골드 채점 로직을 검증한다.
@@ -354,3 +355,70 @@ def test_missed_change_label_survives_an_entry_without_keywords():
                                   "transition": {"before": "70%", "after": "40%"}}],
             "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
     assert score_against_gold(ext, gold).missed_changes == ["T"]
+
+# ---------- 규제 이벤트 (파이프라인의 입력 단위) ----------
+def test_default_event_documents_are_frozen():
+    """기본 이벤트(6·30)의 문서 3건은 고정이다.
+
+    기존 실측·골드가 전부 이 셋에 묶여 있다. 여기에 문서를 더하면 인용 정확성·완전성
+    수치의 **의미가 조용히 바뀐다** — 새 대책은 EVENTS 에 별도 항목으로 넣어야 한다.
+    """
+    from regimpact.extractor.sources import DEFAULT_EVENT, SOURCE_FILES, get_event
+
+    assert DEFAULT_EVENT == "20260630"
+    assert set(SOURCE_FILES) == {
+        "FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"}
+    assert set(get_event().files) == set(SOURCE_FILES)
+
+
+def test_every_event_document_exists_in_the_registry():
+    """이벤트가 가리키는 문서는 전부 코퍼스 레지스트리에 있어야 한다."""
+    from regimpact.extractor.sources import CORPUS_FILES, EVENTS
+
+    for ev in EVENTS.values():
+        missing = [d for d in ev.doc_ids if d not in CORPUS_FILES]
+        assert not missing, f"{ev.event_id}: 레지스트리에 없는 문서 {missing}"
+        assert ev.doc_ids, f"{ev.event_id}: 문서가 비었다"
+
+
+def test_event_dates_agree_with_corpus_event_metadata():
+    """이벤트 발표일과 문서 시점 메타데이터가 갈라지면 시점 필터가 조용히 틀린다."""
+    from regimpact.extractor.sources import CORPUS_EVENTS, EVENTS
+
+    for ev in EVENTS.values():
+        for doc in ev.doc_ids:
+            published, _label = CORPUS_EVENTS[doc]
+            assert published == ev.published_at, (
+                f"{ev.event_id}/{doc}: 이벤트 {ev.published_at} vs 문서 {published}")
+
+
+def test_unknown_event_fails_loudly():
+    """이름을 틀리면 조용히 기본값으로 떨어지지 않고 즉시 실패한다."""
+    import pytest as _pytest
+
+    from regimpact.extractor.sources import get_event
+
+    with _pytest.raises(KeyError):
+        get_event("20990101")
+
+
+def test_event_without_gold_is_marked_as_such():
+    """골드가 없는 이벤트는 그렇다고 표시돼야 한다 — 정답 없이 점수를 내지 않기 위해서다."""
+    from regimpact.extractor.sources import EVENTS
+
+    with_gold = [e for e in EVENTS.values() if e.gold]
+    assert with_gold, "골드를 가진 이벤트가 하나도 없다"
+    for ev in EVENTS.values():
+        if ev.gold is None:
+            continue
+        assert (pathlib.Path(__file__).resolve().parents[1] / ev.gold).exists(), \
+            f"{ev.event_id}: 골드 파일이 없다 — {ev.gold}"
+
+
+def test_loading_an_event_returns_only_its_documents():
+    from regimpact.extractor.sources import EVENTS, load_sources
+
+    for eid, ev in EVENTS.items():
+        loaded = load_sources(event=eid)
+        assert set(loaded) == set(ev.doc_ids), f"{eid}: 로드된 문서가 이벤트와 다르다"
+        assert all(loaded.values()), f"{eid}: 빈 원문이 있다"
