@@ -21,6 +21,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from datetime import date, timedelta
@@ -35,6 +36,24 @@ from .theme import CSS, FONTS, esc, explainer
 ENGINE_JS = Path(__file__).resolve().parent / "static" / "engine.js"
 SEARCH_JS = Path(__file__).resolve().parent / "static" / "search.js"
 AFFORD_JS = Path(__file__).resolve().parent / "static" / "affordability.js"
+
+# 지켜보기가 감시하는 것의 지문. **손으로 올리는 버전 번호가 아니다** — 판정을 만드는
+# 것에서 직접 계산하므로, 규칙이 바뀌면 반드시 바뀌고 문구만 고친 배포에는 안 움직인다.
+#
+# 덮는 범위는 감시 대상과 정확히 같다 — 지켜보기는 **코어 판정(LTV)** 을 감시하므로
+# 코어 판정을 만드는 것만 덮는다. 규칙 데이터(상수·지역 시점 버전·수도권 집합)와
+# 엔진 코드 **둘 다** 넣는 이유는, 상수가 그대로여도 규칙 우선순위가 바뀌면 같은 조건의
+# 답이 달라지기 때문이다. 부가 규제(DSR·최대한도)가 바뀌어도 이 지문은 안 움직인다.
+_DIGEST_KEYS = ("constants", "regions", "capital_area")
+
+
+def rules_digest(fixtures: dict) -> str:
+    """코어 판정을 만드는 것 전부의 지문 (규칙 데이터 + 엔진 코드)."""
+    payload = json.dumps({k: fixtures.get(k) for k in _DIGEST_KEYS},
+                         ensure_ascii=False, sort_keys=True,
+                         separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload + ENGINE_JS.read_bytes()).hexdigest()[:12]
+
 
 _SIGNAL_CSS = """
 html{scroll-behavior:smooth}
@@ -270,6 +289,45 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
 .sub-cta{margin-top:12px; padding:13px 15px; border-radius:10px; border:1px dashed var(--primary);
   font-size:13px; line-height:1.6; word-break:keep-all; color:var(--on-surface-variant)}
 .sub-cta b{color:var(--on-surface)}
+/* ── 지켜보기 — 조건을 저장해 두고 다시 열 때 지금 규칙으로 재판정한다 ──
+   알림 띠는 앱 셸에 둔다. 어느 주제를 보고 있든 바뀐 사실이 먼저 보여야 하기 때문이다. */
+.alert{flex:none;display:flex;flex-direction:column;gap:9px;padding:12px 14px;
+  border-bottom:1px solid var(--outline-variant);background:var(--surface-container-low)}
+.alert[hidden]{display:none}
+.alert.hit{background:color-mix(in srgb,var(--error) 9%,var(--background));
+  border-bottom-color:var(--error)}
+.alert .k{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;
+  color:var(--on-surface-variant)}
+.alert.hit .k{color:var(--error)}
+.alert .k::before{content:"";width:7px;height:7px;border-radius:99px;
+  background:var(--outline-variant)}
+.alert.hit .k::before{background:var(--error)}
+.alert .m{font-size:13.5px;line-height:1.5;word-break:keep-all}
+.alert .m b{font-weight:700}
+.alert .mv{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700}
+.alert .acts{display:flex;gap:7px;flex-wrap:wrap}
+.alert button{font-family:inherit;font-size:12px;padding:8px 12px;border-radius:9px;
+  border:1px solid var(--outline-variant);background:var(--surface-container-lowest);
+  color:inherit;cursor:pointer}
+.alert button.pri{border-color:var(--primary);color:var(--primary);font-weight:700}
+/* 지켜보기 패널 — 타임라인 주제 안. 약속하던 문장을 실제로 도는 것으로 바꾼 자리다. */
+.watch{margin-top:12px;border:1px solid var(--outline-variant);border-radius:12px;
+  background:var(--surface-container-lowest);padding:13px 15px;
+  display:flex;flex-direction:column;gap:10px}
+.watch .wt{font-size:13.5px;font-weight:700;word-break:keep-all}
+.watch .ws{font-size:12px;line-height:1.55;color:var(--on-surface-variant);word-break:keep-all}
+.watch .wc{font-size:12px;line-height:1.5;padding:9px 11px;border-radius:9px;
+  background:var(--surface-container-low);word-break:keep-all}
+.watch .wc .lbl{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;
+  letter-spacing:.06em;color:var(--on-surface-variant);text-transform:uppercase}
+.watch .wc .val{margin-top:3px}
+.watch .wc .val b{font-family:'JetBrains Mono',ui-monospace,monospace}
+.watch .acts{display:flex;gap:7px;flex-wrap:wrap}
+.watch button{font-family:inherit;font-size:12.5px;padding:10px 13px;border-radius:9px;
+  border:1px solid var(--outline-variant);background:var(--surface-container-low);
+  color:inherit;cursor:pointer}
+.watch button.pri{border-color:var(--primary);color:var(--primary);font-weight:700}
 /* 두 사람 비교 — 계산기가 구조적으로 답 못 하는 질문을 10초 안에 보여준다 */
 .duo-wrap{padding:12px 14px}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -758,6 +816,11 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
   <button type="button" class="minibar" id="minibar" hidden>
     <span class="mb-c"></span><span class="mb-v"></span><span class="mb-e">내 조건 고치기 →</span>
   </button>
+  <div class="alert" id="alert" role="status" aria-live="polite" hidden>
+    <div class="k" id="alert-k"></div>
+    <div class="m" id="alert-m"></div>
+    <div class="acts" id="alert-acts"></div>
+  </div>
   <div class="pager" id="pager">
 
     {_pg_open("pg-cond")}
@@ -868,9 +931,22 @@ def render(ev: ValidationEvidence, fixtures: dict, search_export: dict) -> str:
     <div class="panel">
       <div class="tl" id="tl"></div>
       <div class="sub-cta"><b>규제만 한도를 움직이는 게 아닙니다.</b> 지역 지정·해제, 스트레스
-      금리 단계, 정책 변경이 모두 내 한도를 바꿉니다. 실제 서비스에서는 내 조건을 저장해 두고
-      <b>한도가 움직이는 일이 생길 때마다 알림</b>으로 알려드립니다 — 발표일에만 쓰는 도구가
-      아니라, 집을 준비하는 내내 켜져 있는 신호입니다.</div>
+      금리 단계, 정책 변경이 모두 내 한도를 바꿉니다. 발표일에만 쓰는 도구가 아니라,
+      집을 준비하는 내내 켜져 있는 신호입니다.</div>
+
+      <div class="watch" id="watch">
+        <div class="wt">이 조건으로 지켜보기</div>
+        <div class="ws" id="watch-s"></div>
+        <div class="wc" id="watch-c" hidden></div>
+        <div class="acts" id="watch-acts"></div>
+      </div>
+      <div class="honesty" style="margin-top:11px"><b>조건은 이 브라우저에만 저장됩니다</b> —
+      서버로 보내지 않고, 이 기기를 벗어나지 않습니다. 그래서 이 데모는
+      <b>화면을 다시 열 때</b> 확인합니다. 실제 서비스에서는 서버가 새 공문을 감지해
+      앱 푸시로 밀어 주고, 여기서는 그 판정 부분만 실제로 돕니다 — 저장한 조건을
+      <b>지금 규칙으로 다시 판정</b>해 저장 당시와 달라졌는지 봅니다. 규칙이 갱신돼도
+      내 조건의 한도가 그대로면 <b>그대로라고 말합니다</b>. 안 바뀐 것을 바뀐 것처럼
+      알리지 않습니다.</div>
     </div>
 
     <details class="more" open><summary>⚡ 같은 날 계약한 두 사람 — 왜 한도가 다른가요?</summary>
@@ -946,24 +1022,42 @@ const $ = (s) => document.querySelector(s);
 const C = FX.constants;
 let own = "none";
 
-function app(withGf) {
-  const house = own === "none" ? 0 : own === "multi" ? 2 : 1;
+// 조건 스냅샷 — 화면에서 떼어낸 값. 지켜보기가 저장하는 것도, 나중에 다시 판정할 때
+// 엔진에 먹이는 것도 이것이다. 판정 입력이 DOM 을 직접 읽으면 **저장된 조건은 재판정할 수
+// 없다** — 화면은 언제나 '지금 값'이기 때문이다. 그래서 조건을 먼저 값으로 떼어낸다.
+function condSnapshot() {
   return {
-    region_code: $("#region").value,
+    region: $("#region").value,
+    own,
+    first: $("#first").checked,
+    demand: $("#demand").checked,
+    price: Number($("#price").value || 0),
+    contract: $("#contract").value || "",
+    downpay: $("#downpay").checked,
+    accepted: $("#accepted").value || "",
+  };
+}
+
+function appFrom(c, withGf) {
+  const house = c.own === "none" ? 0 : c.own === "multi" ? 2 : 1;
+  return {
+    region_code: c.region,
     evaluation_date: withGf ? C.REG_EFFECTIVE : C.GRANDFATHERING_CUTOFF,
     house_count: house,
-    disposal_condition_flag: own === "disposal",
-    first_home_buyer: $("#first").checked,
-    real_demand_flag: $("#demand").checked,
+    disposal_condition_flag: c.own === "disposal",
+    first_home_buyer: c.first,
+    real_demand_flag: c.demand,
     policy_mortgage_flag: false,
     loan_purpose: "HOME_PURCHASE",
-    application_accepted_at: withGf ? ($("#accepted").value || null) : null,
-    contract_signed_at: withGf ? ($("#contract").value || null) : null,
-    downpayment_paid_at: withGf && $("#downpay").checked ? ($("#contract").value || null) : null,
+    application_accepted_at: withGf ? (c.accepted || null) : null,
+    contract_signed_at: withGf ? (c.contract || null) : null,
+    downpayment_paid_at: withGf && c.downpay ? (c.contract || null) : null,
     land_permit_target: false,
     land_permit_applied_at: null,
   };
 }
+
+const app = (withGf) => appFrom(condSnapshot(), withGf);
 
 const pct = (v) => `${Math.round(v * 100)}%`;
 const pct1 = (v) => `${(v * 100).toFixed(1)}%`;
@@ -1474,6 +1568,211 @@ $("#cond").addEventListener("input", run);
 $("#gf").addEventListener("input", run);   // 경과규정이 별도 주제로 나갔다 — 같이 물려 둔다
 run();
 
+// ── 지켜보기 — "발표일 도구"를 "상시 켜진 신호"로 만드는 최소 구현 ────────────────
+//
+// 서버가 없으므로 **밀어 주는 알림은 없다.** 대신 알림에서 값이 나오는 부분 — 새 규칙으로
+// 내 조건을 다시 판정해 달라졌는지 가리는 일 — 을 실제로 돌린다. 화면을 다시 열 때 확인하는
+// 것이 이 구현의 한계이고, 그 한계는 화면에 그대로 적는다.
+//
+// 규칙 지문(RULES_DIGEST)은 손으로 올리는 버전이 아니라 **판정을 만드는 것에서 계산**된다
+// (signal.py `rules_digest`). 그래서 문구만 고친 배포에는 안 움직이고, 규칙이 바뀌면 반드시
+// 움직인다. 지문이 움직였어도 **내 조건의 답이 그대로면 그대로라고 말한다** — 안 바뀐 것을
+// 바뀐 것처럼 알리는 순간 이 신호는 아무도 안 보는 배지가 된다.
+const WATCH_KEY = "signal.watch.v1";
+const RULES_DIGEST = "__DIGEST__";
+
+// localStorage 는 사생활 보호 모드·차단 설정에서 **읽기만 해도 던진다.** 저장이 안 되는
+// 브라우저에서도 화면 나머지는 그대로 돌아야 하므로 전부 감싼다.
+function readWatch() {
+  try {
+    const r = JSON.parse(localStorage.getItem(WATCH_KEY) || "null");
+    return r && r.v === 1 && r.cond ? r : null;   // 스키마가 바뀌면 옛 기록은 버린다
+  } catch { return null; }
+}
+const writeWatch = (r) => { try { localStorage.setItem(WATCH_KEY, JSON.stringify(r)); } catch {} };
+const dropWatch = () => { try { localStorage.removeItem(WATCH_KEY); } catch {} };
+const canWatch = (() => {
+  try { localStorage.setItem("_p", "1"); localStorage.removeItem("_p"); return true; }
+  catch { return false; }
+})();
+
+// 지켜보는 값 = 고객이 보는 결과. 규칙 id 는 담되 비교에는 안 쓴다 — 근거 조문이 바뀌어도
+// 내 한도가 같으면 "달라졌다"고 알릴 일이 아니다(그 사실은 패널 안에 적는다).
+function verdictOf(c) {
+  const d = evaluate(FX, appFrom(c, true)).decision;
+  const decided = d.status === "DECIDED";
+  return {
+    status: d.status,
+    ltv: decided ? d.max_ltv : null,
+    gf: !!d.grandfathering_applied,
+    limit: decided ? Math.floor(c.price * 1e8 * d.max_ltv) : null,
+    rule: d.applicable_rule_id ?? null,
+  };
+}
+const sameVerdict = (a, b) =>
+  a.status === b.status && a.ltv === b.ltv && a.gf === b.gf && a.limit === b.limit;
+const sameCond = (a, b) =>                       // 키 순서에 기대지 않는다
+  Object.keys({ ...(a ?? {}), ...(b ?? {}) }).every((k) => a?.[k] === b?.[k]);
+
+function condText(c) {
+  const label = FX.regions[c.region]?.label ?? c.region;
+  const extra = [c.first ? "생애최초" : null, c.demand ? "실수요" : null,
+                 c.downpay ? "계약금 납부" : null].filter(Boolean).join(" · ");
+  return `${label} · ${OWN_KO[c.own] ?? c.own} · ${c.price}억` + (extra ? ` · ${extra}` : "");
+}
+function verdictText(v) {
+  if (v.status !== "DECIDED") return "전문 상담 필요 (자동 판정 불가)";
+  return `LTV ${pct(v.ltv)}${v.gf ? " · 경과규정" : ""} · ${v.limit ? won(v.limit) : "0원"}`;
+}
+function applyCond(c) {
+  $("#region").value = c.region;
+  own = c.own;
+  document.querySelectorAll("#own button").forEach(
+    (b) => b.classList.toggle("on", b.dataset.own === c.own));
+  $("#first").checked = !!c.first;
+  $("#demand").checked = !!c.demand;
+  $("#price").value = c.price;
+  $("#contract").value = c.contract || "";
+  $("#downpay").checked = !!c.downpay;
+  $("#accepted").value = c.accepted || "";
+  run();
+}
+
+// 저장 이후 **시행된** 지역 지정·해제. 발표가 아니라 시행일 기준인 이유는 한도 판정이
+// 시행일을 기준으로 갈리기 때문이다(타임라인과 같은 재료·같은 규율).
+function eventsSince(day) {
+  const by = {};
+  for (const e of Object.values(FX.regions))
+    for (const v of e.versions)
+      if (v.effective_from && v.source_policy_id && v.effective_from > day)
+        (by[v.effective_from] ??= new Set()).add(e.label);
+  return Object.entries(by).sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([d, set]) => {
+    const n = [...set];
+    return `${d} · ${n.slice(0, 3).join(", ")}${n.length > 3 ? ` 외 ${n.length - 3}곳` : ""}`;
+  });
+}
+
+function showAlert(hit, kicker, msg, acts) {
+  const el = $("#alert");
+  el.hidden = false;
+  el.classList.toggle("hit", hit);
+  $("#alert-k").textContent = kicker;
+  $("#alert-m").innerHTML = msg;
+  const box = $("#alert-acts");
+  box.innerHTML = "";
+  for (const [label, pri, fn] of acts) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    if (pri) b.className = "pri";
+    b.addEventListener("click", fn);
+    box.appendChild(b);
+  }
+}
+
+function renderWatch() {
+  const box = $("#watch"), sub = $("#watch-s"), det = $("#watch-c"), acts = $("#watch-acts");
+  const rec = readWatch();
+  acts.innerHTML = "";
+  const btn = (label, pri, fn) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label;
+    if (pri) b.className = "pri";
+    b.addEventListener("click", fn);
+    acts.appendChild(b);
+    return b;
+  };
+
+  if (!canWatch) {
+    sub.textContent = "이 브라우저가 저장을 막고 있어 지켜보기를 켤 수 없습니다 "
+      + "(사생활 보호 모드 등). 조건은 원래 이 기기 밖으로 나가지 않으므로, 저장이 막히면 "
+      + "기억할 곳이 없습니다.";
+    det.hidden = true;
+    $("#alert").hidden = true;
+    return;
+  }
+
+  if (!rec) {
+    sub.textContent = "지금 화면의 조건을 저장해 두면, 다음에 열 때 그 조건을 "
+      + "지금 규칙으로 다시 판정해 저장 당시와 달라졌는지 알려드립니다.";
+    det.hidden = true;
+    btn("이 조건으로 지켜보기", true, () => {
+      const c = condSnapshot();
+      writeWatch({ v: 1, savedAt: new Date().toISOString(), seenAt: null,
+                   digest: RULES_DIGEST, cond: c, verdict: verdictOf(c) });
+      renderWatch();
+      box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+    $("#alert").hidden = true;
+    return;
+  }
+
+  const now = verdictOf(rec.cond);
+  const changed = !sameVerdict(rec.verdict, now);
+  const ruleMoved = rec.digest !== RULES_DIGEST;
+  const since = (rec.seenAt || rec.savedAt || "").slice(0, 10);
+  const evs = eventsSince(since);
+
+  sub.textContent = changed
+    ? "저장한 조건을 지금 규칙으로 다시 판정한 결과가 저장 당시와 다릅니다."
+    : (ruleMoved
+        ? "규칙이 갱신됐습니다. 저장한 조건을 다시 판정했지만 한도는 그대로입니다."
+        : "감시 중입니다. 마지막 확인 시점 이후 규칙이 바뀌지 않았습니다.");
+  det.hidden = false;
+  det.innerHTML =
+    `<div class="lbl">지켜보는 조건</div><div class="val">${condText(rec.cond)}</div>`
+    + `<div class="lbl" style="margin-top:8px">저장 당시 판정 · ${since}</div>`
+    + `<div class="val"><b>${verdictText(rec.verdict)}</b></div>`
+    + `<div class="lbl" style="margin-top:8px">지금 규칙 판정</div>`
+    + `<div class="val"><b>${verdictText(now)}</b>`
+    + `${changed ? "" : " — 변화 없음"}</div>`
+    + `<div class="lbl" style="margin-top:8px">감시 중인 규칙 지문</div>`
+    + `<div class="val"><b>${rec.digest}</b>${ruleMoved ? ` → <b>${RULES_DIGEST}</b>` : " (그대로)"}</div>`
+    + (evs.length
+        ? `<div class="lbl" style="margin-top:8px">저장 이후 시행된 지역 변경</div>`
+          + `<div class="val">${evs.map((e) => `<div>${e}</div>`).join("")}</div>`
+        : "");
+
+  if (!sameCond(rec.cond, condSnapshot()))
+    btn("지금 화면 조건으로 갱신", false, () => {
+      const c = condSnapshot();
+      writeWatch({ ...rec, cond: c, verdict: verdictOf(c),
+                   digest: RULES_DIGEST, seenAt: new Date().toISOString() });
+      renderWatch();
+    });
+  btn("지켜보던 조건 불러오기", false, () => { applyCond(rec.cond); goPage(0); });
+  btn("지켜보기 해제", false, () => { dropWatch(); renderWatch(); });
+
+  const ack = () => {
+    writeWatch({ ...rec, digest: RULES_DIGEST, verdict: now,
+                 seenAt: new Date().toISOString() });
+    renderWatch();
+  };
+  if (changed) {
+    showAlert(true, "지켜보던 조건이 달라졌습니다",
+      `<b>${condText(rec.cond)}</b><br>`
+      + `<span class="mv">${verdictText(rec.verdict)}</span> → `
+      + `<span class="mv">${verdictText(now)}</span>`,
+      [["내 조건으로 보기", true, () => { applyCond(rec.cond); goPage(2); ack(); }],
+       ["확인", false, ack]]);
+  } else if (ruleMoved) {
+    showAlert(false, "규칙이 갱신됐습니다",
+      `다시 판정했지만 <b>${condText(rec.cond)}</b> 의 한도는 그대로입니다 — `
+      + `<span class="mv">${verdictText(now)}</span>`,
+      [["확인", false, ack]]);
+  } else {
+    $("#alert").hidden = true;
+  }
+}
+// 지켜보기가 넘어져도 나머지 화면(물어보기 등)은 살아 있어야 한다 — 저장이 막힌 브라우저
+// 하나 때문에 판정 화면이 통째로 죽는 것이 훨씬 나쁘다.
+try { renderWatch(); } catch (e) { console.error("watch", e); $("#alert").hidden = true; }
+// 조건을 고치면 패널도 따라간다. `run` 이 먼저 등록돼 있으므로 판정이 끝난 뒤에 그린다.
+$("#cond").addEventListener("input", renderWatch);
+$("#gf").addEventListener("input", renderWatch);
+document.querySelectorAll("#own button").forEach(
+  (b) => b.addEventListener("click", renderWatch));
+
 // ---- 물어보기(근거 우선 Q&A) — 쉬운 요약(미리 검수된 안내) + 원문 발췌 + 전체 보기 ----
 //      요약은 질문 의도 매칭으로 고르는 사전 작성 안내문이지, 답을 생성하는 LLM이 아니다.
 const INDEX = buildIndex(IDX_EXPORT);
@@ -1645,6 +1944,7 @@ goPage(deep > 0 ? deep : 0, false);
         .replace("__DOCS_NOW__", json.dumps(docs_630, ensure_ascii=False))
         .replace("__RULE_KO__", json.dumps(_RULE_KO, ensure_ascii=False))
         .replace("__BEFORE_CUT__", before_cut)
+        .replace("__DIGEST__", rules_digest(fixtures))
         .replace("__ENGINE__", ENGINE_JS.read_text(encoding="utf-8"))
         .replace("__AFFORD__", AFFORD_JS.read_text(encoding="utf-8"))
         .replace("__SEARCH__", SEARCH_JS.read_text(encoding="utf-8"))
