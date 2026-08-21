@@ -113,7 +113,9 @@ body.sg{margin:0;background:var(--surface-container-low);color:var(--on-surface)
   word-break:keep-all}
 .pgnav{display:flex;align-items:center;gap:8px;flex:none;background:var(--background);
   border-top:1px solid var(--outline-variant);
-  padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  /* env() 에 폴백을 준다 — 값이 정의되지 않으면 calc 이 무효가 되고, 단축 속성이라
+     padding 선언 **전체**가 날아가 넘김 바가 화면 끝에 붙는다 */
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px))}
 .pgnav button{font-family:inherit;font-size:12.5px;padding:11px 13px;border-radius:10px;
   border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);
   cursor:pointer;white-space:nowrap}
