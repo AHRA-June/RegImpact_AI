@@ -140,6 +140,74 @@ def test_report_renders_all_metrics():
         assert key in text
 
 
+# ---------------------------------------------- 0건 중 0건은 100%가 아니다 (미측정)
+#
+# `x / total if total else 1.0` 은 **아무것도 대조하지 않은 실행을 만점으로 보고**한다.
+# 그 만점은 하한 임계를 그대로 통과하므로, 게이트가 비어 있는데 초록으로 보인다.
+# 여기 검사들은 각 지표가 "잴 것이 없으면 값을 내지 않는다"를 고정한다.
+
+def test_no_citations_is_not_100_percent_citation_correctness():
+    """인용을 하나도 달지 않은 답변이 만점이면, **근거를 안 댈수록 점수가 좋아진다.**"""
+    rep = score_qa([_item()], {"DEV-X-001": _resp(citations=())}, SOURCES)
+    assert rep.citation_correctness is None, "대조할 인용이 0건인데 비율을 냈다"
+    assert rep.unsupported_claim_rate is None, "인용이 없으면 미지원 비율도 낼 수 없다"
+    assert rep.items_without_citation == 1        # 사실 자체는 그대로 보고된다
+
+
+def test_escalating_nothing_is_not_perfect_precision():
+    """아무것도 안 올린 모델이 만점을 받으면, 절대 escalation 하지 않는 쪽이 이긴다."""
+    rep = score_qa([_item()], {"DEV-X-001": _resp(needs_human_review=False)}, SOURCES)
+    assert rep.escalation_precision is None, "escalation 한 문항이 0건인데 비율을 냈다"
+
+
+def test_no_item_needs_escalation_is_not_perfect_recall():
+    """올려야 할 문항이 없었던 것은 만점이 아니라 **시험에 안 나온 것**이다."""
+    rep = score_qa([_item(expect_escalation=False)],
+                   {"DEV-X-001": _resp(needs_human_review=False)}, SOURCES)
+    assert rep.escalation_recall is None
+
+
+def test_item_without_gold_facts_is_not_100_percent_covered():
+    """escalation 형 문항은 gold_facts 가 비어 있다 — 담을 사실이 없는 것이지 만점이 아니다.
+
+    100% 로 세면 "원문에 답이 없다"만 답한 문항이 완전성 집계를 끌어올린다.
+    """
+    rep = score_qa([_item(gold_facts=(), expect_escalation=True)],
+                   {"DEV-X-001": _resp(needs_human_review=True)}, SOURCES)
+    s = rep.scores[0]
+    assert s.fact_coverage is None, "대조할 사실이 0건인데 비율을 냈다"
+    assert rep.fact_coverage is None
+    assert s.exact, "사실이 없어도 escalation 판단이 맞았으면 그 문항은 맞은 것이다"
+
+
+def test_empty_report_reports_nothing_rather_than_zero():
+    """채점된 문항이 0건이면 0% 가 아니다 — 0% 는 '전부 틀렸다'는 주장이다."""
+    rep = score_qa([], {}, SOURCES)
+    assert rep.exact_rate is None and rep.fact_coverage is None
+    assert rep.citation_correctness is None
+
+
+def test_unmeasured_metrics_say_why_instead_of_going_blank():
+    """빈칸은 읽는 사람이 각자 해석하고, 대개 '괜찮은가 보다'로 읽힌다."""
+    rep = score_qa([_item(gold_facts=())], {"DEV-X-001": _resp(citations=())}, SOURCES)
+    text = format_qa_report(rep)
+    assert "미측정" in text
+    assert "대조할 인용이 0건" in text and "대조할 골드 사실이 0건" in text
+    # 무엇으로 쟀는지(재료 건수)가 같이 보여야 "왜 미측정인지"를 확인할 수 있다
+    assert "대조 재료:" in text
+
+
+def test_worst_items_still_sorts_when_some_items_are_unmeasured():
+    """미측정을 도입하면서 정렬이 None 에 넘어지면, 실패 문항 목록이 통째로 사라진다."""
+    items = [_item(id="A"), _item(id="B", gold_facts=(), expect_escalation=True)]
+    resps = {"A": _resp(item_id="A", answer="관련 없는 답"),
+             "B": _resp(item_id="B", needs_human_review=False)}
+    rep = score_qa(items, resps, SOURCES)
+    worst = rep.worst_items
+    assert [s.item_id for s in worst] == ["A", "B"], \
+        "잴 수 있는 실패가 먼저, 비율로 줄 세울 수 없는 것이 뒤에 와야 한다"
+
+
 # ------------------------------------------------------------------ 프롬프트·응답 형식
 
 def test_prompt_includes_sources_and_every_question_id():

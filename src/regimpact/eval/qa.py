@@ -193,6 +193,16 @@ def fact_matches(fact: str, answer: str) -> bool:
     return any(_norm(alt) in hay for alt in fact.split("|") if alt.strip())
 
 
+def _rate(hit: int, total: int) -> Optional[float]:
+    """0건 중 0건은 100% 가 아니다 — 대조할 것이 없으면 값을 내지 않는다.
+
+    이 저장소가 2026-08-21 에 추출 지표에서 잡은 것과 같은 결함이다. `x / total if total
+    else 1.0` 은 **아무것도 대조하지 않은 실행을 만점으로 보고**하고, 그 만점은 하한
+    임계를 그대로 통과한다. 미측정은 통과가 아니다(`assurance/scorecard.py` 와 같은 규율).
+    """
+    return hit / total if total else None
+
+
 @dataclass
 class ItemScore:
     item_id: str
@@ -206,12 +216,21 @@ class ItemScore:
     escalation_given: bool
 
     @property
-    def fact_coverage(self) -> float:
-        return self.facts_hit / self.facts_total if self.facts_total else 1.0
+    def fact_coverage(self) -> Optional[float]:
+        """담아낸 골드 사실 비율. **대조할 사실이 0건이면 값을 내지 않는다.**
+
+        escalation 형 문항은 "원문에 답이 없다"가 정답이라 gold_facts 가 비어 있다.
+        그걸 100% 로 세면 답을 안 한 문항이 만점으로 집계에 들어간다.
+        """
+        return _rate(self.facts_hit, self.facts_total)
 
     @property
     def exact(self) -> bool:
-        """모든 gold_fact를 담았고 escalation 판단도 맞았는가."""
+        """모든 gold_fact를 담았고 escalation 판단도 맞았는가.
+
+        사실이 0건인 문항은 `escalation_ok` 하나로 갈린다 — 담을 사실이 없는 것이지
+        비율이 100% 인 것이 아니다(그래서 `fact_coverage` 와 판단 근거가 다르다).
+        """
         return self.facts_hit == self.facts_total and self.escalation_ok
 
     @property
@@ -232,23 +251,35 @@ class QAReport:
         return len(self.scores)
 
     @property
-    def fact_coverage(self) -> float:
-        """골드 사실 중 답변이 담아낸 비율 — Change/Exception Completeness 계열."""
-        tot = sum(s.facts_total for s in self.scores)
-        return sum(s.facts_hit for s in self.scores) / tot if tot else 0.0
+    def fact_coverage(self) -> Optional[float]:
+        """골드 사실 중 답변이 담아낸 비율 — Change/Exception Completeness 계열.
+
+        대조할 사실이 0건이면 **0% 가 아니라 미측정**이다. 0% 는 "전부 놓쳤다"는 주장이고,
+        그건 사실이 하나도 없는 실행에 대해 참일 수 없다.
+        """
+        return _rate(sum(s.facts_hit for s in self.scores),
+                     sum(s.facts_total for s in self.scores))
 
     @property
-    def exact_rate(self) -> float:
-        return sum(s.exact for s in self.scores) / self.total if self.total else 0.0
+    def exact_rate(self) -> Optional[float]:
+        """채점한 문항이 0건이면 0% 가 아니라 미측정이다."""
+        return _rate(sum(s.exact for s in self.scores), self.total)
 
     @property
-    def citation_correctness(self) -> float:
-        tot = sum(s.citations_total for s in self.scores)
-        return sum(s.citations_grounded for s in self.scores) / tot if tot else 1.0
+    def citation_correctness(self) -> Optional[float]:
+        """인용이 원문에 verbatim 실재하는 비율.
+
+        **대조할 인용이 0건이면 값을 내지 않는다.** 인용을 하나도 달지 않은 실행이
+        "인용 정확성 100%" 로 보고되는 것이 이 함정의 가장 나쁜 모양이다 —
+        근거를 대지 않을수록 점수가 좋아진다.
+        """
+        return _rate(sum(s.citations_grounded for s in self.scores),
+                     sum(s.citations_total for s in self.scores))
 
     @property
-    def unsupported_claim_rate(self) -> float:
-        return 1.0 - self.citation_correctness
+    def unsupported_claim_rate(self) -> Optional[float]:
+        cc = self.citation_correctness
+        return None if cc is None else 1.0 - cc
 
     @property
     def items_without_citation(self) -> int:
@@ -256,36 +287,46 @@ class QAReport:
 
     # --- escalation (metrics_spec §4) ---
     @property
-    def escalation_precision(self) -> float:
-        """올린 것 중 실제로 올려야 했던 비율 — 낮으면 과잉 escalation."""
+    def escalation_precision(self) -> Optional[float]:
+        """올린 것 중 실제로 올려야 했던 비율 — 낮으면 과잉 escalation.
+
+        **하나도 올리지 않았으면 미측정이다.** 아무것도 안 올린 실행을 "올린 것 중
+        100% 가 옳았다"로 세면, 절대 escalation 하지 않는 모델이 만점을 받는다.
+        """
         given = [s for s in self.scores if s.escalation_given]
-        return sum(s.escalation_expected for s in given) / len(given) if given else 1.0
+        return _rate(sum(s.escalation_expected for s in given), len(given))
 
     @property
-    def escalation_recall(self) -> float:
-        """올려야 했던 것 중 올린 비율 — 낮으면 **원문에 없는 답을 지어냈다**는 뜻."""
-        need = [s for s in self.scores if s.escalation_expected]
-        return sum(s.escalation_given for s in need) / len(need) if need else 1.0
+    def escalation_recall(self) -> Optional[float]:
+        """올려야 했던 것 중 올린 비율 — 낮으면 **원문에 없는 답을 지어냈다**는 뜻.
 
-    def by_category(self) -> dict[str, tuple[int, float, float]]:
-        """카테고리 → (문항수, fact_coverage, exact_rate)."""
+        올려야 할 문항이 0건이면 미측정이다 — 시험에 그 문제가 안 나온 것이지
+        만점을 받은 것이 아니다.
+        """
+        need = [s for s in self.scores if s.escalation_expected]
+        return _rate(sum(s.escalation_given for s in need), len(need))
+
+    def by_category(self) -> dict[str, tuple[int, Optional[float], Optional[float]]]:
+        """카테고리 → (문항수, fact_coverage, exact_rate). 비율은 미측정이면 None."""
         out = {}
         for cat in {s.category for s in self.scores}:
             subset = [s for s in self.scores if s.category == cat]
-            tot = sum(s.facts_total for s in subset)
-            hit = sum(s.facts_hit for s in subset)
             out[cat] = (
                 len(subset),
-                hit / tot if tot else 0.0,
-                sum(s.exact for s in subset) / len(subset),
+                _rate(sum(s.facts_hit for s in subset),
+                      sum(s.facts_total for s in subset)),
+                _rate(sum(s.exact for s in subset), len(subset)),
             )
         return dict(sorted(out.items()))
 
     @property
     def worst_items(self) -> list[ItemScore]:
+        """나쁜 것부터. 사실이 0건인 문항은 **비율로 줄 세울 수 없으므로** 뒤로 보낸다 —
+        여기 들어왔다면 이유는 escalation 판단이지 사실 누락이 아니다."""
         return sorted(
             [s for s in self.scores if not s.exact],
-            key=lambda s: (s.fact_coverage, s.escalation_ok),
+            key=lambda s: (1.0 if s.fact_coverage is None else s.fact_coverage,
+                           s.escalation_ok),
         )
 
     def failure_modes(self) -> dict[str, int]:
@@ -341,17 +382,38 @@ def score_qa(
     return rep
 
 
+def _cell(v: Optional[float]) -> str:
+    return "     —" if v is None else f"{v:>6.0%}"
+
+
+def _fmt(v: Optional[float], why: str) -> str:
+    """미측정을 빈칸으로 흘리지 않는다 — **왜** 못 쟀는지까지 같은 줄에 적는다.
+
+    빈칸은 읽는 사람이 각자 해석하게 되고, 대개 "괜찮은가 보다"로 읽힌다.
+    """
+    return f"{v:>7.1%}" if v is not None else f"      —   미측정 — {why}"
+
+
 def format_qa_report(rep: QAReport) -> str:
+    n_facts = sum(s.facts_total for s in rep.scores)
+    n_cites = sum(s.citations_total for s in rep.scores)
+    n_given = sum(1 for s in rep.scores if s.escalation_given)
+    n_need = sum(1 for s in rep.scores if s.escalation_expected)
     L = [
         f"QA 평가 — {rep.total}문항 (provider={rep.provider} model={rep.model} "
         f"batch_size={rep.batch_size})",
         "",
-        f"  Fact Coverage          {rep.fact_coverage:.1%}",
-        f"  Exact Rate             {rep.exact_rate:.1%}   (골드 사실 전부 + escalation 판단 일치)",
-        f"  Citation Correctness   {rep.citation_correctness:.1%}",
-        f"  Unsupported Claim Rate {rep.unsupported_claim_rate:.1%}",
-        f"  Escalation Precision   {rep.escalation_precision:.1%}",
-        f"  Escalation Recall      {rep.escalation_recall:.1%}   (낮으면 없는 답을 지어냄)",
+        f"  Fact Coverage         {_fmt(rep.fact_coverage, '대조할 골드 사실이 0건')}",
+        f"  Exact Rate            {_fmt(rep.exact_rate, '채점된 문항이 0건')}"
+        + ("   (골드 사실 전부 + escalation 판단 일치)" if rep.exact_rate is not None else ""),
+        f"  Citation Correctness  {_fmt(rep.citation_correctness, '대조할 인용이 0건')}",
+        f"  Unsupported Claim Rate{_fmt(rep.unsupported_claim_rate, '대조할 인용이 0건')}",
+        f"  Escalation Precision  {_fmt(rep.escalation_precision, 'escalation 한 문항이 0건')}",
+        f"  Escalation Recall     {_fmt(rep.escalation_recall, 'escalation 해야 할 문항이 0건')}"
+        + ("   (낮으면 없는 답을 지어냄)" if rep.escalation_recall is not None else ""),
+        "",
+        f"  대조 재료: 골드 사실 {n_facts} · 인용 {n_cites} · "
+        f"escalation 한 {n_given} / 해야 할 {n_need}",
     ]
     if rep.items_without_citation:
         L.append(f"  ⚠ 근거 인용이 없는 답변 {rep.items_without_citation}건")
@@ -360,7 +422,7 @@ def format_qa_report(rep: QAReport) -> str:
 
     L += ["", "  카테고리별 (문항 / fact_coverage / exact):"]
     for cat, (n, fc, ex) in rep.by_category().items():
-        L.append(f"    {cat:<16} {n:>3}   {fc:>6.0%}   {ex:>6.0%}")
+        L.append(f"    {cat:<16} {n:>3}   {_cell(fc)}   {_cell(ex)}")
 
     modes = rep.failure_modes()
     if modes:
