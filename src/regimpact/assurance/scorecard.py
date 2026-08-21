@@ -116,8 +116,12 @@ def score(ev: ValidationEvidence, *, js_port_agreement: Optional[float] = None) 
         return entry[2] if entry else None
 
     values: dict[str, tuple[Optional[float], str]] = {
+        # 대조할 인용이 0건이면 값을 넘기지 않는다 — 넘기면 1.0 이 되어 하한 통과로
+        # 세어진다. 미측정은 통과가 아니다(스코어카드의 존재 이유).
         "Citation Correctness": (
-            g.citation_correctness, f"인용 {g.grounded}/{g.total} 이 원문에 verbatim 존재"),
+            g.citation_correctness if g.measured else None,
+            f"인용 {g.grounded}/{g.total} 이 원문에 verbatim 존재" if g.measured
+            else "대조할 인용이 0건 — 추출 결과가 비었다"),
         "Unsupported Claim Rate": (
             g.unsupported_claim_rate, f"근거 없는 주장 {g.ungrounded}/{g.total}"),
         "Change Completeness": (

@@ -422,3 +422,50 @@ def test_loading_an_event_returns_only_its_documents():
         loaded = load_sources(event=eid)
         assert set(loaded) == set(ev.doc_ids), f"{eid}: 로드된 문서가 이벤트와 다르다"
         assert all(loaded.values()), f"{eid}: 빈 원문이 있다"
+
+
+# ---------- 0건 중 0건은 100% 가 아니다 (2026-08-21, 두 번째 이벤트에서 발견) ----------
+def test_region_coverage_is_none_when_there_are_no_regions():
+    """지역 지정이 없는 대책에서 coverage 가 100% 로 나오면 안 된다.
+
+    2025 10·15 대책은 DSR·스트레스금리·전세대출 조치라 target_regions 가 비어 있다.
+    "완벽히 매핑됨"과 "매핑할 것이 없었음"은 다른 사실이다.
+    """
+    from regimpact.extractor.postprocess import normalize_regions
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    empty = RegChangeExtraction(
+        policy_id="X", effective_from="2025-10-16", target_regions=[], changes=[])
+    rep = normalize_regions(empty)
+    assert rep.coverage is None, "지역이 0건인데 coverage 가 수치로 나왔다"
+    assert rep.measured is False
+
+
+def test_grounding_report_flags_when_nothing_was_checked():
+    """대조할 인용이 0건이면 measured=False — 판정에 쓰는 쪽이 걸러낼 수 있어야 한다."""
+    from regimpact.extractor.evaluate import GroundingReport
+
+    empty = GroundingReport(grounded=0, total=0, ungrounded=[])
+    assert empty.measured is False
+    assert GroundingReport(grounded=3, total=3, ungrounded=[]).measured is True
+
+
+def test_scorecard_does_not_pass_citation_when_nothing_was_checked():
+    """추출이 0건이었을 뿐인데 '인용 정확성 100% 통과'가 되면 스코어카드가 무력해진다.
+
+    실제 evidence 를 한 번 모은 뒤 grounding 만 빈 것으로 바꿔, 경계에서 걸리는지 본다.
+    """
+    from dataclasses import replace
+
+    from regimpact.assurance.scorecard import score
+    from regimpact.extractor.evaluate import GroundingReport
+    from regimpact.report import collect
+
+    ev = collect(generated_at="x")
+    assert score(ev).summary()["passed"] >= 1          # 정상 경로는 통과가 있다
+
+    blank = replace(ev, grounding=GroundingReport(grounded=0, total=0, ungrounded=[]))
+    rows = {r.threshold.metric: r for r in score(blank).all_metrics}
+    row = rows["Citation Correctness"]
+    assert row.value is None, "대조 0건인데 값이 실려 통과로 세어졌다"
+    assert "0건" in row.evidence

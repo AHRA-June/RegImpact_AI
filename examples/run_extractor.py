@@ -123,7 +123,9 @@ def main() -> None:
 
     # 경계 변환: 한글 지역명 → 룰엔진 지역코드 (결정적, LLM 미개입)
     norm = normalize_regions(extraction)
-    print(f"\n=== 지역 코드 정규화 (coverage {norm.coverage:.0%}) ===")
+    cov = ("해당 없음 — 이 대책은 지역 지정이 없다"
+           if norm.coverage is None else f"coverage {norm.coverage:.0%}")
+    print(f"\n=== 지역 코드 정규화 ({cov}) ===")
     for name, code in norm.mapping.items():
         print(f"    {name} → {code}")
     for name in norm.unmapped:
