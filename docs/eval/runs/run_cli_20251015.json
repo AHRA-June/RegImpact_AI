@@ -1,0 +1,899 @@
+{
+  "provider": "cli",
+  "per_document": true,
+  "merge": {
+    "per_document": {
+      "FSC_PRESS_20251015": 21,
+      "FAQ_20251015": 50
+    },
+    "raw_count": 71,
+    "merged_count": 71,
+    "duplicates_removed": 0,
+    "cross_document_merged": 0,
+    "conflicts": [
+      "policy_id 불일치: {'FSC_PRESS_20251015': 'FSC_20251015', 'FAQ_20251015': 'FSC_20251016'}"
+    ]
+  },
+  "model": null,
+  "source_sha256": {
+    "FSC_PRESS_20251015": "29df9a5404d87934",
+    "FAQ_20251015": "368b908d02241cc8"
+  },
+  "event": {
+    "id": "20251015",
+    "label": "2025 10·15 대책",
+    "published_at": "2025-10-15"
+  },
+  "gold_file": null,
+  "extraction": {
+    "policy_id": "FSC_20251015",
+    "target_regions": [],
+    "effective_from": "2025-10-16",
+    "changes": [
+      {
+        "category": "LTV",
+        "summary": "규제지역 신규 지정에 따라 무주택자(처분조건부 1주택자 포함)의 규제지역 내 주담대 LTV가 70%에서 40%로 강화됨",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "무주택자(처분조건부 1주택자 포함)가 규제지역내주담대취급시 LTV 강화 (비규제지역70% →규제지역40%)"
+        },
+        "before": "70%",
+        "after": "40%",
+        "confidence": 0.95,
+        "corroborations": []
+      },
+      {
+        "category": "LTV",
+        "summary": "토지거래허가구역 신규 지정에 따라 상가·오피스텔 등 비주택담보대출의 LTV가 70%에서 40%로 강화됨",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "토지거래허가구역 신규 지정에 따라 상가·오피스텔 등 비주택담보대출의 LTV 비율도 기존 70%에서 40%로 낮아진다."
+        },
+        "before": "70%",
+        "after": "40%",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주택구입목적 주담대 대출한도, 시가 15억원 이하 구간은 현행 6억원 유지",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "➊시가 15억원 이하 주택의 주담대 한도는 현행과 동일한 6억원"
+        },
+        "before": "6억원(주택가격 무관 일률 적용)",
+        "after": "6억원(시가 15억원 이하)",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주택구입목적 주담대 대출한도, 시가 15억원 초과~25억원 이하 구간 4억원으로 신규 차등 적용",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "➋시가 15억원 초과～25억원 이하 주택은 4억원"
+        },
+        "before": "6억원(주택가격 무관 일률 적용)",
+        "after": "4억원(시가 15억원 초과~25억원 이하)",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주택구입목적 주담대 대출한도, 시가 25억원 초과 구간 2억원으로 신규 차등 적용",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "➌시가 25억원 초과 주택은 2억원으로 대출한도를 차등 적용한다"
+        },
+        "before": "6억원(주택가격 무관 일률 적용)",
+        "after": "2억원(시가 25억원 초과)",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "이주비대출은 주택가격 차등 적용 대상에서 제외, 종전과 동일하게 최대한도 6억원 유지",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "다만, 이주비대출은 현행과 동일하게 주택가격에 관계없이 최대한도 6억원 적용"
+        },
+        "before": null,
+        "after": "주택가격에 관계없이 최대한도 6억원",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주담대에 한해 스트레스 DSR 금리 하한을 1.5%에서 3%로 상향",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "현재 차주별 대출금리에 1.5% 가산되는 스트레스 금리 하한을 수도권 ․ 규제지역내 주담대에 한해 3%로 상향 조정한다."
+        },
+        "before": "하한 1.5%",
+        "after": "하한 3%",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "1주택자가 수도권·규제지역에서 임차인으로 전세대출을 받는 경우 이자상환분을 DSR에 반영",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "1주택자(소유주택의 지역은 무관)가 수도권 ․ 규제지역에서 임차인으로서 전세대출을 받는 경우에는 전세대출의 이자상환분을 차주의 DSR에 반영한다."
+        },
+        "before": "전세대출은 DSR 적용 제외",
+        "after": "1주택자의 수도권·규제지역 전세대출 이자상환분을 DSR에 반영",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "은행권 주담대 위험가중치 하한이 15%에서 20%로 상향 조정됨",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "은행권 주담대 위험가중치 하한 상향(15% → 20%)"
+        },
+        "before": "15%",
+        "after": "20%",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "은행권 주담대 위험가중치 하한 상향 조치의 시행시기를 '26.4월에서 '26.1.1일로 조기 시행",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "‘26.4월 → ‘26.1.1일"
+        },
+        "before": "‘26.4월",
+        "after": "‘26.1.1일",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "REGION",
+        "summary": "투기과열지역·조정대상지역 신규 지정에 따라 해당 지역에 기존 강화 대출규제가 즉시 적용",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "금번 규제지역(투기과열지역, 조정대상지역) 신규 지정에 따라 해당 규제지역에서는 기존 규정에 따라 강화된 대출규제가 즉시 적용된다."
+        },
+        "before": null,
+        "after": "규제지역(투기과열지역, 조정대상지역) 신규 지정",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "REGION",
+        "summary": "토지거래허가구역 신규 지정",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "토지거래허가구역 신규 지정에 따라"
+        },
+        "before": null,
+        "after": "토지거래허가구역 신규 지정",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "규제지역(투기과열지구) 지정에 따라 전세대출 보유 차주의 3억원 초과 APT 취득 및 3억원 초과 APT 취득자의 전세대출이 제한됨",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "전세대출 보유 차주의 규제지역내 3억원 초과 APT 취득과 규제지역내3억원 초과 APT 취득자의 전세대출 제한(투기과열지구)"
+        },
+        "before": null,
+        "after": "전세대출 보유 차주의 규제지역내 3억원 초과 APT 취득 제한, 3억원 초과 APT 취득자의 전세대출 제한(투기과열지구)",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "1억원 초과 신용대출 보유 차주는 대출실행일로부터 1년간 규제지역내 주택구입 제한",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "1억원 초과 신용대출을 보유한 차주에 대해 대출실행일로부터 1년간 규제지역내 주택 구입 제한"
+        },
+        "before": null,
+        "after": "1억원 초과 신용대출 보유 차주, 대출실행일로부터 1년간 규제지역내 주택구입 제한",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "규제지역내 1주택 보유자가 재건축·재개발 중도금·이주비대출 취급시 추가주택 구입 제한",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "규제지역내 1주택 보유자가 해당 주택재건축·재개발로 중도금·이주비대출 취급시 추가주택 구입 제한"
+        },
+        "before": null,
+        "after": "규제지역내 1주택 보유자의 재건축·재개발 중도금·이주비대출 취급시 추가주택 구입 제한",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "주택 매매·임대사업자 외 사업자의 규제지역내 주택구입목적 주담대(사업자대출) 제한",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "주택 매매·임대사업자* 외 사업자의 규제지역내주택구입목적 주담대(사업자대출) 제한"
+        },
+        "before": null,
+        "after": "주택 매매·임대사업자 외 사업자의 규제지역내 주택구입목적 주담대(사업자대출) 제한",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "금번 조치 시행 이전 주택 매매계약 또는 전세계약을 체결한 차주는 경과규정 적용 대상",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "➊주택 매매계약 또는 전세계약을 체결한 차주"
+        },
+        "before": null,
+        "after": "주택 매매계약 또는 전세계약을 체결한 차주는 경과규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "금번 조치 시행 이전 대출 신청접수가 완료된 차주는 경과규정 적용 대상",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "➋대출 신청접수가 완료된 차주"
+        },
+        "before": null,
+        "after": "대출 신청접수가 완료된 차주는 경과규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "수도권·규제지역 주담대 여신한도 차등화 조치 시행일: 10.16일",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "10.16일"
+        },
+        "before": null,
+        "after": "2025-10-16",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "스트레스 금리 하한 상향 조치 시행일: 10.16일",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "10.16일"
+        },
+        "before": null,
+        "after": "2025-10-16",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "1주택자 전세대출 DSR 적용 조치 시행일: 10.29일",
+        "citation": {
+          "source_doc_id": "FSC_PRESS_20251015",
+          "quote": "10.29일"
+        },
+        "before": null,
+        "after": "2025-10-29",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "LTV",
+        "summary": "규제지역 주택 담보 주담대의 LTV 강화",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 주택을 담보로 하는 주담대의 LTV 강화(70%→40%) 등"
+        },
+        "before": "70%",
+        "after": "40%",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주택구입목적 주담대 한도: 시가 15억원 이하 구간",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "15억원 이하 : 6억원"
+        },
+        "before": null,
+        "after": "6억원",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주택구입목적 주담대 한도: 시가 15억원 초과~25억원 이하 구간",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "15억원 초과~25억원 이하 : 4억원"
+        },
+        "before": null,
+        "after": "4억원",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주택구입목적 주담대 한도: 시가 25억원 초과 구간",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "25억원 초과 : 2억원"
+        },
+        "before": null,
+        "after": "2억원",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "수도권·규제지역 주담대 스트레스 금리 상향 조정",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "수도권·규제지역 주담대에 대한 스트레스 금리 상향 조정\n(1.5% →3.0%)"
+        },
+        "before": "1.5%",
+        "after": "3.0%",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "유주택자의 수도권·규제지역 내 전세대출에 DSR 신규 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "유주택자의 수도권·규제지역 내 전세대출에 대한 DSR 적용"
+        },
+        "before": "미적용",
+        "after": "DSR 적용",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "은행권 주담대 위험가중치 하한 상향",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "은행권 주담대에 대한 위험가중치 하한 상향(15%\n→\n20%)"
+        },
+        "before": "15%",
+        "after": "20%",
+        "confidence": 0.6,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "거시건전성 규제(대출한도차등화·ST금리·전세DSR·위험가중치) 조기 시행",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "조치를 조기 시행(’26.4월 →‘26.1월)"
+        },
+        "before": "2026년 4월",
+        "after": "2026년 1월",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "LTV",
+        "summary": "무주택자(처분조건부 1주택자 포함) 규제지역 내 주담대 LTV 강화, '25.9.7 시행",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "강화된LTV(70→40%)가적용* ’25.9.7~"
+        },
+        "before": "70%",
+        "after": "40%",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "일반 주담대: 규제지역 효력발생일 전일까지 대출신청접수 완료 또는 매매계약체결+계약금납부 증명시 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 효력 발생일 전일(10.15일)\n까지 금융회사 전산상 대출 신청 접수가 완료되거나, \n주택매매계약을 체결하고 계약금 납부 사실 증명시 \n종전규정 적용 가능"
+        },
+        "before": null,
+        "after": "종전규정(LTV 70%) 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "토지거래허가제 적용 주택: 효력발생일 전일까지 토지거래허가 신청접수시 이후 매매계약 체결해도 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "단, 토지거래허가제 적용 주택의 경우, 규제지역 효력 발생일 \n전일(10.15일)까지 관할 지자체에 토지거래허가를 신청 접수시, \n그 이후에 부동산매매계약을 체결하여도 종전규정 적용"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "집단대출: 규제지역 효력발생일 전일까지 입주자모집공고(또는 착공신고·관리처분인가)된 사업장은 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 효력 발생일 전일(10.15일)까지 \n입주자모집 공고(입주자모집공고가 없는 경우, \n착공신고, 재건축·재개발 사업장 조합원의 경우 관리\n처분인가 등)된 사업장에 대해 종전규정 적용 가능"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "집단대출 경과규정 예외: 기 공고 사업장의 분양권이 시행일부터 전매된 경우는 종전규정 적용 제외",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "단, 기 공고된 사업장의 분양권 등이 시행일(10.16일)\n부터 전매(전매기준일은 거래당사자가 분양권 등의 \n거래를 신고한 날)된 경우는 제외"
+        },
+        "before": null,
+        "after": "강화된 규제 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "전세대출 관련: 투기·투과지역 효력발생일 전일까지 매매계약체결+계약금납부 증명시 예외 인정",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "투기·투과지역 효력 발생일 전일(10.15일)까지 \n매매계약을 체결하고 계약금 납부사실 증명시 \n예외 인정 가능"
+        },
+        "before": null,
+        "after": "예외 인정",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "신용대출 관련: 규제지역 효력발생일 전일까지 매매계약체결+계약금납부 증명시 예외 인정",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 효력 발생일 전일(10.15일)까지 해당 \n주택매매계약을 체결하고 계약금 납부사실 증명시 \n예외 인정 가능"
+        },
+        "before": null,
+        "after": "예외 인정",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "이주비·중도금 관련: 규제지역 효력발생일 전일까지 관리처분인가 난 재건축·재개발 주택은 예외 인정",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 효력 발생일 전일(10.15일)까지 관리\n처분인가가 나온 재건축·재개발 주택의 경우 \n예외 인정 가능"
+        },
+        "before": null,
+        "after": "예외 인정",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "사업자 주담대 관련: 규제지역 효력발생일 전일까지 매매계약체결+계약금납부 증명시 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 효력 발생일 전일(10.15일)까지 주택\n매매계약 체결하고 계약금 납부 사실 증명시 \n종전규정 적용 가능"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "LTV",
+        "summary": "토지거래허가구역 지정시 비주택담보대출(가계대출) LTV 강화",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "토지거래허가구역지정시 비주택담보대출(가계대출)*의 LTV가 \n70% →40%로 강화"
+        },
+        "before": "70%",
+        "after": "40%",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "토허구역: 효력발생일 전일(10.19)까지 매매계약체결+계약금납부 증명시 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "토허구역 효력 발생일 전일(10.19일)까지 매매계약을 \n체결하고 계약금 납부 사실을증명한 경우 등은 종전규정 적용"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "중도금대출이 증액없이 잔금대출로 전환시 중도금대출 취급시점 LTV 적용 가능",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "중도금대출이 증액없이 잔금대출로 전환되는 경우에는 해당 \n중도금대출 취급시점의 담보인정비율(LTV)를 적용할 수 있음"
+        },
+        "before": null,
+        "after": "중도금대출 취급시점 LTV 적용",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득시 전세대출 회수",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "전세대출 보유자가 투기·투과지역 내 3억원 초과 APT 취득*시\n전세대출 회수 (배우자 포함)"
+        },
+        "before": null,
+        "after": "전세대출 회수",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "전세대출 회수 규제 예외: 투기·투과지역 효력발생일 이전 APT 매매계약 체결시 예외",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "투기·투과지역 효력 발생일 이전 APT에 대한 매매계약을 체결한 경우 등은 예외"
+        },
+        "before": null,
+        "after": "예외",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "투기·투과지역에서 3억원 초과 APT 취득자의 전세대출 제한",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "투기·투과지역에서 3억원 초과 APT를 취득*한 자의 전세대출\n제한 (배우자 포함)"
+        },
+        "before": null,
+        "after": "전세대출 제한",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "전세대출 제한 규제 예외: 투기·투과지역 효력발생일 이전 해당 APT 매매계약 체결시 예외",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "투기·투과지역 효력 발생일 이전 해당 APT에 대한 매매계약을 체결한 경우 등은 예외"
+        },
+        "before": null,
+        "after": "예외",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "1억원 초과 신용대출보유 차주, 대출실행일로부터 1년간 규제지역 내 주택구입 제한",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "1억원 초과 신용대출보유 차주는 대출 실행일로부터 1년간\n규제지역* 내 주택 구입이 제한"
+        },
+        "before": null,
+        "after": "1년간 주택구입 제한",
+        "confidence": 0.75,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "규제지역 내 1주택자가 재건축·재개발 중도금·이주비대출 수령시 추가 주택구입 제한",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역* 내 1주택 보유자가 해당 주택의재건축·재개발에 따른\n중도금·이주비대출을 받을 경우, 추가 주택구입이제한"
+        },
+        "before": null,
+        "after": "추가 주택구입 제한",
+        "confidence": 0.75,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "규제지역 소재 주택구입 목적 사업자대출(주담대) 제한",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제지역 소재 주택을 구입하기 위한주담대(사업자대출) 제한*"
+        },
+        "before": null,
+        "after": "제한",
+        "confidence": 0.75,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "사업자대출 제한 경과규정: 효력발생일 전일까지 매매계약체결+계약금납부 증명시 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "단, 규제지역 효력 발생일 전일(10.15일)까지 주택매매계약을 체결하고 계약금 \n납부사실 증명시 종전규정 적용"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "생활안정자금 목적 주담대는 대출한도 축소 규제 적용대상 아님",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "생활안정자금 목적의 주담대는 금번 대책의 적용을 받지 않음"
+        },
+        "before": null,
+        "after": "적용제외",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "중도금대출은 6.27대책때와 동일하게 대출한도 규제 미적용(제외)",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "6.27대책당시 중도금대출은 6억원 대출한도 규제를 적용하지\n않았는 바, 금번 규제에서도 제외됨 (잔금대출 전환시 적용)"
+        },
+        "before": null,
+        "after": "적용제외",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "이주비대출은 대출한도 축소 규제 미적용, 종전과 동일하게 6억원 한도 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "이주비대출은 재건축·재개발 사업에 대한 영향등을 감안하여\n금번대출한도 축소규제 미적용(현행과 동일하게 6억원 적용)"
+        },
+        "before": null,
+        "after": "6억원 (미적용)",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "스트레스DSR 상향 적용범위: 수도권·규제지역 취급 주담대(오피스텔담보대출 포함)",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "동 조치는 수도권·규제지역에서 취급되는 주택담보대출(오피스텔\n담보대출 포함)에 적용"
+        },
+        "before": null,
+        "after": "수도권·규제지역 주담대(오피스텔담보대출 포함) 적용",
+        "confidence": 0.7,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "DSR 미적용대출(중도금·이주비 대출 등)은 강화된 스트레스DSR 미적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "DSR이 적용되지 않는 대출(중도금·이주비 대출 등)은 미적용"
+        },
+        "before": null,
+        "after": "미적용",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "중도금·이주비 대출 취급 후 DSR적용대출 신규취급시 기존 원리금상환분(강화된 ST금리 반영) DSR산정에 반영",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "다만, 중도금·이주비 등 대출 취급 이후 DSR 적용대출 신규취급시, 기존 중도금·\n이주비 대출 등의 원리금상환분(강화된 ST금리 반영)은 신규대출의 DSR 산정시 반영"
+        },
+        "before": null,
+        "after": "신규대출 DSR 산정시 반영",
+        "confidence": 0.7,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "기실행 대출의 증액없는 만기연장·자행대환시 DSR 신규 심사하지 않음",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "旣\n실행된 대출의\n증액없는 만기 연장 및\n자행대환시에는 \nDSR을 신규로 심사하지 않음"
+        },
+        "before": null,
+        "after": "DSR 재심사 없음",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "규제시행일 이전 기실행 대출의 원리금상환액은 실행 당시 ST금리 적용(소급적용 안됨)",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "즉, 금번 조치로 상향된 스트레스 금리(3%)가 소급 적용되지 않음"
+        },
+        "before": "실행 당시 ST금리",
+        "after": "소급 미적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "전세대출 DSR 적용대상: 1주택자가 수도권·규제지역에서 전세대출 이용시(주택 소재지 무관)",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "1주택자가 보유한 주택 소재지에 관계없이 1주택자가 수도권·\n규제지역에서 전세대출이용시 적용"
+        },
+        "before": null,
+        "after": "DSR 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "정책적 목적 전세대출 예시: 버팀목 전세대출은 DSR 적용대상 제외",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "버팀목 전세대출"
+        },
+        "before": null,
+        "after": "적용제외",
+        "confidence": 0.7,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "정책적 목적 전세대출 예시: 은행-지자체 협약 전세대출은 DSR 적용대상 제외",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "은행↔지자체 협약 전세대출"
+        },
+        "before": null,
+        "after": "적용제외",
+        "confidence": 0.7,
+        "corroborations": []
+      },
+      {
+        "category": "SCOPE_LIMIT",
+        "summary": "전세대출 DSR 산정시 원금 미반영, 이자상환분만 반영",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "전세대출 차주(임차인)의 DSR 산정시 전세대출의 원금은 반영\n하지 않고, 이자상환분만 임차인의 DSR에 반영한다는 의미"
+        },
+        "before": null,
+        "after": "이자상환분만 DSR 반영",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "전세대출 DSR 시행일",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "‘25.10.29일부터 시행될 예정"
+        },
+        "before": null,
+        "after": "2025-10-29",
+        "confidence": 0.9,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "기존 전세대출 이용자가 계약갱신 등으로 만기 연장시 DSR 미적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "규제시행일 이전 전세대출을이미 이용하던차주가기존\n주택에 계속 거주하면서 계약 갱신등을 통해 전세대출 만기를\n연장하는 경우에는 DSR 미적용"
+        },
+        "before": null,
+        "after": "DSR 미적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EXCEPTION",
+        "summary": "전세대출 만기연장시 대출금액 증액하는 경우는 신규대출로 간주되어 DSR 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "다만, 전세대출 만기 연장시 대출금액을 증액하는 것은 신규대출에 해당하므로 DSR 적용"
+        },
+        "before": null,
+        "after": "DSR 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "전세대출 DSR 신뢰보호: 최초 임대차계약이 규제시행일 전일(10.28)까지 체결시 종전규정(DSR 미적용) 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "해당 주택에 대한 최초 임대차계약이 규제시행일 전일(10.28일)\n까지 체결되었다면, 종전규정에 따라 DSR 미적용"
+        },
+        "before": null,
+        "after": "종전규정(DSR 미적용) 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "각 조치별 경과규정 총칙: 시행일부터 신규 신청되는 대출부터 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "시행일부터 신규 신청되는 대출부터 적용"
+        },
+        "before": null,
+        "after": "시행일 이후 신규 신청분부터 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "경과규정: 시행일 전일까지 전산 등록완료 또는 대출만기연장 통보받은 차주는 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "시행일 전일*까지 금융회사가 전산상 등록을 통해 대출 신청\n접수를 완료하거나,\n금융회사로부터 대출만기 연장 통보를 \n받은 차주 및"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.75,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "경과규정: 시행일 전일까지 매매계약(구입자금)·임대차계약 체결(가계약 불포함)하고 계약금 납부 증명시 종전규정 적용",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "시행일 전일까지 주택매매계약(구입자금)·임대차계약을 체결\n(가계약 불포함)하고 계약금을 이미 납부한 사실을 증명한 차주는\n종전규정 적용"
+        },
+        "before": null,
+        "after": "종전규정 적용",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "GRANDFATHERING",
+        "summary": "경과규정: 이에 준하는 경우로 금융기관 여신심사위원회 등을 통해 인정되는 차주는 종전규정 적용 가능",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "그 밖에 이에 준하는 경우로 금융기관 여신심사위원회 등을 \n통해 인정되는 차주 등에 대해서는 종전규정 적용 가능"
+        },
+        "before": null,
+        "after": "종전규정 적용 가능",
+        "confidence": 0.8,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "고가주택 주담대 대출한도 축소 시행일",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "고가주택 \n주담대\n대출한도 축소\n(10.16일 시행)"
+        },
+        "before": null,
+        "after": "2025-10-16",
+        "confidence": 0.85,
+        "corroborations": []
+      },
+      {
+        "category": "EFFECTIVE_DATE",
+        "summary": "수도권·규제지역 주담대 ST금리 하한 상향 시행일",
+        "citation": {
+          "source_doc_id": "FAQ_20251015",
+          "quote": "수도권·규제지역\n주담대 ST금리 \n하한 상향\n(10.16일 시행)"
+        },
+        "before": null,
+        "after": "2025-10-16",
+        "confidence": 0.85,
+        "corroborations": []
+      }
+    ]
+  },
+  "region_normalization": {
+    "mapping": {},
+    "unmapped": [],
+    "coverage": 1.0
+  },
+  "assurance": {
+    "citation_correctness": 1.0,
+    "unsupported_claim_rate": 0.0,
+    "grounded": 71,
+    "total_changes": 71,
+    "ungrounded_summaries": []
+  }
+}

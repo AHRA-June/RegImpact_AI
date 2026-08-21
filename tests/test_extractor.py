@@ -1,3 +1,4 @@
+import pathlib
 """RegChange Extractor + Assurance 테스트 (오프라인, API 불필요).
 
 LLM 호출은 가짜 complete로 주입해 파싱·grounding·골드 채점 로직을 검증한다.
@@ -354,3 +355,117 @@ def test_missed_change_label_survives_an_entry_without_keywords():
                                   "transition": {"before": "70%", "after": "40%"}}],
             "exceptions": [], "effective_from": "2026-07-01", "target_regions": []}
     assert score_against_gold(ext, gold).missed_changes == ["T"]
+
+# ---------- 규제 이벤트 (파이프라인의 입력 단위) ----------
+def test_default_event_documents_are_frozen():
+    """기본 이벤트(6·30)의 문서 3건은 고정이다.
+
+    기존 실측·골드가 전부 이 셋에 묶여 있다. 여기에 문서를 더하면 인용 정확성·완전성
+    수치의 **의미가 조용히 바뀐다** — 새 대책은 EVENTS 에 별도 항목으로 넣어야 한다.
+    """
+    from regimpact.extractor.sources import DEFAULT_EVENT, SOURCE_FILES, get_event
+
+    assert DEFAULT_EVENT == "20260630"
+    assert set(SOURCE_FILES) == {
+        "FSC_PRESS_20260630", "MOLIT_PRESS_20260630", "FAQ_20260630"}
+    assert set(get_event().files) == set(SOURCE_FILES)
+
+
+def test_every_event_document_exists_in_the_registry():
+    """이벤트가 가리키는 문서는 전부 코퍼스 레지스트리에 있어야 한다."""
+    from regimpact.extractor.sources import CORPUS_FILES, EVENTS
+
+    for ev in EVENTS.values():
+        missing = [d for d in ev.doc_ids if d not in CORPUS_FILES]
+        assert not missing, f"{ev.event_id}: 레지스트리에 없는 문서 {missing}"
+        assert ev.doc_ids, f"{ev.event_id}: 문서가 비었다"
+
+
+def test_event_dates_agree_with_corpus_event_metadata():
+    """이벤트 발표일과 문서 시점 메타데이터가 갈라지면 시점 필터가 조용히 틀린다."""
+    from regimpact.extractor.sources import CORPUS_EVENTS, EVENTS
+
+    for ev in EVENTS.values():
+        for doc in ev.doc_ids:
+            published, _label = CORPUS_EVENTS[doc]
+            assert published == ev.published_at, (
+                f"{ev.event_id}/{doc}: 이벤트 {ev.published_at} vs 문서 {published}")
+
+
+def test_unknown_event_fails_loudly():
+    """이름을 틀리면 조용히 기본값으로 떨어지지 않고 즉시 실패한다."""
+    import pytest as _pytest
+
+    from regimpact.extractor.sources import get_event
+
+    with _pytest.raises(KeyError):
+        get_event("20990101")
+
+
+def test_event_without_gold_is_marked_as_such():
+    """골드가 없는 이벤트는 그렇다고 표시돼야 한다 — 정답 없이 점수를 내지 않기 위해서다."""
+    from regimpact.extractor.sources import EVENTS
+
+    with_gold = [e for e in EVENTS.values() if e.gold]
+    assert with_gold, "골드를 가진 이벤트가 하나도 없다"
+    for ev in EVENTS.values():
+        if ev.gold is None:
+            continue
+        assert (pathlib.Path(__file__).resolve().parents[1] / ev.gold).exists(), \
+            f"{ev.event_id}: 골드 파일이 없다 — {ev.gold}"
+
+
+def test_loading_an_event_returns_only_its_documents():
+    from regimpact.extractor.sources import EVENTS, load_sources
+
+    for eid, ev in EVENTS.items():
+        loaded = load_sources(event=eid)
+        assert set(loaded) == set(ev.doc_ids), f"{eid}: 로드된 문서가 이벤트와 다르다"
+        assert all(loaded.values()), f"{eid}: 빈 원문이 있다"
+
+
+# ---------- 0건 중 0건은 100% 가 아니다 (2026-08-21, 두 번째 이벤트에서 발견) ----------
+def test_region_coverage_is_none_when_there_are_no_regions():
+    """지역 지정이 없는 대책에서 coverage 가 100% 로 나오면 안 된다.
+
+    2025 10·15 대책은 DSR·스트레스금리·전세대출 조치라 target_regions 가 비어 있다.
+    "완벽히 매핑됨"과 "매핑할 것이 없었음"은 다른 사실이다.
+    """
+    from regimpact.extractor.postprocess import normalize_regions
+    from regimpact.extractor.schema import RegChangeExtraction
+
+    empty = RegChangeExtraction(
+        policy_id="X", effective_from="2025-10-16", target_regions=[], changes=[])
+    rep = normalize_regions(empty)
+    assert rep.coverage is None, "지역이 0건인데 coverage 가 수치로 나왔다"
+    assert rep.measured is False
+
+
+def test_grounding_report_flags_when_nothing_was_checked():
+    """대조할 인용이 0건이면 measured=False — 판정에 쓰는 쪽이 걸러낼 수 있어야 한다."""
+    from regimpact.extractor.evaluate import GroundingReport
+
+    empty = GroundingReport(grounded=0, total=0, ungrounded=[])
+    assert empty.measured is False
+    assert GroundingReport(grounded=3, total=3, ungrounded=[]).measured is True
+
+
+def test_scorecard_does_not_pass_citation_when_nothing_was_checked():
+    """추출이 0건이었을 뿐인데 '인용 정확성 100% 통과'가 되면 스코어카드가 무력해진다.
+
+    실제 evidence 를 한 번 모은 뒤 grounding 만 빈 것으로 바꿔, 경계에서 걸리는지 본다.
+    """
+    from dataclasses import replace
+
+    from regimpact.assurance.scorecard import score
+    from regimpact.extractor.evaluate import GroundingReport
+    from regimpact.report import collect
+
+    ev = collect(generated_at="x")
+    assert score(ev).summary()["passed"] >= 1          # 정상 경로는 통과가 있다
+
+    blank = replace(ev, grounding=GroundingReport(grounded=0, total=0, ungrounded=[]))
+    rows = {r.threshold.metric: r for r in score(blank).all_metrics}
+    row = rows["Citation Correctness"]
+    assert row.value is None, "대조 0건인데 값이 실려 통과로 세어졌다"
+    assert "0건" in row.evidence

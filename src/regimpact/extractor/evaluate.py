@@ -39,6 +39,16 @@ class GroundingReport:
         return self.grounded / self.total if self.total else 1.0
 
     @property
+    def measured(self) -> bool:
+        """대조할 인용이 하나라도 있었는가.
+
+        `citation_correctness` 는 total=0 일 때 1.0 을 돌려준다(하위호환 — 소비처 38곳).
+        그 값을 **판정에 쓰는 곳**은 이 플래그로 걸러야 한다. 추출이 0건이었을 뿐인데
+        "인용 정확성 100% 통과"가 되는 것이 이 프로젝트가 가장 경계하는 실패다.
+        """
+        return self.total > 0
+
+    @property
     def unsupported_claim_rate(self) -> float:
         return len(self.ungrounded) / self.total if self.total else 0.0
 

@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import Optional
 
 from ..regions import normalize_region_name
 from .schema import RegChangeExtraction
@@ -20,9 +21,21 @@ class RegionNormalizationReport:
     unmapped: list[str]            # 코드를 찾지 못한 표기 (사람 확인 필요)
 
     @property
-    def coverage(self) -> float:
+    def measured(self) -> bool:
+        """정규화할 지역이 하나라도 있었는가."""
+        return bool(self.mapping or self.unmapped)
+
+    @property
+    def coverage(self) -> Optional[float]:
+        """매핑 성공률. **지역이 없으면 None** — 0건 중 0건은 100% 가 아니다.
+
+        2026-08-21 발견: 2025 10·15 대책은 규제지역 지정이 없는 대책(DSR·스트레스금리·
+        전세대출)이라 target_regions 가 비었는데, coverage 가 1.0 으로 나왔다. "완벽히
+        매핑됨"과 "매핑할 것이 없었음"은 다른 사실이고, 전자로 보고하면 나중에 아무도
+        구분하지 못한다.
+        """
         total = len(self.mapping) + len(self.unmapped)
-        return len(self.mapping) / total if total else 1.0
+        return len(self.mapping) / total if total else None
 
 
 def normalize_regions(extraction: RegChangeExtraction) -> RegionNormalizationReport:
