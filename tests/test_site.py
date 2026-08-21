@@ -801,14 +801,57 @@ def test_playground_shows_verdict_before_form_on_mobile(site):
 
 
 # ---------- 모바일 ----------
+BROWSER_ROOTS = (Path("/opt/pw-browsers"), Path.home() / ".cache" / "ms-playwright")
+
+
 def _find_chromium() -> Path | None:
     """샌드박스는 /opt/pw-browsers 에, CI 는 ~/.cache/ms-playwright 에 둔다."""
-    for root in (Path("/opt/pw-browsers"), Path.home() / ".cache" / "ms-playwright"):
+    for root in BROWSER_ROOTS:
         if not root.exists():
             continue
-        for exe in sorted(root.glob("chromium*/chrome-linux/chrome")):
+        for exe in sorted(root.glob("chromium*/chrome-linux*/chrome")):
             return exe
     return None
+
+
+def _browser_state() -> str:
+    """못 찾았으면 **어디를 봤고 거기 뭐가 있었는지**를 로그에 남긴다.
+
+    조용한 skip 을 두 번 겪지 않기 위한 것이다 — 이유가 안 남으면 다음 사람도 똑같이
+    "초록이니 됐겠지"로 지나간다.
+    """
+    out = []
+    for root in BROWSER_ROOTS:
+        if not root.exists():
+            out.append(f"{root}: 없음")
+        else:
+            out.append(f"{root}: {sorted(p.name for p in root.iterdir())[:12]}")
+    return " | ".join(out)
+
+
+def _require_browser() -> None:
+    """`REGIMPACT_BROWSER_TESTS=1` 이면 브라우저가 없는 것은 skip 이 아니라 **실패**다.
+
+    2026-08-21 발견: CI 의 mobile 잡이 `67 passed, 2 skipped` 로 초록이었다 — 폰 검사가
+    통째로 건너뛰어졌는데 배포 게이트는 통과였다. 잡을 도입한 2026-08-19 이후 줄곧
+    그랬다(검사 단계가 매번 2~3초로 끝났다).
+
+    **미측정은 통과가 아니다.** assurance 스코어카드에 적어 둔 규율이 정작 자기 CI 에서
+    지켜지지 않고 있었다. 로컬에서는 여전히 skip 한다(브라우저가 없는 것이 정상이다) —
+    다만 "돌리겠다"고 선언한 환경에서 못 돌리는 것은 결함이다.
+    """
+    if not os.environ.get("REGIMPACT_BROWSER_TESTS"):
+        pytest.skip(
+            "브라우저 검사는 이 샌드박스에서 페이지당 ~10초라 기본 스위트에서 제외한다. "
+            "CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다.")
+    try:
+        import playwright  # noqa: F401
+    except ImportError as exc:
+        pytest.fail(f"REGIMPACT_BROWSER_TESTS=1 인데 playwright 가 없다: {exc}")
+    if CHROMIUM is None:
+        pytest.fail(
+            "REGIMPACT_BROWSER_TESTS=1 인데 chromium 을 못 찾았다 — 조용히 건너뛰면 "
+            f"배포 게이트가 빈다. 찾아본 곳: {_browser_state()}")
 
 
 CHROMIUM = _find_chromium()
@@ -822,13 +865,7 @@ def mobile_scroll(site):
     `scrollWidth` 비교만으로는 부족하다 — 스크롤 컨테이너 안의 넓은 표는 정상이고
     페이지 자체가 밀리는 것만 문제다. 그래서 실제로 스크롤을 시도해 본다.
     """
-    if not os.environ.get("REGIMPACT_BROWSER_TESTS"):
-        pytest.skip(
-            "브라우저 검사는 이 샌드박스에서 페이지당 ~10초라 기본 스위트에서 제외한다. "
-            "CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다.")
-    pytest.importorskip("playwright")
-    if CHROMIUM is None:
-        pytest.skip("chromium 없음")
+    _require_browser()
     from playwright.sync_api import sync_playwright
 
     out = {}
@@ -863,11 +900,7 @@ def test_no_horizontal_scroll_on_mobile(mobile_scroll):
 @pytest.fixture(scope="module")
 def signal_pager(site):
     """폰에서 실제로 '넘어가는지' 본다 — 정적 검사는 규칙이 있는지만 안다."""
-    if not os.environ.get("REGIMPACT_BROWSER_TESTS"):
-        pytest.skip("브라우저 검사는 CI 가 REGIMPACT_BROWSER_TESTS=1 로 돌린다")
-    pytest.importorskip("playwright")
-    if CHROMIUM is None:
-        pytest.skip("chromium 없음")
+    _require_browser()
     from playwright.sync_api import sync_playwright
 
     out = {"viewport": 844}

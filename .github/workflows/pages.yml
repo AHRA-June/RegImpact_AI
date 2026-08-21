@@ -79,8 +79,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}
 
+      # 캐시 적중이어도 **항상** 돌린다. 이미 있으면 몇 초 만에 끝나고, 캐시가 지금
+      # 설치된 playwright 버전과 어긋나 있으면(빌드 번호가 다르면) 여기서 메꾼다.
+      # 건너뛰었더니 브라우저가 없는 채로 검사가 조용히 skip 됐다 (2026-08-21).
       - name: Install chromium
-        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: python -m playwright install chromium
 
       - name: Mobile layout check
