@@ -4,11 +4,74 @@
 > 매 작업 세션 종료 시 갱신한다. 새 계정/새 세션은 **이 파일부터** 읽는다.
 > 규칙: "지금 어디 / 다음 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
-- **마지막 갱신:** 2026-08-21 (지원서 최종 점검 — 제출물 4곳 정정 + 생성기 저장소 편입)
-- **개발 브랜치:** `claude/page-based-topic-navigation-2ablml`
+- **마지막 갱신:** 2026-08-21 (**계정 교체 마감 정리** — 인수인계 절 신설 + 시작 절차 수치 정정)
+- **개발 브랜치:** `claude/account-change-prep-pf7f12` (기본 브랜치 = `claude/portfolio-project-planning-9sip11`)
 - **전체 단계:** 🟢 **Phase 2 마무리 + 공모전 트랙** — 배포 완료, 남은 것은 QA 골드 검수와 Phase 3 진입
 - **테스트:** 636개 통과(브라우저 검사 10건 포함 — 로컬 기본 실행에서는 skip, CI 에서 전량 실행)
   · **비용: 0원** (유료 API 키 미사용)
+
+---
+
+## 🔁 계정 교체 인수인계 — **새 계정은 이 절부터 읽는다** (2026-08-21 마감)
+
+계정이 바뀐다. **대화 메모리는 넘어가지 않는다. 저장소가 전부다.**
+아래 4가지만 알면 이어서 일할 수 있다.
+
+### ① 마감 시점에 실제로 돌려 본 것 (2026-08-21, 커밋 `2745b9f` 기준)
+
+| 확인 | 명령 | 결과 |
+|---|---|---|
+| 테스트 | `python -m pytest -q` | **626 passed · 10 skipped**(브라우저 검사 — CI 에서만 실행) · 4.9초 |
+| 골드 무결성 | `python examples/validate_goldset.py` | 127문항 통과 · 명세 정합 · 추출 골드 지문 `098cd1265bc17024` 일치 |
+| 파이프라인 | `python examples/demo_impact_e2e.py` | 11단계 전부 ✅ · 감사로그 9건 체인 OK · head `ed02b3412a6e…` |
+| 사이트 빌드 | `python tools/build_site.py` | 17쪽 생성 (배포와 같은 경로) |
+| JS 포팅 대조 | `node tools/verify_js_port.mjs site/fixtures.json` | 판정 36 · 지역 450 · 한도 150 · 목표역산 288 **전건 일치** |
+| 검색 포팅 대조 | `node tools/verify_search_port.mjs site/search_fixtures.json` | 프로브 120건 전건 일치 |
+| 덱 수치 | `python tools/deck_facts.py` | 엔진에서 재계산됨 (인용 75/75 · 오라클 36/36 · 테스트 636) |
+
+전부 **LLM 호출 0회 · 0원**이다. 새 계정에서 이 표와 다른 값이 나오면 **코드가 아니라 환경을
+먼저 의심한다**(의존성은 `.claude/hooks/session-start.sh` 가 설치한다).
+
+### ② 남은 일은 셋뿐이다 — 전부 "사람만 할 수 있는 것"
+
+기계가 할 수 있는 것은 이번 세션까지 다 했다. 남은 것은 **도메인 검수**와 **제출**이다.
+
+| 순위 | 남은 일 | 기한 | 시작점 |
+|---|---|---|---|
+| 1 | **신한퓨처스랩 Tomorrow Challenge 제출** | **2026-08-31** (마감) | `docs/business/APPLY_TOMORROW_CHALLENGE.md` — 답안은 완성돼 있다. 제출 파일(pptx·webm)만 재생성하면 된다 |
+| 2 | QA 골드 DEV 40 검수 (잔여 36) | 없음 | `docs/eval/qa_gold_review.html` — 확정 전까지 QA 지표는 **상대 비교용**이다 |
+| 3 | 시점 골드 12 · 10·15 추출 71건 검수 | 없음 | `docs/eval/temporal_gold_review.html` · `docs/eval/extraction_review_20251015.html` |
+
+**제출 파일은 저장소에 없다**(바이너리를 관리하지 않는다). 두 줄이면 지금 화면·지금 수치로 다시 나온다:
+
+```bash
+python tools/deck_facts.py --out deck_facts.json
+node tools/build_deck.js deck_facts.json 내한도시그널_서비스소개서.pptx   # npm install pptxgenjs 필요
+
+python tools/build_site.py --out site
+python tools/record_demo.py --site site --out 내한도시그널_데모.webm
+```
+
+2·3번은 **끝나면 스스로 켜진다.** 골드의 `authored_by` 가 `human_confirmed` 로 바뀌는 순간
+Policy-version Consistency 측정이 코드 수정 없이 시작된다(2026-08-21 배선). 검수 결과를
+반영하는 것 외에 따로 손댈 파일은 없다.
+
+### ③ 새 계정이 건드리면 안 되는 것
+
+- **LOCKED / CHALLENGE 골드** — 코어 완성 후 **1회만** 연다(브리프 §12). 사유 없이 열리지 않고,
+  여는 순간 `docs/eval/gold/SEAL_ACCESS_LOG.md` 에 남는다.
+- **확정된 도메인 값** — 룰 값·정답은 LLM 이 만들지 않는다(LOCKED §4). 🤖 초안까지가 기계 몫이다.
+- **문서의 수치를 손으로 고치는 것** — 제출물이 실제와 갈라졌던 원인이 정확히 그것이었다
+  (2026-08-21). 수치는 생성기에서 나온다.
+- **`git checkout -B` 로 브랜치 리셋** — 미병합 커밋을 두 번 날렸다. 아래 함정 ③ 을 볼 것.
+
+### ④ 인계 상태 요약
+
+- **코드·문서·근거·실행 기록이 전부 저장소 안에 있다.** 외부 서비스 의존은 GitHub Pages 배포
+  하나뿐이고, 그것도 push 하면 Actions 가 자동으로 한다(Vercel 연동은 2026-08-19 정리됨).
+- **유료 API 키가 없어도 전량 재현된다** — 기본 provider 가 `replay` 다.
+- 공개 URL: **https://ahra-june.github.io/RegImpact_AI/** (전 페이지 noindex — 링크를 받은 사람만 본다)
+- 읽는 순서: **이 파일 → `00_BRIEF.md`(정체성·LOCKED) → `02_DECISION_LOG.md`(왜 그렇게 했는지)**
 
 ---
 
@@ -184,9 +247,9 @@
 ## 🚀 새 세션 시작 절차 (2분)
 
 ```bash
-python -m pytest -q                  # 217 passed 여야 한다
+python -m pytest -q                  # 626 passed · 10 skipped(브라우저) 여야 한다
 python examples/validate_goldset.py  # 골드셋 무결성 + 명세 정합 + 확정 지문
-python examples/demo_impact_e2e.py   # E2E 10단계 전부 ✅ (LLM 호출 0회)
+python examples/demo_impact_e2e.py   # E2E 11단계 전부 ✅ (LLM 호출 0회)
 ```
 
 의존성은 **SessionStart 훅이 자동 설치**한다(`.claude/hooks/session-start.sh` — 웹 세션 한정).
@@ -234,7 +297,7 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 - 전 페이지 noindex — 링크를 받은 사람만 본다.
 
 **다음 세션에서 볼 것**
-- 지원서 본문(`APPLY_TOMORROW_CHALLENGE_SUBMIT.md` 계열)과 설명서의 **논지 정합** —
+- 지원서 본문(`docs/business/APPLY_TOMORROW_CHALLENGE.md`)과 설명서의 **논지 정합** —
   같은 주장을 두 문서가 다른 강도로 말하고 있지 않은지.
 - 심사 기준별로 어떤 근거를 어디에 놓을지(팀·기술·시장·PoC 실행력).
 - 분량·톤 조정. 과장 없이 세게 말하는 지점 찾기.
@@ -282,6 +345,7 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 | 항목 | 위치 | 영향 |
 |---|---|---|
 | QA 골드 DEV 40 검수 (잔여 36) | `docs/eval/gold/dev.json` | QA 지표의 절대값 신뢰도 |
+| 2025 10·15 추출 71건 검수 | `docs/eval/extraction_review_20251015.html` (`tools/build_extraction_review.py`) | 🤖 초안 → 골드 승격 가능 여부 |
 | 시점 질의 골드 TEMPORAL 12 검수 | `docs/eval/gold/temporal.json` | Policy-version Consistency 측정 가동 |
 | 非규제(수도권) 비처분 1주택 LTV | Q10 (해결됨·현행 유지 결정) | 원문에 없음 → escalation 유지 중 |
 
@@ -317,6 +381,18 @@ UI 스크린샷 검증이 필요하면 `pip install -e ".[ui]"`(브라우저는 
 ---
 
 ## 작업 로그 (append-only, 최신이 위)
+
+- **2026-08-21(계정 교체 마감)** — 🔁 **인수인계 정리.** 계정이 바뀌므로 대화에만 있던 것을
+  저장소로 내렸다. 상태판 맨 앞에 「계정 교체 인수인계」 절을 신설 — 마감 시점에 **실제로 돌려
+  본** 7가지(테스트·골드 무결성·E2E·사이트 빌드·JS 대조 2종·덱 수치)를 명령과 결과로 적어,
+  새 계정이 자기 환경의 이상을 코드 결함으로 오인하지 않게 했다. 남은 일이 셋뿐이며 **전부
+  사람 몫**(공모전 제출 8/31 · QA 골드 36 · 시점/10·15 검수)임을 못박고, 제출 파일은 저장소에
+  없으니 두 줄로 재생성한다는 것을 같이 적었다.
+  곁가지로 **시작 절차가 이미 낡아 있던 것**을 잡았다 — "217 passed 여야 한다"(실제 626 passed ·
+  10 skipped)와 "E2E 10단계"(실제 11단계). 새 세션이 가장 먼저 치는 세 줄이 틀린 기대값을 주고
+  있었다. 지원서 파일명도 존재하지 않는 `APPLY_TOMORROW_CHALLENGE_SUBMIT.md` 로 적혀 있어
+  실제 경로로 고쳤고, 검수 대기 표에 빠져 있던 **10·15 추출 71건**을 추가했다.
+  이번 세션은 코드를 바꾸지 않았다 — 문서와 실제의 어긋남만 없앴다.
 
 - **2026-08-20(noindex)** — 🔒 **전 페이지 검색 색인 거부**. 사용자 질문("공유 안 하면 인입은
   거의 없겠지?")에서 출발 — 확인해 보니 저장소가 **public** 이라 URL 을 몰라도 닿는 길이
