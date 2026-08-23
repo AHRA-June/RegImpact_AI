@@ -18,3 +18,11 @@ docs/eval/runs/perdoc_cache/
 
 # 빌드 산출 (CI 에서 생성)
 /site/
+
+# node 로컬 설치 (덱 생성 때만 쓰는 pptxgenjs — 저장소는 담지 않는다)
+/node_modules/
+
+# 제출 산출물 (생성기로 재현한다 — tools/build_deck.js · tools/record_demo.py)
+/*.pptx
+/*.webm
+/*.timeline.txt
