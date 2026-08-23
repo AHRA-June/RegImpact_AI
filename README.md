@@ -50,6 +50,7 @@ python -m pytest -q                          # 테스트 전량
 python examples/demo_impact_e2e.py           # 파이프라인 11단계 관통
 python examples/demo_discrimination.py       # 판별력 실측 (오류 주입 후 재측정)
 python examples/build_validation_report.py   # 검증보고서 재생성
+python examples/build_ops_description.py     # 현업용 상품설명서 재생성
 python tools/build_site.py                   # 사이트 빌드 → site/
 ```
 
@@ -125,7 +126,7 @@ python tools/build_site.py                   # 사이트 빌드 → site/
 | `docs/validation/` · `docs/governance/` | 생성된 검증보고서 · 카드 · 리스크 레지스터 |
 | `docs/policies/` | 정책 버전 DB (git 이력이 곧 승인 기록) |
 | `docs/sources/` | 공문 원본 스냅샷 + 추출 텍스트 + sha256 |
-| `docs/business/` | 사업계획서 (별도 트랙) |
+| `docs/business/` | 사업계획서·설명서 (별도 트랙) — 고객용 `SERVICE_DESCRIPTION_TOMORROW.md`, 현업용 `OPS_PRODUCT_DESCRIPTION.md`(생성물) |
 
 ## 개발 브랜치
 

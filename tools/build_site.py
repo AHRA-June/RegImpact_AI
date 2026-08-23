@@ -34,6 +34,7 @@ def _load_fixture_builder():
 
 build_fixtures = _load_fixture_builder()
 
+from regimpact.business import render_ops_description        # noqa: E402
 from regimpact.extractor.sources import load_corpus, load_sources  # noqa: E402
 from regimpact.governance import render_card, render_register    # noqa: E402
 from regimpact.graph import build_graph                          # noqa: E402
@@ -56,6 +57,12 @@ from regimpact.ui.theme import explainer                         # noqa: E402
 
 # 마크다운 문서 → 사이트 파일명 · 상단 '이 페이지는?' 설명 (비전공자용)
 DOCS = {
+    "service_ops.html": ("현업용 상품설명서", render_ops_description, explainer(
+        "규제가 바뀐 날 심사·리스크·컴플라이언스가 해야 할 일을, 이 시스템이 무엇까지 "
+        "산출물로 내고 무엇을 사람에게 넘기는지 정리한 설명서입니다.",
+        "파이프라인을 한 번 관통 실행한 결과. 변경 건수·매트릭스 행수·포트폴리오 영향·"
+        "사람 검토 사유까지 전부 그 실행에서 채워지므로, 손으로 적은 숫자가 없습니다.",
+        "고객용 설명서는 메뉴 밖 \"서비스 설명서\"에 따로 있습니다 — 같은 엔진의 다른 면입니다.")),
     "validation_report.html": ("검증보고서", render_report, explainer(
         "이 시스템이 믿을 만한지 항목별로 검사한 정식 보고서(전문)입니다.",
         "파이프라인을 실제로 한 번 관통 실행한 결과. 보고서의 모든 숫자가 그 실행에서 "

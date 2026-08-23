@@ -121,6 +121,10 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
                      "직접 검색해보기")
 
     docs = "".join([
+        _tile("service_ops.html", "현업용 상품설명서",
+              "규제 발표일에 심사·리스크·컴플라이언스가 해야 할 일과, 이 시스템이 "
+              "무엇까지 산출물로 내고 무엇을 사람에게 넘기는지. 수치는 전부 실행 결과다.",
+              f"조치 {len(ev.matrix.rows)}행 · 사람 검토 {im.human_review_count:,}건"),
         _tile("validation_summary.html", "검증 요약 (1페이지)",
               "목적·수행 내용·점수·영향도·한계를 한 화면에. 길게 읽기 전에 여기부터.",
               _scorecard_meta(ev) or "임계 대조 요약"),
@@ -187,6 +191,9 @@ def render(ev: ValidationEvidence, *, commit: Optional[str] = None,
       <a class="demo-cta" style="background:var(--surface-container-lowest);color:var(--on-surface);
         border:1px solid var(--outline-variant)" href="service.html">📄 서비스 설명서
         <small>무엇이 되고 무엇이 아직 안 되는지 — 출처 포함</small></a>
+      <a class="demo-cta" style="background:var(--surface-container-lowest);color:var(--on-surface);
+        border:1px solid var(--outline-variant)" href="service_ops.html">🏦 현업용 상품설명서
+        <small>같은 엔진의 현업 면 — 산출물과 사람 몫의 경계</small></a>
     </div>
   </header>
 

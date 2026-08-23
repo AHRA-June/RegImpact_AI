@@ -231,6 +231,7 @@ _ICON_PATHS = {
     "upload_file": "M12 16V5M8 9l4-4 4 4M4 19h16",
     "hub": "M12 5a2 2 0 100-4 2 2 0 000 4zM5 21a2 2 0 100-4 2 2 0 000 4zM19 21a2 2 0 100-4 2 2 0 000 4zM12 5v6M12 11l-6 7M12 11l6 7",
     "search": "M10 4a6 6 0 100 12 6 6 0 000-12zM14.5 14.5L20 20",
+    "description": "M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5zM14 3v5h5M9 13h6M9 17h6",
 }
 
 FONTS = (
@@ -261,6 +262,9 @@ NAV_SECTIONS = (
         ("playground.html", "판정 플레이그라운드", "science"),
         ("graph.html", "영향 지식그래프", "hub"),
         ("search.html", "규제 원문 검색", "search"),
+    )),
+    ("제안 문서", (
+        ("service_ops.html", "현업용 상품설명서", "description"),
     )),
     ("검증 문서", (
         ("validation_summary.html", "검증 요약", "dashboard"),

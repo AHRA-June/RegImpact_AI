@@ -33,7 +33,7 @@ EXPECTED = {
     "validation_report.html", "validation_summary.html",
     "model_system_card.html", "ai_risk_register.html",
     "graph.html", "search.html", "demo.html", "signal.html",
-    "service.html",
+    "service.html", "service_ops.html",
 }
 
 # 사이드바 셸 밖의 독립 화면 — 랜딩(그 자체가 안내판), 시연 모드(녹화 화면을 메뉴가
@@ -123,6 +123,35 @@ def test_service_page_carries_its_sources(site):
     # 고객 화면과 나란히 열어 두고 보는 페이지다 — 탭 제목이 같으면 구분이 안 된다.
     assert "<title>내 한도 시그널 — 서비스 설명서</title>" in html
     assert site["signal.html"].count("<title>내 한도 시그널 — 서비스 설명서</title>") == 0
+
+
+def test_ops_description_page_is_built_from_the_pipeline(site):
+    """현업용 상품설명서는 사람이 옮겨 적은 문서가 아니라 실행 산출물이어야 한다.
+
+    고객용 설명서(`service.html`)는 사람이 쓴 문서를 감싸지만, 현업용은 수치가 전부
+    파이프라인에서 나오므로 **렌더링**된다. 같은 실행의 다른 화면과 숫자가 갈라지면
+    현업이 두 화면을 나란히 놓는 순간 신뢰를 잃는다.
+    """
+    from regimpact.report import collect
+    ev = collect(generated_at="site-check")
+    html = site["service_ops.html"]
+    assert "현업용 상품설명서" in html
+    # 같은 실행의 다른 화면과 같은 수치를 말하는지 — 매트릭스 행수·포트폴리오 규모
+    assert f"{len(ev.matrix.rows)}행" in html
+    assert f"{ev.impact.portfolio_size:,}건" in html
+    # 사람에게 넘긴 자리를 사유 코드와 함께 적는지
+    for code in ev.impact.escalation_reasons:
+        assert code in html, f"에스컬레이션 사유 {code} 가 현업 설명서에 없다"
+
+
+def test_ops_and_customer_descriptions_are_different_documents(site):
+    """두 설명서는 같은 엔진의 서로 다른 면이다 — 한쪽이 다른 쪽의 복사본이면 안 된다."""
+    ops, cust = site["service_ops.html"], site["service.html"]
+    assert "내 한도 시그널" in cust and "현업용 상품설명서" in ops
+    assert "<title>내 한도 시그널 — 서비스 설명서</title>" not in ops
+    # 현업 문서는 현업 산출물을, 고객 문서는 고객 화면을 중심에 둔다
+    assert "임팩트 매트릭스" in ops and "룰 변경안" in ops
+    assert "SERVICE_DESCRIPTION_TOMORROW.md" in ops, "고객 면 문서로 가는 안내가 없다"
 
 
 def test_sources_page_hashes_come_from_real_files(site):
@@ -916,12 +945,20 @@ def test_submission_docs_do_not_overstate_the_test_count():
     assert m, f"수집 결과를 읽지 못했다:\n{got[-500:]}"
     actual = int(m.group(1))
 
+    # 주장 형태가 하나가 아니다. 2026-08-23 점검에서 **굵게 쓴 것**(`**590개**`)과 지표
+    # 타일(`<div class="v">569</div>`)이 이 검사를 빠져나가 낡은 채로 남아 있었다 —
+    # 정규식이 평문 한 형태만 보고 있었기 때문이다. 형태를 늘려 다시 조인다.
+    patterns = (
+        r"자동 테스트\s*\**(\d[\d,]*)개",                       # 평문·굵게 모두
+        r'<div class="v">(\d[\d,]*)</div>\s*<div class="l">배포 전 자동 테스트',
+    )
     claims = []
     for rel in ("docs/business/APPLY_TOMORROW_CHALLENGE.md",
                 "docs/business/SERVICE_DESCRIPTION_TOMORROW.md",
                 "docs/business/service_description.html"):
         text = (REPO / rel).read_text(encoding="utf-8")
-        claims += [(rel, int(n)) for n in re.findall(r"자동 테스트 (\d+)개", text)]
+        for pat in patterns:
+            claims += [(rel, int(n.replace(",", ""))) for n in re.findall(pat, text)]
 
     assert claims, "제출 문서에서 테스트 수 주장을 찾지 못했다 — 표현이 바뀌었으면 이 검사도 고쳐야 한다"
     wrong = [(rel, n) for rel, n in claims if n != actual]
