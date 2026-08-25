@@ -42,7 +42,10 @@
 | 2 | QA 골드 DEV 40 검수 (잔여 36) | 없음 | `docs/eval/qa_gold_review.html` — 확정 전까지 QA 지표는 **상대 비교용**이다 |
 | 3 | 시점 골드 12 · 10·15 추출 71건 검수 | 없음 | `docs/eval/temporal_gold_review.html` · `docs/eval/extraction_review_20251015.html` |
 
-**제출 파일은 저장소에 없다**(바이너리를 관리하지 않는다). 두 줄이면 지금 화면·지금 수치로 다시 나온다:
+**제출 파일은 `docs/business/submission/` 에 고정본이 있다** — 2026-08-23 계정 교체로
+실행 환경과 대화 기록이 함께 사라지므로, 마감(8/31)까지 재생성 환경을 못 갖출 경우를 대비해
+한 벌을 넣어 뒀다(원칙은 여전히 재생성이다). **화면이나 수치가 바뀌면 그 사본은 낡는다** —
+제출 직전에 아래로 다시 뽑아 대조하는 편이 안전하다:
 
 ```bash
 python tools/deck_facts.py --out deck_facts.json

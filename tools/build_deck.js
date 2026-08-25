@@ -41,6 +41,17 @@ p.title = "내 한도 시그널 — 서비스 소개서";
 
 const M = 0.62, CW = 13.3 - M * 2;
 
+// 팀 경력. `deck_facts.py` 에 두지 않는 이유는 **엔진에서 나오는 값이 아니기 때문**이다
+// (그쪽은 파이프라인을 돌려 만드는 수치 전용이다). 대신 여기 한 번만 적어 표지·문제·팀
+// 세 슬라이드가 같은 문자열을 쓴다 — 예전에 덱과 설명서가 같은 사실을 다르게 적어
+// 갈라진 적이 있고, 그 자리를 없앤다. 값이 바뀌면 `SERVICE_DESCRIPTION_TOMORROW.md` §10
+// 과 함께 고친다(설명서 §12-D 가 이 수치의 검증 한계를 이미 밝혀 두었다).
+const TEAM = {
+  tenure: "금융권 개인여신 데이터분석 8년 7개월",
+  did: "규제가 바뀌는 날 은행 안에서 해석 → Rule 변경 → 테스트 → 전산 반영을 직접 수행한 당사자입니다.",
+  result: "LTV 차등 전략을 설계해 불량률 5.77% → 3.16%로 개선한 실적이 있습니다.",
+};
+
 // 규칙 id → 한국어. 화면(`ui/signal.py` 의 `_RULE_KO`)과 같은 문구를 쓴다 —
 // 덱과 데모가 같은 판정을 다른 말로 부르면 같은 것인지 확인할 길이 없다.
 const RULE_KO = {
@@ -125,6 +136,13 @@ function foot(s, txt) {
     x: M, y: 4.42, w: 3.35, h: 0.44, fontFace: KO, fontSize: 12, bold: true,
     color: ICE, align: "center", valign: "middle", margin: 0,
   });
+  // 경력을 표지에 올리는 이유: 뒤 슬라이드의 "규제 변경일"을 아는 사람이 만들었다는 것이
+  // 이 덱에서 복제 불가능한 유일한 근거다. 마지막 장에만 두면 심사자는 그걸 다 본 뒤에 안다.
+  s.addText([
+    { text: TEAM.tenure, options: { fontFace: KO, fontSize: 13, bold: true, color: W } },
+    { text: "   규제 변경일의 해석 · Rule 변경 · 테스트 · 전산 반영을 은행 안에서 수행했습니다",
+      options: { fontFace: KO, fontSize: 12.5, color: ICE } },
+  ], { x: M, y: 5.12, w: CW, h: 0.32, margin: 0 });
   s.addText([
     { text: "동작 데모  ", options: { fontFace: KO, fontSize: 12, color: ICE } },
     { text: "ahra-june.github.io/RegImpact_AI/signal.html",
@@ -181,8 +199,17 @@ function foot(s, txt) {
     x: M, y: 5.5, w: CW, h: 0.4, fontFace: KO, fontSize: 13, bold: true,
     color: NAVY, margin: 0,
   });
+  // 이 문제를 왜 이 팀이 아는지 — 문제 슬라이드에서 바로 답한다.
+  card(s, M, 5.96, CW, 0.74, SURF, NAVY);
+  s.addText([
+    { text: "이 혼란을 창구 반대편에서 처리해 왔습니다  ",
+      options: { fontFace: KO, fontSize: 13, bold: true, color: NAVY } },
+    { text: TEAM.tenure + " — 발표 다음 날 해석 · Rule 변경 · 테스트 · 전산 반영이 제 업무였습니다",
+      options: { fontFace: KO, fontSize: 12, color: INK } },
+  ], { x: M + 0.34, y: 5.96, w: CW - 0.68, h: 0.74, valign: "middle", margin: 0 });
   foot(s, "출처: 금융위원회·국토교통부 보도참고자료(2026-06-30), 뉴시스(2026-08-14) — 전체 링크는 서비스 설명서 §12");
-  s.addNotes(`문제 정의. 수치는 엔진 실제 판정값(${SCN.region_label} ${SCN.price}·무주택 기준).`);
+  s.addNotes(`문제 정의. 수치는 엔진 실제 판정값(${SCN.region_label} ${SCN.price}·무주택 기준). `
+    + `경력 한 줄은 "왜 이 팀이 이걸 아는가"에 여기서 답하려는 것이다 — 실적 수치는 마지막 장에만 둔다.`);
 }
 
 // ── 3. 기존 도구 ─────────────────────────────────────────────────────────
@@ -571,11 +598,9 @@ function foot(s, txt) {
     fill: { color: "17204E" }, line: { color: "35407A", width: 1 } });
   s.addText("팀 엣지케이스", { x: M + 0.34, y: 1.88, w: 5.3, h: 0.36, fontFace: KO,
     fontSize: 16, bold: true, color: W, margin: 0 });
-  s.addText("금융권 개인여신 데이터분석 8년 7개월", { x: M + 0.34, y: 2.26, w: 5.3, h: 0.32,
+  s.addText(TEAM.tenure, { x: M + 0.34, y: 2.26, w: 5.3, h: 0.32,
     fontFace: KO, fontSize: 13, bold: true, color: ICE, margin: 0 });
-  s.addText(
-    "규제가 바뀌는 날 은행 안에서 해석 → Rule 변경 → 테스트 → 전산 반영을 직접 수행한 " +
-    "당사자입니다. LTV 차등 전략을 설계해 불량률 5.77% → 3.16%로 개선한 실적이 있습니다.", {
+  s.addText(TEAM.did + " " + TEAM.result, {
       x: M + 0.34, y: 2.64, w: 5.3, h: 0.9, fontFace: KO, fontSize: 12, color: ICE,
       lineSpacing: 19, margin: 0 });
   s.addText("이 도메인 지식으로 룰엔진부터 검증 체계, 고객 화면까지 MVP를 완성했습니다.", {
