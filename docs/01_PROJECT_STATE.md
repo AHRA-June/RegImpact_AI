@@ -5,7 +5,7 @@
 > 규칙: "지금 어디 / 다음 액션 / 대기 중 결정 / 블로커"를 항상 최신으로 유지.
 
 - **마지막 갱신:** 2026-08-21 (**계정 교체 마감 정리** — 인수인계 절 신설 + 시작 절차 수치 정정)
-- **개발 브랜치:** `claude/account-change-prep-pf7f12` (기본 브랜치 = `claude/portfolio-project-planning-9sip11`)
+- **개발 브랜치:** `claude/account-change-prep-pf7f12` (기본 브랜치 = `main`)
 - **전체 단계:** 🟢 **Phase 2 마무리 + 공모전 트랙** — 배포 완료, 남은 것은 QA 골드 검수와 Phase 3 진입
 - **테스트:** 636개 통과(브라우저 검사 10건 포함 — 로컬 기본 실행에서는 skip, CI 에서 전량 실행)
   · **비용: 0원** (유료 API 키 미사용)
@@ -231,7 +231,7 @@ Policy-version Consistency 측정이 코드 수정 없이 시작된다(2026-08-2
 `git checkout -B <branch> origin/<default>` 를 습관적으로 치다가 **커밋해 둔 문서 갱신을
 두 번 날렸다.** 리셋 전에 확인한다:
 
-    git log --oneline origin/claude/portfolio-project-planning-9sip11..HEAD
+    git log --oneline origin/main..HEAD
 
   비어 있지 않으면 먼저 PR 을 만들어 병합하거나, 리셋 대신 `git merge` 로 최신을 받는다.
 

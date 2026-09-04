@@ -10,7 +10,7 @@ name: Deploy site to GitHub Pages
 
 on:
   push:
-    branches: [claude/portfolio-project-planning-9sip11]
+    branches: [main]
     paths-ignore: ["**/*.md"]
   # PR 에서도 같은 검사를 돌린다. 안 그러면 깨진 코드가 기본 브랜치에 **들어간 뒤에야**
   # 발견된다 — 배포를 막는 것과 병합을 막는 것은 다른 일이다. 배포는 push 일 때만 한다.
@@ -19,7 +19,7 @@ on:
   # pull_request = 검증(항상)" 이다. 문서 커밋이 마지막이면 병합 대상 커밋에 검사 증거가
   # 없는 채로 남는데, 초록불을 보고 병합하는 사람에게 그건 초록이 아니다.
   pull_request:
-    branches: [claude/portfolio-project-planning-9sip11]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

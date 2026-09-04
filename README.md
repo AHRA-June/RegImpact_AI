@@ -129,4 +129,4 @@ python tools/build_site.py                   # 사이트 빌드 → site/
 
 ## 개발 브랜치
 
-`claude/anthropic-api-key-issue-itk27f` → 기본 브랜치 `claude/portfolio-project-planning-9sip11`
+`claude/anthropic-api-key-issue-itk27f` → 기본 브랜치 `main`
